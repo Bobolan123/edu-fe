@@ -1,0 +1,9 @@
+{
+    "Home": {
+        "home": "nha"
+    },
+    "LocaleSwitcher": {
+        "label": "Thay doi ngon ngu",
+        "locale": "{locale, select, vi {Vi} en {En} other {Unbekannt}}"
+    }
+}
