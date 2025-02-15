@@ -25,7 +25,8 @@ import {
 } from "@mui/icons-material";
 import LocaleSwitcher from "./LocaleSwitcher";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -163,6 +164,8 @@ export default function Navbar() {
     // Check if the URL contains "admin"
     const isAdmin = pathname.includes("admin");
 
+    const t = useTranslations("Navbar");
+
     return (
         <Box>
             {isAdmin ? (
@@ -182,12 +185,12 @@ export default function Navbar() {
                             />
                             <div className="flex justify-center items-center gap-3">
                                 <Typography variant="button">
-                                    <Link href={""}>Home</Link>
+                                    <Link href="/">{t("home")}</Link>
                                 </Typography>
 
                                 <Link href={"/courses"}>
                                     <Typography variant="button">
-                                        Course
+                                        {t("course")}
                                     </Typography>
                                 </Link>
                             </div>
@@ -204,18 +207,19 @@ export default function Navbar() {
                             <Box sx={{ flexGrow: 1 }} />
                             <Box sx={{ display: { xs: "none", md: "flex" } }}>
                                 <div className="flex justify-center items-center gap-3">
-                                        <Button variant="outlined" >
-                                            Login
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            className=""
-                                        >
-                                            Signup
-                                        </Button>
+                                    <Button variant="outlined">
+                                        <Link  href="/login">
+                                            {t("login")}
+                                        </Link>
+                                    </Button>
+                                    <Button variant="contained" className="">
+                                        <Link href={"/signup"}>
+                                            {t("signup")}
+                                        </Link>
+                                    </Button>
 
                                     <LocaleSwitcher />
-                                    
+
                                     <IconButton
                                         size="medium"
                                         edge="end"

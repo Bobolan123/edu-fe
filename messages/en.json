@@ -1,9 +1,34 @@
 {
-  "Home":{
-    "home":"Home"
-  },
-  "LocaleSwitcher": {
-    "label": "Change language",
-    "locale": "{locale, select, vi {Vi} en {En} other {Unknown}}"
+    "Home": {
+        "home": "Home"
+    },
+    "Navbar": {
+        "home": "Home",
+        "course": "Course",
+        "login": "Login",
+        "signup": "Signup",
+        "search": "Search"
+    },
+    "LocaleSwitcher": {
+        "label": "Change language",
+        "locale": "{locale, select, vi {Vi} en {En} other {Unknown}}"
+    },
+    "Signup": {
+        "title": "Sign up and start learning",
+        "fullname": "Full name",
+        "email": "Email",
+        "password": "Password",
+        "signup_button": "SIGN UP",
+        "terms": "By signing up, you agree to our Terms of Use and Privacy Policy.",
+        "login_prompt": "Already have an account? Log in"
+    },
+    "Login": {
+      "title": "Log in to explore your learning journey",
+      "email": "Email",
+      "password": "Password",
+      "login_button": "LOG IN",
+      "terms": "By logging in, you agree to our Terms of Use and Privacy Policy.",
+      "signup_prompt": "Don't have an account? Sign up",
+      "signup_button": "Sign up"
   }
 }

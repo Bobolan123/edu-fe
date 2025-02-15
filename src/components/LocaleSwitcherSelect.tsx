@@ -41,15 +41,14 @@ export default function LocaleSwitcherSelect({
     }
 
     return (
-        <FormControl fullWidth className="my-4">
+        <FormControl className="">
             <Select
                 size="small"
-                sx={{width:70}}
                 displayEmpty
                 labelId="locale-switcher-label"
                 value={defaultValue}
                 onChange={onSelectChange}
-                className="rounded-lg border-gray-300 bg-white"
+                className="rounded-lg border-gray-300 bg-white w-16"
                 variant="outlined"
                 disabled={isPending}
             >

@@ -2,8 +2,33 @@
     "Home": {
         "home": "nha"
     },
+    "Navbar": {
+        "home": "Trang Chủ",
+        "course": "Khóa Học",
+        "login": "Đăng Nhập",
+        "signup": "Đăng Ký",
+        "search": "Tìm Kiếm"
+    },
     "LocaleSwitcher": {
         "label": "Thay doi ngon ngu",
         "locale": "{locale, select, vi {Vi} en {En} other {Unbekannt}}"
+    },
+    "Signup": {
+        "title": "Đăng ký và bắt đầu học",
+        "fullname": "Họ và tên",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "signup_button": "ĐĂNG KÝ",
+        "terms": "Bằng cách đăng ký, bạn đồng ý với Điều khoản Sử dụng và Chính sách Quyền riêng tư của chúng tôi.",
+        "login_prompt": "Đã có tài khoản? Đăng nhập"
+    },
+    "Login": {
+        "title": "Đăng nhập để khám phá hành trình học tập của bạn",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "login_button": "ĐĂNG NHẬP",
+        "terms": "Bằng cách đăng nhập, bạn đồng ý với Điều khoản Sử dụng và Chính sách Quyền riêng tư của chúng tôi.",
+        "signup_prompt": "Chưa có tài khoản? Đăng ký",
+        "signup_button": "Đăng ký"
     }
 }
