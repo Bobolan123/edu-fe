@@ -3,35 +3,11 @@ import { TextField, Button } from "@mui/material";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { FormEvent } from "react";
+import { signIn } from "@/auth";
 
 export default function Login() {
     const t = useTranslations("Login");
-    async function onLogin(event: FormEvent<HTMLFormElement>) {
-      event.preventDefault();
-  
-      const formData = new FormData(event.currentTarget);
-      const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-              email: formData.get('email'),
-              password: formData.get('password'),
-          }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-          console.log("Login successful:", data);
-          // Redirect or handle success (e.g., store token)
-      } else {
-          console.error("Login failed:", data);
-          // Show error message to user
-      }
-  }
-  
+
     return (
         <div className="flex min-h-screen items-center justify-center">
             <div className="flex w-full max-w-6xl bg-white gap-28 overflow-hidden">
@@ -50,7 +26,9 @@ export default function Login() {
                     <h2 className="text-2xl font-semibold text-gray-700 text-center">
                         {t("title")}
                     </h2>
-                    <form className="mt-6 space-y-4">
+                    <form
+                        className="mt-6 space-y-4"
+                    >
                         <TextField
                             fullWidth
                             label={t("email")}
@@ -80,12 +58,24 @@ export default function Login() {
                         {t("terms")}.
                     </p>
                     <p className="mt-2 text-center">
-                        {t("signup_prompt")} {" "}
-                        <Link href="/signup" className="text-blue-500 font-semibold">
+                        {t("signup_prompt")}{" "}
+                        <Link
+                            href="/signup"
+                            className="text-blue-500 font-semibold"
+                        >
                             {t("signup_button")}
                         </Link>
                     </p>
                 </div>
+
+                {/* <form
+                    action={async () => {
+                        "use server";
+                        await signIn("google");
+                    }}
+                >
+                    <button type="submit">Signin with Google</button>
+                </form> */}
             </div>
         </div>
     );

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
 import {
     alpha,
     AppBar,
@@ -69,7 +68,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Navbar() {
-    const pathname = usePathname();
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -161,16 +159,11 @@ export default function Navbar() {
         </Menu>
     );
 
-    // Check if the URL contains "admin"
-    const isAdmin = pathname.includes("admin");
 
     const t = useTranslations("Navbar");
 
     return (
         <Box>
-            {isAdmin ? (
-                <></>
-            ) : (
                 <>
                     <AppBar
                         position="static"
@@ -250,7 +243,6 @@ export default function Navbar() {
                     {renderMobileMenu}
                     {renderMenu}
                 </>
-            )}
         </Box>
     );
 }
