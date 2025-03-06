@@ -28,7 +28,7 @@
       "password": "Password",
       "login_button": "LOG IN",
       "terms": "By logging in, you agree to our Terms of Use and Privacy Policy.",
-      "signup_prompt": "Don't have an account? Sign up",
+      "signup_prompt": "Don't have an account?",
       "signup_button": "Sign up"
   }
 }

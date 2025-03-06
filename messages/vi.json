@@ -28,7 +28,7 @@
         "password": "Mật khẩu",
         "login_button": "ĐĂNG NHẬP",
         "terms": "Bằng cách đăng nhập, bạn đồng ý với Điều khoản Sử dụng và Chính sách Quyền riêng tư của chúng tôi.",
-        "signup_prompt": "Chưa có tài khoản? Đăng ký",
+        "signup_prompt": "Chưa có tài khoản? ",
         "signup_button": "Đăng ký"
     }
 }
