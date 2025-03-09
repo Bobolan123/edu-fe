@@ -33,8 +33,7 @@ declare global {
         email: string;
         name: string;
         id: number;
-        role: string;
+        role?: string;
         access_token: string;
-        refresh_token: string;
     }
 }

@@ -13,7 +13,7 @@ const pages = {
     },
 };
 const locales = ["en", "vi"];
-const protectedPages = [""];
+const protectedPages: string[] = [];
 const authPages = ["/login", "/signup"];
 const defaultLocale = "en";
 const intlMiddleware = createIntlMiddleware({
@@ -22,11 +22,14 @@ const intlMiddleware = createIntlMiddleware({
 });
 
 const testPagesRegex = (pages: string[], pathname: string) => {
+    if (pages.length === 0) return false; 
+
     const regex = `^(/(${locales.join("|")}))?(${pages
         .map((p) => p.replace("/*", ".*"))
         .join("|")})/?$`;
     return new RegExp(regex, "i").test(pathname);
 };
+
 
 const handleAuth = async (
     req: NextRequest,

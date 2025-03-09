@@ -5,11 +5,8 @@ import { sendRequest } from "../../../ultils/api";
 
 const ThirdPartyOAuth = (props: any) => {
     const handleGoogle = async () => {
-        const res = await sendRequest<IBackendRes<any>>({
-            url: `${process.env.NEXT_PUBLIC_SERVER}/auth/google`,
-            method: "POST",
-        });
-        return res;
+        window.location.href = `${process.env.NEXT_PUBLIC_SERVER}/auth/google`;
+
     };
     return (
         <div className="flex gap-10">

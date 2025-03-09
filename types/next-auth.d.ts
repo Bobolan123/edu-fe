@@ -4,7 +4,6 @@ import { JWT } from "next-auth/jwt";
 interface IUser {
     id: string;
     username: string;
-    password: string;
     email: string;
     isVerify: boolean;
     role: string;

@@ -7,7 +7,9 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@mui/material";
 import theme from "./theme";
 import { Roboto } from "next/font/google";
-import "../globals.css"
+import "../globals.css";
+import ToastProvider from "@/components/Toastify/ToastContainer";
+import ClientSideToastContainer from "@/components/Toastify/ToastContainer";
 const roboto = Roboto({
     weight: ["100", "300", "400", "500", "700"],
     style: ["normal", "italic"],
@@ -40,6 +42,7 @@ export default async function LocaleLayout({
                 <NextIntlClientProvider messages={messages}>
                     <AppRouterCacheProvider>
                         <ThemeProvider theme={theme}>
+                            <ClientSideToastContainer />
                             <Navbar />
                             {children}
                         </ThemeProvider>

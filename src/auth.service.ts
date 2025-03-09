@@ -1,11 +1,12 @@
 import { sendRequest } from "../ultils/api";
 
 //Register
-export const fetchRegister = async (email: string, password: string) => {
+export const fetchRegister = async (email: string, password: string,name:string) => {
     const res = await sendRequest<IBackendRes<any>>({
         url: `${process.env.NEXT_PUBLIC_SERVER}/auth/register`,
         method: "POST",
         body: {
+            name:name.toString(),
             email: email.toString(),
             password: password.toString(),
         },
@@ -19,8 +20,8 @@ export const fetchSignIn = async (email: string, password: string) => {
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/auth/login`,
         body: {
-            username: email,
-            password: password,
+            email,
+            password,
         },
     });
     return res;
