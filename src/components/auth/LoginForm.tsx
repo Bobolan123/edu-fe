@@ -16,12 +16,12 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import ResendOtpModel from "./resendOtp.model";
-import ForgotPasswordModel from "./forgotPassword.model";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { customSignin } from "../../../ultils/auth/action";
 import { IsValidEmail } from "../../../ultils/ultils";
+import ResendOtpModel from "./resendOtp.model";
+import ForgotPasswordModel from "./forgotPassword.model";
 
 const LoginForm = () => {
     const t = useTranslations("Login");

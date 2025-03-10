@@ -23,40 +23,34 @@ const style = {
     p: 4,
 };
 
-const steps = ["Login", "Verify", "Done"];
+const steps = ["Verify", "Done"];
 
 interface IResendOtpModelProps {
-    handleCloseModelResendOtp: any;
-    isOpenModelResendOtp: boolean;
+    handleCloseModelOpenVerify: () =>void;
+    isOpenVerify: boolean;
     email: string;
 }
-export default function ResendOtpModel(props: IResendOtpModelProps) {
-    const { isOpenModelResendOtp, handleCloseModelResendOtp, email } = props;
+export default function VerifyOtpModel(props: IResendOtpModelProps) {
+    const { isOpenVerify, handleCloseModelOpenVerify, email } = props;
     const [step, setStep] = React.useState<number>(0);
     const [userId, setUserId] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
 
-    const handleResendOtp = async (email: string) => {
-        const res = await fetchResendOtp(email);
-        if (res?.data) {
-            setStep(1);
-            setUserId(res?.data?.id);
-        }
-    };
     const handleVerify = async (id: number, otp: number) => {
         const res = await fetchVerifyOTP(id, otp);
+
         if (res?.data) {
-            setStep(2);
+            setStep(1);
         }
     };
     const handleDone = async () => {
-        handleCloseModelResendOtp();
+        handleCloseModelOpenVerify();
     };
     return (
         <div>
             <Modal
-                open={isOpenModelResendOtp}
-                onClose={handleCloseModelResendOtp}
+                open={isOpenVerify}
+                onClose={handleCloseModelOpenVerify}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
@@ -78,29 +72,15 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                     >
                         {step === 0 && (
                             <>
-                                <Typography>
-                                    Your account aren't verified
-                                </Typography>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    disabled
-                                    id="email"
-                                    name="email"
-                                    label="Email"
-                                    defaultValue={email}
-                                />
-                                <Button
-                                    variant="contained"
-                                    onClick={() => handleResendOtp(email)}
-                                >
-                                    Resend OTP
-                                </Button>
-                            </>
-                        )}
-                        {step === 1 && (
-                            <>
                                 <Typography>Verify your account!</Typography>
+                                <TextField
+                                    name="email"
+                                    size="small"
+                                    id="email"
+                                    defaultValue={email}
+                                    disabled
+                                    onChange={(e) => setOtp(e.target.value)} 
+                                />
                                 <TextField
                                     name="otp"
                                     size="small"
@@ -117,7 +97,7 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                             </>
                         )}
 
-                        {step === 2 && (
+                        {step === 1 && (
                             <>
                                 <Typography>
                                     Succesfully. Please sign up

@@ -54,18 +54,30 @@ export default function ForgotPasswordModel(props: any) {
             toast.error(res?.message);
         }
     };
+
     const handleChangePassword = async (
         email: string,
         password: string,
         confirmPassword: string
     ) => {
-        const res = await fetchChangePassword(email, password, confirmPassword);
+        const res = await fetchChangePassword(
+            email,
+            password,
+            confirmPassword,
+            otp || "0"
+        );
         if (res?.data) {
+            toast.success(res?.message);
+
             setStep(2);
+        } else {
+            toast.error(res?.message);
         }
     };
+
     const handleDone = async () => {
         handleCloseModelForgotPassword();
+        setStep(0);
     };
     return (
         <div>
@@ -124,7 +136,6 @@ export default function ForgotPasswordModel(props: any) {
                                     size="small"
                                     id="otp"
                                     label="OTP"
-                                    defaultValue=""
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                 />
@@ -136,6 +147,7 @@ export default function ForgotPasswordModel(props: any) {
                                     name="password"
                                     label="password"
                                     id="password"
+                                    type="password"
                                     autoComplete="current-password"
                                     onChange={(e) =>
                                         setPassword(e.target.value)
@@ -145,6 +157,7 @@ export default function ForgotPasswordModel(props: any) {
                                     margin="normal"
                                     required
                                     fullWidth
+                                    type="password"
                                     size="small"
                                     name="confirmPassword"
                                     label="confirmPassword"

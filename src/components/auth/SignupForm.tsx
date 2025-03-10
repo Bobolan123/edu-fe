@@ -18,6 +18,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { IsValidEmail } from "../../../ultils/ultils";
 import { fetchRegister } from "@/auth.service";
+import VerifyOtpModel from "./VerifyOTP.model";
 
 const SignupForm = () => {
     const t = useTranslations("Signup");
@@ -27,6 +28,9 @@ const SignupForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [isOpenVerify, setIsOpenVerify] = useState(false);
+
+    const handleCloseModelOpenVerify = () => setIsOpenVerify(false);
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
@@ -42,13 +46,19 @@ const SignupForm = () => {
             return;
         }
 
-        const res = await fetchRegister(email.toString(), password.toString(), fullName);
-        console.log(res)
-        if (res?.statusCode !== 200) {
+        const res = await fetchRegister(
+            email.toString(),
+            password.toString(),
+            fullName
+        );
+        if (res?.statusCode === 403) {
+            toast.error(res.message);
+            setIsOpenVerify(true);
+        } else if (res?.statusCode === 400) {
             toast.error(res.message);
         } else {
-            toast.success("Signup successful!");
-            // router.push("/login");
+            toast.success(res.message + " Please verify Email!");
+            setIsOpenVerify(true);
         }
     };
 
@@ -119,6 +129,11 @@ const SignupForm = () => {
                     </Typography>
                 </Grid>
             </Box>
+            <VerifyOtpModel
+                email={email}
+                handleCloseModelOpenVerify={handleCloseModelOpenVerify}
+                isOpenVerify={isOpenVerify}
+            />
         </Box>
     );
 };

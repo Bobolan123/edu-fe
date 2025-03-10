@@ -68,15 +68,17 @@ export const fetchForgotPassword = async (email: string) => {
 export const fetchChangePassword = async (
     email: string,
     password: string,
-    confirmPassword: string
+    confirmPassword: string,
+    otp?:string
 ) => {
     const res = await sendRequest<IBackendRes<any>>({
-        method: "POST",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/auth/changePassword`,
+        method: "PATCH",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/auth/forgetPassword`,
         body: {
             email,
             password,
             confirmPassword,
+            otp
         },
     });
     return res;
