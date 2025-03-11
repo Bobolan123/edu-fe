@@ -26,6 +26,9 @@ import LocaleSwitcher from "./LocaleSwitcher";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { signOut } from "@/auth";
+import { useSession } from "next-auth/react";
+import HeaderAuthButton from "./HeaderAuthButton";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -68,7 +71,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Navbar() {
-
+    const { data: session } = useSession();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
         React.useState<null | HTMLElement>(null);
@@ -112,6 +115,7 @@ export default function Navbar() {
         >
             <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
             <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+            <MenuItem onClick={() => signOut()}>My account</MenuItem>
         </Menu>
     );
 
@@ -159,90 +163,74 @@ export default function Navbar() {
         </Menu>
     );
 
-
     const t = useTranslations("Navbar");
 
     return (
         <Box>
-                <>
-                    <AppBar
-                        position="static"
-                        sx={{ backgroundColor: "white", color: "black" }}
-                    >
-                        <Toolbar>
-                            <Image
-                                src="/logo.png"
-                                width={90}
-                                height={90}
-                                alt="Picture of the author"
-                            />
-                            <div className="flex justify-center items-center gap-3">
+            <>
+                <AppBar
+                    position="static"
+                    sx={{ backgroundColor: "white", color: "black" }}
+                >
+                    <Toolbar>
+                        <Image
+                            src="/logo.png"
+                            width={90}
+                            height={90}
+                            alt="Picture of the author"
+                        />
+                        <div className="flex justify-center items-center gap-3">
+                            <Typography variant="button">
+                                <Link href="/">{t("home")}</Link>
+                            </Typography>
+
+                            <Link href={"/courses"}>
                                 <Typography variant="button">
-                                    <Link href="/">{t("home")}</Link>
+                                    {t("course")}
                                 </Typography>
+                            </Link>
+                        </div>
 
-                                <Link href={"/courses"}>
-                                    <Typography variant="button">
-                                        {t("course")}
-                                    </Typography>
-                                </Link>
-                            </div>
-
-                            <Search>
-                                <SearchIconWrapper>
-                                    <SearchIcon />
-                                </SearchIconWrapper>
-                                <StyledInputBase
-                                    placeholder="Search…"
-                                    inputProps={{ "aria-label": "search" }}
+                        <Search>
+                            <SearchIconWrapper>
+                                <SearchIcon />
+                            </SearchIconWrapper>
+                            <StyledInputBase
+                                placeholder="Search…"
+                                inputProps={{ "aria-label": "search" }}
+                            />
+                        </Search>
+                        <Box sx={{ flexGrow: 1 }} />
+                        <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                            <div className="flex justify-center items-center gap-3">
+                                <HeaderAuthButton
+                                    handleProfileMenuOpen={
+                                        handleProfileMenuOpen
+                                    }
+                                    menuId={menuId}
+                                    key={1}
                                 />
-                            </Search>
-                            <Box sx={{ flexGrow: 1 }} />
-                            <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                                <div className="flex justify-center items-center gap-3">
-                                    <Button variant="outlined">
-                                        <Link  href="/login">
-                                            {t("login")}
-                                        </Link>
-                                    </Button>
-                                    <Button variant="contained" className="">
-                                        <Link href={"/signup"}>
-                                            {t("signup")}
-                                        </Link>
-                                    </Button>
 
-                                    <LocaleSwitcher />
-
-                                    <IconButton
-                                        size="medium"
-                                        edge="end"
-                                        aria-label="account of current user"
-                                        aria-controls={menuId}
-                                        aria-haspopup="true"
-                                        onClick={handleProfileMenuOpen}
-                                        color="inherit"
-                                    >
-                                        <AccountCircle />
-                                    </IconButton>
-                                </div>
-                            </Box>
-                            <Box sx={{ display: { xs: "flex", md: "none" } }}>
-                                <IconButton
-                                    size="medium"
-                                    aria-label="show more"
-                                    aria-controls={mobileMenuId}
-                                    aria-haspopup="true"
-                                    onClick={handleMobileMenuOpen}
-                                    color="inherit"
-                                >
-                                    <MoreIcon />
-                                </IconButton>
-                            </Box>
-                        </Toolbar>
-                    </AppBar>
-                    {renderMobileMenu}
-                    {renderMenu}
-                </>
+                                <LocaleSwitcher />
+                            </div>
+                        </Box>
+                        <Box sx={{ display: { xs: "flex", md: "none" } }}>
+                            <IconButton
+                                size="medium"
+                                aria-label="show more"
+                                aria-controls={mobileMenuId}
+                                aria-haspopup="true"
+                                onClick={handleMobileMenuOpen}
+                                color="inherit"
+                            >
+                                <MoreIcon />
+                            </IconButton>
+                        </Box>
+                    </Toolbar>
+                </AppBar>
+                {renderMobileMenu}
+                {renderMenu}
+            </>
         </Box>
     );
 }

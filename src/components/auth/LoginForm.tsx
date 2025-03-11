@@ -20,8 +20,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { customSignin } from "../../../ultils/auth/action";
 import { IsValidEmail } from "../../../ultils/ultils";
-import ResendOtpModel from "./resendOtp.model";
-import ForgotPasswordModel from "./forgotPassword.model";
+import ResendOtpModel from "./ResendOtp.model";
+import ForgotPasswordModel from "./ForgotPassword.model";
 
 const LoginForm = () => {
     const t = useTranslations("Login");

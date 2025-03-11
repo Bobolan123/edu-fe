@@ -3,13 +3,15 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@mui/material";
 import theme from "./theme";
 import { Roboto } from "next/font/google";
 import "../globals.css";
 import ToastProvider from "@/components/Toastify/ToastContainer";
 import ClientSideToastContainer from "@/components/Toastify/ToastContainer";
+import { SessionProvider } from "next-auth/react";
+import Navbar from "@/components/Navbar/Navbar";
+
 const roboto = Roboto({
     weight: ["100", "300", "400", "500", "700"],
     style: ["normal", "italic"],
@@ -29,8 +31,7 @@ export default async function LocaleLayout({
         notFound();
     }
 
-    // Providing all messages to the client
-    // side is the easiest way to get started
+    // Providing all messages to the client side is the easiest way to get started
     const messages = await getMessages();
 
     return (
@@ -43,8 +44,10 @@ export default async function LocaleLayout({
                     <AppRouterCacheProvider>
                         <ThemeProvider theme={theme}>
                             <ClientSideToastContainer />
-                            <Navbar />
-                            {children}
+                            <SessionProvider>
+                                <Navbar />
+                                {children}
+                            </SessionProvider>
                         </ThemeProvider>
                     </AppRouterCacheProvider>
                 </NextIntlClientProvider>

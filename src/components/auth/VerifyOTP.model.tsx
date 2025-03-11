@@ -10,6 +10,7 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import { TextField } from "@mui/material";
 import { fetchResendOtp, fetchVerifyOTP } from "@/auth.service";
+import { toast } from "react-toastify";
 
 const style = {
     position: "absolute" as "absolute",
@@ -26,7 +27,7 @@ const style = {
 const steps = ["Verify", "Done"];
 
 interface IResendOtpModelProps {
-    handleCloseModelOpenVerify: () =>void;
+    handleCloseModelOpenVerify: () => void;
     isOpenVerify: boolean;
     email: string;
 }
@@ -36,11 +37,25 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
     const [userId, setUserId] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
 
-    const handleVerify = async (id: number, otp: number) => {
-        const res = await fetchVerifyOTP(id, otp);
+    const handleVerify = async () => {
+        const res = await fetchVerifyOTP(userId, +otp);
 
         if (res?.data) {
+            toast.success(res?.message);
+
             setStep(1);
+        } else {
+            toast.error(res?.message);
+        }
+    };
+
+    const handleResendOtp = async (email: string) => {
+        const res = await fetchResendOtp(email);
+        if (res?.data) {
+            setUserId(res?.data?.id);
+            toast.success(res.message);
+        } else {
+            toast.error(res.message);
         }
     };
     const handleDone = async () => {
@@ -79,20 +94,26 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
                                     id="email"
                                     defaultValue={email}
                                     disabled
-                                    onChange={(e) => setOtp(e.target.value)} 
+                                    onChange={(e) => setOtp(e.target.value)}
                                 />
                                 <TextField
                                     name="otp"
                                     size="small"
                                     id="otp"
                                     label="OTP"
-                                    onChange={(e) => setOtp(e.target.value)} 
+                                    onChange={(e) => setOtp(e.target.value)}
                                 />
                                 <Button
                                     variant="contained"
-                                    onClick={() => handleVerify(userId, +otp)}
+                                    onClick={handleVerify}
                                 >
                                     Verify
+                                </Button>
+                                <Button
+                                    className=" m-0"
+                                    onClick={() => handleResendOtp(email)}
+                                >
+                                    Resend OTP
                                 </Button>
                             </>
                         )}
