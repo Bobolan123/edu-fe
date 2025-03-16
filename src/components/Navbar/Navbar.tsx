@@ -26,7 +26,7 @@ import LocaleSwitcher from "./LocaleSwitcher";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { signOut } from "@/auth";
+import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react";
 import HeaderAuthButton from "./HeaderAuthButton";
 
@@ -92,9 +92,6 @@ export default function Navbar() {
         handleMobileMenuClose();
     };
 
-    const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-        setMobileMoreAnchorEl(event.currentTarget);
-    };
 
     const menuId = "primary-search-account-menu";
     const renderMenu = (
@@ -113,53 +110,9 @@ export default function Navbar() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-            <MenuItem onClick={() => signOut()}>My account</MenuItem>
-        </Menu>
-    );
-
-    const mobileMenuId = "primary-search-account-menu-mobile";
-    const renderMobileMenu = (
-        <Menu
-            anchorEl={mobileMoreAnchorEl}
-            anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-            }}
-            id={mobileMenuId}
-            keepMounted
-            transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-            }}
-            open={isMobileMenuOpen}
-            onClose={handleMobileMenuClose}
-        >
-            <MenuItem>
-                <IconButton
-                    size="medium"
-                    aria-label="show 4 new mails"
-                    color="inherit"
-                >
-                    <Badge badgeContent={4} color="error">
-                        <MailIcon />
-                    </Badge>
-                </IconButton>
-                <p>Messages</p>
-            </MenuItem>
-            <MenuItem onClick={handleProfileMenuOpen}>
-                <IconButton
-                    size="medium"
-                    aria-label="account of current user"
-                    aria-controls="primary-search-account-menu"
-                    aria-haspopup="true"
-                    color="inherit"
-                >
-                    <AccountCircle />
-                </IconButton>
-                <p>Profile</p>
-            </MenuItem>
+            <MenuItem ><Link href="/my-learning">My learning</Link></MenuItem>
+            <MenuItem ><Link href="/my-activity">My activity</Link></MenuItem>
+            <MenuItem onClick={() => signOut()}>Log out</MenuItem>
         </Menu>
     );
 
@@ -167,70 +120,52 @@ export default function Navbar() {
 
     return (
         <Box>
-            <>
-                <AppBar
-                    position="static"
-                    sx={{ backgroundColor: "white", color: "black" }}
-                >
-                    <Toolbar>
-                        <Image
-                            src="/logo.png"
-                            width={90}
-                            height={90}
-                            alt="Picture of the author"
-                        />
-                        <div className="flex justify-center items-center gap-3">
+            <AppBar
+                position="static"
+                sx={{ backgroundColor: "white", color: "black" }}
+            >
+                <Toolbar>
+                    <Image
+                        src="/logo.png"
+                        width={90}
+                        height={90}
+                        alt="Picture of the author"
+                    />
+                    <div className="flex justify-center items-center gap-3">
+                        <Typography variant="button">
+                            <Link href="/">{t("home")}</Link>
+                        </Typography>
+
+                        <Link href={"/courses"}>
                             <Typography variant="button">
-                                <Link href="/">{t("home")}</Link>
+                                {t("course")}
                             </Typography>
+                        </Link>
+                    </div>
 
-                            <Link href={"/courses"}>
-                                <Typography variant="button">
-                                    {t("course")}
-                                </Typography>
-                            </Link>
-                        </div>
-
-                        <Search>
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                                placeholder="Search…"
-                                inputProps={{ "aria-label": "search" }}
+                    <Search>
+                        <SearchIconWrapper>
+                            <SearchIcon />
+                        </SearchIconWrapper>
+                        <StyledInputBase
+                            placeholder="Search…"
+                            inputProps={{ "aria-label": "search" }}
+                        />
+                    </Search>
+                    <Box sx={{ flexGrow: 1 }} />
+                    <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                        <div className="flex justify-center items-center gap-3">
+                            <HeaderAuthButton
+                                handleProfileMenuOpen={handleProfileMenuOpen}
+                                menuId={menuId}
+                                key={1}
                             />
-                        </Search>
-                        <Box sx={{ flexGrow: 1 }} />
-                        <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                            <div className="flex justify-center items-center gap-3">
-                                <HeaderAuthButton
-                                    handleProfileMenuOpen={
-                                        handleProfileMenuOpen
-                                    }
-                                    menuId={menuId}
-                                    key={1}
-                                />
-
-                                <LocaleSwitcher />
-                            </div>
-                        </Box>
-                        <Box sx={{ display: { xs: "flex", md: "none" } }}>
-                            <IconButton
-                                size="medium"
-                                aria-label="show more"
-                                aria-controls={mobileMenuId}
-                                aria-haspopup="true"
-                                onClick={handleMobileMenuOpen}
-                                color="inherit"
-                            >
-                                <MoreIcon />
-                            </IconButton>
-                        </Box>
-                    </Toolbar>
-                </AppBar>
-                {renderMobileMenu}
-                {renderMenu}
-            </>
+                            <LocaleSwitcher />
+                        </div>
+                    </Box>
+                </Toolbar>
+            </AppBar>
+            {renderMenu}
         </Box>
     );
 }

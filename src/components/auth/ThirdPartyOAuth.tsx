@@ -2,15 +2,13 @@
 
 import { Google } from "@mui/icons-material";
 import { sendRequest } from "../../../ultils/api";
+import { signIn } from "next-auth/react";
 
 const ThirdPartyOAuth = (props: any) => {
-    const handleGoogle = async () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_SERVER}/auth/google`;
-
-    };
+    
     return (
         <div className="flex gap-10">
-            <button onClick={handleGoogle}>
+            <button onClick={() => signIn("google")}>
                 <Google fontSize="large" />
             </button>
         </div>

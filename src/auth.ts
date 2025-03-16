@@ -1,11 +1,21 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { fetchSignIn } from "./auth.service";
+import { fetchSignIn, fetchSignInGoogle } from "./auth.service";
 import { IUser } from "../types/next-auth";
 import { InvalidActive, InvalidCredentials } from "../ultils/auth/auth-error";
+import Google from "next-auth/providers/google";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
+        Google({
+            authorization: {
+                params: {
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code",
+                },
+            },
+        }),
         Credentials({
             credentials: {
                 email: {},
@@ -16,7 +26,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     credentials.email as string,
                     credentials.password as string
                 );
-                console.log(res)
                 if (res?.statusCode === 201 && res?.data) {
                     return {
                         email: res.data.email,
@@ -24,14 +33,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         name: res.data.name,
                     };
                 } else if (res?.statusCode === 403) {
-                    throw new InvalidActive()
+                    throw new InvalidActive();
                 } else {
-                    throw new InvalidCredentials()
+                    throw new InvalidCredentials();
                 }
             },
         }),
     ],
     callbacks: {
+        async signIn({ account, profile }) {
+            if (account?.provider === "google") {
+                if (profile?.email_verified && profile?.email?.endsWith("@gmail.com")) {
+                    try {
+                        const res = await fetchSignInGoogle(profile.email, profile.name || "", profile.sub || "");
+                      if (res?.statusCode === 201 && res?.data) {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    } catch (error) {
+                        console.error("Error saving Google user:", error);
+                        return false;
+                    }
+                }
+                return false;
+            }
+            return true;
+        },
+
         jwt({ token, user }) {
             if (user) {
                 // User is available during sign-in

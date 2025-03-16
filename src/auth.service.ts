@@ -26,6 +26,19 @@ export const fetchSignIn = async (email: string, password: string) => {
     });
     return res;
 };
+//Sign in
+export const fetchSignInGoogle = async (email: string, name: string, googleId: string) => {
+    const res = await sendRequest<IBackendRes<ILogin>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/auth/google-login`,
+        body: {
+            email,
+            name,
+            googleId,
+        },
+    });
+    return res;
+};
 
 //Verify OTP
 export const fetchResendOtp = async (email: string) => {

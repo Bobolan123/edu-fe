@@ -50,15 +50,15 @@ const LoginForm = () => {
             return;
         }
         const res = await customSignin(email, password);
-        console.log(res)
         if (res?.message && res.statusCode === 400) {
             toast.error(res.message);
+            
         } else if (res?.message && res.statusCode === 403) {
             toast.error(res.message);
             setEmailModel(email);
             setIsOpenModelResendOtp(true);
         } else {
-            // router.push("/");
+            router.push("/");
         }
     };
 

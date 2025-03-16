@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { getLocale } from "next-intl/server";
+import { cookies } from "next/headers";
 
 const pages = {
     auth: {
@@ -37,7 +38,7 @@ const handleAuth = async (
     isProtectedPage: boolean
 ) => {
     const session = await auth();
-    const isAuth = !!session?.user;
+    const isAuth = session?.user;
 
     if (!isAuth && isProtectedPage) {
 
@@ -52,7 +53,7 @@ const handleAuth = async (
     }
 
     if (isAuth && isAuthPage) {
-        return NextResponse.redirect(new URL(pages.home.root, req.nextUrl));
+        return NextResponse.redirect(new URL(pages.home.root, req.url));
     }
 
     return intlMiddleware(req);
