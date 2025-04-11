@@ -33,7 +33,7 @@ const upcomingSessions = [
 ];
 
 export default function LiveSessionsPage() {
-    const [isHost] = useState(false); // This would be determined by user role from your auth system
+    const [isHost] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const formatDate = (dateString: string) => {

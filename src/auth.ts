@@ -49,7 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                       if (res?.statusCode === 201 && res?.data) {
                         return true;
                       } else {
-                        return false;
+                        return false; 
                       }
                     } catch (error) {
                         console.error("Error saving Google user:", error);
