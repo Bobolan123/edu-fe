@@ -1,26 +1,37 @@
-'use client';
+"use client";
 
-import { useRef } from 'react';
-import { Box, Typography, IconButton, Card, CardContent, Container } from '@mui/material';
-import { ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from '@mui/icons-material';
+import { useRef } from "react";
+import {
+    Box,
+    Typography,
+    IconButton,
+    Card,
+    CardContent,
+    Container,
+} from "@mui/material";
+import {
+    ChevronLeft as ChevronLeftIcon,
+    ChevronRight as ChevronRightIcon,
+} from "@mui/icons-material";
+import { ICategory } from "../../../types/entities";
 
-// Sample data - replace with actual data from your backend
-const sampleCategories = [
-    { id: 1, name: "Web Development", description: "Learn web technologies" },
-    { id: 2, name: "Data Science", description: "Master data analysis" },
-    { id: 3, name: "Mobile Development", description: "Build mobile apps" },
-    { id: 4, name: "UI/UX Design", description: "Design user interfaces" },
-    { id: 5, name: "Machine Learning", description: "AI and ML fundamentals" },
-    { id: 6, name: "Cloud Computing", description: "Cloud technologies" },
-];
 
-export default function CategoriesSection() {
+
+interface ICategoriesSectionProps {
+    categories: ICategory[] | undefined;
+}
+
+export default function CategoriesSection(props: ICategoriesSectionProps) {
+    const { categories } = props;
     const categoryRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: "left" | "right") => {
         if (categoryRef.current) {
             const scrollAmount = direction === "left" ? -300 : 300;
-            categoryRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            categoryRef.current.scrollBy({
+                left: scrollAmount,
+                behavior: "smooth",
+            });
         }
     };
 
@@ -56,7 +67,7 @@ export default function CategoriesSection() {
                     "&::-webkit-scrollbar": { display: "none" },
                 }}
             >
-                {sampleCategories.map((category) => (
+                {categories?.map((category) => (
                     <Card
                         key={category.id}
                         sx={{
@@ -80,4 +91,4 @@ export default function CategoriesSection() {
             </Box>
         </Container>
     );
-} 
+}

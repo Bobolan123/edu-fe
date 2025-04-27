@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Box, Typography, Container, Grid, IconButton } from '@mui/material';
 import { FormatQuote, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from '@mui/icons-material';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 const testimonials = [
     {
@@ -32,6 +33,7 @@ const testimonials = [
 export default function TestimonialsSection() {
     const [currentTestimonial, setCurrentTestimonial] = useState(0);
     const testimonialInterval = useRef<NodeJS.Timeout | null>(null);
+    const t = useTranslations('Home.testimonials');
 
     useEffect(() => {
         // Auto-advance testimonials every 5 seconds
@@ -60,6 +62,9 @@ export default function TestimonialsSection() {
     return (
         <Box sx={{ bgcolor: '#333b3c', py: 10, mt: 8, height: '85vh' }}>
             <Container maxWidth="lg">
+                <Typography variant="h3" component="h2" gutterBottom sx={{ color: 'white', textAlign: 'center', mb: 6 }}>
+                    {t('title')}
+                </Typography>
                 <Grid container spacing={4} alignItems="center">
                     {/* Testimonial Content */}
                     <Grid item xs={12} md={8} sx={{ position: 'relative' }}>
@@ -129,7 +134,7 @@ export default function TestimonialsSection() {
                             }}
                         >
                             <Image
-                                src={testimonials[currentTestimonial].image}
+                                src={""}
                                 alt={testimonials[currentTestimonial].name}
                                 fill
                                 style={{ objectFit: 'cover' }}

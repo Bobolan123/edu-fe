@@ -10,6 +10,7 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import { TextField } from "@mui/material";
 import { fetchResendOtp, fetchVerifyOTP } from "@/auth.service";
+import { useTranslations } from 'next-intl';
 
 const style = {
     position: "absolute" as "absolute",
@@ -35,6 +36,7 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
     const [step, setStep] = React.useState<number>(0);
     const [userId, setUserId] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
+    const t = useTranslations('ResendOTP');
 
     const handleResendOtp = async (email: string) => {
         const res = await fetchResendOtp(email);
@@ -64,7 +66,7 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                     <Stepper activeStep={step} alternativeLabel>
                         {steps.map((label) => (
                             <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
+                                <StepLabel>{t(`steps.${label.toLowerCase()}`)}</StepLabel>
                             </Step>
                         ))}
                     </Stepper>
@@ -79,7 +81,7 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                         {step === 0 && (
                             <>
                                 <Typography>
-                                    Your account aren't verified
+                                    {t('not_verified')}
                                 </Typography>
                                 <TextField
                                     fullWidth
@@ -94,39 +96,38 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                                     variant="contained"
                                     onClick={() => handleResendOtp(email)}
                                 >
-                                    Resend OTP
+                                    {t('resend_button')}
                                 </Button>
                             </>
                         )}
                         {step === 1 && (
                             <>
-                                <Typography>Verify your account!</Typography>
+                                <Typography>{t('verify_account')}</Typography>
                                 <TextField
                                     name="otp"
                                     size="small"
                                     id="otp"
                                     label="OTP"
-                                    onChange={(e) => setOtp(e.target.value)} 
+                                    onChange={(e) => setOtp(e.target.value)}
                                 />
                                 <Button
                                     variant="contained"
                                     onClick={() => handleVerify(userId, +otp)}
                                 >
-                                    Verify
+                                    {t('verify_button')}
                                 </Button>
                             </>
                         )}
-
                         {step === 2 && (
                             <>
                                 <Typography>
-                                    Succesfully. Please sign up
+                                    {t('success_message')}
                                 </Typography>
                                 <Button
                                     variant="contained"
                                     onClick={() => handleDone()}
                                 >
-                                    Done
+                                    {t('done_button')}
                                 </Button>
                             </>
                         )}

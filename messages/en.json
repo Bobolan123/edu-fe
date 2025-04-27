@@ -1,13 +1,20 @@
 {
     "Home": {
-        "home": "Home"
+        "home": "Home",
+        "learning_focused_title": "Learning focused on your goals",
+        "testimonials": {
+            "title": "What Our Students Say"
+        }
     },
     "Navbar": {
         "home": "Home",
         "course": "Course",
         "login": "Login",
         "signup": "Signup",
-        "search": "Search"
+        "search": "Search",
+        "my_learning": "My Learning",
+        "my_activity": "My Activity",
+        "logout": "Log out"
     },
     "LocaleSwitcher": {
         "label": "Change language",
@@ -23,13 +30,37 @@
         "login_prompt": "Already have an account? Log in"
     },
     "Login": {
-      "title": "Log in to explore your learning journey",
-      "email": "Email",
-      "password": "Password",
-      "login_button": "LOG IN",
-      "terms": "By logging in, you agree to our Terms of Use and Privacy Policy.",
-      "signup_prompt": "Don't have an account?",
-      "signup_button": "Sign up",
-      "forgot_password": "Forgot password"
-  }
+        "title": "Log in to explore your learning journey",
+        "email": "Email",
+        "password": "Password",
+        "login_button": "LOG IN",
+        "terms": "By logging in, you agree to our Terms of Use and Privacy Policy.",
+        "signup_prompt": "Don't have an account?",
+        "signup_button": "Sign up",
+        "forgot_password": "Forgot password"
+    },
+    "VerifyOTP": {
+        "steps": {
+            "verify": "Verify",
+            "done": "Done"
+        },
+        "verify_account": "Verify your account!",
+        "verify_button": "Verify",
+        "success_message": "Successfully verified. Please sign in",
+        "done_button": "Done",
+        "resend_otp": "Resend OTP"
+    },
+    "ResendOTP": {
+        "steps": {
+            "login": "Login",
+            "verify": "Verify",
+            "done": "Done"
+        },
+        "not_verified": "Your account isn't verified",
+        "resend_button": "Resend OTP",
+        "verify_account": "Verify your account!",
+        "verify_button": "Verify",
+        "success_message": "Successfully verified. Please sign in",
+        "done_button": "Done"
+    }
 }

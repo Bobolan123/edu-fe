@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Box, Typography, Card, CardContent, Grid, Container } from '@mui/material';
 import { Build as BuildIcon, School as SchoolIcon, Assessment as AssessmentIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 const learningFeatures = [
     {
@@ -40,11 +41,12 @@ const learningFeatures = [
 
 export default function LearningFeaturesSection() {
     const [selectedFeature, setSelectedFeature] = useState(learningFeatures[0]);
+    const t = useTranslations('Home');
 
     return (
         <Container maxWidth="lg" sx={{ py: 6 }}>
             <Typography variant="h4" component="h2" gutterBottom>
-                Learning focused on your goals
+                {t('learning_focused_title')}
             </Typography>
 
             <Grid container spacing={4}>

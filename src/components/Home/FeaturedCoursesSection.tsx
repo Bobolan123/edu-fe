@@ -1,8 +1,22 @@
-'use client';
+"use client";
 
-import { useRef } from 'react';
-import { Box, Typography, IconButton, Card, CardContent, CardMedia, CardActions, Button, Container } from '@mui/material';
-import { ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from '@mui/icons-material';
+import { useRef } from "react";
+import {
+    Box,
+    Typography,
+    IconButton,
+    Card,
+    CardContent,
+    CardMedia,
+    CardActions,
+    Button,
+    Container,
+} from "@mui/material";
+import {
+    ChevronLeft as ChevronLeftIcon,
+    ChevronRight as ChevronRightIcon,
+} from "@mui/icons-material";
+import { ICourse } from "../../../types/entities";
 
 // Sample data - replace with actual data from your backend
 const sampleCourses = [
@@ -11,38 +25,47 @@ const sampleCourses = [
         title: "Complete Web Development Bootcamp",
         instructor: "John Doe",
         price: 89.99,
-        image: "/sample/web-dev.jpg"
+        image: "/sample/web-dev.jpg",
     },
     {
         id: 2,
         title: "Data Science and Machine Learning",
         instructor: "Jane Smith",
         price: 99.99,
-        image: "/sample/data-science.jpg"
+        image: "/sample/data-science.jpg",
     },
     {
         id: 3,
         title: "Mobile App Development with React Native",
         instructor: "Mike Johnson",
         price: 79.99,
-        image: "/sample/mobile-dev.jpg"
+        image: "/sample/mobile-dev.jpg",
     },
     {
         id: 4,
         title: "UI/UX Design Masterclass",
         instructor: "Sarah Wilson",
         price: 69.99,
-        image: "/sample/design.jpg"
-    }
+        image: "/sample/design.jpg",
+    },
 ];
 
-export default function FeaturedCoursesSection() {
+interface IFeaturedCoursesSectionProps {
+    courses: ICourse[] | undefined;
+}
+export default function FeaturedCoursesSection(
+    props: IFeaturedCoursesSectionProps
+) {
+    const { courses } = props;
     const courseRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: "left" | "right") => {
         if (courseRef.current) {
             const scrollAmount = direction === "left" ? -300 : 300;
-            courseRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            courseRef.current.scrollBy({
+                left: scrollAmount,
+                behavior: "smooth",
+            });
         }
     };
 
@@ -70,7 +93,7 @@ export default function FeaturedCoursesSection() {
                     scrollbarWidth: "none",
                 }}
             >
-                {sampleCourses.map((course) => (
+                {courses?.map((course) => (
                     <Card
                         key={course.id}
                         className="min-w-[280px] cursor-pointer hover:shadow-lg transition-shadow"
@@ -85,10 +108,14 @@ export default function FeaturedCoursesSection() {
                                 {course.title}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                by {course.instructor}
+                                by {course.instructor?.name}
                             </Typography>
-                            <Typography variant="h6" color="primary" className="mt-2">
-                                ${course.price.toFixed(2)}
+                            <Typography
+                                variant="h6"
+                                color="primary"
+                                className="mt-2"
+                            >
+                                ${(+course?.price).toFixed(2)}
                             </Typography>
                         </CardContent>
                         <CardActions>
@@ -101,4 +128,4 @@ export default function FeaturedCoursesSection() {
             </Box>
         </Container>
     );
-} 
+}

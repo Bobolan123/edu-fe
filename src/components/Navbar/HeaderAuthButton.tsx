@@ -2,7 +2,8 @@ import { useSession } from "next-auth/react";
 import { Button, IconButton } from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+
 interface HeaderAuthButtonProps {
     handleProfileMenuOpen: (event: React.MouseEvent<HTMLElement>) => void;
     menuId: string;
@@ -14,6 +15,8 @@ export default function HeaderAuthButton({
 }: HeaderAuthButtonProps) {
     const { data: session, status } = useSession();
     const locale = useLocale();
+    const t = useTranslations('Navbar');
+
     if (status === "loading") {
         return null;
     }
@@ -34,12 +37,12 @@ export default function HeaderAuthButton({
         <>
             <Button variant="outlined">
                 <Link href={`/${locale}/login`} passHref>
-                    Login
+                    {t('login')}
                 </Link>
             </Button>
             <Button variant="contained">
                 <Link href={`/${locale}/signup`} passHref>
-                    Signup
+                    {t('signup')}
                 </Link>
             </Button>
         </>

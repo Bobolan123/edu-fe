@@ -11,6 +11,7 @@ import StepLabel from "@mui/material/StepLabel";
 import { TextField } from "@mui/material";
 import { fetchResendOtp, fetchVerifyOTP } from "@/auth.service";
 import { toast } from "react-toastify";
+import { useTranslations } from 'next-intl';
 
 const style = {
     position: "absolute" as "absolute",
@@ -36,6 +37,7 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
     const [step, setStep] = React.useState<number>(0);
     const [userId, setUserId] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
+    const t = useTranslations('VerifyOTP');
 
     const handleVerify = async () => {
         const res = await fetchVerifyOTP(userId, +otp);
@@ -73,7 +75,7 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
                     <Stepper activeStep={step} alternativeLabel>
                         {steps.map((label) => (
                             <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
+                                <StepLabel>{t(`steps.${label.toLowerCase()}`)}</StepLabel>
                             </Step>
                         ))}
                     </Stepper>
@@ -87,15 +89,7 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
                     >
                         {step === 0 && (
                             <>
-                                <Typography>Verify your account!</Typography>
-                                <TextField
-                                    name="email"
-                                    size="small"
-                                    id="email"
-                                    defaultValue={email}
-                                    disabled
-                                    onChange={(e) => setOtp(e.target.value)}
-                                />
+                                <Typography>{t('verify_account')}</Typography>
                                 <TextField
                                     name="otp"
                                     size="small"
@@ -107,27 +101,26 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
                                     variant="contained"
                                     onClick={handleVerify}
                                 >
-                                    Verify
+                                    {t('verify_button')}
                                 </Button>
                                 <Button
-                                    className=" m-0"
+                                    variant="text"
                                     onClick={() => handleResendOtp(email)}
                                 >
-                                    Resend OTP
+                                    {t('resend_otp')}
                                 </Button>
                             </>
                         )}
-
                         {step === 1 && (
                             <>
                                 <Typography>
-                                    Succesfully. Please sign up
+                                    {t('success_message')}
                                 </Typography>
                                 <Button
                                     variant="contained"
-                                    onClick={() => handleDone()}
+                                    onClick={handleDone}
                                 >
-                                    Done
+                                    {t('done_button')}
                                 </Button>
                             </>
                         )}

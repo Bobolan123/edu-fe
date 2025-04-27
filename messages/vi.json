@@ -1,17 +1,24 @@
 {
     "Home": {
-        "home": "nha"
+        "home": "Trang Chủ",
+        "learning_focused_title": "Học tập tập trung vào mục tiêu của bạn",
+        "testimonials": {
+            "title": "Học Viên Nói Gì Về Chúng Tôi"
+        }
     },
     "Navbar": {
         "home": "Trang Chủ",
         "course": "Khóa Học",
         "login": "Đăng Nhập",
         "signup": "Đăng Ký",
-        "search": "Tìm Kiếm"
+        "search": "Tìm Kiếm",
+        "my_learning": "Khóa Học Của Tôi",
+        "my_activity": "Hoạt Động Của Tôi",
+        "logout": "Đăng Xuất"
     },
     "LocaleSwitcher": {
-        "label": "Thay doi ngon ngu",
-        "locale": "{locale, select, vi {Vi} en {En} other {Unbekannt}}"
+        "label": "Thay đổi ngôn ngữ",
+        "locale": "{locale, select, vi {Vi} en {En} other {Không xác định}}"
     },
     "Signup": {
         "title": "Đăng ký và bắt đầu học",
@@ -28,9 +35,32 @@
         "password": "Mật khẩu",
         "login_button": "ĐĂNG NHẬP",
         "terms": "Bằng cách đăng nhập, bạn đồng ý với Điều khoản Sử dụng và Chính sách Quyền riêng tư của chúng tôi.",
-        "signup_prompt": "Chưa có tài khoản? ",
+        "signup_prompt": "Chưa có tài khoản?",
         "signup_button": "Đăng ký",
         "forgot_password": "Quên mật khẩu"
-
+    },
+    "VerifyOTP": {
+        "steps": {
+            "verify": "Xác Thực",
+            "done": "Hoàn Thành"
+        },
+        "verify_account": "Xác thực tài khoản của bạn!",
+        "verify_button": "Xác Thực",
+        "success_message": "Xác thực thành công. Vui lòng đăng nhập",
+        "done_button": "Hoàn Thành",
+        "resend_otp": "Gửi Lại OTP"
+    },
+    "ResendOTP": {
+        "steps": {
+            "login": "Đăng Nhập",
+            "verify": "Xác Thực",
+            "done": "Hoàn Thành"
+        },
+        "not_verified": "Tài khoản của bạn chưa được xác thực",
+        "resend_button": "Gửi Lại OTP",
+        "verify_account": "Xác thực tài khoản của bạn!",
+        "verify_button": "Xác Thực",
+        "success_message": "Xác thực thành công. Vui lòng đăng nhập",
+        "done_button": "Hoàn Thành"
     }
 }

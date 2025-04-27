@@ -75,6 +75,7 @@ export default function Navbar() {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
         React.useState<null | HTMLElement>(null);
+    const t = useTranslations("Navbar");
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -110,13 +111,11 @@ export default function Navbar() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem ><Link href="/my-learning">My learning</Link></MenuItem>
-            <MenuItem ><Link href="/my-activity">My activity</Link></MenuItem>
-            <MenuItem onClick={() => signOut()}>Log out</MenuItem>
+            <MenuItem><Link href="/my-learning">{t('my_learning')}</Link></MenuItem>
+            <MenuItem><Link href="/my-activity">{t('my_activity')}</Link></MenuItem>
+            <MenuItem onClick={() => signOut()}>{t('logout')}</MenuItem>
         </Menu>
     );
-
-    const t = useTranslations("Navbar");
 
     return (
         <Box>
@@ -148,7 +147,7 @@ export default function Navbar() {
                             <SearchIcon />
                         </SearchIconWrapper>
                         <StyledInputBase
-                            placeholder="Search…"
+                            placeholder={t("search")}
                             inputProps={{ "aria-label": "search" }}
                         />
                     </Search>
