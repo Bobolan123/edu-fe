@@ -12,21 +12,21 @@ const testimonials = [
         name: "Kati Frantz",
         role: "Senior Developer at Google",
         quote: "MindfulMaze has transformed the way I approach learning. The interactive exercises and real-world projects have helped me master new technologies faster than ever.",
-        image: "/images/testimonials/kati.jpg"
+        image: "/home/Testimonial1.png"
     },
     {
         id: 2,
         name: "Sarah Johnson",
         role: "Product Manager at Microsoft",
         quote: "The quality of content and the learning experience on MindfulMaze is unmatched. It's helped our entire team stay up-to-date with the latest technologies.",
-        image: "/images/testimonials/sarah.jpg"
+        image: "/home/Testimonial2.png"
     },
     {
         id: 3,
         name: "James Wilson",
         role: "Tech Lead at Amazon",
         quote: "What sets MindfulMaze apart is their focus on practical, hands-on learning. The platform has been instrumental in our team's professional development.",
-        image: "/images/testimonials/james.jpg"
+        image: "/home/Testimonial3.png"
     }
 ];
 
@@ -128,13 +128,12 @@ export default function TestimonialsSection() {
                                 width: '280px',
                                 height: '280px',
                                 margin: '0 auto',
-                                borderRadius: '50%',
                                 overflow: 'hidden',
                                 border: '4px solid rgba(255,255,255,0.1)'
                             }}
                         >
                             <Image
-                                src={""}
+                                src={testimonials[currentTestimonial].image}
                                 alt={testimonials[currentTestimonial].name}
                                 fill
                                 style={{ objectFit: 'cover' }}

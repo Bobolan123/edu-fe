@@ -12,14 +12,14 @@ const learningFeatures = [
         title: "Hands-on training",
         description: "Upskill effectively with AI-powered coding exercises, practice tests, and quizzes.",
         icon: <BuildIcon sx={{ fontSize: 40 }} />,
-        image: "/images/hands-on-training.png",
+        image: "/home/Hands-on training.png",
     },
     {
         id: 2,
         title: "Certification prep",
         description: "Prep for industry-recognized certifications by solving real-world challenges and earn badges along the way.",
         icon: <SchoolIcon sx={{ fontSize: 40 }} />,
-        image: "/images/certification-prep.png",
+        image: "/home/Certification-prep.png",
     },
     {
         id: 3,
@@ -27,7 +27,7 @@ const learningFeatures = [
         description: "Fast-track goals with advanced insights plus a dedicated customer success team to help drive effective learning.",
         icon: <AssessmentIcon sx={{ fontSize: 40 }} />,
         badge: "Enterprise Plan",
-        image: "/images/insights-analytics.png",
+        image: "/home/Insights-analytics.png",
     },
     {
         id: 4,
@@ -35,7 +35,7 @@ const learningFeatures = [
         description: "Create tailored learning paths for team and organization goals and even host your own content and resources.",
         icon: <SettingsIcon sx={{ fontSize: 40 }} />,
         badge: "Enterprise Plan",
-        image: "/images/customizable-content.png",
+        image: "/home/Customizable-content.png",
     },
 ];
 
