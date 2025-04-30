@@ -10,6 +10,7 @@ export interface ICourse {
     thumbnail: string | null;
     price: number;
     average_rating: number;
+    total_students: number;
     sections: ISection[];
     enrollments: IEnrollment[];
     quizzes: IQuiz[];
