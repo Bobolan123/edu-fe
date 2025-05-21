@@ -8,14 +8,12 @@ export default async function CoursesPage(props: {
         page?: string;
         take?: string;
         rating?: string;
-        categories?: string;
+        categoryIds?: string | string[]; 
     };
 }) {
     const searchParams = props.searchParams || {};
     const currentPage = Number(searchParams?.page) || 1;
-    const take = Number(searchParams?.take) || 10;
-    const rating = searchParams?.rating;
-    const categories = searchParams?.categories;
+    const take = Number(searchParams?.take) || 5;
 
     const resCourses = await sendRequest<IModelPaginate<ICourse>>({
         method: "GET",
@@ -24,19 +22,16 @@ export default async function CoursesPage(props: {
             page: currentPage,
             take,
             search: searchParams?.filter,
-            rating,
-            categories,
+            rating: searchParams?.rating,
+            categoryIds: searchParams?.categoryIds,
         },
-        nextOption: {
-            cache: "no-cache",
-        },
+        nextOption: { cache: "no-cache" },
     });
 
     const resCategories = await sendRequest<IModelPaginate<ICategory>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/categories`,
     });
-    console.log(resCourses);
 
     return (
         <Courses

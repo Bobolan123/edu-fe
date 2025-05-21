@@ -43,8 +43,9 @@ export default async function LocaleLayout({
                 <NextIntlClientProvider messages={messages}>
                     <AppRouterCacheProvider>
                         <ThemeProvider theme={theme}>
+                        <SessionProvider>
+
                             <ClientSideToastContainer />
-                            <SessionProvider>
                                 <Navbar />
                                 {children}
                             </SessionProvider>

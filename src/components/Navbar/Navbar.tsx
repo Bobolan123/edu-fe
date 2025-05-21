@@ -4,7 +4,6 @@ import * as React from "react";
 import {
     alpha,
     AppBar,
-    Badge,
     Box,
     Button,
     IconButton,
@@ -15,20 +14,12 @@ import {
     Toolbar,
     Typography,
 } from "@mui/material";
-import {
-    AccountCircle,
-    Mail as MailIcon,
-    Notifications as NotificationsIcon,
-    MoreVert as MoreIcon,
-    Search as SearchIcon,
-} from "@mui/icons-material";
+import { AccountCircle, Search as SearchIcon } from "@mui/icons-material";
 import LocaleSwitcher from "./LocaleSwitcher";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { signOut } from "next-auth/react"
-import { useSession } from "next-auth/react";
-import HeaderAuthButton from "./HeaderAuthButton";
+import { signOut, useSession } from "next-auth/react";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -60,7 +51,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     color: "inherit",
     "& .MuiInputBase-input": {
         padding: theme.spacing(1, 1, 1, 0),
-        // vertical padding + font size from searchIcon
         paddingLeft: `calc(1em + ${theme.spacing(4)})`,
         transition: theme.transitions.create("width"),
         width: "100%",
@@ -71,49 +61,38 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Navbar() {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
-        React.useState<null | HTMLElement>(null);
     const t = useTranslations("Navbar");
 
     const isMenuOpen = Boolean(anchorEl);
-    const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
     const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleMobileMenuClose = () => {
-        setMobileMoreAnchorEl(null);
-    };
-
     const handleMenuClose = () => {
         setAnchorEl(null);
-        handleMobileMenuClose();
     };
-
 
     const menuId = "primary-search-account-menu";
     const renderMenu = (
         <Menu
             anchorEl={anchorEl}
-            anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-            }}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
             id={menuId}
             keepMounted
-            transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-            }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem><Link href="/my-learning">{t('my_learning')}</Link></MenuItem>
-            <MenuItem><Link href="/my-activity">{t('my_activity')}</Link></MenuItem>
-            <MenuItem onClick={() => signOut()}>{t('logout')}</MenuItem>
+            <MenuItem>
+                <Link href="/my-learning">{t("my_learning")}</Link>
+            </MenuItem>
+            <MenuItem>
+                <Link href="/my-activity">{t("my_activity")}</Link>
+            </MenuItem>
+            <MenuItem onClick={() => signOut()}>{t("logout")}</MenuItem>
         </Menu>
     );
 
@@ -124,18 +103,13 @@ export default function Navbar() {
                 sx={{ backgroundColor: "white", color: "black" }}
             >
                 <Toolbar>
-                    <Image
-                        src="/logo.png"
-                        width={90}
-                        height={90}
-                        alt="Picture of the author"
-                    />
+                    <Image src="/logo.png" width={90} height={90} alt="Logo" />
+
                     <div className="flex justify-center items-center gap-3">
                         <Typography variant="button">
                             <Link href="/">{t("home")}</Link>
                         </Typography>
-
-                        <Link href={"/courses"}>
+                        <Link href="/courses">
                             <Typography variant="button">
                                 {t("course")}
                             </Typography>
@@ -151,17 +125,45 @@ export default function Navbar() {
                             inputProps={{ "aria-label": "search" }}
                         />
                     </Search>
+
                     <Box sx={{ flexGrow: 1 }} />
-                    <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                        <div className="flex justify-center items-center gap-3">
-                            <HeaderAuthButton
-                                handleProfileMenuOpen={handleProfileMenuOpen}
-                                menuId={menuId}
-                                key={1}
-                            />
-                            <LocaleSwitcher />
-                        </div>
-                    </Box>
+
+                    {status !== "loading" && (
+                        <Box
+                            key={status}
+                            sx={{ display: { xs: "none", md: "flex" } }}
+                        >
+                            <div className="flex justify-center items-center gap-3">
+                                {status === "authenticated" ? (
+                                    <IconButton
+                                        size="medium"
+                                        edge="end"
+                                        aria-label="account of current user"
+                                        aria-controls={menuId}
+                                        aria-haspopup="true"
+                                        onClick={handleProfileMenuOpen}
+                                        color="inherit"
+                                    >
+                                        <AccountCircle />
+                                    </IconButton>
+                                ) : (
+                                    <>
+                                        <Link href="/login">
+                                            <Button variant="outlined">
+                                                {t("login")}
+                                            </Button>
+                                        </Link>
+                                        <Link href="/register">
+                                            <Button variant="contained">
+                                                {t("signup")}
+                                            </Button>
+                                        </Link>
+                                    </>
+                                )}
+                                <LocaleSwitcher />
+                            </div>
+                        </Box>
+                    )}
                 </Toolbar>
             </AppBar>
             {renderMenu}

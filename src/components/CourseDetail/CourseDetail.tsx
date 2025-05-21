@@ -83,34 +83,34 @@ export default function CourseDetail({ course, similarCourses }: ICourseDetailPr
     setCurrentTab(newValue);
   };
 
-  const originalPrice = course.price | 100;
-  const discountedPrice = course.price * 0.25; // 75% off
+  const originalPrice = course?.price | 100;
+  const discountedPrice = course?.price * 0.25; 
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       {/* Header */}
       <Grid container spacing={4}>
         <Grid item xs={12} md={8}>
-          <Typography variant="h3" gutterBottom>{course.title}</Typography>
+          <Typography variant="h3" gutterBottom>{course?.title}</Typography>
           <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-            {course.description}
+            {course?.description}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <Rating value={course.average_rating} precision={0.1} readOnly />
-            <Typography>({course.average_rating})</Typography>
-            <Typography color="text.secondary">{course.total_students} students</Typography>
+            <Rating value={course?.average_rating} precision={0.1} readOnly />
+            <Typography>({course?.average_rating})</Typography>
+            <Typography color="text.secondary">{course?.total_students} students</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <AccessTimeIcon sx={{ mr: 1 }} />
-              <Typography>{Math.round(course.duration / 60)} hours</Typography>
+              <Typography>{Math.round(course?.duration / 60)} hours</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <LanguageIcon sx={{ mr: 1 }} />
               <Typography>English</Typography>
             </Box>
             <Typography>
-              Last updated: {format(new Date(course.last_updated), 'MMM dd, yyyy')}
+              Last updated: {format(new Date(course?.last_updated), 'MMM dd, yyyy')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -124,7 +124,7 @@ export default function CourseDetail({ course, similarCourses }: ICourseDetailPr
             <CardMedia
               sx={{
                 height: 200,
-                backgroundImage: `url(${course.thumbnail_url})`,
+                backgroundImage: `url(${course?.thumbnail_url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -143,30 +143,6 @@ export default function CourseDetail({ course, similarCourses }: ICourseDetailPr
               <Button variant="outlined" color="primary" fullWidth sx={{ mb: 2 }}>
                 Buy now
               </Button>
-              <Typography variant="body2" align="center" color="text.secondary" gutterBottom>
-                30-day money-back guarantee
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                This course includes:
-              </Typography>
-              <List dense>
-                <ListItem>
-                  <ListItemIcon><PlayArrowIcon /></ListItemIcon>
-                  <ListItemText primary="14 hours on-demand video" />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon><CheckIcon /></ListItemIcon>
-                  <ListItemText primary="Full lifetime access" />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon><CheckIcon /></ListItemIcon>
-                  <ListItemText primary="Access on mobile and TV" />
-                </ListItem>
-                <ListItem>
-                  <ListItemIcon><CheckIcon /></ListItemIcon>
-                  <ListItemText primary="Certificate of completion" />
-                </ListItem>
-              </List>
             </CardContent>
           </Card>
         </Grid>

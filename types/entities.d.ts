@@ -19,6 +19,7 @@ export interface ICourse {
     payments: IPayment[];
     categories: ICategory[];
     thumbnail_url: string | null;
+    total_reviews: number;
 }
 
 // User Interface
