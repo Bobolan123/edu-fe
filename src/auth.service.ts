@@ -1,4 +1,4 @@
-import { sendRequest } from "../ultils/api";
+import { sendRequest } from "../utils/api";
 
 //Register
 export const fetchRegister = async (email: string, password: string,name:string) => {

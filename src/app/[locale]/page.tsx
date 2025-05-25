@@ -3,8 +3,8 @@ import CategoriesSection from "@/components/Home/CategoriesSection";
 import FeaturedCoursesSection from "@/components/Home/FeaturedCoursesSection";
 import LearningFeaturesSection from "@/components/Home/LearningFeaturesSection";
 import TestimonialsSection from "@/components/Home/TestimonialsSection";
-import { sendRequest } from "../../../ultils/api";
 import { ICategory, ICourse } from "../../../types/entities";
+import { sendRequest } from "../../../utils/api";
 
 export default async function HomePage() {
     const courses = await sendRequest<IModelPaginate<ICourse>>({

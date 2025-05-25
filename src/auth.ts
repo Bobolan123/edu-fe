@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { fetchSignIn, fetchSignInGoogle } from "./auth.service";
 import { IUser } from "../types/next-auth";
-import { InvalidActive, InvalidCredentials } from "../ultils/auth/auth-error";
+import { InvalidActive, InvalidCredentials } from "../utils/auth/auth-error";
 import Google from "next-auth/providers/google";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

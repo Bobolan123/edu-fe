@@ -1,5 +1,5 @@
 import Courses from "@/components/Courses/Courses";
-import { sendRequest } from "../../../../ultils/api";
+import { sendRequest } from "../../../../utils/api";
 import { ICategory, ICourse } from "../../../../types/entities";
 
 export default async function CoursesPage(props: {

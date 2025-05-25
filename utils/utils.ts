@@ -3,6 +3,11 @@ export const IsValidEmail = (email: string) => {
 };
 
 export function extractIds<T extends { id: number }>(objects: T[]): number[] {
-    return objects.map(obj => obj.id);
-  }
-  
+    return objects.map((obj) => obj.id);
+}
+
+export const slugify = (title: string) =>
+    title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");

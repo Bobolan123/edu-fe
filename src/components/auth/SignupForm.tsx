@@ -16,7 +16,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { IsValidEmail } from "../../../ultils/ultils";
+import { IsValidEmail } from "../../../utils/utils";
 import { fetchRegister } from "@/auth.service";
 import VerifyOtpModel from "./VerifyOTP.model";
 

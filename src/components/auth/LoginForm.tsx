@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { customSignin } from "../../../ultils/auth/action";
-import { IsValidEmail } from "../../../ultils/ultils";
+import { customSignin } from "../../../utils/auth/action";
+import { IsValidEmail } from "../../../utils/utils";
 import ResendOtpModel from "./ResendOtp.model";
 import ForgotPasswordModel from "./ForgotPassword.model";
 

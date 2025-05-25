@@ -23,7 +23,7 @@ import {
 import { ICategory, ICourse } from "../../../types/entities";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { slugify } from "@/utils/ultils";
+import { slugify } from "../../../utils/utils";
 
 interface ICoursesProps {
     courses: ICourse[] | undefined;
