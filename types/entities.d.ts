@@ -77,51 +77,7 @@ export interface IReview {
     date_posted: Date;
 }
 
-// Quiz Interface
-export interface IQuiz {
-    id: number;
-    title: string;
-    description: string;
-    course: ICourse;
-    questions: IQuestion[];
-    submissions: IQuizSubmission[];
-}
 
-// Question Interface
-export interface IQuestion {
-    id: number;
-    quiz: IQuiz;
-    question_text: string;
-    options: string[];
-    correct_answer: string;
-}
-
-// Quiz Submission Interface
-export interface IQuizSubmission {
-    id: number;
-    user: IUser;
-    quiz: IQuiz;
-    score: number;
-    submission_date: Date;
-}
-
-// Section Interface
-export interface ISection {
-    id: number;
-    title: string;
-    course: ICourse;
-    lessons: ILesson[];
-    order: number;
-}
-
-// Lesson Interface
-export interface ILesson {
-    id: number;
-    title: string;
-    content: string;
-    section: ISection;
-    order: number;
-}
 
 // Role Interface
 export interface IRole {
@@ -167,3 +123,23 @@ export interface ISubscription {
     end_date: Date;
     status: string;
 }
+
+export interface ILecture {
+    title: string;
+    totalDuration?: string;
+    videoUrl: string;
+  }
+  
+  export interface ISection {
+    title: string;
+    totalLectures: number;
+    lectures: ILecture[];
+  }
+  
+  export interface ICourseContent {
+    courseId: number;
+    sections: ISection[];
+    createdAt?: Date;
+    updatedAt?: Date;
+  }
+  
