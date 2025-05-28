@@ -24,7 +24,6 @@ export default async function ManageDetailCoursePage({
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
     });
 
-    if (!resContent?.data) throw new Error("No course content found");
 
     return (
         <ManageDetailCourse
