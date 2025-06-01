@@ -12,8 +12,7 @@ const nextConfig = {
             pathname: '/dekzljlu0/image/upload/**',
           },
         ],
-      },
-      
+      },    
 };
 
 export default withNextIntl(nextConfig);

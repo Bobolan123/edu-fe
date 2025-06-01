@@ -21,18 +21,18 @@ const roboto = Roboto({
 
 export default async function LocaleLayout({
     children,
-    params: { locale },
+    params,
 }: {
     children: React.ReactNode;
     params: { locale: string };
 }) {
+    const messages = await getMessages();
+    const parameters = await params;
+    const locale = parameters.locale;
     // Ensure that the incoming `locale` is valid
     if (!routing.locales.includes(locale as any)) {
         notFound();
     }
-
-    // Providing all messages to the client side is the easiest way to get started
-    const messages = await getMessages();
 
     return (
         <html lang={locale}>
@@ -43,9 +43,8 @@ export default async function LocaleLayout({
                 <NextIntlClientProvider messages={messages}>
                     <AppRouterCacheProvider>
                         <ThemeProvider theme={theme}>
-                        <SessionProvider>
-
-                            <ClientSideToastContainer />
+                            <SessionProvider>
+                                <ClientSideToastContainer />
                                 <Navbar />
                                 {children}
                             </SessionProvider>

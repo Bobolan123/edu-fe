@@ -10,7 +10,7 @@ interface IParams {
 export default async function ManageDetailCoursePage({
     searchParams,
 }: IParams) {
-    const { id } = searchParams;
+    const { id } = await searchParams;
 
     const resCourse = await sendRequest<IBackendRes<ICourse>>({
         method: "GET",
@@ -22,8 +22,12 @@ export default async function ManageDetailCoursePage({
     const resContent = await sendRequest<IBackendRes<ICourseContent>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
+        nextOption: {
+            next: {
+                tags: ["course-content"],
+            },
+        },
     });
-
 
     return (
         <ManageDetailCourse

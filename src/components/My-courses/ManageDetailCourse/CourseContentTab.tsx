@@ -20,8 +20,10 @@ import {
 } from "@mui/icons-material";
 import { ILecture, ISection } from "../../../../types/entities";
 import { useEffect, useState } from "react";
-import { sendRequest } from "../../../../utils/api";
+import { sendRequest, sendRequestFile } from "../../../../utils/api";
 import { toast } from "react-toastify";
+import { revalidateTag } from "next/cache";
+import { saveCourseContent, uploadLectureVideo } from "@/actions";
 
 interface ICourseContentTabProps {
     sections: ISection[];
@@ -118,47 +120,29 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "your_upload_preset");
-        formData.append("folder", "lectures");
+        formData.append("sectionIndex", sectionIndex.toString());
+        formData.append("lectureIndex", lectureIndex.toString());
 
         try {
-            const res = await fetch(
-                "https://api.cloudinary.com/v1_1/your_cloud_name/video/upload",
-                {
-                    method: "POST",
-                    body: formData,
-                }
-            );
+            await uploadLectureVideo(courseId, formData);
 
-            const data = await res.json();
-            const videoUrl = data.secure_url;
-
-            const updated = [...localSections];
-            updated[sectionIndex].lectures[lectureIndex].videoUrl = videoUrl;
-            setLocalSections(updated);
-            toast.success("Video uploaded successfully!");
+            toast.success("Video uploaded and updated!");
         } catch (error) {
             console.error(error);
-            toast.error("Failed to upload video.");
+            toast.error("Video upload failed.");
         }
     };
 
     const handleSaveChanges = async () => {
         try {
-            const res = await sendRequest({
-                method: "PUT",
-                url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
-                body: { sections: localSections },
-            });
-
-            if (!res) throw new Error("Failed to save");
+            const res = await saveCourseContent(courseId, localSections);
             toast.success("Course content saved successfully!");
         } catch (error) {
             console.error(error);
             toast.error("Failed to save course content.");
         }
     };
-
+ 
     return (
         <Card>
             <CardContent>

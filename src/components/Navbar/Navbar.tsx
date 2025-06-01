@@ -86,6 +86,9 @@ export default function Navbar() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
+             <MenuItem>
+                <Link href="/my-courses">{t("my_courses")}</Link>
+            </MenuItem>
             <MenuItem>
                 <Link href="/my-learning">{t("my_learning")}</Link>
             </MenuItem>

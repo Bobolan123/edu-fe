@@ -81,9 +81,10 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
         });
 
     const formatCurrency = (amount: number) =>
-        new Intl.NumberFormat("en-US", {
+        new Intl.NumberFormat("vi-VN", {
             style: "currency",
-            currency: "USD",
+            currency: "VND",
+            maximumFractionDigits: 0,
         }).format(amount);
 
     return (

@@ -11,6 +11,8 @@ import {
     CardActions,
     Button,
     Container,
+    Chip,
+    Link,
 } from "@mui/material";
 import {
     ChevronLeft as ChevronLeftIcon,
@@ -18,45 +20,13 @@ import {
 } from "@mui/icons-material";
 import { ICourse } from "../../../types/entities";
 
-// Sample data - replace with actual data from your backend
-const sampleCourses = [
-    {
-        id: 1,
-        title: "Complete Web Development Bootcamp",
-        instructor: "John Doe",
-        price: 89.99,
-        image: "/sample/web-dev.jpg",
-    },
-    {
-        id: 2,
-        title: "Data Science and Machine Learning",
-        instructor: "Jane Smith",
-        price: 99.99,
-        image: "/sample/data-science.jpg",
-    },
-    {
-        id: 3,
-        title: "Mobile App Development with React Native",
-        instructor: "Mike Johnson",
-        price: 79.99,
-        image: "/sample/mobile-dev.jpg",
-    },
-    {
-        id: 4,
-        title: "UI/UX Design Masterclass",
-        instructor: "Sarah Wilson",
-        price: 69.99,
-        image: "/sample/design.jpg",
-    },
-];
-
 interface IFeaturedCoursesSectionProps {
     courses: ICourse[] | undefined;
 }
-export default function FeaturedCoursesSection(
-    props: IFeaturedCoursesSectionProps
-) {
-    const { courses } = props;
+
+export default function FeaturedCoursesSection({
+    courses,
+}: IFeaturedCoursesSectionProps) {
     const courseRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: "left" | "right") => {
@@ -96,14 +66,25 @@ export default function FeaturedCoursesSection(
                 {courses?.map((course) => (
                     <Card
                         key={course.id}
-                        className="min-w-[280px] cursor-pointer hover:shadow-lg transition-shadow"
+                        className="min-w-[280px] flex flex-col justify-between hover:shadow-lg transition-shadow"
+                        sx={{
+                            height: 360,
+                            borderRadius: 2,
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                        }}
                     >
                         <CardMedia
-                            component="div"
-                            className="h-40 bg-gray-200"
-                            title={course.title}
+                            component="img"
+                            image={course.thumbnail_url || "/img_not_found.png"}
+                            alt={course.title}
+                            sx={{
+                                height: 160,
+                                objectFit: "cover",
+                                width: "100%",
+                            }}
                         />
-                        <CardContent>
+
+                        <CardContent className="flex-1">
                             <Typography variant="h6" component="h3" noWrap>
                                 {course.title}
                             </Typography>
@@ -115,13 +96,34 @@ export default function FeaturedCoursesSection(
                                 color="primary"
                                 className="mt-2"
                             >
-                                ${(+course?.price).toFixed(2)}
+                                ₫{course.price.toLocaleString("vi-VN")}
                             </Typography>
+
+                            {course.categories?.length > 0 && (
+                                <Box className="flex flex-wrap gap-1 mt-2">
+                                    {course.categories
+                                        .slice(0, 3)
+                                        .map((category) => (
+                                            <Chip
+                                                key={category.id}
+                                                label={category.name}
+                                                size="small"
+                                                sx={{
+                                                    backgroundColor: "#f0f0f0",
+                                                    fontWeight: 500,
+                                                }}
+                                            />
+                                        ))}
+                                </Box>
+                            )}
                         </CardContent>
-                        <CardActions>
-                            <Button size="small" color="primary">
-                                Learn More
-                            </Button>
+
+                        <CardActions className="px-4 pb-4 pt-0">
+                            <Link href={`/courses/${course.title}/?id=${course.id}`}>
+                                <Button size="small" color="primary">
+                                    Learn More
+                                </Button>
+                            </Link>
                         </CardActions>
                     </Card>
                 ))}

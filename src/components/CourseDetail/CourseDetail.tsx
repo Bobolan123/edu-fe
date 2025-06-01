@@ -287,7 +287,7 @@ export default function CourseDetail({
                                             variant="h4"
                                             fontWeight={600}
                                         >
-                                            ${Number(originalPrice).toFixed(2)}
+                                            ₫{Number(originalPrice).toLocaleString("vi-VN")}
                                         </Typography>
                                         <Typography
                                             variant="body2"
@@ -296,10 +296,7 @@ export default function CourseDetail({
                                                 textDecoration: "line-through",
                                             }}
                                         >
-                                            $
-                                            {Number(
-                                                originalPrice * 1.5
-                                            ).toFixed(2)}
+                                            ₫{Number(originalPrice * 1.5).toLocaleString("vi-VN")}
                                         </Typography>
                                     </Box>
 
@@ -383,7 +380,7 @@ export default function CourseDetail({
                                                 variant="h6"
                                                 color="primary"
                                             >
-                                                ${Number(item.price).toFixed(2)}
+                                                ₫{Number(item.price).toLocaleString("vi-VN")}
                                             </Typography>
                                         </CardContent>
                                     </Card>

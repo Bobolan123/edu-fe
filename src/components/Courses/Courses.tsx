@@ -282,10 +282,7 @@ export default function Courses(props: ICoursesProps) {
                                                     variant="h6"
                                                     fontWeight={700}
                                                 >
-                                                    $
-                                                    {Number(
-                                                        course.price
-                                                    ).toLocaleString()}
+                                                    ₫{Number(course.price).toLocaleString("vi-VN")}
                                                 </Typography>
                                             </Box>
                                         </Box>

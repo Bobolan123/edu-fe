@@ -77,8 +77,6 @@ export interface IReview {
     date_posted: Date;
 }
 
-
-
 // Role Interface
 export interface IRole {
     id: number;
@@ -128,18 +126,17 @@ export interface ILecture {
     title: string;
     totalDuration?: string;
     videoUrl: string;
-  }
-  
-  export interface ISection {
+}
+
+export interface ISection {
     title: string;
     totalLectures: number;
     lectures: ILecture[];
-  }
-  
-  export interface ICourseContent {
+}
+
+export interface ICourseContent {
     courseId: number;
     sections: ISection[];
     createdAt?: Date;
     updatedAt?: Date;
-  }
-  
+}

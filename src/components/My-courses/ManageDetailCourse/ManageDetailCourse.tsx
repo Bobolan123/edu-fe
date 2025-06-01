@@ -118,7 +118,7 @@ export default function ManageDetailCourse({
                             </Box>
                             <Box className="text-right space-y-2">
                                 <Typography variant="h6" color="green">
-                                    ${course.price}
+                                    ₫{course.price.toLocaleString("vi-VN")}
                                 </Typography>
                                 <Box className="flex items-center gap-1">
                                     <Star
@@ -163,11 +163,7 @@ export default function ManageDetailCourse({
                             />
                             <CardContent>
                                 <Typography variant="h6">
-                                    $
-                                    {(
-                                        course.enrollments?.length *
-                                            course.price || 0
-                                    ).toLocaleString()}
+                                    ₫{((course.enrollments?.length * course.price) || 0).toLocaleString("vi-VN")}
                                 </Typography>
                                 <Typography
                                     variant="caption"
@@ -298,23 +294,24 @@ export default function ManageDetailCourse({
                                 <Typography
                                     sx={{ color: "green", fontWeight: "bold" }}
                                 >
-                                    ${course?.price}
+                                    ₫{course?.price.toLocaleString("vi-VN")}
                                 </Typography>
                             </Box>
                         </CardContent>
                     </Card>
                 )}
 
-                {activeTab === 1 && courseContent ? (
-                    <CourseContentTab
-                        sections={courseContent.sections}
-                        courseId={course.id}
-                    />
-                ) : (
-                    <Typography variant="body2" color="text.secondary">
-                        Course content is not available or failed to load.
-                    </Typography>
-                )}
+                {activeTab === 1 &&
+                    (courseContent ? (
+                        <CourseContentTab
+                            sections={courseContent.sections}
+                            courseId={course.id}
+                        />
+                    ) : (
+                        <Typography variant="body2" color="text.secondary">
+                            Course content is not available or failed to load.
+                        </Typography>
+                    ))}
 
                 {activeTab === 2 && (
                     <Card>
