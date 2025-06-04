@@ -12,13 +12,14 @@ import {
     Button,
     Container,
     Chip,
-    Link,
 } from "@mui/material";
 import {
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
 import { ICourse } from "../../../types/entities";
+import Link from "next/link";
+import { slugify } from "../../../utils/utils";
 
 interface IFeaturedCoursesSectionProps {
     courses: ICourse[] | undefined;
@@ -73,58 +74,65 @@ export default function FeaturedCoursesSection({
                             boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                         }}
                     >
-                        <CardMedia
-                            component="img"
-                            image={course.thumbnail_url || "/img_not_found.png"}
-                            alt={course.title}
-                            sx={{
-                                height: 160,
-                                objectFit: "cover",
-                                width: "100%",
-                            }}
-                        />
+                        <Link
+                            href={`/courses/${slugify(course.title)}/?id=${course.id}`}
+                        >
+                            <CardMedia
+                                component="img"
+                                image={
+                                    course.thumbnail_url || "/img_not_found.png"
+                                }
+                                alt={course.title}
+                                sx={{
+                                    height: 160,
+                                    objectFit: "cover",
+                                    width: "100%",
+                                }}
+                            />
+                            <CardContent className="flex-1">
+                                <Typography variant="h6" component="h3" noWrap>
+                                    {course.title}
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    by {course.instructor?.name}
+                                </Typography>
+                                <Typography
+                                    variant="h6"
+                                    color="primary"
+                                    className="mt-2"
+                                >
+                                    ₫{course.price.toLocaleString("vi-VN")}
+                                </Typography>
 
-                        <CardContent className="flex-1">
-                            <Typography variant="h6" component="h3" noWrap>
-                                {course.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                by {course.instructor?.name}
-                            </Typography>
-                            <Typography
-                                variant="h6"
-                                color="primary"
-                                className="mt-2"
-                            >
-                                ₫{course.price.toLocaleString("vi-VN")}
-                            </Typography>
+                                {course.categories?.length > 0 && (
+                                    <Box className="flex flex-wrap gap-1 mt-2">
+                                        {course.categories
+                                            .slice(0, 3)
+                                            .map((category) => (
+                                                <Chip
+                                                    key={category.id}
+                                                    label={category.name}
+                                                    size="small"
+                                                    sx={{
+                                                        backgroundColor:
+                                                            "#f0f0f0",
+                                                        fontWeight: 500,
+                                                    }}
+                                                />
+                                            ))}
+                                    </Box>
+                                )}
+                            </CardContent>
 
-                            {course.categories?.length > 0 && (
-                                <Box className="flex flex-wrap gap-1 mt-2">
-                                    {course.categories
-                                        .slice(0, 3)
-                                        .map((category) => (
-                                            <Chip
-                                                key={category.id}
-                                                label={category.name}
-                                                size="small"
-                                                sx={{
-                                                    backgroundColor: "#f0f0f0",
-                                                    fontWeight: 500,
-                                                }}
-                                            />
-                                        ))}
-                                </Box>
-                            )}
-                        </CardContent>
-
-                        <CardActions className="px-4 pb-4 pt-0">
-                            <Link href={`/courses/${course.title}/?id=${course.id}`}>
+                            <CardActions className="px-4 pb-4 pt-0">
                                 <Button size="small" color="primary">
                                     Learn More
                                 </Button>
-                            </Link>
-                        </CardActions>
+                            </CardActions>
+                        </Link>
                     </Card>
                 ))}
             </Box>

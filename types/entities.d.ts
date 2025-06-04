@@ -126,9 +126,11 @@ export interface ILecture {
     title: string;
     totalDuration?: string;
     videoUrl: string;
+    _id:string;
 }
 
 export interface ISection {
+    _id:string;
     title: string;
     totalLectures: number;
     lectures: ILecture[];
@@ -137,6 +139,55 @@ export interface ISection {
 export interface ICourseContent {
     courseId: number;
     sections: ISection[];
+    totalLength: number;
+    totalLectures: number;
+    whatYoullLearn: string[];
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+export interface ICart {
+    id: string;
+    user: IUser;
+    items: ICartItem[];
+    isCheckedOut: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+import { ICart } from "./cart.interface";
+import { ICourse } from "./course.interface";
+
+export interface ICartItem {
+    id: string;
+    cart: ICart;
+    cartId: string;
+    course: ICourse;
+    courseId: string;
+    price: number;
+    addedAt: Date;
+}
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+}
+
+export enum PaymentMethod {
+  VNPAY = 'VNPAY',
+  PAYPAL = 'PAYPAL',
+  CREDIT_CARD = 'CREDIT_CARD',
+}
+
+export interface IOrder {
+  id: string;
+  totalPrice: number;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  transactionId?: string; // nullable
+  paymentGatewayResponse?: string; // nullable
+  user: IUser;
+  createdAt: Date;
+  updatedAt: Date;
 }

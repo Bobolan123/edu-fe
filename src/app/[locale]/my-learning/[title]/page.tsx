@@ -6,6 +6,7 @@ import {
 } from "../../../../../types/entities";
 import { sendRequest } from "../../../../../utils/api";
 import { extractIds } from "../../../../../utils/utils";
+import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
 
 interface Params {
     params: { title: string };
@@ -25,17 +26,11 @@ export default async function CourseDetailPage({
     const resContent = await sendRequest<IBackendRes<ICourseContent>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
-        nextOption: {
-            next: {
-                tags: ["course-content"],
-            },
-        },
     });
 
     return (
-        <CourseDetail
-            course={resCourse?.data as ICourse}
-            courseContent={resContent?.data as ICourseContent}
-        />
+        <div>
+            <CourseLesson courseContent={resContent?.data as ICourseContent}/>
+        </div>
     );
 }

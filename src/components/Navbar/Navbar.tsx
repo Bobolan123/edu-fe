@@ -20,6 +20,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { signOut, useSession } from "next-auth/react";
+import Cart from "./cart/Cart";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -86,7 +87,7 @@ export default function Navbar() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-             <MenuItem>
+            <MenuItem>
                 <Link href="/my-courses">{t("my_courses")}</Link>
             </MenuItem>
             <MenuItem>
@@ -138,17 +139,20 @@ export default function Navbar() {
                         >
                             <div className="flex justify-center items-center gap-3">
                                 {status === "authenticated" ? (
-                                    <IconButton
-                                        size="medium"
-                                        edge="end"
-                                        aria-label="account of current user"
-                                        aria-controls={menuId}
-                                        aria-haspopup="true"
-                                        onClick={handleProfileMenuOpen}
-                                        color="inherit"
-                                    >
-                                        <AccountCircle />
-                                    </IconButton>
+                                    <>
+                                        <Cart />
+                                        <IconButton
+                                            size="medium"
+                                            edge="end"
+                                            aria-label="account of current user"
+                                            aria-controls={menuId}
+                                            aria-haspopup="true"
+                                            onClick={handleProfileMenuOpen}
+                                            color="inherit"
+                                        >
+                                            <AccountCircle />
+                                        </IconButton>
+                                    </>
                                 ) : (
                                     <>
                                         <Link href="/login">

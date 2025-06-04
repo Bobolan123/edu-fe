@@ -11,76 +11,33 @@ import {
     Rating,
     Box,
     Button,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
     Chip,
 } from "@mui/material";
 import {
     AccessTime as AccessTimeIcon,
     Language as LanguageIcon,
     Check as CheckIcon,
-    ExpandMore as ExpandMoreIcon,
-    PlayArrow as PlayArrowIcon,
 } from "@mui/icons-material";
 import { format } from "date-fns";
-import { ICourse } from "../../../types/entities";
+import { ICourse, ICourseContent } from "../../../types/entities";
+import {
+    PlayArrow as PlayIcon,
+    AccessTime as ClockIcon,
+    MenuBook as BookIcon,
+} from "@mui/icons-material";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Play } from "lucide-react";
 
 interface ICourseDetailProps {
     course: ICourse;
-    similarCourses: ICourse[];
+    courseContent: ICourseContent;
 }
-
-interface ICourseSection {
-    title: string;
-    duration: string;
-    lectures: number;
-    subsections?: { title: string; duration: string }[];
-}
-
-const courseSections: ICourseSection[] = [
-    {
-        title: "Welcome",
-        duration: "05:00",
-        lectures: 2,
-        subsections: [
-            { title: "Welcome to the Course", duration: "02:00" },
-            { title: "Course PDF Guide", duration: "03:00" },
-        ],
-    },
-    {
-        title: "Installing and Exploring Node.js",
-        duration: "45:00",
-        lectures: 5,
-    },
-    {
-        title: "Node.js Module System (Notes App)",
-        duration: "1:30:00",
-        lectures: 8,
-    },
-];
-
-const learningPoints = [
-    "Completely refreshed for 3rd edition",
-    "Create Express web server and APIs",
-    "Use cutting-edge ES6/ES7 JavaScript",
-    "Create real-time web apps with Express",
-    "Store data with MongoDB and Mongoose",
-    "Deploy your Node apps to production",
-];
 
 export default function CourseDetail({
     course,
-    similarCourses,
+    courseContent,
 }: ICourseDetailProps) {
-    const [currentTab, setCurrentTab] = useState(0);
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setCurrentTab(newValue);
-    };
 
     const originalPrice = course?.price ?? 100;
 
@@ -148,10 +105,8 @@ export default function CourseDetail({
                         </Box>
 
                         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                            {course.categories.map((category) => (
-                                <>
-                                    <Chip label={`${category?.name}`} />
-                                </>
+                            {course.categories.map((category, i) => (
+                                <Chip label={category?.name} key={i} />
                             ))}
                         </Box>
 
@@ -169,7 +124,7 @@ export default function CourseDetail({
                                 What you'll learn
                             </Typography>
                             <Grid container spacing={2}>
-                                {learningPoints.map((point, index) => (
+                                {courseContent?.whatYoullLearn?.map((point, index) => (
                                     <Grid item xs={12} md={6} key={index}>
                                         <Box sx={{ display: "flex", gap: 2 }}>
                                             <CheckIcon color="primary" />
@@ -185,16 +140,53 @@ export default function CourseDetail({
                             <Typography variant="h5" gutterBottom>
                                 Course Content
                             </Typography>
-                            <Box sx={{ mb: 2 }}>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    gap: 4,
+                                    mb: 2,
+                                    color: "gray",
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1,
+                                    }}
                                 >
-                                    15 sections • 177 lectures • 20h 20m total
-                                    length
-                                </Typography>
+                                    <BookIcon fontSize="small" />
+                                    <Typography>
+                                        {courseContent?.sections?.length} sections
+                                    </Typography>
+                                </Box>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1,
+                                    }}
+                                >
+                                    <PlayIcon fontSize="small" />
+                                    <Typography>
+                                        {courseContent?.totalLectures} lectures
+                                    </Typography>
+                                </Box>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1,
+                                    }}
+                                >
+                                    <ClockIcon fontSize="small" />
+                                    <Typography>
+                                        {courseContent?.totalLength} total length
+                                    </Typography>
+                                </Box>
                             </Box>
-                            {courseSections.map((section, index) => (
+
+                            {courseContent?.sections?.map((section, index) => (
                                 <Accordion key={index}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
@@ -207,36 +199,86 @@ export default function CourseDetail({
                                                 alignItems: "center",
                                             }}
                                         >
-                                            <Typography>
-                                                {section.title}
-                                            </Typography>
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 2,
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        width: 32,
+                                                        height: 32,
+                                                        bgcolor:
+                                                            "primary.light",
+                                                        borderRadius: "50%",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent:
+                                                            "center",
+                                                        fontWeight: 600,
+                                                        color: "primary.main",
+                                                    }}
+                                                >
+                                                    {index + 1}
+                                                </Box>
+                                                <Typography fontWeight={600}>
+                                                    {section.title}
+                                                </Typography>
+                                            </Box>
                                             <Typography
                                                 variant="body2"
                                                 color="text.secondary"
+                                                className="flex items-center gap-1"
                                             >
-                                                {section.lectures} lectures •{" "}
-                                                {section.duration}
+                                                <Play className="w-4 h-4" />
+                                                {section.totalLectures} lectures
                                             </Typography>
                                         </Box>
                                     </AccordionSummary>
                                     <AccordionDetails>
-                                        <List dense>
-                                            {section.subsections?.map(
-                                                (sub, idx) => (
-                                                    <ListItem key={idx}>
-                                                        <ListItemIcon>
-                                                            <PlayArrowIcon />
-                                                        </ListItemIcon>
-                                                        <ListItemText
-                                                            primary={sub.title}
-                                                            secondary={
-                                                                sub.duration
-                                                            }
-                                                        />
-                                                    </ListItem>
-                                                )
-                                            )}
-                                        </List>
+                                        {section.lectures?.map((sub, idx) => (
+                                            <Box
+                                                key={idx}
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "space-between",
+                                                    alignItems: "center",
+                                                    px: 2,
+                                                    py: 1,
+                                                    "&:hover": {
+                                                        bgcolor: "action.hover",
+                                                    },
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: 1,
+                                                    }}
+                                                >
+                                                    <PlayIcon fontSize="small" />
+                                                    <Typography>
+                                                        {sub.title}
+                                                    </Typography>
+                                                </Box>
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: 1,
+                                                    }}
+                                                >
+                                                    <ClockIcon fontSize="small" />
+                                                    <Typography variant="body2">
+                                                        {sub.totalDuration}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        ))}
                                     </AccordionDetails>
                                 </Accordion>
                             ))}
@@ -245,13 +287,7 @@ export default function CourseDetail({
 
                     {/* Right Column - Sticky Card */}
                     <Grid item xs={12} md={4}>
-                        <Box
-                            sx={{
-                                position: "sticky",
-                                top: 80,
-                                zIndex: 1,
-                            }}
-                        >
+                        <Box sx={{ position: "sticky", top: 80, zIndex: 1 }}>
                             <Card
                                 sx={{
                                     boxShadow: 6,
@@ -287,7 +323,10 @@ export default function CourseDetail({
                                             variant="h4"
                                             fontWeight={600}
                                         >
-                                            ₫{Number(originalPrice).toLocaleString("vi-VN")}
+                                            ₫
+                                            {Number(
+                                                originalPrice
+                                            ).toLocaleString("vi-VN")}
                                         </Typography>
                                         <Typography
                                             variant="body2"
@@ -296,7 +335,10 @@ export default function CourseDetail({
                                                 textDecoration: "line-through",
                                             }}
                                         >
-                                            ₫{Number(originalPrice * 1.5).toLocaleString("vi-VN")}
+                                            ₫
+                                            {Number(
+                                                originalPrice * 1.5
+                                            ).toLocaleString("vi-VN")}
                                         </Typography>
                                     </Box>
 
@@ -333,62 +375,6 @@ export default function CourseDetail({
                         </Box>
                     </Grid>
                 </Grid>
-
-                {/* Similar Courses */}
-                {similarCourses.length > 0 && (
-                    <Box sx={{ mt: 8 }}>
-                        <Typography variant="h5" gutterBottom>
-                            Similar Courses
-                        </Typography>
-                        <Grid container spacing={3}>
-                            {similarCourses.map((item) => (
-                                <Grid item key={item.id} xs={12} sm={6} md={4}>
-                                    <Card>
-                                        <CardMedia
-                                            sx={{
-                                                height: 140,
-                                                backgroundImage: `url(${item.thumbnail_url})`,
-                                                backgroundSize: "cover",
-                                                backgroundPosition: "center",
-                                            }}
-                                        />
-                                        <CardContent>
-                                            <Typography variant="h6" noWrap>
-                                                {item.title}
-                                            </Typography>
-                                            <Box
-                                                sx={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    mb: 1,
-                                                }}
-                                            >
-                                                <Rating
-                                                    value={item.average_rating}
-                                                    precision={0.1}
-                                                    readOnly
-                                                    size="small"
-                                                />
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ ml: 1 }}
-                                                >
-                                                    ({item.average_rating})
-                                                </Typography>
-                                            </Box>
-                                            <Typography
-                                                variant="h6"
-                                                color="primary"
-                                            >
-                                                ₫{Number(item.price).toLocaleString("vi-VN")}
-                                            </Typography>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                )}
             </Container>
         </div>
     );

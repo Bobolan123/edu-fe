@@ -20,6 +20,7 @@ import {
 import { AccessTime, Category } from "@mui/icons-material";
 import Link from "next/link";
 import { useLocale } from "next-intl";
+import { slugify } from "../../../../utils/utils";
 
 // Sample data - replace with actual data from your backend
 const myCourses = [
@@ -140,7 +141,11 @@ export default function MyLearningPage() {
                                 flexDirection: "column",
                             }}
                         >
-                            <Link href={`classroom/course/${course.title}`}>
+                            <Link
+                                href={`my-learning/${slugify(
+                                    course.title
+                                )}id?=${course.id}`}
+                            >
                                 <CardMedia
                                     component="div"
                                     sx={{

@@ -1,0 +1,116 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ShoppingCart } from "lucide-react";
+import { Badge } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+export interface CartItem {
+    id: number;
+    title: string;
+    instructor: string;
+    price: number;
+    originalPrice: number;
+    image: string;
+}
+
+interface CartDropdownProps {
+    cartItems: CartItem[];
+}
+
+// Styled MUI Badge component
+const StyledBadge = styled(Badge)(({ theme }) => ({
+    "& .MuiBadge-badge": {
+        right: -3,
+        top: 3,
+        backgroundColor: "#3f50b5",
+        color: "white",
+        fontWeight: "bold",
+    },
+}));
+
+export default function CartDropdown({ cartItems }: CartDropdownProps) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Calculate total prices
+    const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+    const totalOriginalPrice = cartItems.reduce(
+        (sum, item) => sum + item.originalPrice,
+        0
+    );
+
+    return (
+        <div
+            className="relative"
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+        >
+            {/* Cart Icon Button */}
+            <button className="p-2">
+                <StyledBadge badgeContent={cartItems.length} color="default">
+                    <ShoppingCart className="h-6 w-6" />
+                </StyledBadge>
+            </button>
+
+            {/* Dropdown Content */}
+            {isOpen && (
+                <div className="absolute top-8 right-2 mt-2 w-[380px] bg-white border rounded-md shadow-lg z-50">
+                    <div className="max-h-[400px] overflow-y-auto">
+                        {cartItems.map((item) => (
+                            <Link key={item.id} href={`/course/${item.id}`}>
+                                <div className="p-4 border-b hover:bg-gray-50 transition-colors cursor-pointer">
+                                    <div className="flex gap-3">
+                                        <div className="flex-shrink-0">
+                                            <Image
+                                                src={
+                                                    item.image ||
+                                                    "/placeholder.svg"
+                                                }
+                                                alt={item.title}
+                                                width={60}
+                                                height={60}
+                                                className="rounded-md"
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-medium text-gray-900 line-clamp-2 hover:text-blue-600 transition-colors">
+                                                {item.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-600">
+                                                {item.instructor}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="font-bold">
+                                                    đ
+                                                    {item.price.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className="p-4 border-t">
+                        <div className="flex justify-between mb-4">
+                            <span className="font-bold">Total:</span>
+                            <div>
+                                <span className="font-bold">
+                                    đ{totalPrice.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                        <Link href="/cart">
+                            <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors">
+                                Go to cart
+                            </button>
+                        </Link>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
