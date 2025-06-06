@@ -18,11 +18,11 @@ export default async function CourseDetailPage({
     searchParams,
 }: Params) {
     const { id } = await searchParams;
+
     const resCourse = await sendRequest<IBackendRes<ICourse>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
     });
-
     const resContent = await sendRequest<IBackendRes<ICourseContent>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
@@ -30,7 +30,10 @@ export default async function CourseDetailPage({
 
     return (
         <div>
-            <CourseLesson courseContent={resContent?.data as ICourseContent}/>
+            <CourseLesson
+                courseContent={resContent?.data as ICourseContent}
+                course={resCourse?.data as ICourse}
+            />
         </div>
     );
 }

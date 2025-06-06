@@ -7,10 +7,10 @@ export interface ICourse {
     duration: number;
     date_created: Date;
     last_updated: Date;
-    thumbnail: string | null;
     price: number;
     average_rating: number;
     total_students: number;
+    language:string;
     sections: ISection[];
     enrollments: IEnrollment[];
     quizzes: IQuiz[];
