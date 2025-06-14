@@ -6,18 +6,10 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@mui/material";
 import { styled } from "@mui/material/styles";
-
-export interface CartItem {
-    id: number;
-    title: string;
-    instructor: string;
-    price: number;
-    originalPrice: number;
-    image: string;
-}
+import { ICartItem } from "../../../../types/entities";
 
 interface CartDropdownProps {
-    cartItems: CartItem[];
+    cartItems: ICartItem[];
 }
 
 // Styled MUI Badge component
@@ -34,10 +26,9 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 export default function CartDropdown({ cartItems }: CartDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Calculate total prices
     const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
     const totalOriginalPrice = cartItems.reduce(
-        (sum, item) => sum + item.originalPrice,
+        (sum, item) => sum + item.course.price,
         0
     );
 
@@ -47,28 +38,29 @@ export default function CartDropdown({ cartItems }: CartDropdownProps) {
             onMouseEnter={() => setIsOpen(true)}
             onMouseLeave={() => setIsOpen(false)}
         >
-            {/* Cart Icon Button */}
             <button className="p-2">
                 <StyledBadge badgeContent={cartItems.length} color="default">
                     <ShoppingCart className="h-6 w-6" />
                 </StyledBadge>
             </button>
 
-            {/* Dropdown Content */}
             {isOpen && (
                 <div className="absolute top-8 right-2 mt-2 w-[380px] bg-white border rounded-md shadow-lg z-50">
                     <div className="max-h-[400px] overflow-y-auto">
                         {cartItems.map((item) => (
-                            <Link key={item.id} href={`/course/${item.id}`}>
+                            <Link
+                                key={item.id}
+                                href={`/course/${item.courseId}`}
+                            >
                                 <div className="p-4 border-b hover:bg-gray-50 transition-colors cursor-pointer">
                                     <div className="flex gap-3">
                                         <div className="flex-shrink-0">
                                             <Image
                                                 src={
-                                                    item.image ||
+                                                    item.course.thumbnail_url ||
                                                     "/placeholder.svg"
                                                 }
-                                                alt={item.title}
+                                                alt={item.course.title}
                                                 width={60}
                                                 height={60}
                                                 className="rounded-md"
@@ -76,10 +68,10 @@ export default function CartDropdown({ cartItems }: CartDropdownProps) {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="font-medium text-gray-900 line-clamp-2 hover:text-blue-600 transition-colors">
-                                                {item.title}
+                                                {item.course.title}
                                             </h3>
                                             <p className="text-sm text-gray-600">
-                                                {item.instructor}
+                                                {item.course.instructor.name}
                                             </p>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="font-bold">

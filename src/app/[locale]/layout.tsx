@@ -10,6 +10,7 @@ import "../globals.css";
 import ToastProvider from "@/components/Toastify/ToastContainer";
 import ClientSideToastContainer from "@/components/Toastify/ToastContainer";
 import { SessionProvider } from "next-auth/react";
+import NavbarClient from "@/components/Navbar/NavbarClient";
 import Navbar from "@/components/Navbar/Navbar";
 
 const roboto = Roboto({
@@ -45,7 +46,7 @@ export default async function LocaleLayout({
                         <ThemeProvider theme={theme}>
                             <SessionProvider>
                                 <ClientSideToastContainer />
-                                <Navbar />
+                                <Navbar/>
                                 {children}
                             </SessionProvider>
                         </ThemeProvider>

@@ -7,6 +7,8 @@ interface IUser {
     email: string;
     isVerify: boolean;
     role: string;
+    access_token:string;
+    refresh_token: string;
 }
 declare module "next-auth/jwt" {
     interface JWT {

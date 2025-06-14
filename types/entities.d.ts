@@ -149,21 +149,16 @@ export interface ICourseContent {
 export interface ICart {
     id: string;
     user: IUser;
-    items: ICartItem[];
+    cartItems: ICartItem[];
     isCheckedOut: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
 
-import { ICart } from "./cart.interface";
-import { ICourse } from "./course.interface";
-
 export interface ICartItem {
     id: string;
     cart: ICart;
-    cartId: string;
     course: ICourse;
-    courseId: string;
     price: number;
     addedAt: Date;
 }

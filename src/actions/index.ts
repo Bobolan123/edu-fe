@@ -34,3 +34,20 @@ export async function saveCourseContent(
     revalidateTag("course-content");
     return res;
 }
+
+export async function deleteCartItem(
+    courseId: number,
+    access_token:string
+) {
+    const res = await sendRequest<
+        IBackendRes<{ videoUrl: string; totalDuration: string }>
+    >({
+        method: "DELETE",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/cart/${courseId}`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+    revalidateTag("cart");
+    return res;
+}

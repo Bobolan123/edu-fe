@@ -7,7 +7,6 @@ export const customSignin = async (email: string, password: string) => {
         const res = await signIn("credentials", {
             email,
             password,
-            redirect: false,
         });
         return res;
     } catch (error) {
