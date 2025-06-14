@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2 } from "lucide-react";
-import { sendRequest } from "../../../../utils/api";
 import { generateGeminiResponse } from "@/actions/gemini";
 
 interface Message {
@@ -16,6 +15,10 @@ export default function ChatBot() {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages, isLoading]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -31,7 +34,7 @@ export default function ChatBot() {
         setIsLoading(true);
 
         try {
-            const res: IBackendRes<string> = await generateGeminiResponse(input)
+            const res: IBackendRes<string> = await generateGeminiResponse(input);
 
             const aiMessage: Message = {
                 id: Date.now().toString() + "-bot",
@@ -57,73 +60,46 @@ export default function ChatBot() {
     };
 
     return (
-        <div className="flex flex-col h-56 bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="flex flex-col h-full max-h-[90vh] bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                <Bot className="w-5 h-5" />
+                <h2 className="text-sm font-semibold">AI Assistant</h2>
+            </div>
+
             {/* Message Area */}
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50">
                 {messages.length === 0 && (
-                    <div className="text-center">
-                        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Bot className="w-8 h-8 text-white" />
-                        </div>
-                        <h2 className="text-xl font-semibold text-slate-700 mb-2">
-                            Welcome to AI Assistant
-                        </h2>
-                        <p className="text-slate-500 max-w-md mx-auto">
-                            I'm here to help you with any questions or tasks.
-                            Start a conversation by typing a message below.
-                        </p>
+                    <div className="text-center text-slate-500 text-sm py-8">
+                        👋 Hi there! Ask me anything to get started.
                     </div>
                 )}
 
                 {messages.map((message) => (
                     <div
                         key={message.id}
-                        className={`flex items-start space-x-3 ${
+                        className={`flex ${
                             message.role === "user"
-                                ? "flex-row-reverse space-x-reverse"
-                                : ""
+                                ? "justify-end"
+                                : "justify-start"
                         }`}
                     >
                         <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                message.role === "user"
-                                    ? "bg-gradient-to-r from-green-500 to-emerald-600"
-                                    : "bg-gradient-to-r from-blue-500 to-purple-600"
-                            }`}
-                        >
-                            {message.role === "user" ? (
-                                <User className="w-4 h-4 text-white" />
-                            ) : (
-                                <Bot className="w-4 h-4 text-white" />
-                            )}
-                        </div>
-                        <div
-                            className={`max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl px-4 py-3 ${
+                            className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                                 message.role === "user"
                                     ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                                    : "bg-white text-slate-800 shadow-sm border border-slate-200"
+                                    : "bg-white text-slate-800 border border-slate-200 shadow-sm"
                             }`}
                         >
-                            <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                {message.content}
-                            </div>
+                            {message.content}
                         </div>
                     </div>
                 ))}
 
                 {isLoading && (
-                    <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Bot className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-slate-200">
-                            <div className="flex items-center space-x-2">
-                                <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
-                                <span className="text-sm text-slate-500">
-                                    AI is thinking...
-                                </span>
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        AI is thinking...
                     </div>
                 )}
 
@@ -131,31 +107,26 @@ export default function ChatBot() {
             </div>
 
             {/* Input Form */}
-            <div className="bg-white border-t border-slate-200 px-4 py-4">
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex items-center space-x-3"
-                >
-                    <div className="flex-1 relative">
-                        <input
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder="Type your message..."
-                            className="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                            disabled={isLoading}
-                        />
-                        <button
-                            type="submit"
-                            disabled={isLoading || !input.trim()}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full flex items-center justify-center hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                        >
-                            {isLoading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                                <Send className="w-4 h-4" />
-                            )}
-                        </button>
-                    </div>
+            <div className="px-4 py-3 bg-white border-t border-slate-200">
+                <form onSubmit={handleSubmit} className="relative flex items-center">
+                    <input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Type your message..."
+                        disabled={isLoading}
+                        className="w-full pl-4 pr-10 py-2 rounded-full border border-slate-300 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                        type="submit"
+                        disabled={isLoading || !input.trim()}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-gradient-to-r from-blue-500 to-purple-600 p-1.5 rounded-full hover:scale-105 transition disabled:opacity-50"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <Send className="w-4 h-4" />
+                        )}
+                    </button>
                 </form>
             </div>
         </div>

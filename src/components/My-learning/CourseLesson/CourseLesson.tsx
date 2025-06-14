@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import ReactPlayer from "react-player";
 import {
     Typography,
@@ -10,47 +10,44 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    Checkbox,
-    LinearProgress,
     Rating,
-    Slider,
+    LinearProgress,
 } from "@mui/material";
-import { ExpandMore, Close, Search } from "@mui/icons-material";
+import { ExpandMore, Close } from "@mui/icons-material";
+import { Bot } from "lucide-react";
 import { ICourse, ICourseContent } from "../../../../types/entities";
 import CourseOverview from "./Overview";
 import ChatBot from "./LeaningTool";
+import { IReviewDistribution } from "../../../../types/resData";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
     course: ICourse;
+    reviewDistribution?: IReviewDistribution;
 }
 
-export default function CourseLesson({ courseContent, course }: ICourseLesson) {
+export default function CourseLesson({
+    courseContent,
+    course,
+    reviewDistribution,
+}: ICourseLesson) {
     const [isPlaying, setIsPlaying] = useState(true);
     const [activeTab, setActiveTab] = useState(0);
-    const [expandedSection, setExpandedSections] = useState<string[]>([]);
+    const [expandedSection, setExpandedSection] = useState<string | false>(
+        false
+    );
+    const [isOpen, setIsOpen] = useState(false);
 
-    const playerRef = useRef<ReactPlayer | null>(null);
-    const videoUrl = courseContent.sections[0]?.lectures[0]?.videoUrl ?? "";
+    const videoUrl = courseContent?.sections?.[0]?.lectures?.[0]?.videoUrl ?? "";
     const [curVideoUrl, setCurVideoUrl] = useState(videoUrl);
 
-    const feedbackData = [
-        { stars: 5, percentage: 46 },
-        { stars: 4, percentage: 38 },
-        { stars: 3, percentage: 13 },
-        { stars: 2, percentage: 2 },
-        { stars: 1, percentage: 1 },
-    ];
-
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-100 relative">
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
-                {/* Video Player */}
-                <div className="bg-black" style={{ height: 400 }}>
+                {/* Video */}
+                <div className="bg-black w-full" style={{ height: "calc(130vh * 0.5)" }}>
                     <ReactPlayer
-                        key={curVideoUrl} 
-                        ref={playerRef}
                         url={curVideoUrl}
                         playing={isPlaying}
                         controls
@@ -70,19 +67,13 @@ export default function CourseLesson({ courseContent, course }: ICourseLesson) {
                     >
                         <Tab label="Overview" />
                         <Tab label="Reviews" />
-                        <Tab label="Learning tools" />
                     </Tabs>
                 </div>
-                <div>
-                    {activeTab === 0 && (
-                        <>
-                            <CourseOverview course={course} />
-                        </>
-                    )}
-                </div>
 
-                {/* Feedback Tab */}
-                <div>
+                {/* Tab Content */}
+                <div className="p-4">
+                    {activeTab === 0 && <CourseOverview course={course} />}
+
                     {activeTab === 1 && (
                         <div>
                             <Typography
@@ -97,17 +88,20 @@ export default function CourseLesson({ courseContent, course }: ICourseLesson) {
                                         variant="h2"
                                         className="font-bold text-orange-500 mb-2"
                                     >
-                                        4.4
+                                        {reviewDistribution?.average_rating ?? "N/A"}
                                     </Typography>
                                     <Rating
-                                        value={4.4}
+                                        value={reviewDistribution?.average_rating ?? 0}
                                         readOnly
                                         precision={0.1}
                                     />
+                                    <Typography variant="body2" className="text-gray-600 mt-1">
+                                        {reviewDistribution?.total_reviews ?? 0} reviews
+                                    </Typography>
                                 </div>
                                 <div className="flex-1 space-y-2">
-                                    {feedbackData.map(
-                                        ({ stars, percentage }) => (
+                                    {reviewDistribution?.distribution?.map(
+                                        ({ stars, percentage, count }) => (
                                             <div
                                                 key={stars}
                                                 className="flex items-center space-x-3"
@@ -122,13 +116,12 @@ export default function CourseLesson({ courseContent, course }: ICourseLesson) {
                                                     value={percentage}
                                                     className="flex-1 h-2 bg-gray-200"
                                                     sx={{
-                                                        "& .MuiLinearProgress-bar":
-                                                            {
-                                                                backgroundColor:
-                                                                    stars >= 4
-                                                                        ? "#f59e0b"
-                                                                        : "#6b7280",
-                                                            },
+                                                        "& .MuiLinearProgress-bar": {
+                                                            backgroundColor:
+                                                                stars >= 4
+                                                                    ? "#f59e0b"
+                                                                    : "#6b7280",
+                                                        },
                                                     }}
                                                 />
                                                 <Typography
@@ -145,13 +138,6 @@ export default function CourseLesson({ courseContent, course }: ICourseLesson) {
                         </div>
                     )}
                 </div>
-                <div>
-                    {activeTab === 2 && (
-                        <>
-                            <ChatBot />
-                        </>
-                    )}
-                </div>
             </div>
 
             {/* Sidebar */}
@@ -165,25 +151,20 @@ export default function CourseLesson({ courseContent, course }: ICourseLesson) {
                     </IconButton>
                 </div>
                 <div className="flex-1 overflow-auto">
-                    {courseContent.sections.map((section) => (
+                    {courseContent?.sections?.map((section) => (
                         <Accordion
                             key={section._id}
-                            expanded={expandedSection.includes(section._id)}
-                            onChange={() => {
-                                setExpandedSections((prev) =>
-                                    prev.includes(section._id)
-                                        ? prev.filter(
-                                              (id) => id !== section._id
-                                          )
-                                        : [...prev, section._id]
-                                );
-                            }}
+                            expanded={expandedSection === section._id}
+                            onChange={() =>
+                                setExpandedSection(
+                                    expandedSection === section._id
+                                        ? false
+                                        : section._id
+                                )
+                            }
                             className="shadow-none border-b"
                         >
-                            <AccordionSummary
-                                expandIcon={<ExpandMore />}
-                                className="px-4"
-                            >
+                            <AccordionSummary expandIcon={<ExpandMore />} className="px-4">
                                 <div className="flex-1">
                                     <Typography
                                         variant="subtitle2"
@@ -191,40 +172,37 @@ export default function CourseLesson({ courseContent, course }: ICourseLesson) {
                                     >
                                         {section.title}
                                     </Typography>
-                                    <Typography
-                                        variant="caption"
-                                        className="text-gray-600"
-                                    >
-                                        {section.lectures.length} lectures
+                                    <Typography variant="caption" className="text-gray-600">
+                                        {section.lectures?.length} lectures
                                     </Typography>
                                 </div>
                             </AccordionSummary>
                             <AccordionDetails className="px-4">
-                                {section.lectures.map((lecture, index) => (
+                                {section.lectures?.map((lecture, index) => (
                                     <div
-                                        key={lecture._id}
+                                        key={lecture?._id}
                                         className="flex items-center py-1 px-1 hover:bg-gray-100"
                                     >
                                         <button
+                                            type="button"
                                             onClick={() =>
-                                                setCurVideoUrl(lecture.videoUrl)
+                                                setCurVideoUrl(lecture?.videoUrl ?? "")
                                             }
+                                            className="w-full text-left"
                                         >
                                             <div className="flex-1">
                                                 <Typography
                                                     variant="body2"
                                                     className="mb-1"
                                                 >
-                                                    {index + 1}. {lecture.title}
+                                                    {index + 1}. {lecture?.title}
                                                 </Typography>
                                                 <Typography
                                                     variant="caption"
                                                     className="text-gray-600 flex items-center"
                                                 >
-                                                    <span className="mr-1">
-                                                        ▶
-                                                    </span>{" "}
-                                                    {lecture.totalDuration}
+                                                    <span className="mr-1">▶</span>
+                                                    {lecture?.totalDuration}
                                                 </Typography>
                                             </div>
                                         </button>
@@ -234,6 +212,22 @@ export default function CourseLesson({ courseContent, course }: ICourseLesson) {
                         </Accordion>
                     ))}
                 </div>
+            </div>
+
+            {/* Chat Widget */}
+            <div className="fixed bottom-4 right-4 z-50 p-1 sm:p-0">
+                <button
+                    onClick={() => setIsOpen((prev) => !prev)}
+                    className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg flex items-center justify-center hover:scale-105 transition-all duration-200"
+                >
+                    {isOpen ? <Close className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+                </button>
+
+                {isOpen && (
+                    <div className="animate-fade-in mt-2 w-[350px] h-[500px] rounded-xl overflow-hidden shadow-xl">
+                        <ChatBot />
+                    </div>
+                )}
             </div>
         </div>
     );

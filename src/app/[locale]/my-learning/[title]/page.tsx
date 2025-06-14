@@ -7,6 +7,7 @@ import {
 import { sendRequest } from "../../../../../utils/api";
 import { extractIds } from "../../../../../utils/utils";
 import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
+import { IReviewDistribution } from "../../../../../types/resData";
 
 interface Params {
     params: { title: string };
@@ -28,11 +29,20 @@ export default async function CourseDetailPage({
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
     });
 
-    return (
+    const reviewDistribution = await sendRequest<IBackendRes<IReviewDistribution>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/distribution`,
+        queryParams:{
+            id
+        }
+    });
+
+        return (
         <div>
             <CourseLesson
                 courseContent={resContent?.data as ICourseContent}
                 course={resCourse?.data as ICourse}
+                reviewDistribution={reviewDistribution?.data as IReviewDistribution} 
             />
         </div>
     );
