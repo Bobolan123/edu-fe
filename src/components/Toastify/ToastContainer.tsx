@@ -3,6 +3,6 @@
 import 'react-toastify/dist/ReactToastify.css'
 import { ToastContainer } from 'react-toastify'
 
-const ClientSideToastContainer = () => <ToastContainer />
+const ClientSideToastContainer = () => <ToastContainer autoClose={1000}/>
 
 export default ClientSideToastContainer

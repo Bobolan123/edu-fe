@@ -5,7 +5,6 @@ import NavbarClient from "./NavbarClient";
 
 export default async function Navbar() {
     const session = await auth();
-    if (!session?.user) return null;
     const cart = await sendRequest<IBackendRes<ICart>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/cart`,

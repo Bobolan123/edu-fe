@@ -23,6 +23,9 @@ import {
 import { ICartItem } from "../../../types/entities";
 import { deleteCartItem } from "@/actions";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { slugify } from "../../../utils/utils";
+import { toast } from "react-toastify";
 
 interface ICartProps {
     cartItems?: ICartItem[];
@@ -39,7 +42,11 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
             courseId,
             session?.user?.access_token as string
         );
-        console.log(res)
+        if (res && res.data) {
+            toast.success(res.message)
+        } else {
+            toast.error(res.message)
+        }
     };
 
     if (cartItems.length === 0) {
@@ -88,159 +95,169 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                 <Grid container spacing={4}>
                     <Grid item xs={12} lg={8}>
                         {cartItems.map((cartItem) => (
-                            <Card
-                                key={cartItem?.course?.id}
-                                elevation={2}
-                                sx={{
-                                    mb: 2,
-                                    overflow: "hidden",
-                                    borderRadius: 3,
-                                    transition: "box-shadow 0.3s",
-                                    ":hover": { boxShadow: 6 },
-                                }}
+                            <Link
+                                key={cartItem.id}
+                                href={`/courses/${slugify(
+                                    cartItem?.course?.title
+                                )}?id=${cartItem?.course?.id}`}
                             >
-                                <Grid container>
-                                    <Grid item xs={12} md={4}>
-                                        <Image
-                                            src={
-                                                cartItem?.course
-                                                    ?.thumbnail_url ||
-                                                "/placeholder.svg"
-                                            }
-                                            alt={
-                                                cartItem?.course?.title ||
-                                                "Course image"
-                                            }
-                                            width={300}
-                                            height={200}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={8}>
-                                        <Box
-                                            p={2}
-                                            display="flex"
-                                            flexDirection="column"
-                                            gap={1}
-                                        >
+                                <Card
+                                    key={cartItem?.course?.id}
+                                    elevation={2}
+                                    sx={{
+                                        mb: 2,
+                                        overflow: "hidden",
+                                        borderRadius: 3,
+                                        transition: "box-shadow 0.3s",
+                                        ":hover": { boxShadow: 6 },
+                                    }}
+                                >
+                                    <Grid container>
+                                        <Grid item xs={12} md={4}>
+                                            <Image
+                                                src={
+                                                    cartItem?.course
+                                                        ?.thumbnail_url ||
+                                                    "/placeholder.svg"
+                                                }
+                                                alt={
+                                                    cartItem?.course?.title ||
+                                                    "Course image"
+                                                }
+                                                width={300}
+                                                height={200}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={8}>
                                             <Box
+                                                p={2}
                                                 display="flex"
-                                                justifyContent="space-between"
-                                                alignItems="start"
-                                            >
-                                                <Typography variant="h6">
-                                                    {cartItem?.course?.title ||
-                                                        "Untitled Course"}
-                                                </Typography>
-                                                <MUIButton
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={() => {
-                                                        handleDeleteItem(
-                                                            +cartItem?.course
-                                                                ?.id
-                                                        );
-                                                    }}
-                                                >
-                                                    <Trash2 size={18} />
-                                                </MUIButton>
-                                            </Box>
-
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                            >
-                                                {cartItem?.course
-                                                    ?.description ||
-                                                    "No description available."}
-                                            </Typography>
-
-                                            <Box
-                                                display="flex"
-                                                alignItems="center"
+                                                flexDirection="column"
                                                 gap={1}
                                             >
-                                                <Image
-                                                    src={
-                                                        cartItem?.course
-                                                            ?.instructor
-                                                            ?.avatar_url ||
-                                                        "/placeholder.svg"
-                                                    }
-                                                    alt={
-                                                        cartItem?.course
+                                                <Box
+                                                    display="flex"
+                                                    justifyContent="space-between"
+                                                    alignItems="start"
+                                                >
+                                                    <Typography variant="h6">
+                                                        {cartItem?.course
+                                                            ?.title ||
+                                                            "Untitled Course"}
+                                                    </Typography>
+                                                    <MUIButton
+                                                        size="small"
+                                                        color="error"
+                                                        onClick={() => {
+                                                            handleDeleteItem(
+                                                                +cartItem
+                                                                    ?.course?.id
+                                                            );
+                                                        }}
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </MUIButton>
+                                                </Box>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    {cartItem?.course
+                                                        ?.description ||
+                                                        "No description available."}
+                                                </Typography>
+
+                                                <Box
+                                                    display="flex"
+                                                    alignItems="center"
+                                                    gap={1}
+                                                >
+                                                    <Image
+                                                        src={
+                                                            cartItem?.course
+                                                                ?.instructor
+                                                                ?.avatar_url ||
+                                                            "/placeholder.svg"
+                                                        }
+                                                        alt={
+                                                            cartItem?.course
+                                                                ?.instructor
+                                                                ?.name ||
+                                                            "Instructor"
+                                                        }
+                                                        width={32}
+                                                        height={32}
+                                                        className="rounded-full"
+                                                    />
+                                                    <Typography variant="body2">
+                                                        {cartItem?.course
                                                             ?.instructor
                                                             ?.name ||
-                                                        "Instructor"
-                                                    }
-                                                    width={32}
-                                                    height={32}
-                                                    className="rounded-full"
-                                                />
-                                                <Typography variant="body2">
-                                                    {cartItem?.course
-                                                        ?.instructor?.name ||
-                                                        "Unknown Instructor"}
-                                                </Typography>
-                                            </Box>
+                                                            "Unknown Instructor"}
+                                                    </Typography>
+                                                </Box>
 
-                                            <Box
-                                                display="flex"
-                                                gap={1.5}
-                                                flexWrap="wrap"
-                                                mt={1}
-                                            >
-                                                <Chip
-                                                    icon={<Star />}
-                                                    label={`${formatRating(
-                                                        cartItem?.course
-                                                            ?.average_rating
-                                                    )} (${
-                                                        cartItem?.course
-                                                            ?.total_reviews || 0
-                                                    })`}
-                                                    color="warning"
-                                                />
-                                                <Chip
-                                                    icon={<Clock />}
-                                                    label={`${
-                                                        cartItem?.course
-                                                            ?.duration || 0
-                                                    }h`}
-                                                    color="info"
-                                                />
-                                                <Chip
-                                                    icon={<Users />}
-                                                    label={
-                                                        cartItem?.course?.total_students?.toLocaleString() ||
-                                                        "0"
-                                                    }
-                                                    color="success"
-                                                />
-                                            </Box>
+                                                <Box
+                                                    display="flex"
+                                                    gap={1.5}
+                                                    flexWrap="wrap"
+                                                    mt={1}
+                                                >
+                                                    <Chip
+                                                        icon={<Star />}
+                                                        label={`${formatRating(
+                                                            cartItem?.course
+                                                                ?.average_rating
+                                                        )} (${
+                                                            cartItem?.course
+                                                                ?.total_reviews ||
+                                                            0
+                                                        })`}
+                                                        color="warning"
+                                                    />
+                                                    <Chip
+                                                        icon={<Clock />}
+                                                        label={`${
+                                                            cartItem?.course
+                                                                ?.duration || 0
+                                                        }h`}
+                                                        color="info"
+                                                    />
+                                                    <Chip
+                                                        icon={<Users />}
+                                                        label={
+                                                            cartItem?.course?.total_students?.toLocaleString() ||
+                                                            "0"
+                                                        }
+                                                        color="success"
+                                                    />
+                                                </Box>
 
-                                            <Box
-                                                display="flex"
-                                                justifyContent="space-between"
-                                                alignItems="center"
-                                                mt={2}
-                                            >
-                                                <Chip
-                                                    label="Bestseller"
-                                                    color="warning"
-                                                    variant="outlined"
-                                                />
-                                                <Typography variant="h6">
-                                                    $
-                                                    {cartItem?.course?.price?.toFixed(
-                                                        2
-                                                    ) || "0.00"}
-                                                </Typography>
+                                                <Box
+                                                    display="flex"
+                                                    justifyContent="space-between"
+                                                    alignItems="center"
+                                                    mt={2}
+                                                >
+                                                    <Chip
+                                                        label="Bestseller"
+                                                        color="warning"
+                                                        variant="outlined"
+                                                    />
+                                                    <Typography variant="h6">
+                                                        $
+                                                        {cartItem?.course?.price?.toFixed(
+                                                            2
+                                                        ) || "0.00"}
+                                                    </Typography>
+                                                </Box>
                                             </Box>
-                                        </Box>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </Card>
+                                </Card>
+                            </Link>
                         ))}
                     </Grid>
 
@@ -255,19 +272,6 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                         >
                             <CardHeader title="Order Summary" />
                             <CardContent>
-                                <Box
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    mb={1}
-                                >
-                                    <Typography variant="body2">
-                                        Subtotal
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        ${total.toFixed(2)}
-                                    </Typography>
-                                </Box>
-                                <Divider sx={{ my: 2 }} />
                                 <Box
                                     display="flex"
                                     justifyContent="space-between"
@@ -286,24 +290,26 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         ${total.toFixed(2)}
                                     </Typography>
                                 </Box>
+                                <Link href={`/checkout`}>
+                                    <MUIButton
+                                        variant="contained"
+                                        fullWidth
+                                        sx={{ mt: 1.5 }}
+                                        startIcon={<CreditCard />}
+                                    >
+                                        Checkout
+                                    </MUIButton>
+                                </Link>
 
-                                <MUIButton
-                                    variant="contained"
-                                    color="secondary"
-                                    fullWidth
-                                    sx={{ mt: 1.5 }}
-                                    startIcon={<CreditCard />}
-                                >
-                                    Checkout
-                                </MUIButton>
-
-                                <MUIButton
-                                    variant="outlined"
-                                    fullWidth
-                                    sx={{ mt: 2 }}
-                                >
-                                    Continue Shopping
-                                </MUIButton>
+                                <Link href={`/courses`}>
+                                    <MUIButton
+                                        variant="outlined"
+                                        fullWidth
+                                        sx={{ mt: 2 }}
+                                    >
+                                        Continue Shopping
+                                    </MUIButton>
+                                </Link>
 
                                 <Box
                                     mt={4}

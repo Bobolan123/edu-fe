@@ -28,6 +28,9 @@ import {
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Play } from "lucide-react";
+import { addCartItem } from "@/actions";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
 
 interface ICourseDetailProps {
     course: ICourse;
@@ -38,8 +41,17 @@ export default function CourseDetail({
     course,
     courseContent,
 }: ICourseDetailProps) {
+    const { data } = useSession();
+    
 
-    const originalPrice = course?.price ?? 100;
+    const handleAddToCart = async (courseId: number) => {
+        const res = await addCartItem(courseId, data?.user?.access_token || "");
+        if (res && res?.data) {
+            toast.success(res?.message);
+        } else {
+            toast.error(res?.message, { autoClose: 1000 });
+        }
+    };
 
     return (
         <div className="my-8">
@@ -124,14 +136,18 @@ export default function CourseDetail({
                                 What you'll learn
                             </Typography>
                             <Grid container spacing={2}>
-                                {courseContent?.whatYoullLearn?.map((point, index) => (
-                                    <Grid item xs={12} md={6} key={index}>
-                                        <Box sx={{ display: "flex", gap: 2 }}>
-                                            <CheckIcon color="primary" />
-                                            <Typography>{point}</Typography>
-                                        </Box>
-                                    </Grid>
-                                ))}
+                                {courseContent?.whatYoullLearn?.map(
+                                    (point, index) => (
+                                        <Grid item xs={12} md={6} key={index}>
+                                            <Box
+                                                sx={{ display: "flex", gap: 2 }}
+                                            >
+                                                <CheckIcon color="primary" />
+                                                <Typography>{point}</Typography>
+                                            </Box>
+                                        </Grid>
+                                    )
+                                )}
                             </Grid>
                         </Box>
 
@@ -157,7 +173,8 @@ export default function CourseDetail({
                                 >
                                     <BookIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.sections?.length} sections
+                                        {courseContent?.sections?.length}{" "}
+                                        sections
                                     </Typography>
                                 </Box>
                                 <Box
@@ -181,7 +198,8 @@ export default function CourseDetail({
                                 >
                                     <ClockIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.totalLength} total length
+                                        {courseContent?.totalLength} total
+                                        length
                                     </Typography>
                                 </Box>
                             </Box>
@@ -325,26 +343,18 @@ export default function CourseDetail({
                                         >
                                             ₫
                                             {Number(
-                                                originalPrice
+                                                course?.price
                                             ).toLocaleString("vi-VN")}
                                         </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{
-                                                textDecoration: "line-through",
-                                            }}
-                                        >
-                                            ₫
-                                            {Number(
-                                                originalPrice * 1.5
-                                            ).toLocaleString("vi-VN")}
-                                        </Typography>
+                                        
                                     </Box>
 
                                     <Button
                                         variant="contained"
                                         color="primary"
+                                        onClick={() => {
+                                            handleAddToCart(course.id);
+                                        }}
                                         fullWidth
                                         sx={{
                                             mb: 1.5,

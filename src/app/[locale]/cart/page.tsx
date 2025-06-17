@@ -17,7 +17,7 @@ export default async function CartPage() {
     });
     return (
         <div>
-            <Cart cartItems={cart?.data?.cartItems as ICartItem[]} />
+            <Cart cartItems={cart?.data?.cartItems } />
         </div>
     );
 }

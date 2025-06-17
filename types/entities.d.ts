@@ -16,7 +16,6 @@ export interface ICourse {
     quizzes: IQuiz[];
     reviews: IReview[];
     certifications: ICertification[];
-    payments: IPayment[];
     categories: ICategory[];
     thumbnail_url: string | null;
     total_reviews: number;
@@ -40,7 +39,6 @@ export interface IUser {
     role: IRole | null;
     courses: ICourse[];
     enrollments: IEnrollment[];
-    payments: IPayment[];
     subscriptions: ISubscription[];
     certifications: ICertification[];
     reviews: IReview[];
@@ -55,17 +53,6 @@ export interface ICategory {
     courses: ICourse[];
 }
 
-// Payment Interface
-export interface IPayment {
-    id: number;
-    user: IUser;
-    course: ICourse;
-    amount: number;
-    payment_date: Date;
-    payment_status: string;
-    payment_method: string;
-    transaction_id: string;
-}
 
 // Review Interface
 export interface IReview {

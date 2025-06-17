@@ -1,3 +1,5 @@
+import { auth } from "@/auth";
+
 export const IsValidEmail = (email: string) => {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 };
@@ -11,3 +13,8 @@ export const slugify = (title: string) =>
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "");
+
+export const getJWT = async (): Promise<string> => {
+    const session = await auth();
+    return session?.user?.access_token || "";
+};

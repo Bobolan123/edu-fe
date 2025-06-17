@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { sendRequest, sendRequestFile } from "../../utils/api";
-import { ISection } from "../../types/entities";
+import { ICart, IOrder, ISection, PaymentMethod } from "../../types/entities";
 
 export const uploadLectureVideo = async (
     courseId: number,
@@ -40,7 +40,7 @@ export async function deleteCartItem(
     access_token:string
 ) {
     const res = await sendRequest<
-        IBackendRes<{ videoUrl: string; totalDuration: string }>
+        IBackendRes<ICart>
     >({
         method: "DELETE",
         url: `${process.env.NEXT_PUBLIC_SERVER}/cart/${courseId}`,
@@ -51,3 +51,59 @@ export async function deleteCartItem(
     revalidateTag("cart");
     return res;
 }
+
+
+
+export async function addCartItem(
+    courseId: number,
+    access_token:string
+) {
+    const res = await sendRequest<
+        IBackendRes<ICart>
+    >({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/cart/${courseId}`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+    revalidateTag("cart");
+    return res;
+}
+
+interface CreateOrderParams {
+    cartId: number;
+    totalPrice: number;
+    paymentMethod: PaymentMethod;
+    userId: string;
+    access_token: string;
+  }
+  
+  export const createOrder = async ({
+    cartId,
+    totalPrice,
+    paymentMethod,
+    userId,
+    access_token,
+  }: CreateOrderParams): Promise<{ paymentUrl: string; order: IOrder }> => {
+    const res = await sendRequest<{
+      paymentUrl: string;
+      order: IOrder;
+    }>({
+      method: "POST",
+      url: `${process.env.NEXT_PUBLIC_SERVER}/orders`,
+      body: {
+        cartId,
+        totalPrice,
+        paymentMethod,
+        userId,
+      },
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+  
+    revalidateTag("order");
+    return res;
+  };
+  
