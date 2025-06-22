@@ -19,13 +19,20 @@ import {
     Chip,
     Button as MUIButton,
     Divider,
+    Select,
+    MenuItem,
 } from "@mui/material";
 import { ICartItem } from "../../../types/entities";
 import { deleteCartItem } from "@/actions";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { slugify } from "../../../utils/utils";
+import {
+    slugify,
+    formatCurrency,
+    exchangeCurrency,
+} from "../../../utils/utils";
 import { toast } from "react-toastify";
+import { useState, useEffect } from "react";
 
 interface ICartProps {
     cartItems?: ICartItem[];
@@ -33,8 +40,20 @@ interface ICartProps {
 
 const Cart = ({ cartItems = [] }: ICartProps) => {
     const { data: session } = useSession();
-    const total =
+    const [currency, setCurrency] = useState<"USD" | "VND">("VND");
+    const [convertedTotal, setConvertedTotal] = useState(0);
+
+    const rawTotal =
         cartItems?.reduce((sum, item) => sum + (item.price || 0), 0) || 0;
+
+    useEffect(() => {
+        async function convertTotal() {
+            const value = await exchangeCurrency(rawTotal, "VND", currency,0.0038);
+            setConvertedTotal(value);
+        }
+        convertTotal();
+    }, [rawTotal, currency]);
+
     const formatRating = (rating: number = 0) => rating.toFixed(1);
 
     const handleDeleteItem = async (courseId: number) => {
@@ -42,11 +61,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
             courseId,
             session?.user?.access_token as string
         );
-        if (res && res.data) {
-            toast.success(res.message)
-        } else {
-            toast.error(res.message)
-        }
+        res && res.data ? toast.success(res.message) : toast.error(res.message);
     };
 
     if (cartItems.length === 0) {
@@ -108,7 +123,6 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         mb: 2,
                                         overflow: "hidden",
                                         borderRadius: 3,
-                                        transition: "box-shadow 0.3s",
                                         ":hover": { boxShadow: 6 },
                                     }}
                                 >
@@ -149,12 +163,12 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                     <MUIButton
                                                         size="small"
                                                         color="error"
-                                                        onClick={() => {
+                                                        onClick={() =>
                                                             handleDeleteItem(
                                                                 +cartItem
                                                                     ?.course?.id
-                                                            );
-                                                        }}
+                                                            )
+                                                        }
                                                     >
                                                         <Trash2 size={18} />
                                                     </MUIButton>
@@ -237,20 +251,16 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
 
                                                 <Box
                                                     display="flex"
-                                                    justifyContent="space-between"
-                                                    alignItems="center"
+                                                    justifyContent="right"
                                                     mt={2}
                                                 >
-                                                    <Chip
-                                                        label="Bestseller"
-                                                        color="warning"
-                                                        variant="outlined"
-                                                    />
+                                                   
                                                     <Typography variant="h6">
-                                                        $
-                                                        {cartItem?.course?.price?.toFixed(
-                                                            2
-                                                        ) || "0.00"}
+                                                        {formatCurrency(
+                                                            cartItem?.course
+                                                                ?.price || 0,
+                                                            currency
+                                                        )}
                                                     </Typography>
                                                 </Box>
                                             </Box>
@@ -271,6 +281,20 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                             }}
                         >
                             <CardHeader title="Order Summary" />
+                            <Select
+                                value={currency}
+                                onChange={(e) =>
+                                    setCurrency(e.target.value as "USD" | "VND")
+                                }
+                                className="mb-2 ml-4"
+                            >
+                                <MenuItem value="VND">
+                                    🇻🇳 Vietnamese Dong (VND)
+                                </MenuItem>
+                                <MenuItem value="USD">
+                                    🇺🇸 US Dollar (USD)
+                                </MenuItem>
+                            </Select>
                             <CardContent>
                                 <Box
                                     display="flex"
@@ -287,7 +311,10 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         variant="subtitle1"
                                         fontWeight={600}
                                     >
-                                        ${total.toFixed(2)}
+                                        {formatCurrency(
+                                            convertedTotal,
+                                            currency
+                                        )}
                                     </Typography>
                                 </Box>
                                 <Link href={`/checkout`}>
@@ -300,7 +327,6 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         Checkout
                                     </MUIButton>
                                 </Link>
-
                                 <Link href={`/courses`}>
                                     <MUIButton
                                         variant="outlined"
@@ -310,7 +336,6 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         Continue Shopping
                                     </MUIButton>
                                 </Link>
-
                                 <Box
                                     mt={4}
                                     bgcolor="green.50"

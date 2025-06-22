@@ -3,6 +3,7 @@
 import { revalidateTag } from "next/cache";
 import { sendRequest, sendRequestFile } from "../../utils/api";
 import { ICart, IOrder, ISection, PaymentMethod } from "../../types/entities";
+import { cookies } from "next/headers";
 
 export const uploadLectureVideo = async (
     courseId: number,
@@ -107,3 +108,11 @@ interface CreateOrderParams {
     return res;
   };
   
+  export async function setExchangeRateCookie(rate: number) {
+    const cookieStore = await cookies();
+
+    cookieStore.set("exchangeRate", rate.toString(), {
+        maxAge: 3600, // 1 hour
+        path: "/",
+    });
+}

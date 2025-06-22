@@ -12,6 +12,10 @@ import ClientSideToastContainer from "@/components/Toastify/ToastContainer";
 import { SessionProvider } from "next-auth/react";
 import NavbarClient from "@/components/Navbar/NavbarClient";
 import Navbar from "@/components/Navbar/Navbar";
+import { getExchangeRateVND } from "../../../utils/utils";
+import { ExchangeRateProvider } from "@/context/ExchangeRateContext";
+import { cookies } from "next/headers";
+import { setExchangeRateCookie } from "@/actions";
 
 const roboto = Roboto({
     weight: ["100", "300", "400", "500", "700"],
@@ -30,11 +34,15 @@ export default async function LocaleLayout({
     const messages = await getMessages();
     const parameters = await params;
     const locale = parameters.locale;
+    let exchangeRate: number | string = 1;
     // Ensure that the incoming `locale` is valid
     if (!routing.locales.includes(locale as any)) {
         notFound();
     }
+ 
+    exchangeRate = await getExchangeRateVND("USD");
 
+    setExchangeRateCookie(exchangeRate)
     return (
         <html lang={locale}>
             <body
@@ -45,9 +53,11 @@ export default async function LocaleLayout({
                     <AppRouterCacheProvider>
                         <ThemeProvider theme={theme}>
                             <SessionProvider>
-                                <ClientSideToastContainer />
-                                <Navbar/>
-                                {children}
+                                <ExchangeRateProvider>
+                                    <Navbar />
+                                    {children}
+                                    <ClientSideToastContainer />
+                                </ExchangeRateProvider>
                             </SessionProvider>
                         </ThemeProvider>
                     </AppRouterCacheProvider>

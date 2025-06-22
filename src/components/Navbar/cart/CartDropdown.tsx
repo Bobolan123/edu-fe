@@ -7,6 +7,9 @@ import { ShoppingCart } from "lucide-react";
 import { Badge } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ICartItem } from "../../../../types/entities";
+import { useRouter } from "next/router";
+import { useLocale, useTranslations } from "next-intl";
+import { formatCurrency } from "../../../../utils/utils";
 
 interface CartDropdownProps {
     cartItems: ICartItem[];
@@ -25,6 +28,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 export default function CartDropdown({ cartItems }: CartDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const locale = useLocale();
 
     const totalPrice = cartItems.reduce((sum, item) => sum + (item?.price || 0), 0);
     const totalOriginalPrice = cartItems.reduce(
@@ -72,7 +76,7 @@ export default function CartDropdown({ cartItems }: CartDropdownProps) {
                                             </p>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="font-bold">
-                                                    đ{item?.price?.toLocaleString?.() || "0"}
+                                                    {formatCurrency(item?.price, locale) }
                                                 </span>
                                             </div>
                                         </div>
@@ -87,7 +91,7 @@ export default function CartDropdown({ cartItems }: CartDropdownProps) {
                             <span className="font-bold">Total:</span>
                             <div>
                                 <span className="font-bold">
-                                    đ{totalPrice.toLocaleString()}
+                                    {formatCurrency(totalPrice, locale) }
                                 </span>
                             </div>
                         </div>

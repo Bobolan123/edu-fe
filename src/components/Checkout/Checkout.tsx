@@ -20,10 +20,11 @@ import { Lock, Shield } from "lucide-react";
 import { ICartItem, PaymentMethod } from "../../../types/entities";
 import { createOrder } from "@/actions";
 import { useSession } from "next-auth/react";
+import { formatCurrency } from "../../../utils/utils";
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
-    cartId:number;
+    cartId: number;
 }
 
 const exchangeRate = 25000;
@@ -38,18 +39,14 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
         cartItems?.reduce((sum, item) => sum + (item?.price || 0), 0) || 0;
     const totalUSD = totalVND / exchangeRate;
 
-    const formatCurrency = (amount: number, curr: string) => {
-        return curr === "VND"
-            ? `₫${amount.toLocaleString()}`
-            : `$${amount.toFixed(2)}`;
-    };
+   
 
-    const getCurrentTotal = () => (currency === "VND" ? totalVND : totalUSD);
+    const getCurrentTotal = () => (currency ==="VND" ? totalVND : totalUSD); 
 
     const handleCheckout = async () => {
         try {
             const result = await createOrder({
-                cartId:cartId,
+                cartId: cartId,
                 totalPrice: totalVND,
                 paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
                 userId: session?.user.id || "",

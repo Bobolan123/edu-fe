@@ -14,7 +14,32 @@ export const slugify = (title: string) =>
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "");
 
-export const getJWT = async (): Promise<string> => {
-    const session = await auth();
-    return session?.user?.access_token || "";
+// Fetch real-time USD to VND exchange rate
+export async function getExchangeRateVND(to: string): Promise<number> {
+    const res = await fetch("https://open.er-api.com/v6/latest/VND");
+    const data = await res.json();
+
+    const rate = data.rates[to];
+    if (!rate) throw new Error(`Unable to retrieve exchange rate for ${to}`);
+
+    return rate || 1;
+}
+
+// Convert currency between USD and VND
+export async function exchangeCurrency(
+    amount: number,
+    from: "USD" | "VND",
+    to: "USD" | "VND",
+    rateOverride?: number
+): Promise<number> {
+    if (from === to) return amount;
+    const rate = rateOverride ?? (await getExchangeRateVND("USD"));
+    return to === "USD" ? amount / rate : amount * rate;
+}
+
+// Format currency based on locale
+export const formatCurrency = (amount: number, currency: string): string => {
+    return currency === "VND" || currency === "vi"
+        ? `₫${amount.toLocaleString("vi-VN")}`
+        : `$${amount.toFixed(2)}`;
 };
