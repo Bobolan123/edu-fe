@@ -22,7 +22,7 @@ import { Link } from "@/i18n/routing";
 import { signOut, useSession } from "next-auth/react";
 import CartDropdown from "./cart/CartDropdown";
 import { ICart, ICartItem } from "../../../types/entities";
-
+import CurrencySelector from "./CurrencySelector";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -64,9 +64,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 interface INavbarClientProps {
-    cart:ICart
+    cart: ICart;
 }
-export default function NavbarClient({cart}: INavbarClientProps) {
+export default function NavbarClient({ cart }: INavbarClientProps) {
     const { data: session, status } = useSession();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const t = useTranslations("Navbar");
@@ -109,7 +109,7 @@ export default function NavbarClient({cart}: INavbarClientProps) {
         <Box>
             <AppBar
                 position="static"
-                sx={{ backgroundColor: "white", color: "black" }}
+                sx={{ backgroundColor: "white", color: "black" , paddingX:2}}
             >
                 <Toolbar>
                     <Image src="/logo.png" width={90} height={90} alt="Logo" />
@@ -143,9 +143,13 @@ export default function NavbarClient({cart}: INavbarClientProps) {
                             sx={{ display: { xs: "none", md: "flex" } }}
                         >
                             <div className="flex justify-center items-center gap-3">
+                                <LocaleSwitcher />
+                                <CurrencySelector />
                                 {status === "authenticated" ? (
                                     <>
-                                        <CartDropdown cartItems={cart?.cartItems}/>
+                                        <CartDropdown
+                                            cartItems={cart?.cartItems}
+                                        />
                                         <IconButton
                                             size="medium"
                                             edge="end"
@@ -172,7 +176,6 @@ export default function NavbarClient({cart}: INavbarClientProps) {
                                         </Link>
                                     </>
                                 )}
-                                <LocaleSwitcher />
                             </div>
                         </Box>
                     )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Typography,
     Paper,
@@ -9,8 +9,6 @@ import {
     FormControlLabel,
     FormControl,
     Button,
-    Select,
-    MenuItem,
     Alert,
     Divider,
     Card,
@@ -20,34 +18,42 @@ import { Lock, Shield } from "lucide-react";
 import { ICartItem, PaymentMethod } from "../../../types/entities";
 import { createOrder } from "@/actions";
 import { useSession } from "next-auth/react";
-import { formatCurrency } from "../../../utils/utils";
+import { useCurrency } from "@/context/CurrencyContext";
+import { currencyService } from "@/service/currency";
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
     cartId: number;
 }
 
-const exchangeRate = 25000;
-
 export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
     const { data: session } = useSession();
-
+    const { currency } = useCurrency();
     const [paymentMethod, setPaymentMethod] = useState("vnpay");
-    const [currency, setCurrency] = useState("VND");
+    const [totalUSD, setTotalUSD] = useState(0);
 
     const totalVND =
         cartItems?.reduce((sum, item) => sum + (item?.price || 0), 0) || 0;
-    const totalUSD = totalVND / exchangeRate;
 
-   
+    useEffect(() => {
+        if (currency === "USD") {
+            currencyService
+                .convertPrice(totalVND, "VND", "USD")
+                .then(setTotalUSD)
+                .catch(console.error);
+        }
+    }, [totalVND, currency]);
 
-    const getCurrentTotal = () => (currency ==="VND" ? totalVND : totalUSD); 
+    const getCurrentTotal = () => (currency === "VND" ? totalVND : totalUSD);
+
+    const formatCurrency = (amount: number) =>
+        currencyService.formatPrice(amount, currency);
 
     const handleCheckout = async () => {
         try {
             const result = await createOrder({
-                cartId: cartId,
-                totalPrice: totalVND,
+                cartId,
+                totalPrice: totalVND, // Always in VND for server
                 paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
                 userId: session?.user.id || "",
                 access_token: session?.user?.access_token || "",
@@ -75,39 +81,6 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Currency Selection */}
-                        <Paper className="p-6">
-                            <Typography
-                                variant="h6"
-                                className="font-semibold mb-4"
-                            >
-                                Currency
-                            </Typography>
-                            <FormControl fullWidth>
-                                <Select
-                                    value={currency}
-                                    onChange={(e) =>
-                                        setCurrency(e.target.value)
-                                    }
-                                    className="mb-2"
-                                >
-                                    <MenuItem value="VND">
-                                        🇻🇳 Vietnamese Dong (VND)
-                                    </MenuItem>
-                                    <MenuItem value="USD">
-                                        🇺🇸 US Dollar (USD)
-                                    </MenuItem>
-                                </Select>
-                            </FormControl>
-                            <Typography
-                                variant="body2"
-                                className="text-gray-600 mt-2"
-                            >
-                                Exchange rate: 1 USD = ₫
-                                {exchangeRate.toLocaleString()}
-                            </Typography>
-                        </Paper>
-
                         {/* Payment Method */}
                         <Paper className="p-6">
                             <div className="flex items-center justify-between mb-4">
@@ -184,7 +157,7 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                                                     className="font-medium"
                                                 >
                                                     You will be charged{" "}
-                                                    {formatCurrency(
+                                                    {currencyService.formatPrice(
                                                         totalUSD,
                                                         "USD"
                                                     )}
@@ -276,9 +249,9 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                                             {formatCurrency(
                                                 currency === "VND"
                                                     ? item?.price || 0
-                                                    : (item?.price || 0) /
-                                                          exchangeRate,
-                                                currency
+                                                    : totalUSD *
+                                                          ((item?.price || 0) /
+                                                              totalVND)
                                             )}
                                         </Typography>
                                     </div>
@@ -297,24 +270,7 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                                 Order summary
                             </Typography>
 
-                            <div className="space-y-3 mb-4">
-                                <div className="flex justify-between">
-                                    <Typography
-                                        variant="body2"
-                                        className="text-gray-600"
-                                    >
-                                        Original Price:
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {formatCurrency(
-                                            getCurrentTotal(),
-                                            currency
-                                        )}
-                                    </Typography>
-                                </div>
-
-                                <Divider />
-
+                            <div className="space-y-3 mb-4">    
                                 <div className="flex justify-between">
                                     <Typography
                                         variant="body1"
@@ -327,10 +283,7 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                                         variant="body1"
                                         className="font-bold text-lg"
                                     >
-                                        {formatCurrency(
-                                            getCurrentTotal(),
-                                            currency
-                                        )}
+                                        {formatCurrency(getCurrentTotal())}
                                     </Typography>
                                 </div>
                             </div>

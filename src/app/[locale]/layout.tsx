@@ -13,9 +13,9 @@ import { SessionProvider } from "next-auth/react";
 import NavbarClient from "@/components/Navbar/NavbarClient";
 import Navbar from "@/components/Navbar/Navbar";
 import { getExchangeRateVND } from "../../../utils/utils";
-import { ExchangeRateProvider } from "@/context/ExchangeRateContext";
 import { cookies } from "next/headers";
 import { setExchangeRateCookie } from "@/actions";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 
 const roboto = Roboto({
     weight: ["100", "300", "400", "500", "700"],
@@ -39,10 +39,9 @@ export default async function LocaleLayout({
     if (!routing.locales.includes(locale as any)) {
         notFound();
     }
- 
+
     exchangeRate = await getExchangeRateVND("USD");
 
-    setExchangeRateCookie(exchangeRate)
     return (
         <html lang={locale}>
             <body
@@ -53,11 +52,11 @@ export default async function LocaleLayout({
                     <AppRouterCacheProvider>
                         <ThemeProvider theme={theme}>
                             <SessionProvider>
-                                <ExchangeRateProvider>
+                                <CurrencyProvider>
                                     <Navbar />
                                     {children}
                                     <ClientSideToastContainer />
-                                </ExchangeRateProvider>
+                                </CurrencyProvider>
                             </SessionProvider>
                         </ThemeProvider>
                     </AppRouterCacheProvider>
