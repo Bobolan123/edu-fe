@@ -30,19 +30,14 @@ export async function saveCourseContent(
     >({
         method: "PUT",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
-        body: {sections},
+        body: { sections },
     });
     revalidateTag("course-content");
     return res;
 }
 
-export async function deleteCartItem(
-    courseId: number,
-    access_token:string
-) {
-    const res = await sendRequest<
-        IBackendRes<ICart>
-    >({
+export async function deleteCartItem(courseId: number, access_token: string) {
+    const res = await sendRequest<IBackendRes<ICart>>({
         method: "DELETE",
         url: `${process.env.NEXT_PUBLIC_SERVER}/cart/${courseId}`,
         headers: {
@@ -53,15 +48,8 @@ export async function deleteCartItem(
     return res;
 }
 
-
-
-export async function addCartItem(
-    courseId: number,
-    access_token:string
-) {
-    const res = await sendRequest<
-        IBackendRes<ICart>
-    >({
+export async function addCartItem(courseId: number, access_token: string) {
+    const res = await sendRequest<IBackendRes<ICart>>({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/cart/${courseId}`,
         headers: {
@@ -78,37 +66,42 @@ interface CreateOrderParams {
     paymentMethod: PaymentMethod;
     userId: string;
     access_token: string;
-  }
-  
-  export const createOrder = async ({
+}
+
+export const createOrder = async ({
     cartId,
     totalPrice,
     paymentMethod,
     userId,
     access_token,
-  }: CreateOrderParams): Promise<{ paymentUrl: string; order: IOrder }> => {
-    const res = await sendRequest<{
-      paymentUrl: string;
-      order: IOrder;
-    }>({
-      method: "POST",
-      url: `${process.env.NEXT_PUBLIC_SERVER}/orders`,
-      body: {
-        cartId,
-        totalPrice,
-        paymentMethod,
-        userId,
-      },
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
+}: CreateOrderParams): Promise<{ paymentUrl: string; order: IOrder }> => {
+    const res = await sendRequest<
+        IBackendRes<{
+            paymentUrl: string;
+            order: IOrder;
+        }>
+    >({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/orders`,
+        body: {
+            cartId,
+            totalPrice,
+            paymentMethod,
+            userId,
+        },
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
     });
-  
+
+    if (!res?.data) {
+        throw new Error(res.message);
+    }
     revalidateTag("order");
-    return res;
-  };
-  
-  export async function setExchangeRateCookie(rate: number) {
+    return res?.data;
+};
+
+export async function setExchangeRateCookie(rate: number) {
     const cookieStore = await cookies();
 
     cookieStore.set("exchangeRate", rate.toString(), {

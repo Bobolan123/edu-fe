@@ -1,4 +1,3 @@
-// pages/my-courses/page.tsx
 import ManageMyCourses from "@/components/My-courses/ManageMyCourses";
 import { sendRequest } from "../../../../utils/api";
 import { ICourse } from "../../../../types/entities";

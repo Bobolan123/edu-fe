@@ -18,7 +18,6 @@ import {
     Typography,
     Chip,
     Button as MUIButton,
-    Divider,
     Select,
     MenuItem,
 } from "@mui/material";
@@ -26,13 +25,11 @@ import { ICartItem } from "../../../types/entities";
 import { deleteCartItem } from "@/actions";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import {
-    slugify,
-    formatCurrency,
-    exchangeCurrency,
-} from "../../../utils/utils";
+import { slugify } from "../../../utils/utils";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
+import { useCurrency } from "@/context/CurrencyContext";
+import { currencyService } from "@/service/currency";
 
 interface ICartProps {
     cartItems?: ICartItem[];
@@ -40,19 +37,41 @@ interface ICartProps {
 
 const Cart = ({ cartItems = [] }: ICartProps) => {
     const { data: session } = useSession();
-    const [currency, setCurrency] = useState<"USD" | "VND">("VND");
+    const { currency, setCurrency } = useCurrency();
     const [convertedTotal, setConvertedTotal] = useState(0);
+    const [convertedPrices, setConvertedPrices] = useState<
+        Record<number, number>
+    >({});
 
     const rawTotal =
         cartItems?.reduce((sum, item) => sum + (item.price || 0), 0) || 0;
 
     useEffect(() => {
         async function convertTotal() {
-            const value = await exchangeCurrency(rawTotal, "VND", currency,0.0038);
-            setConvertedTotal(value);
+            const result = await currencyService.convertPrice(
+                rawTotal,
+                "VND",
+                currency
+            );
+            setConvertedTotal(result);
         }
         convertTotal();
     }, [rawTotal, currency]);
+    useEffect(() => {
+        async function convertAllPrices() {
+            const newPrices: Record<number, number> = {};
+            for (const item of cartItems) {
+                const converted = await currencyService.convertPrice(
+                    item.price || 0,
+                    "VND",
+                    currency
+                );
+                newPrices[item.course.id] = converted;
+            }
+            setConvertedPrices(newPrices);
+        }
+        convertAllPrices();
+    }, [cartItems, currency]);
 
     const formatRating = (rating: number = 0) => rating.toFixed(1);
 
@@ -117,7 +136,6 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                 )}?id=${cartItem?.course?.id}`}
                             >
                                 <Card
-                                    key={cartItem?.course?.id}
                                     elevation={2}
                                     sx={{
                                         mb: 2,
@@ -254,11 +272,12 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                     justifyContent="right"
                                                     mt={2}
                                                 >
-                                                   
                                                     <Typography variant="h6">
-                                                        {formatCurrency(
-                                                            cartItem?.course
-                                                                ?.price || 0,
+                                                        {currencyService.formatPrice(
+                                                            convertedPrices[
+                                                                cartItem.course
+                                                                    .id
+                                                            ] || 0,
                                                             currency
                                                         )}
                                                     </Typography>
@@ -271,6 +290,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                         ))}
                     </Grid>
 
+                    {/* Summary Section */}
                     <Grid item xs={12} lg={4}>
                         <Card
                             elevation={3}
@@ -281,20 +301,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                             }}
                         >
                             <CardHeader title="Order Summary" />
-                            <Select
-                                value={currency}
-                                onChange={(e) =>
-                                    setCurrency(e.target.value as "USD" | "VND")
-                                }
-                                className="mb-2 ml-4"
-                            >
-                                <MenuItem value="VND">
-                                    🇻🇳 Vietnamese Dong (VND)
-                                </MenuItem>
-                                <MenuItem value="USD">
-                                    🇺🇸 US Dollar (USD)
-                                </MenuItem>
-                            </Select>
+
                             <CardContent>
                                 <Box
                                     display="flex"
@@ -311,7 +318,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         variant="subtitle1"
                                         fontWeight={600}
                                     >
-                                        {formatCurrency(
+                                        {currencyService.formatPrice(
                                             convertedTotal,
                                             currency
                                         )}

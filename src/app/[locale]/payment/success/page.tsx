@@ -48,10 +48,10 @@ export default function PaymentSuccessPage() {
               color="primary"
               size="large"
               component={Link}
-              href="/my-courses"
+              href="/my-learning"
               className="w-full sm:w-auto"
             >
-              Go to My Courses
+              Go to My learning
             </Button>
             <Button
               variant="outlined"

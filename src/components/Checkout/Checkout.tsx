@@ -20,6 +20,7 @@ import { createOrder } from "@/actions";
 import { useSession } from "next-auth/react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
+import { toast } from "react-toastify";
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
@@ -51,20 +52,19 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
 
     const handleCheckout = async () => {
         try {
-            const result = await createOrder({
+            const res = await createOrder({
                 cartId,
                 totalPrice: totalVND, // Always in VND for server
                 paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
                 userId: session?.user.id || "",
                 access_token: session?.user?.access_token || "",
             });
-
-            if (result.paymentUrl) {
-                window.location.href = result.paymentUrl;
+            if (res?.paymentUrl) {
+                window.location.href = res.paymentUrl;
             }
         } catch (error) {
             console.error("Checkout error:", error);
-            alert("Something went wrong during checkout.");
+            toast.error("Something went wrong during checkout.");
         }
     };
 

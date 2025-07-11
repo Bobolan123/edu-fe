@@ -19,6 +19,8 @@ export interface ICourse {
     categories: ICategory[];
     thumbnail_url: string | null;
     total_reviews: number;
+    preview_url?: string,
+    active?:boolean
 }
 
 // User Interface
@@ -111,7 +113,7 @@ export interface ISubscription {
 
 export interface ILecture {
     title: string;
-    totalDuration?: string;
+    totalDuration?: number;
     videoUrl: string;
     _id:string;
 }

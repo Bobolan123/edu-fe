@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Container,
     Grid,
@@ -17,13 +17,15 @@ import {
     Checkbox,
     FormControlLabel,
     Divider,
-    Chip,
     Radio,
+    Skeleton,
 } from "@mui/material";
 import { ICategory, ICourse } from "../../../types/entities";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { slugify } from "../../../utils/utils";
+import { useCurrency } from "@/context/CurrencyContext";
+import { currencyService } from "@/service/currency";
 
 interface ICoursesProps {
     courses: ICourse[] | undefined;
@@ -46,10 +48,42 @@ export default function Courses(props: ICoursesProps) {
     const pathname = usePathname();
     const { replace } = useRouter();
 
+    /* ──────────────────────── pagination & filter state ──────────────────────── */
     const [page, setPage] = useState(currentPage || 1);
     const [ratingFilter, setRatingFilter] = useState<number[]>([0, 5]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
+    /* ────────────────────────────── currency state ───────────────────────────── */
+    const { currency } = useCurrency();
+    const [convertedPrices, setConvertedPrices] = useState<
+        Record<number, number>
+    >({});
+
+    /* ───────────────────────── price conversion effect ───────────────────────── */
+    useEffect(() => {
+        if (!courses.length) return;
+
+        let isMounted = true;
+
+        async function convert() {
+            const map: Record<number, number> = {};
+            for (const c of courses) {
+                map[c.id] = await currencyService.convertPrice(
+                    c.price || 0,
+                    "VND",
+                    currency
+                );
+            }
+            if (isMounted) setConvertedPrices(map);
+        }
+
+        convert();
+        return () => {
+            isMounted = false;
+        };
+    }, [courses, currency]);
+
+    /* ────────────────────────────── handlers ────────────────────────────── */
     const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
         const params = new URLSearchParams(searchParams);
@@ -76,32 +110,29 @@ export default function Courses(props: ICoursesProps) {
 
         const params = new URLSearchParams(searchParams);
 
-        // Remove existing categoryIds
+        // Reset categoryIds and append the current selection
         params.delete("categoryIds");
-
-        // Append correct category IDs from category names
         newCategories.forEach((catName) => {
             const cat = categories.find((c) => c.name === catName);
-            if (cat) {
-                params.append("categoryIds", String(cat.id));
-            }
+            if (cat) params.append("categoryIds", String(cat.id));
         });
 
         params.set("page", "1");
         replace(`${pathname}?${params.toString()}`);
     };
 
+    /* ─────────────────────────────── render ─────────────────────────────── */
     return (
         <Container maxWidth="lg" sx={{ py: 6 }}>
             <Grid container spacing={4}>
-                {/* Filters Sidebar */}
+                {/* ───────────────────────── filters sidebar ───────────────────────── */}
                 <Grid item xs={12} md={3}>
                     <Box sx={{ position: "sticky", top: 20 }}>
                         <Typography variant="h6" gutterBottom>
                             Filters
                         </Typography>
 
-                        {/* Rating Filter */}
+                        {/* Rating */}
                         <Box sx={{ mb: 4 }}>
                             <Typography gutterBottom>Ratings</Typography>
                             <FormGroup>
@@ -124,7 +155,7 @@ export default function Courses(props: ICoursesProps) {
 
                         <Divider sx={{ my: 2 }} />
 
-                        {/* Category Filter */}
+                        {/* Categories */}
                         <FormControl
                             component="fieldset"
                             sx={{ width: "100%" }}
@@ -154,7 +185,7 @@ export default function Courses(props: ICoursesProps) {
                     </Box>
                 </Grid>
 
-                {/* Course List */}
+                {/* ─────────────────────────── course list ─────────────────────────── */}
                 <Grid item xs={12} md={9}>
                     <Box sx={{ mb: 3 }}>
                         <Typography variant="h5" component="h2" gutterBottom>
@@ -204,6 +235,8 @@ export default function Courses(props: ICoursesProps) {
                                             }
                                             alt={course.title}
                                         />
+
+                                        {/* content */}
                                         <Box
                                             sx={{
                                                 flex: 1,
@@ -235,6 +268,8 @@ export default function Courses(props: ICoursesProps) {
                                                 >
                                                     Instructor Name
                                                 </Typography>
+
+                                                {/* rating */}
                                                 <Box
                                                     sx={{
                                                         display: "flex",
@@ -270,6 +305,8 @@ export default function Courses(props: ICoursesProps) {
                                                     </Typography>
                                                 </Box>
                                             </Box>
+
+                                            {/* price */}
                                             <Box
                                                 sx={{
                                                     display: "flex",
@@ -278,12 +315,22 @@ export default function Courses(props: ICoursesProps) {
                                                     alignItems: "center",
                                                 }}
                                             >
-                                                <Typography
-                                                    variant="h6"
-                                                    fontWeight={700}
-                                                >
-                                                    ₫{Number(course.price).toLocaleString("vi-VN")}
-                                                </Typography>
+                                                {convertedPrices[course.id] ===
+                                                undefined ? (
+                                                    <Skeleton width={80} />
+                                                ) : (
+                                                    <Typography
+                                                        variant="h6"
+                                                        fontWeight={700}
+                                                    >
+                                                        {currencyService.formatPrice(
+                                                            convertedPrices[
+                                                                course.id
+                                                            ],
+                                                            currency
+                                                        )}
+                                                    </Typography>
+                                                )}
                                             </Box>
                                         </Box>
                                     </Card>
@@ -294,6 +341,7 @@ export default function Courses(props: ICoursesProps) {
                 </Grid>
             </Grid>
 
+            {/* ──────────────────────────── pagination ──────────────────────────── */}
             {totalPages > 1 && (
                 <Box
                     sx={{
