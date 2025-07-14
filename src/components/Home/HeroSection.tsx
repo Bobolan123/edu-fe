@@ -1,8 +1,10 @@
 'use client';
 
 import { Typography } from '@mui/material';
+import { useTranslations } from 'next-intl';
 
 export default function HeroSection() {
+    const t = useTranslations('HeroSection');
     return (
         <div className="flex items-center h-[500px] relative">
             <section>
@@ -14,17 +16,16 @@ export default function HeroSection() {
                     playsInline
                 >
                     <source src="/video.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
+                    {t('video_not_supported')}
                 </video>
             </section>
 
             <div className="w-1/3 z-10 text-white mx-60">
                 <Typography variant="h2" className="text-white italic">
-                    Studying Online is now much easier
+                    {t('title')}
                 </Typography>
                 <Typography variant="inherit">
-                    Mindful Maze is an interesting platform that will teach
-                    you in a more interactive way
+                    {t('description')}
                 </Typography>
             </div>
         </div>

@@ -12,6 +12,7 @@ import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
 import { fetchChangePassword, fetchResendOtp } from "@/auth.service";
 import { IsValidEmail } from "../../../utils/utils";
+import { useTranslations } from "next-intl";
 
 const style = {
     position: "absolute" as "absolute",
@@ -25,8 +26,6 @@ const style = {
     p: 4,
 };
 
-const steps = ["Login", "Verify", "Done"];
-
 interface IForgotPasswordModelProps {
     handleCloseModelForgotPassword: any;
     isOpenModelForgotPassword: boolean;
@@ -35,12 +34,15 @@ interface IForgotPasswordModelProps {
 }
 export default function ForgotPasswordModel(props: any) {
     const { isOpenModelForgotPassword, handleCloseModelForgotPassword } = props;
+    const t = useTranslations("ForgotPassword");
 
     const [email, setEmail] = React.useState<string>("");
     const [password, setPassword] = React.useState<string>("");
     const [confirmPassword, setConfirmPassword] = React.useState<string>("");
     const [step, setStep] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
+
+    const steps = [t("steps.login"), t("steps.verify"), t("steps.done")];
 
     const handleResendOtp = async (email: string) => {
         if (!email || !IsValidEmail(email)) {
@@ -114,7 +116,7 @@ export default function ForgotPasswordModel(props: any) {
                                     size="small"
                                     id="email"
                                     name="email"
-                                    label="Email"
+                                    label={t("email")}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
@@ -123,7 +125,7 @@ export default function ForgotPasswordModel(props: any) {
                                     variant="contained"
                                     onClick={() => handleResendOtp(email)}
                                 >
-                                    Submit
+                                    {t("send_otp")}
                                 </Button>
                             </>
                         )}
@@ -135,7 +137,7 @@ export default function ForgotPasswordModel(props: any) {
                                     name="otp"
                                     size="small"
                                     id="otp"
-                                    label="OTP"
+                                    label={t("verify_otp")}
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                 />
@@ -145,7 +147,7 @@ export default function ForgotPasswordModel(props: any) {
                                     size="small"
                                     fullWidth
                                     name="password"
-                                    label="password"
+                                    label={t("new_password")}
                                     id="password"
                                     type="password"
                                     autoComplete="current-password"
@@ -160,7 +162,7 @@ export default function ForgotPasswordModel(props: any) {
                                     type="password"
                                     size="small"
                                     name="confirmPassword"
-                                    label="confirmPassword"
+                                    label={t("confirm_password")}
                                     id="confirmPassword"
                                     autoComplete="current-password"
                                     onChange={(e) =>
@@ -177,7 +179,7 @@ export default function ForgotPasswordModel(props: any) {
                                         )
                                     }
                                 >
-                                    Verify
+                                    {t("change_password")}
                                 </Button>
                             </>
                         )}
@@ -185,13 +187,13 @@ export default function ForgotPasswordModel(props: any) {
                         {step === 2 && (
                             <>
                                 <Typography>
-                                    Succesfully. Please sign in!
+                                    {t("success_message")}
                                 </Typography>
                                 <Button
                                     variant="contained"
                                     onClick={() => handleDone()}
                                 >
-                                    Done
+                                    {t("done_button")}
                                 </Button>
                             </>
                         )}

@@ -31,12 +31,14 @@ import {
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";
 import { slugify } from "../../../utils/utils";
+import { useTranslations } from "next-intl";
 
 interface IManageMyCoursesProps {
     courses: ICourse[] | undefined;
 }
 
 export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
+    const t = useTranslations("ManageMyCourses");
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
 
@@ -99,13 +101,13 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                     component="h1"
                                     className="font-bold tracking-tight mb-2"
                                 >
-                                    My Courses
+                                    {t("title")}
                                 </Typography>
                                 <Typography
                                     variant="body1"
                                     color="text.secondary"
                                 >
-                                    Manage and track your course portfolio
+                                    {t("subtitle")}
                                 </Typography>
                             </div>
                             <Button
@@ -113,13 +115,13 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 startIcon={<Plus className="w-4 h-4" />}
                                 sx={{ textTransform: "none" }}
                             >
-                                Create New Course
+                                {t("create_new")}
                             </Button>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4">
                             <TextField
-                                placeholder="Search courses..."
+                                placeholder={t("search_placeholder")}
                                 variant="outlined"
                                 size="small"
                                 className="flex-1 bg-white"
@@ -137,14 +139,14 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                     size="small"
                                     sx={{ textTransform: "none" }}
                                 >
-                                    All Categories
+                                    {t("all_categories")}
                                 </Button>
                                 <Button
                                     variant="outlined"
                                     size="small"
                                     sx={{ textTransform: "none" }}
                                 >
-                                    Sort by Rating
+                                    {t("sort_by_rating")}
                                 </Button>
                             </div>
                         </div>
@@ -154,28 +156,28 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                     <Grid container spacing={3} className="mb-8">
                         {[
                             {
-                                label: "Total Courses",
+                                label: t("total_courses"),
                                 value: courses?.length || 0,
                                 icon: (
                                     <BookOpen className="h-4 w-4 text-gray-400" />
                                 ),
                             },
                             {
-                                label: "Total Students",
+                                label: t("total_students"),
                                 value: totalStudents,
                                 icon: (
                                     <Users className="h-4 w-4 text-gray-400" />
                                 ),
                             },
                             {
-                                label: "Total Revenue",
+                                label: t("total_revenue"),
                                 value: formatCurrency(totalRevenue),
                                 icon: (
                                     <DollarSign className="h-4 w-4 text-gray-400" />
                                 ),
                             },
                             {
-                                label: "Avg. Rating",
+                                label: t("avg_rating"),
                                 value: averageRating.toFixed(1),
                                 icon: (
                                     <Star className="h-4 w-4 text-gray-400" />
@@ -206,9 +208,9 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                             variant="caption"
                                             color="text.secondary"
                                         >
-                                            {stat.label === "Avg. Rating"
-                                                ? "Across all courses"
-                                                : `For ${stat.label.toLowerCase()}`}
+                                            {stat.label === t("avg_rating")
+                                                ? t("across_all_courses")
+                                                : t("for_stat", { stat: stat.label.toLowerCase() })}
                                         </Typography>
                                     </CardContent>
                                 </Card>
@@ -323,14 +325,14 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                 >
                                                     {course.enrollments
                                                         ?.length || 0}{" "}
-                                                    students
+                                                    {t("students")}
                                                 </Typography>
                                             </Box>
                                             <Typography
                                                 variant="caption"
                                                 color="text.secondary"
                                             >
-                                                Updated{" "}
+                                                {t("updated")}{" "}
                                                 {formatDate(
                                                     course.last_updated
                                                 )}
@@ -351,7 +353,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                         textTransform: "none",
                                                     }}
                                                 >
-                                                    Manage Course
+                                                    {t("manage_course")}
                                                 </Button>
                                             </Link>
 
@@ -360,7 +362,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                 size="small"
                                                 sx={{ textTransform: "none" }}
                                             >
-                                                Analytics
+                                                {t("analytics")}
                                             </Button>
                                         </Box>
                                     </CardContent>
@@ -384,25 +386,25 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                         }}
                     >
                         <MenuItem onClick={handleMenuClose}>
-                            Edit Course
+                            {t("menu_edit")}
                         </MenuItem>
                         <MenuItem onClick={handleMenuClose}>
-                            View Analytics
+                            {t("menu_analytics")}
                         </MenuItem>
                         <MenuItem onClick={handleMenuClose}>
-                            Manage Enrollments
+                            {t("menu_enrollments")}
                         </MenuItem>
                         <MenuItem onClick={handleMenuClose}>
-                            View Reviews
+                            {t("menu_reviews")}
                         </MenuItem>
                         <MenuItem onClick={handleMenuClose}>
-                            Course Settings
+                            {t("menu_settings")}
                         </MenuItem>
                         <MenuItem
                             onClick={handleMenuClose}
                             sx={{ color: "error.main" }}
                         >
-                            Delete Course
+                            {t("menu_delete")}
                         </MenuItem>
                     </Menu>
                 </Container>

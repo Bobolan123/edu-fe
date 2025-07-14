@@ -6,6 +6,285 @@
             "title": "What Our Students Say"
         }
     },
+    "Currency": {
+        "label": "Currency",
+        "selector_label": "Select Currency"
+    },
+    "VideoUpload": {
+        "upload_video": "Upload Video",
+        "select_file": "Please select a video file",
+        "file_size_error": "File size must be less than {maxSize}MB",
+        "uploading": "Uploading... {progress}%",
+        "uploaded": "Uploaded: {filename}",
+        "success": "Video uploaded successfully",
+        "progress": "{progress}% uploaded"
+    },
+    "MyLearning": {
+        "title": "My Learning",
+        "sort_by": "Sort By",
+        "most_recent": "Most Recent",
+        "progress": "Progress",
+        "course_name": "Course Name",
+        "category": "Category",
+        "all_categories": "All Categories",
+        "last_accessed": "Last accessed"
+    },
+    "Cart": {
+        "empty_title": "Your cart is empty",
+        "empty_description": "Discover amazing courses and start learning today!",
+        "browse_courses": "Browse Courses",
+        "title": "Shopping Cart",
+        "course": "course",
+        "courses": "courses",
+        "order_summary": "Order Summary",
+        "total": "Total",
+        "checkout": "Checkout",
+        "continue_shopping": "Continue Shopping",
+        "money_back_guarantee": "30-Day Money-Back Guarantee",
+        "lifetime_access": "Full Lifetime Access",
+        "course_image": "Course image",
+        "untitled_course": "Untitled Course",
+        "no_description": "No description available",
+        "unknown_instructor": "Unknown Instructor"
+    },
+    "Checkout": {
+        "title": "Checkout",
+        "payment_method": "Payment method",
+        "secure_encrypted": "Secure and encrypted",
+        "paypal": "PayPal",
+        "vnpay": "VNPay",
+        "paypal_redirect": "We will redirect you to PayPal's secure servers",
+        "paypal_currency_notice": "PayPal does not support VND. Payment will be made in USD",
+        "charged_amount": "You will be charged",
+        "vnpay_description": "VNPay supports all major Vietnamese banks and e-wallets",
+        "order_details": "Order details",
+        "order_summary": "Order summary",
+        "terms_agreement": "By completing your purchase, you agree to our Terms of Use",
+        "proceed": "Proceed",
+        "money_back_guarantee": "30-Day Money-Back Guarantee",
+        "money_back_description": "Not satisfied? Get a full refund within 30 days"
+    },
+    "ManageMyCourses": {
+        "title": "My Courses",
+        "subtitle": "Manage and track your course portfolio",
+        "create_new": "Create New Course",
+        "search_placeholder": "Search courses...",
+        "all_categories": "All Categories",
+        "sort_by_rating": "Sort by Rating",
+        "total_courses": "Total Courses",
+        "total_students": "Total Students",
+        "total_revenue": "Total Revenue",
+        "avg_rating": "Avg. Rating",
+        "across_all_courses": "Across all courses",
+        "for_stat": "For {stat}",
+        "students": "students",
+        "updated": "Updated",
+        "manage_course": "Manage Course",
+        "analytics": "Analytics",
+        "menu_edit": "Edit Course",
+        "menu_analytics": "View Analytics",
+        "menu_enrollments": "Manage Enrollments",
+        "menu_reviews": "View Reviews",
+        "menu_settings": "Course Settings",
+        "menu_delete": "Delete Course"
+    },
+    "ManageDetailCourse": {
+        "total_students": "Total Students",
+        "revenue": "Revenue",
+        "completion_rate": "Completion Rate",
+        "avg_rating": "Avg. Rating",
+        "from_reviews": "From {count} reviews",
+        "growth_rate": "+8% from last month",
+        "tab_overview": "Overview",
+        "tab_content": "Content",
+        "tab_students": "Students",
+        "tab_reviews": "Reviews",
+        "tab_settings": "Settings",
+        "course_information": "Course Information",
+        "instructor": "Instructor",
+        "duration": "Duration",
+        "last_updated": "Last Updated",
+        "price": "Price",
+        "enrolled_students": "Enrolled Students",
+        "enrolled_days_ago": "Enrolled {days} days ago",
+        "student_reviews": "Student Reviews",
+        "days_ago": "{days} days ago",
+        "course_settings": "Course Settings",
+        "change_thumbnail": "Change Thumbnail",
+        "danger_zone": "Danger Zone",
+        "delete_course": "Delete Course",
+        "delete_warning": "Deleting this course will permanently remove all content..."
+    },
+    "Courses": {
+        "filters": "Filters",
+        "ratings": "Ratings",
+        "categories": "Categories",
+        "rating_up": "{rating} & up",
+        "all_courses": "All Courses",
+        "courses_found": "{count} courses found",
+        "instructor_placeholder": "Instructor Name"
+    },
+    "CourseDetail": {
+        "students": "students",
+        "hours": "hours",
+        "language": "English",
+        "last_updated": "Last updated:",
+        "what_learn": "What you'll learn",
+        "course_content": "Course Content",
+        "sections": "sections",
+        "lectures": "lectures",
+        "total_length": "total length",
+        "add_to_cart": "Add to cart",
+        "buy_now": "Buy now",
+        "money_back_guarantee": "30-Day Money-Back Guarantee"
+    },
+    "Footer": {
+        "brand_description": "Join the more than 150,000 creators who use MindfulMaze to share their knowledge and reach millions of learners worldwide.",
+        "section_explore": "Explore",
+        "section_company": "Company",
+        "section_support": "Support",
+        "products": "Products",
+        "features": "Features",
+        "pricing": "Pricing",
+        "staff_picks": "Staff picks",
+        "product_demo": "Product demo",
+        "careers": "Careers",
+        "blog": "Blog",
+        "press": "Press",
+        "partners": "Partners",
+        "newsletter": "Newsletter",
+        "help_center": "Help Center",
+        "house_rules": "House Rules",
+        "content_guidelines": "Content Guidelines",
+        "privacy_policy": "Privacy Policy",
+        "terms_of_use": "Terms of Use",
+        "cookies_policy": "Cookies Policy",
+        "cookie_preferences": "Cookie Preferences",
+        "ethics_line": "Ethics Line",
+        "accessibility": "Accessibility",
+        "copyright": "Copyright © {year} MindfulMaze, Inc. All rights reserved."
+    },
+    "CreateCourse": {
+        "title": "Create New Course",
+        "basic_info": "Basic Information",
+        "course_title": "Course Title",
+        "course_title_placeholder": "Enter course title",
+        "course_description": "Course Description",
+        "course_description_placeholder": "Describe what students will learn",
+        "course_price": "Course Price",
+        "course_price_placeholder": "Enter price in VND",
+        "course_duration": "Course Duration (minutes)",
+        "course_duration_placeholder": "Enter total duration",
+        "course_categories": "Categories",
+        "course_categories_placeholder": "Select categories",
+        "course_thumbnail": "Course Thumbnail",
+        "upload_thumbnail": "Upload Thumbnail",
+        "course_content": "Course Content",
+        "what_learn": "What Students Will Learn",
+        "what_learn_placeholder": "Enter learning outcome",
+        "add_outcome": "Add Learning Outcome",
+        "course_sections": "Course Sections",
+        "add_section": "Add Section",
+        "section_title": "Section Title",
+        "section_title_placeholder": "Enter section title",
+        "add_lecture": "Add Lecture",
+        "lecture_title": "Lecture Title",
+        "lecture_title_placeholder": "Enter lecture title",
+        "lecture_video": "Lecture Video",
+        "upload_video": "Upload Video",
+        "preview": "Preview",
+        "save_draft": "Save as Draft",
+        "publish": "Publish Course",
+        "cancel": "Cancel",
+        "required_field": "This field is required",
+        "min_price": "Price must be at least 1000 VND",
+        "min_duration": "Duration must be at least 1 minute",
+        "min_outcomes": "Please add at least one learning outcome",
+        "min_sections": "Please add at least one section",
+        "min_lectures": "Each section must have at least one lecture",
+        "success_message": "Course created successfully!",
+        "error_message": "Error creating course. Please try again.",
+        "upload_error": "Upload error for section {section}, lecture {lecture}: {error}",
+        "create_course_error": "Failed to create course: {error}",
+        "course_information": "Course Information",
+        "description": "Description",
+        "language": "Language",
+        "price": "Price",
+        "categories": "Categories",
+        "thumbnail": "Thumbnail",
+        "upload_thumbnail": "Upload Thumbnail",
+        "content": "Content",
+        "what_learn": "What You'll Learn",
+        "add_learning_point": "Add Learning Point",
+        "sections": "Sections",
+        "add_section": "Add Section",
+        "section_title": "Section Title",
+        "lectures": "Lectures",
+        "add_lecture": "Add Lecture",
+        "lecture_title": "Lecture Title",
+        "lecture_video": "Lecture Video",
+        "submit": "Create Course",
+        "submitting": "Creating Course..."
+    },
+    "Footer": {
+        "brand_description": "Join the more than 150,000 creators who use MindfulMaze to share their knowledge...",
+        "section_explore": "Explore",
+        "section_company": "Company",
+        "section_support": "Support",
+        "products": "Products",
+        "features": "Features",
+        "pricing": "Pricing",
+        "staff_picks": "Staff picks",
+        "product_demo": "Product demo",
+        "careers": "Careers",
+        "blog": "Blog",
+        "press": "Press",
+        "partners": "Partners",
+        "newsletter": "Newsletter",
+        "help_center": "Help Center",
+        "house_rules": "House Rules",
+        "content_guidelines": "Content Guidelines",
+        "privacy_policy": "Privacy Policy",
+        "terms_of_use": "Terms of Use",
+        "cookies_policy": "Cookies Policy",
+        "cookie_preferences": "Cookie Preferences",
+        "ethics_line": "Ethics Line",
+        "accessibility": "Accessibility",
+        "copyright": "Copyright © {year} MindfulMaze, Inc. All rights reserved."
+    },
+    "Payment": {
+        "success_title": "Payment Successful!",
+        "success_description": "Thank you for your purchase! Your payment has been processed successfully. You can now access your course materials and start learning.",
+        "whats_next": "What's Next?",
+        "whats_next_list": {
+            "access_materials": "Access your course materials immediately",
+            "download_resources": "Download any available resources",
+            "start_watching": "Start watching video lessons",
+            "join_community": "Join the course community"
+        },
+        "go_to_learning": "Go to My learning",
+        "back_to_home": "Back to Home",
+        "need_help": "Need help? Contact our support team at {email}",
+        "failed_title": "Payment Failed",
+        "failed_description": "We're sorry, but there was an issue processing your payment. Please try again or contact our support team for assistance.",
+        "common_reasons": "Common reasons for payment failure:",
+        "common_reasons_list": {
+            "insufficient_funds": "Insufficient funds",
+            "incorrect_details": "Incorrect card details",
+            "bank_declined": "Bank declined the transaction",
+            "network_issues": "Network connectivity issues"
+        },
+        "need_help_title": "Need Help?",
+        "need_help_description": "If you continue to experience issues, please:",
+        "need_help_list": {
+            "check_details": "Check your payment details",
+            "contact_bank": "Contact your bank",
+            "try_different": "Try a different payment method",
+            "reach_support": "Reach out to our support team"
+        },
+        "try_again": "Try Again",
+        "support_contact": "Contact our support team at {email} or call us at {phone}"
+    },
     "Navbar": {
         "home": "Home",
         "course": "Course",
@@ -51,6 +330,59 @@
         "done_button": "Done",
         "resend_otp": "Resend OTP"
     },
+    "HeroSection": {
+        "title": "Studying Online is now much easier",
+        "description": "Mindful Maze is an interesting platform that will teach you in a more interactive way",
+        "video_not_supported": "Your browser does not support the video tag."
+    },
+    "CategoriesSection": {
+        "title": "Browse Categories",
+        "description": "Discover courses across different subjects"
+    },
+    "FeaturedCoursesSection": {
+        "title": "Featured Courses",
+        "by_instructor": "by {instructor}",
+        "learn_more": "Learn More"
+    },
+    "LearningFeaturesSection": {
+        "features": {
+            "interactive": {
+                "title": "Interactive Learning",
+                "description": "Engage with hands-on exercises and real-world projects"
+            },
+            "flexible": {
+                "title": "Flexible Schedule",
+                "description": "Learn at your own pace with 24/7 access to course materials"
+            },
+            "expert": {
+                "title": "Expert Instructors",
+                "description": "Learn from industry professionals and experienced educators"
+            },
+            "community": {
+                "title": "Community Support",
+                "description": "Connect with fellow learners and get help when you need it"
+            }
+        }
+    },
+    "TestimonialsSection": {
+        "testimonials": {
+            "john": {
+                "name": "John Doe",
+                "role": "Software Developer",
+                "content": "MindfulMaze has completely transformed my learning experience. The interactive approach and expert instructors made complex topics easy to understand."
+            },
+            "sarah": {
+                "name": "Sarah Johnson",
+                "role": "Marketing Manager",
+                "content": "The flexibility to learn at my own pace while maintaining a full-time job has been incredible. Highly recommend this platform!"
+            },
+            "mike": {
+                "name": "Mike Chen",
+                "role": "Data Scientist",
+                "content": "The quality of courses and the community support are outstanding. I've gained skills that directly impacted my career."
+            }
+        }
+    },
     "ResendOTP": {
         "steps": {
             "login": "Login",
@@ -62,6 +394,21 @@
         "verify_account": "Verify your account!",
         "verify_button": "Verify",
         "success_message": "Successfully verified. Please sign in",
+        "done_button": "Done"
+    },
+    "ForgotPassword": {
+        "steps": {
+            "login": "Login",
+            "verify": "Verify",
+            "done": "Done"
+        },
+        "email": "Email",
+        "send_otp": "Send OTP",
+        "verify_otp": "Verify OTP",
+        "new_password": "New Password",
+        "confirm_password": "Confirm Password",
+        "change_password": "Change Password",
+        "success_message": "Password changed successfully",
         "done_button": "Done"
     }
 }

@@ -6,42 +6,43 @@ import { Build as BuildIcon, School as SchoolIcon, Assessment as AssessmentIcon,
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
-const learningFeatures = [
-    {
-        id: 1,
-        title: "Hands-on training",
-        description: "Upskill effectively with AI-powered coding exercises, practice tests, and quizzes.",
-        icon: <BuildIcon sx={{ fontSize: 40 }} />,
-        image: "/home/Hands-on training.png",
-    },
-    {
-        id: 2,
-        title: "Certification prep",
-        description: "Prep for industry-recognized certifications by solving real-world challenges and earn badges along the way.",
-        icon: <SchoolIcon sx={{ fontSize: 40 }} />,
-        image: "/home/Certification-prep.png",
-    },
-    {
-        id: 3,
-        title: "Insights and analytics",
-        description: "Fast-track goals with advanced insights plus a dedicated customer success team to help drive effective learning.",
-        icon: <AssessmentIcon sx={{ fontSize: 40 }} />,
-        badge: "Enterprise Plan",
-        image: "/home/Insights-analytics.png",
-    },
-    {
-        id: 4,
-        title: "Customizable content",
-        description: "Create tailored learning paths for team and organization goals and even host your own content and resources.",
-        icon: <SettingsIcon sx={{ fontSize: 40 }} />,
-        badge: "Enterprise Plan",
-        image: "/home/Customizable-content.png",
-    },
-];
 
 export default function LearningFeaturesSection() {
-    const [selectedFeature, setSelectedFeature] = useState(learningFeatures[0]);
     const t = useTranslations('Home');
+    const tFeatures = useTranslations('LearningFeaturesSection');
+    
+    const learningFeatures = [
+        {
+            id: 1,
+            title: tFeatures('features.interactive.title'),
+            description: tFeatures('features.interactive.description'),
+            icon: <BuildIcon sx={{ fontSize: 40 }} />,
+            image: "/home/Hands-on training.png",
+        },
+        {
+            id: 2,
+            title: tFeatures('features.flexible.title'),
+            description: tFeatures('features.flexible.description'),
+            icon: <SchoolIcon sx={{ fontSize: 40 }} />,
+            image: "/home/Certification-prep.png",
+        },
+        {
+            id: 3,
+            title: tFeatures('features.expert.title'),
+            description: tFeatures('features.expert.description'),
+            icon: <AssessmentIcon sx={{ fontSize: 40 }} />,
+            image: "/home/Insights-analytics.png",
+        },
+        {
+            id: 4,
+            title: tFeatures('features.community.title'),
+            description: tFeatures('features.community.description'),
+            icon: <SettingsIcon sx={{ fontSize: 40 }} />,
+            image: "/home/Customizable-content.png",
+        },
+    ];
+    
+    const [selectedFeature, setSelectedFeature] = useState(learningFeatures[0]);
 
     return (
         <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -92,7 +93,7 @@ export default function LearningFeaturesSection() {
                                                             fontSize: '0.75rem',
                                                         }}
                                                     >
-                                                        {feature.badge}
+                                                        Enterprise Plan
                                                     </Typography>
                                                 )}
                                             </Box>

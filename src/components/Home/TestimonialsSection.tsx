@@ -6,34 +6,37 @@ import { FormatQuote, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRig
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
-const testimonials = [
-    {
-        id: 1,
-        name: "Kati Frantz",
-        role: "Senior Developer at Google",
-        quote: "MindfulMaze has transformed the way I approach learning. The interactive exercises and real-world projects have helped me master new technologies faster than ever.",
-        image: "/home/Testimonial1.png"
-    },
-    {
-        id: 2,
-        name: "Sarah Johnson",
-        role: "Product Manager at Microsoft",
-        quote: "The quality of content and the learning experience on MindfulMaze is unmatched. It's helped our entire team stay up-to-date with the latest technologies.",
-        image: "/home/Testimonial2.png"
-    },
-    {
-        id: 3,
-        name: "James Wilson",
-        role: "Tech Lead at Amazon",
-        quote: "What sets MindfulMaze apart is their focus on practical, hands-on learning. The platform has been instrumental in our team's professional development.",
-        image: "/home/Testimonial3.png"
-    }
-];
 
 export default function TestimonialsSection() {
+    const t = useTranslations('Home.testimonials');
+    const tTestimonials = useTranslations('TestimonialsSection');
+    
+    const testimonials = [
+        {
+            id: 1,
+            name: tTestimonials('testimonials.john.name'),
+            role: tTestimonials('testimonials.john.role'),
+            quote: tTestimonials('testimonials.john.content'),
+            image: "/home/Testimonial1.png"
+        },
+        {
+            id: 2,
+            name: tTestimonials('testimonials.sarah.name'),
+            role: tTestimonials('testimonials.sarah.role'),
+            quote: tTestimonials('testimonials.sarah.content'),
+            image: "/home/Testimonial2.png"
+        },
+        {
+            id: 3,
+            name: tTestimonials('testimonials.mike.name'),
+            role: tTestimonials('testimonials.mike.role'),
+            quote: tTestimonials('testimonials.mike.content'),
+            image: "/home/Testimonial3.png"
+        }
+    ];
+    
     const [currentTestimonial, setCurrentTestimonial] = useState(0);
     const testimonialInterval = useRef<NodeJS.Timeout | null>(null);
-    const t = useTranslations('Home.testimonials');
 
     useEffect(() => {
         // Auto-advance testimonials every 5 seconds

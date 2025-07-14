@@ -15,12 +15,14 @@ import {
   Category as CategoryIcon,
 } from "@mui/icons-material";
 import { ICategory } from "../../../types/entities"; // Keep your original type if already defined
+import { useTranslations } from "next-intl";
 
 interface ICategoriesSectionProps {
   categories: ICategory[] | undefined;
 }
 
 export default function CategoriesSection({ categories }: ICategoriesSectionProps) {
+  const t = useTranslations('CategoriesSection');
   const categoryRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -39,10 +41,10 @@ export default function CategoriesSection({ categories }: ICategoriesSectionProp
         <Box className="flex items-center justify-between mb-8">
           <Box>
             <Typography variant="h4" component="h2" className="font-bold text-gray-900 mb-1">
-              Browse Categories
+              {t('title')}
             </Typography>
             <Typography variant="body1" className="text-gray-600">
-              Discover courses across different subjects
+              {t('description')}
             </Typography>
           </Box>
           <Box className="flex gap-2">

@@ -6,6 +6,285 @@
             "title": "Học Viên Nói Gì Về Chúng Tôi"
         }
     },
+    "Currency": {
+        "label": "Tiền Tệ",
+        "selector_label": "Chọn Tiền Tệ"
+    },
+    "VideoUpload": {
+        "upload_video": "Tải Video Lên",
+        "select_file": "Vui lòng chọn tệp video",
+        "file_size_error": "Kích thước tệp phải nhỏ hơn {maxSize}MB",
+        "uploading": "Đang tải lên... {progress}%",
+        "uploaded": "Đã tải lên: {filename}",
+        "success": "Video đã được tải lên thành công",
+        "progress": "{progress}% đã tải lên"
+    },
+    "MyLearning": {
+        "title": "Học Tập Của Tôi",
+        "sort_by": "Sắp Xếp Theo",
+        "most_recent": "Gần Đây Nhất",
+        "progress": "Tiến Độ",
+        "course_name": "Tên Khóa Học",
+        "category": "Danh Mục",
+        "all_categories": "Tất Cả Danh Mục",
+        "last_accessed": "Lần truy cập cuối"
+    },
+    "Cart": {
+        "empty_title": "Giỏ hàng của bạn đang trống",
+        "empty_description": "Khám phá những khóa học tuyệt vời và bắt đầu học ngay hôm nay!",
+        "browse_courses": "Duyệt Khóa Học",
+        "title": "Giỏ Hàng",
+        "course": "khóa học",
+        "courses": "khóa học",
+        "order_summary": "Tóm Tắt Đơn Hàng",
+        "total": "Tổng Cộng",
+        "checkout": "Thanh Toán",
+        "continue_shopping": "Tiếp Tục Mua Sắm",
+        "money_back_guarantee": "Đảm Bảo Hoàn Tiền 30 Ngày",
+        "lifetime_access": "Truy Cập Trọn Đời",
+        "course_image": "Hình ảnh khóa học",
+        "untitled_course": "Khóa Học Chưa Có Tiêu Đề",
+        "no_description": "Không có mô tả",
+        "unknown_instructor": "Giảng Viên Chưa Xác Định"
+    },
+    "Checkout": {
+        "title": "Thanh Toán",
+        "payment_method": "Phương thức thanh toán",
+        "secure_encrypted": "Bảo mật và mã hóa",
+        "paypal": "PayPal",
+        "vnpay": "VNPay",
+        "paypal_redirect": "Chúng tôi sẽ chuyển hướng bạn đến máy chủ bảo mật của PayPal",
+        "paypal_currency_notice": "PayPal không hỗ trợ VND. Thanh toán sẽ được thực hiện bằng USD",
+        "charged_amount": "Bạn sẽ bị tính phí",
+        "vnpay_description": "VNPay hỗ trợ tất cả các ngân hàng và ví điện tử lớn của Việt Nam",
+        "order_details": "Chi tiết đơn hàng",
+        "order_summary": "Tóm tắt đơn hàng",
+        "terms_agreement": "Bằng cách hoàn tất mua hàng, bạn đồng ý với Điều khoản Sử dụng của chúng tôi",
+        "proceed": "Tiếp Tục",
+        "money_back_guarantee": "Đảm Bảo Hoàn Tiền 30 Ngày",
+        "money_back_description": "Không hài lòng? Nhận hoàn tiền đầy đủ trong vòng 30 ngày"
+    },
+    "ManageMyCourses": {
+        "title": "Khóa Học Của Tôi",
+        "subtitle": "Quản lý và theo dõi danh mục khóa học của bạn",
+        "create_new": "Tạo Khóa Học Mới",
+        "search_placeholder": "Tìm kiếm khóa học...",
+        "all_categories": "Tất Cả Danh Mục",
+        "sort_by_rating": "Sắp xếp theo Đánh giá",
+        "total_courses": "Tổng Khóa Học",
+        "total_students": "Tổng Học Viên",
+        "total_revenue": "Tổng Doanh Thu",
+        "avg_rating": "Đánh Giá Trung Bình",
+        "across_all_courses": "Trên tất cả khóa học",
+        "for_stat": "Cho {stat}",
+        "students": "học viên",
+        "updated": "Cập nhật",
+        "manage_course": "Quản Lý Khóa Học",
+        "analytics": "Phân Tích",
+        "menu_edit": "Chỉnh Sửa Khóa Học",
+        "menu_analytics": "Xem Phân Tích",
+        "menu_enrollments": "Quản Lý Đăng Ký",
+        "menu_reviews": "Xem Đánh Giá",
+        "menu_settings": "Cài Đặt Khóa Học",
+        "menu_delete": "Xóa Khóa Học"
+    },
+    "ManageDetailCourse": {
+        "total_students": "Tổng Học Viên",
+        "revenue": "Doanh Thu",
+        "completion_rate": "Tỷ Lệ Hoàn Thành",
+        "avg_rating": "Đánh Giá Trung Bình",
+        "from_reviews": "Từ {count} đánh giá",
+        "growth_rate": "+8% từ tháng trước",
+        "tab_overview": "Tổng Quan",
+        "tab_content": "Nội Dung",
+        "tab_students": "Học Viên",
+        "tab_reviews": "Đánh Giá",
+        "tab_settings": "Cài Đặt",
+        "course_information": "Thông Tin Khóa Học",
+        "instructor": "Giảng Viên",
+        "duration": "Thời Lượng",
+        "last_updated": "Cập Nhật Lần Cuối",
+        "price": "Giá",
+        "enrolled_students": "Học Viên Đã Đăng Ký",
+        "enrolled_days_ago": "Đăng ký {days} ngày trước",
+        "student_reviews": "Đánh Giá Học Viên",
+        "days_ago": "{days} ngày trước",
+        "course_settings": "Cài Đặt Khóa Học",
+        "change_thumbnail": "Thay Đổi Hình Thu Nhỏ",
+        "danger_zone": "Vùng Nguy Hiểm",
+        "delete_course": "Xóa Khóa Học",
+        "delete_warning": "Xóa khóa học này sẽ xóa vĩnh viễn toàn bộ nội dung..."
+    },
+    "Courses": {
+        "filters": "Bộ Lọc",
+        "ratings": "Đánh Giá",
+        "categories": "Danh Mục",
+        "rating_up": "{rating} & trở lên",
+        "all_courses": "Tất Cả Khóa Học",
+        "courses_found": "Tìm thấy {count} khóa học",
+        "instructor_placeholder": "Tên Giảng Viên"
+    },
+    "CourseDetail": {
+        "students": "học viên",
+        "hours": "giờ",
+        "language": "Tiếng Anh",
+        "last_updated": "Cập nhật lần cuối:",
+        "what_learn": "Bạn sẽ học được gì",
+        "course_content": "Nội Dung Khóa Học",
+        "sections": "phần",
+        "lectures": "bài giảng",
+        "total_length": "tổng thời lượng",
+        "add_to_cart": "Thêm vào giỏ hàng",
+        "buy_now": "Mua ngay",
+        "money_back_guarantee": "Đảm Bảo Hoàn Tiền 30 Ngày"
+    },
+    "Footer": {
+        "brand_description": "Tham gia cùng hơn 150,000 nhà sáng tạo sử dụng MindfulMaze để chia sẻ kiến thức và tiếp cận hàng triệu học viên trên toàn thế giới.",
+        "section_explore": "Khám Phá",
+        "section_company": "Công Ty",
+        "section_support": "Hỗ Trợ",
+        "products": "Sản Phẩm",
+        "features": "Tính Năng",
+        "pricing": "Giá Cả",
+        "staff_picks": "Lựa chọn của nhân viên",
+        "product_demo": "Demo sản phẩm",
+        "careers": "Nghề Nghiệp",
+        "blog": "Blog",
+        "press": "Báo Chí",
+        "partners": "Đối Tác",
+        "newsletter": "Bản Tin",
+        "help_center": "Trung Tâm Trợ Giúp",
+        "house_rules": "Quy Tắc Nhà",
+        "content_guidelines": "Hướng Dẫn Nội Dung",
+        "privacy_policy": "Chính Sách Quyền Riêng Tư",
+        "terms_of_use": "Điều Khoản Sử Dụng",
+        "cookies_policy": "Chính Sách Cookie",
+        "cookie_preferences": "Tùy Chọn Cookie",
+        "ethics_line": "Đường Dây Đạo Đức",
+        "accessibility": "Khả Năng Truy Cập",
+        "copyright": "Bản quyền © {year} MindfulMaze, Inc. Tất cả quyền được bảo lưu."
+    },
+    "CreateCourse": {
+        "title": "Tạo Khóa Học Mới",
+        "basic_info": "Thông Tin Cơ Bản",
+        "course_title": "Tiêu Đề Khóa Học",
+        "course_title_placeholder": "Nhập tiêu đề khóa học",
+        "course_description": "Mô Tả Khóa Học",
+        "course_description_placeholder": "Mô tả những gì học viên sẽ học được",
+        "course_price": "Giá Khóa Học",
+        "course_price_placeholder": "Nhập giá bằng VNĐ",
+        "course_duration": "Thời Lượng Khóa Học (phút)",
+        "course_duration_placeholder": "Nhập tổng thời lượng",
+        "course_categories": "Danh Mục",
+        "course_categories_placeholder": "Chọn danh mục",
+        "course_thumbnail": "Hình Thu Nhỏ Khóa Học",
+        "upload_thumbnail": "Tải Lên Hình Thu Nhỏ",
+        "course_content": "Nội Dung Khóa Học",
+        "what_learn": "Học Viên Sẽ Học Được Gì",
+        "what_learn_placeholder": "Nhập kết quả học tập",
+        "add_outcome": "Thêm Kết Quả Học Tập",
+        "course_sections": "Phần Khóa Học",
+        "add_section": "Thêm Phần",
+        "section_title": "Tiêu Đề Phần",
+        "section_title_placeholder": "Nhập tiêu đề phần",
+        "add_lecture": "Thêm Bài Giảng",
+        "lecture_title": "Tiêu Đề Bài Giảng",
+        "lecture_title_placeholder": "Nhập tiêu đề bài giảng",
+        "lecture_video": "Video Bài Giảng",
+        "upload_video": "Tải Lên Video",
+        "preview": "Xem Trước",
+        "save_draft": "Lưu Dưới Dạng Bản Nháp",
+        "publish": "Xuất Bản Khóa Học",
+        "cancel": "Hủy",
+        "required_field": "Trường này là bắt buộc",
+        "min_price": "Giá phải ít nhất 1000 VNĐ",
+        "min_duration": "Thời lượng phải ít nhất 1 phút",
+        "min_outcomes": "Vui lòng thêm ít nhất một kết quả học tập",
+        "min_sections": "Vui lòng thêm ít nhất một phần",
+        "min_lectures": "Mỗi phần phải có ít nhất một bài giảng",
+        "success_message": "Khóa học đã được tạo thành công!",
+        "error_message": "Lỗi tạo khóa học. Vui lòng thử lại.",
+        "upload_error": "Lỗi tải lên phần {section}, bài giảng {lecture}: {error}",
+        "create_course_error": "Lỗi tạo khóa học: {error}",
+        "course_information": "Thông Tin Khóa Học",
+        "description": "Mô Tả",
+        "language": "Ngôn Ngữ",
+        "price": "Giá",
+        "categories": "Danh Mục",
+        "thumbnail": "Hình Thu Nhỏ",
+        "upload_thumbnail": "Tải Lên Hình Thu Nhỏ",
+        "content": "Nội Dung",
+        "what_learn": "Bạn Sẽ Học Được Gì",
+        "add_learning_point": "Thêm Điểm Học Tập",
+        "sections": "Phần",
+        "add_section": "Thêm Phần",
+        "section_title": "Tiêu Đề Phần",
+        "lectures": "Bài Giảng",
+        "add_lecture": "Thêm Bài Giảng",
+        "lecture_title": "Tiêu Đề Bài Giảng",
+        "lecture_video": "Video Bài Giảng",
+        "submit": "Tạo Khóa Học",
+        "submitting": "Đang Tạo Khóa Học..."
+    },
+    "Footer": {
+        "brand_description": "Tham gia cùng hơn 150,000 nhà sáng tạo sử dụng MindfulMaze để chia sẻ kiến thức...",
+        "section_explore": "Khám Phá",
+        "section_company": "Công Ty",
+        "section_support": "Hỗ Trợ",
+        "products": "Sản Phẩm",
+        "features": "Tính Năng",
+        "pricing": "Giá Cả",
+        "staff_picks": "Lựa chọn của nhân viên",
+        "product_demo": "Demo sản phẩm",
+        "careers": "Nghề Nghiệp",
+        "blog": "Blog",
+        "press": "Báo Chí",
+        "partners": "Đối Tác",
+        "newsletter": "Bản Tin",
+        "help_center": "Trung Tâm Trợ Giúp",
+        "house_rules": "Quy Tắc Nhà",
+        "content_guidelines": "Hướng Dẫn Nội Dung",
+        "privacy_policy": "Chính Sách Quyền Riêng Tư",
+        "terms_of_use": "Điều Khoản Sử Dụng",
+        "cookies_policy": "Chính Sách Cookie",
+        "cookie_preferences": "Tùy Chọn Cookie",
+        "ethics_line": "Đường Dây Đạo Đức",
+        "accessibility": "Khả Năng Truy Cập",
+        "copyright": "Bản quyền © {year} MindfulMaze, Inc. Tất cả quyền được bảo lưu."
+    },
+    "Payment": {
+        "success_title": "Thanh Toán Thành Công!",
+        "success_description": "Cảm ơn bạn đã mua hàng! Thanh toán của bạn đã được xử lý thành công. Bây giờ bạn có thể truy cập tài liệu khóa học và bắt đầu học.",
+        "whats_next": "Tiếp Theo Là Gì?",
+        "whats_next_list": {
+            "access_materials": "Truy cập tài liệu khóa học ngay lập tức",
+            "download_resources": "Tải xuống tài nguyên có sẵn",
+            "start_watching": "Bắt đầu xem các bài học video",
+            "join_community": "Tham gia cộng đồng khóa học"
+        },
+        "go_to_learning": "Đi đến Học tập của tôi",
+        "back_to_home": "Trở về Trang Chủ",
+        "need_help": "Cần trợ giúp? Liên hệ đội ngũ hỗ trợ của chúng tôi tại {email}",
+        "failed_title": "Thanh Toán Thất Bại",
+        "failed_description": "Chúng tôi xin lỗi, nhưng có vấn đề khi xử lý thanh toán của bạn. Vui lòng thử lại hoặc liên hệ đội ngũ hỗ trợ để được trợ giúp.",
+        "common_reasons": "Lý do phổ biến khiến thanh toán thất bại:",
+        "common_reasons_list": {
+            "insufficient_funds": "Không đủ tiền",
+            "incorrect_details": "Thông tin thẻ không chính xác",
+            "bank_declined": "Ngân hàng từ chối giao dịch",
+            "network_issues": "Vấn đề kết nối mạng"
+        },
+        "need_help_title": "Cần Trợ Giúp?",
+        "need_help_description": "Nếu bạn tiếp tục gặp vấn đề, vui lòng:",
+        "need_help_list": {
+            "check_details": "Kiểm tra thông tin thanh toán của bạn",
+            "contact_bank": "Liên hệ ngân hàng của bạn",
+            "try_different": "Thử phương thức thanh toán khác",
+            "reach_support": "Liên hệ đội ngũ hỗ trợ của chúng tôi"
+        },
+        "try_again": "Thử Lại",
+        "support_contact": "Liên hệ đội ngũ hỗ trợ của chúng tôi tại {email} hoặc gọi cho chúng tôi tại {phone}"
+    },
     "Navbar": {
         "home": "Trang Chủ",
         "course": "Khóa Học",
@@ -51,6 +330,59 @@
         "done_button": "Hoàn Thành",
         "resend_otp": "Gửi Lại OTP"
     },
+    "HeroSection": {
+        "title": "Học trực tuyến giờ đây dễ dàng hơn nhiều",
+        "description": "Mindful Maze là một nền tảng thú vị sẽ dạy bạn theo cách tương tác hơn",
+        "video_not_supported": "Trình duyệt của bạn không hỗ trợ thẻ video."
+    },
+    "CategoriesSection": {
+        "title": "Duyệt Danh Mục",
+        "description": "Khám phá các khóa học theo từng chủ đề khác nhau"
+    },
+    "FeaturedCoursesSection": {
+        "title": "Khóa Học Nổi Bật",
+        "by_instructor": "bởi {instructor}",
+        "learn_more": "Tìm Hiểu Thêm"
+    },
+    "LearningFeaturesSection": {
+        "features": {
+            "interactive": {
+                "title": "Học Tập Tương Tác",
+                "description": "Tham gia các bài tập thực hành và dự án thực tế"
+            },
+            "flexible": {
+                "title": "Lịch Học Linh Hoạt",
+                "description": "Học theo tốc độ riêng với quyền truy cập 24/7 vào tài liệu khóa học"
+            },
+            "expert": {
+                "title": "Giảng Viên Chuyên Gia",
+                "description": "Học từ các chuyên gia trong ngành và giáo viên có kinh nghiệm"
+            },
+            "community": {
+                "title": "Hỗ Trợ Cộng Đồng",
+                "description": "Kết nối với những người học khác và nhận trợ giúp khi cần"
+            }
+        }
+    },
+    "TestimonialsSection": {
+        "testimonials": {
+            "john": {
+                "name": "John Doe",
+                "role": "Lập Trình Viên",
+                "content": "MindfulMaze đã hoàn toàn thay đổi trải nghiệm học tập của tôi. Cách tiếp cận tương tác và giảng viên chuyên gia đã làm cho những chủ đề phức tạp trở nên dễ hiểu."
+            },
+            "sarah": {
+                "name": "Sarah Johnson",
+                "role": "Quản Lý Marketing",
+                "content": "Sự linh hoạt để học theo tốc độ riêng trong khi vẫn làm việc toàn thời gian thật tuyệt vời. Rất khuyến khích nền tảng này!"
+            },
+            "mike": {
+                "name": "Mike Chen",
+                "role": "Nhà Khoa Học Dữ Liệu",
+                "content": "Chất lượng khóa học và hỗ trợ cộng đồng đều xuất sắc. Tôi đã có được những kỹ năng tác động trực tiếp đến sự nghiệp của mình."
+            }
+        }
+    },
     "ResendOTP": {
         "steps": {
             "login": "Đăng Nhập",
@@ -62,6 +394,21 @@
         "verify_account": "Xác thực tài khoản của bạn!",
         "verify_button": "Xác Thực",
         "success_message": "Xác thực thành công. Vui lòng đăng nhập",
+        "done_button": "Hoàn Thành"
+    },
+    "ForgotPassword": {
+        "steps": {
+            "login": "Đăng Nhập",
+            "verify": "Xác Thực",
+            "done": "Hoàn Thành"
+        },
+        "email": "Email",
+        "send_otp": "Gửi OTP",
+        "verify_otp": "Xác Thực OTP",
+        "new_password": "Mật Khẩu Mới",
+        "confirm_password": "Xác Nhận Mật Khẩu",
+        "change_password": "Thay Đổi Mật Khẩu",
+        "success_message": "Đổi mật khẩu thành công",
         "done_button": "Hoàn Thành"
     }
 }

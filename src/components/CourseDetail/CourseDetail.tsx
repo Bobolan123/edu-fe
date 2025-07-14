@@ -31,6 +31,7 @@ import { Play } from "lucide-react";
 import { addCartItem } from "@/actions";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 interface ICourseDetailProps {
     course: ICourse;
@@ -42,6 +43,7 @@ export default function CourseDetail({
     courseContent,
 }: ICourseDetailProps) {
     const { data } = useSession();
+    const t = useTranslations('CourseDetail');
     
 
     const handleAddToCart = async (courseId: number) => {
@@ -85,7 +87,7 @@ export default function CourseDetail({
                             />
                             <Typography>({course?.average_rating})</Typography>
                             <Typography color="text.secondary">
-                                {course?.total_students} students
+                                {course?.total_students} {t('students')}
                             </Typography>
                         </Box>
 
@@ -100,15 +102,15 @@ export default function CourseDetail({
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <AccessTimeIcon sx={{ mr: 1 }} />
                                 <Typography>
-                                    {Math.round(course?.duration / 60)} hours
+                                    {Math.round(course?.duration / 60)} {t('hours')}
                                 </Typography>
                             </Box>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <LanguageIcon sx={{ mr: 1 }} />
-                                <Typography>English</Typography>
+                                <Typography>{t('language')}</Typography>
                             </Box>
                             <Typography>
-                                Last updated:{" "}
+                                {t('last_updated')}{" "}
                                 {format(
                                     new Date(course?.last_updated),
                                     "MMM dd, yyyy"
@@ -133,7 +135,7 @@ export default function CourseDetail({
                             }}
                         >
                             <Typography variant="h5" gutterBottom>
-                                What you'll learn
+                                {t('what_learn')}
                             </Typography>
                             <Grid container spacing={2}>
                                 {courseContent?.whatYoullLearn?.map(
@@ -154,7 +156,7 @@ export default function CourseDetail({
                         {/* Course Content */}
                         <Box sx={{ mt: 6 }}>
                             <Typography variant="h5" gutterBottom>
-                                Course Content
+                                {t('course_content')}
                             </Typography>
                             <Box
                                 sx={{
@@ -174,7 +176,7 @@ export default function CourseDetail({
                                     <BookIcon fontSize="small" />
                                     <Typography>
                                         {courseContent?.sections?.length}{" "}
-                                        sections
+                                        {t('sections')}
                                     </Typography>
                                 </Box>
                                 <Box
@@ -186,7 +188,7 @@ export default function CourseDetail({
                                 >
                                     <PlayIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.totalLectures} lectures
+                                        {courseContent?.totalLectures} {t('lectures')}
                                     </Typography>
                                 </Box>
                                 <Box
@@ -198,8 +200,7 @@ export default function CourseDetail({
                                 >
                                     <ClockIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.totalLength} total
-                                        length
+                                        {courseContent?.totalLength} {t('total_length')}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -251,7 +252,7 @@ export default function CourseDetail({
                                                 className="flex items-center gap-1"
                                             >
                                                 <Play className="w-4 h-4" />
-                                                {section.totalLectures} lectures
+                                                {section.totalLectures} {t('lectures')}
                                             </Typography>
                                         </Box>
                                     </AccordionSummary>
@@ -362,7 +363,7 @@ export default function CourseDetail({
                                             fontWeight: 600,
                                         }}
                                     >
-                                        Add to cart
+                                        {t('add_to_cart')}
                                     </Button>
                                     <Button
                                         variant="outlined"
@@ -370,7 +371,7 @@ export default function CourseDetail({
                                         fullWidth
                                         sx={{ py: 1.3, fontWeight: 600 }}
                                     >
-                                        Buy now
+                                        {t('buy_now')}
                                     </Button>
                                     <Typography
                                         variant="caption"
@@ -378,7 +379,7 @@ export default function CourseDetail({
                                         sx={{ mt: 1 }}
                                         color="text.secondary"
                                     >
-                                        30-Day Money-Back Guarantee
+                                        {t('money_back_guarantee')}
                                     </Typography>
                                 </CardContent>
                             </Card>

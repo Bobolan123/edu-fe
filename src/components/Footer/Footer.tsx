@@ -11,37 +11,7 @@ import {
     LinkedIn,
     MusicNote,
 } from '@mui/icons-material';
-
-const footerLinks = {
-    explore: {
-        title: 'Explore',
-        links: [
-            { name: 'Products', href: '/products' },
-            { name: 'Features', href: '/features' },
-            { name: 'Pricing', href: '/pricing' },
-            { name: 'Staff picks', href: '/staff-picks' },
-            { name: 'Product demo', href: '/demo' },
-        ],
-    },
-    company: {
-        title: 'Company',
-        links: [
-            { name: 'Careers', href: '/careers' },
-            { name: 'Blog', href: '/blog' },
-            { name: 'Press', href: '/press' },
-            { name: 'Partners', href: '/partners' },
-            { name: 'Newsletter', href: '/newsletter' },
-        ],
-    },
-    support: {
-        title: 'Support',
-        links: [
-            { name: 'Help Center', href: '/help' },
-            { name: 'House Rules', href: '/rules' },
-            { name: 'Content Guidelines', href: '/guidelines' },
-        ],
-    },
-};
+import { useTranslations } from 'next-intl';
 
 const socialLinks = [
     { Icon: YouTube, href: 'https://youtube.com' },
@@ -53,16 +23,48 @@ const socialLinks = [
     { Icon: MusicNote, href: 'https://tiktok.com' },
 ];
 
-const legalLinks = [
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Use', href: '/terms' },
-    { name: 'Cookies Policy', href: '/cookies' },
-    { name: 'Cookie Preferences', href: '/cookie-preferences' },
-    { name: 'Ethics Line', href: '/ethics' },
-    { name: 'Accessibility', href: '/accessibility' },
-];
-
 export default function Footer() {
+    const t = useTranslations('Footer');
+    
+    const footerLinks = {
+        explore: {
+            title: t('section_explore'),
+            links: [
+                { name: t('products'), href: '/products' },
+                { name: t('features'), href: '/features' },
+                { name: t('pricing'), href: '/pricing' },
+                { name: t('staff_picks'), href: '/staff-picks' },
+                { name: t('product_demo'), href: '/demo' },
+            ],
+        },
+        company: {
+            title: t('section_company'),
+            links: [
+                { name: t('careers'), href: '/careers' },
+                { name: t('blog'), href: '/blog' },
+                { name: t('press'), href: '/press' },
+                { name: t('partners'), href: '/partners' },
+                { name: t('newsletter'), href: '/newsletter' },
+            ],
+        },
+        support: {
+            title: t('section_support'),
+            links: [
+                { name: t('help_center'), href: '/help' },
+                { name: t('house_rules'), href: '/rules' },
+                { name: t('content_guidelines'), href: '/guidelines' },
+            ],
+        },
+    };
+    
+    const legalLinks = [
+        { name: t('privacy_policy'), href: '/privacy' },
+        { name: t('terms_of_use'), href: '/terms' },
+        { name: t('cookies_policy'), href: '/cookies' },
+        { name: t('cookie_preferences'), href: '/cookie-preferences' },
+        { name: t('ethics_line'), href: '/ethics' },
+        { name: t('accessibility'), href: '/accessibility' },
+    ];
     return (
         <Box className="bg-[#1B1B1B] text-white pt-8 pb-4">
             <Container maxWidth="lg">
@@ -76,9 +78,7 @@ export default function Footer() {
                             </Typography>
                         </Box>
                         <Typography variant="body2" className="mb-3 opacity-80">
-                            Join the more than 150,000 creators who use MindfulMaze to share their knowledge.
-                            Easily create and sell courses, coaching, and digital downloads with our powerful
-                            yet simple no-code platform.
+                            {t('brand_description')}
                         </Typography>
                         {/* Social Media Icons */}
                         <Box className="flex gap-4">
@@ -120,7 +120,7 @@ export default function Footer() {
                 {/* Bottom Section */}
                 <Box className="mt-8 pt-3 border-t border-white/10 flex flex-col md:flex-row justify-between items-center md:items-start gap-4">
                     <Typography variant="body2" className="opacity-80">
-                        Copyright © {new Date().getFullYear()} MindfulMaze, Inc. All rights reserved.
+                        {t('copyright', { year: new Date().getFullYear() })}
                     </Typography>
                     <Box className="flex gap-6 flex-wrap justify-center">
                         {legalLinks.map((link) => (

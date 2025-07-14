@@ -20,6 +20,7 @@ import {
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";
 import { slugify } from "../../../utils/utils";
+import { useTranslations } from "next-intl";
 
 interface IFeaturedCoursesSectionProps {
     courses: ICourse[] | undefined;
@@ -28,6 +29,7 @@ interface IFeaturedCoursesSectionProps {
 export default function FeaturedCoursesSection({
     courses,
 }: IFeaturedCoursesSectionProps) {
+    const t = useTranslations('FeaturedCoursesSection');
     const courseRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: "left" | "right") => {
@@ -44,7 +46,7 @@ export default function FeaturedCoursesSection({
         <Container maxWidth="lg" sx={{ py: 6 }}>
             <div className="flex justify-between items-center mb-6">
                 <Typography variant="h4" component="h2">
-                    Featured Courses
+                    {t('title')}
                 </Typography>
                 <div className="flex gap-2">
                     <IconButton onClick={() => scroll("left")}>
@@ -97,7 +99,7 @@ export default function FeaturedCoursesSection({
                                     variant="body2"
                                     color="text.secondary"
                                 >
-                                    by {course.instructor?.name}
+                                    {t('by_instructor', { instructor: course.instructor?.name })}
                                 </Typography>
                                 <Typography
                                     variant="h6"
@@ -129,7 +131,7 @@ export default function FeaturedCoursesSection({
 
                             <CardActions className="px-4 pb-4 pt-0">
                                 <Button size="small" color="primary">
-                                    Learn More
+                                    {t('learn_more')}
                                 </Button>
                             </CardActions>
                         </Link>

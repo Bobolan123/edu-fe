@@ -26,6 +26,7 @@ import Link from "next/link";
 import { slugify } from "../../../utils/utils";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
+import { useTranslations } from "next-intl";
 
 interface ICoursesProps {
     courses: ICourse[] | undefined;
@@ -36,6 +37,7 @@ interface ICoursesProps {
 }
 
 export default function Courses(props: ICoursesProps) {
+    const t = useTranslations('Courses');
     const {
         courses = [],
         currentPage,
@@ -129,12 +131,12 @@ export default function Courses(props: ICoursesProps) {
                 <Grid item xs={12} md={3}>
                     <Box sx={{ position: "sticky", top: 20 }}>
                         <Typography variant="h6" gutterBottom>
-                            Filters
+                            {t('filters')}
                         </Typography>
 
                         {/* Rating */}
                         <Box sx={{ mb: 4 }}>
-                            <Typography gutterBottom>Ratings</Typography>
+                            <Typography gutterBottom>{t('ratings')}</Typography>
                             <FormGroup>
                                 {[4.5, 4.0, 3.5, 3.0].map((r) => (
                                     <FormControlLabel
@@ -147,7 +149,7 @@ export default function Courses(props: ICoursesProps) {
                                                 }
                                             />
                                         }
-                                        label={`${r} & up`}
+                                        label={t('rating_up', { rating: r })}
                                     />
                                 ))}
                             </FormGroup>
@@ -160,7 +162,7 @@ export default function Courses(props: ICoursesProps) {
                             component="fieldset"
                             sx={{ width: "100%" }}
                         >
-                            <FormLabel component="legend">Categories</FormLabel>
+                            <FormLabel component="legend">{t('categories')}</FormLabel>
                             <FormGroup>
                                 {categories.map((category) => (
                                     <FormControlLabel
@@ -189,10 +191,10 @@ export default function Courses(props: ICoursesProps) {
                 <Grid item xs={12} md={9}>
                     <Box sx={{ mb: 3 }}>
                         <Typography variant="h5" component="h2" gutterBottom>
-                            All Courses
+                            {t('all_courses')}
                         </Typography>
                         <Typography color="text.secondary">
-                            {totalItems} courses found
+                            {t('courses_found', { count: totalItems })}
                         </Typography>
                     </Box>
 
@@ -266,7 +268,7 @@ export default function Courses(props: ICoursesProps) {
                                                     color="text.secondary"
                                                     sx={{ mb: 1 }}
                                                 >
-                                                    Instructor Name
+                                                    {t('instructor_placeholder')}
                                                 </Typography>
 
                                                 {/* rating */}

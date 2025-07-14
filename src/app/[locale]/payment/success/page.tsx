@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Container, Typography, Box, Button, Paper } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export const metadata: Metadata = {
   title: 'Payment Successful - MindfulMaze',
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function PaymentSuccessPage() {
+  const t = useTranslations('Payment');
+  
   return (
     <Container maxWidth="md" className="py-12">
       <Paper elevation={3} className="p-8 text-center">
@@ -22,23 +25,22 @@ export default function PaymentSuccessPage() {
           />
           
           <Typography variant="h4" component="h1" className="font-bold">
-            Payment Successful!
+            {t('success_title')}
           </Typography>
           
           <Typography variant="body1" color="text.secondary" className="max-w-md">
-            Thank you for your purchase! Your payment has been processed successfully. 
-            You can now access your course materials and start learning.
+            {t('success_description')}
           </Typography>
 
           <Box className="w-full max-w-md mt-8 p-6 bg-green-50 rounded-lg">
             <Typography variant="h6" gutterBottom>
-              What's Next?
+              {t('whats_next')}
             </Typography>
             <ul className="list-disc list-inside text-left space-y-2">
-              <li>Access your course materials immediately</li>
-              <li>Download any available resources</li>
-              <li>Start watching video lessons</li>
-              <li>Join the course community</li>
+              <li>{t('whats_next_list.access_materials')}</li>
+              <li>{t('whats_next_list.download_resources')}</li>
+              <li>{t('whats_next_list.start_watching')}</li>
+              <li>{t('whats_next_list.join_community')}</li>
             </ul>
           </Box>
 
@@ -51,7 +53,7 @@ export default function PaymentSuccessPage() {
               href="/my-learning"
               className="w-full sm:w-auto"
             >
-              Go to My learning
+              {t('go_to_learning')}
             </Button>
             <Button
               variant="outlined"
@@ -61,16 +63,13 @@ export default function PaymentSuccessPage() {
               href="/"
               className="w-full sm:w-auto"
             >
-              Back to Home
+              {t('back_to_home')}
             </Button>
           </Box>
 
           <Box className="mt-8 text-sm text-gray-500">
             <Typography variant="body2">
-              Need help? Contact our support team at{' '}
-              <a href="mailto:support@mindfulmaze.com" className="text-primary hover:underline">
-                support@mindfulmaze.com
-              </a>
+              {t('need_help', { email: 'support@mindfulmaze.com' })}
             </Typography>
           </Box>
         </Box>

@@ -30,6 +30,7 @@ import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
+import { useTranslations } from "next-intl";
 
 interface ICartProps {
     cartItems?: ICartItem[];
@@ -38,6 +39,7 @@ interface ICartProps {
 const Cart = ({ cartItems = [] }: ICartProps) => {
     const { data: session } = useSession();
     const { currency, setCurrency } = useCurrency();
+    const t = useTranslations('Cart');
     const [convertedTotal, setConvertedTotal] = useState(0);
     const [convertedPrices, setConvertedPrices] = useState<
         Record<number, number>
@@ -92,21 +94,21 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                         size={64}
                     />
                     <Typography variant="h5" gutterBottom>
-                        Your cart is empty
+                        {t('emptyTitle')}
                     </Typography>
                     <Typography
                         variant="body2"
                         color="text.secondary"
                         gutterBottom
                     >
-                        Discover amazing courses and start learning today!
+                        {t('emptyDescription')}
                     </Typography>
                     <MUIButton
                         variant="contained"
                         sx={{ mt: 3 }}
                         color="primary"
                     >
-                        Browse Courses
+                        {t('browseCourses')}
                     </MUIButton>
                 </Card>
             </Box>
@@ -118,11 +120,10 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
             <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <Box className="mb-8">
                     <Typography variant="h4" gutterBottom>
-                        Shopping Cart
+                        {t('title')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        {cartItems.length} course
-                        {cartItems.length !== 1 ? "s" : ""} in your cart
+                        {t('itemCount', { count: cartItems.length })}
                     </Typography>
                 </Box>
 
@@ -154,7 +155,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                 }
                                                 alt={
                                                     cartItem?.course?.title ||
-                                                    "Course image"
+                                                    t('courseImage')
                                                 }
                                                 width={300}
                                                 height={200}
@@ -176,7 +177,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                     <Typography variant="h6">
                                                         {cartItem?.course
                                                             ?.title ||
-                                                            "Untitled Course"}
+                                                            t('untitledCourse')}
                                                     </Typography>
                                                     <MUIButton
                                                         size="small"
@@ -198,7 +199,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                 >
                                                     {cartItem?.course
                                                         ?.description ||
-                                                        "No description available."}
+                                                        t('noDescription')}
                                                 </Typography>
 
                                                 <Box
@@ -217,7 +218,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                             cartItem?.course
                                                                 ?.instructor
                                                                 ?.name ||
-                                                            "Instructor"
+                                                            t('instructor')
                                                         }
                                                         width={32}
                                                         height={32}
@@ -227,7 +228,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                         {cartItem?.course
                                                             ?.instructor
                                                             ?.name ||
-                                                            "Unknown Instructor"}
+                                                            t('unknownInstructor')}
                                                     </Typography>
                                                 </Box>
 
@@ -300,7 +301,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                 borderRadius: 3,
                             }}
                         >
-                            <CardHeader title="Order Summary" />
+                            <CardHeader title={t('orderSummary')} />
 
                             <CardContent>
                                 <Box
@@ -312,7 +313,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         variant="subtitle1"
                                         fontWeight={600}
                                     >
-                                        Total
+                                        {t('total')}
                                     </Typography>
                                     <Typography
                                         variant="subtitle1"
@@ -331,7 +332,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         sx={{ mt: 1.5 }}
                                         startIcon={<CreditCard />}
                                     >
-                                        Checkout
+                                        {t('checkout')}
                                     </MUIButton>
                                 </Link>
                                 <Link href={`/courses`}>
@@ -340,7 +341,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         fullWidth
                                         sx={{ mt: 2 }}
                                     >
-                                        Continue Shopping
+                                        {t('continueShopping')}
                                     </MUIButton>
                                 </Link>
                                 <Box
@@ -354,13 +355,13 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         variant="body2"
                                         color="green.800"
                                     >
-                                        30-Day Money-Back Guarantee
+                                        {t('moneyBackGuarantee')}
                                     </Typography>
                                     <Typography
                                         variant="caption"
                                         color="green.600"
                                     >
-                                        Full Lifetime Access
+                                        {t('lifetimeAccess')}
                                     </Typography>
                                 </Box>
                             </CardContent>

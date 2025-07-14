@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Container, Typography, Box, Button, Paper, Alert } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export const metadata: Metadata = {
   title: 'Payment Failed - MindfulMaze',
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function PaymentFailedPage() {
+  const t = useTranslations('Payment');
+  
   return (
     <Container maxWidth="md" className="py-12">
       <Paper elevation={3} className="p-8 text-center">
@@ -22,38 +25,37 @@ export default function PaymentFailedPage() {
           />
           
           <Typography variant="h4" component="h1" className="font-bold">
-            Payment Failed
+            {t('failed_title')}
           </Typography>
           
           <Typography variant="body1" color="text.secondary" className="max-w-md">
-            We're sorry, but there was an issue processing your payment. 
-            Please try again or contact our support team for assistance.
+            {t('failed_description')}
           </Typography>
 
           <Alert severity="error" className="w-full max-w-md">
             <Typography variant="body2">
-              Common reasons for payment failure:
+              {t('common_reasons')}
             </Typography>
             <ul className="list-disc list-inside text-left mt-2">
-              <li>Insufficient funds</li>
-              <li>Incorrect card details</li>
-              <li>Bank declined the transaction</li>
-              <li>Network connectivity issues</li>
+              <li>{t('common_reasons_list.insufficient_funds')}</li>
+              <li>{t('common_reasons_list.incorrect_details')}</li>
+              <li>{t('common_reasons_list.bank_declined')}</li>
+              <li>{t('common_reasons_list.network_issues')}</li>
             </ul>
           </Alert>
 
           <Box className="w-full max-w-md mt-8 p-6 bg-gray-50 rounded-lg">
             <Typography variant="h6" gutterBottom>
-              Need Help?
+              {t('need_help_title')}
             </Typography>
             <Typography variant="body2" className="text-left">
-              If you continue to experience issues, please:
+              {t('need_help_description')}
             </Typography>
             <ul className="list-disc list-inside text-left space-y-2 mt-2">
-              <li>Check your payment details</li>
-              <li>Contact your bank</li>
-              <li>Try a different payment method</li>
-              <li>Reach out to our support team</li>
+              <li>{t('need_help_list.check_details')}</li>
+              <li>{t('need_help_list.contact_bank')}</li>
+              <li>{t('need_help_list.try_different')}</li>
+              <li>{t('need_help_list.reach_support')}</li>
             </ul>
           </Box>
 
@@ -66,7 +68,7 @@ export default function PaymentFailedPage() {
               href="/checkout"
               className="w-full sm:w-auto"
             >
-              Try Again
+              {t('try_again')}
             </Button>
             <Button
               variant="outlined"
@@ -76,20 +78,16 @@ export default function PaymentFailedPage() {
               href="/"
               className="w-full sm:w-auto"
             >
-              Back to Home
+              {t('back_to_home')}
             </Button>
           </Box>
 
           <Box className="mt-8 text-sm text-gray-500">
             <Typography variant="body2">
-              Contact our support team at{' '}
-              <a href="mailto:support@mindfulmaze.com" className="text-primary hover:underline">
-                support@mindfulmaze.com
-              </a>
-              {' '}or call us at{' '}
-              <a href="tel:+1234567890" className="text-primary hover:underline">
-                +1 (234) 567-890
-              </a>
+              {t('support_contact', { 
+                email: 'support@mindfulmaze.com', 
+                phone: '+1 (234) 567-890' 
+              })}
             </Typography>
           </Box>
         </Box>

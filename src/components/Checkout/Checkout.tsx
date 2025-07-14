@@ -21,6 +21,7 @@ import { useSession } from "next-auth/react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
@@ -28,6 +29,7 @@ interface ICheckoutProps {
 }
 
 export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
+    const t = useTranslations("Checkout");
     const { data: session } = useSession();
     const { currency } = useCurrency();
     const [paymentMethod, setPaymentMethod] = useState("vnpay");
@@ -64,7 +66,7 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
             }
         } catch (error) {
             console.error("Checkout error:", error);
-            toast.error("Something went wrong during checkout.");
+            toast.error(t("checkout_error"));
         }
     };
 
@@ -75,7 +77,7 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                     variant="h4"
                     className="font-bold mb-8 text-gray-900"
                 >
-                    Checkout
+                    {t("title")}
                 </Typography>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -88,11 +90,11 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                                     variant="h6"
                                     className="font-semibold"
                                 >
-                                    Payment method
+                                    {t("payment_method")}
                                 </Typography>
                                 <div className="flex items-center text-sm text-gray-600">
                                     <Lock className="w-4 h-4 mr-1" />
-                                    Secure and encrypted
+                                    {t("secure_encrypted")}
                                 </div>
                             </div>
 
@@ -127,7 +129,7 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                                                         </span>
                                                     </div>
                                                     <span className="font-medium">
-                                                        PayPal
+                                                        {t("paypal")}
                                                     </span>
                                                 </div>
                                             }
