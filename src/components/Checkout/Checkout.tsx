@@ -20,18 +20,21 @@ import { createOrder } from "@/actions";
 import { useSession } from "next-auth/react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
-import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
+import { toastService } from "@/services/toast";
+import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
     cartId: number;
 }
 
-export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
+function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
     const t = useTranslations("Checkout");
     const { data: session } = useSession();
     const { currency } = useCurrency();
+    const { loading, withLoading } = useLoadingState();
     const [paymentMethod, setPaymentMethod] = useState("vnpay");
     const [totalUSD, setTotalUSD] = useState(0);
 
@@ -70,7 +73,7 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
             }
         } catch (error) {
             console.error("Checkout error:", error);
-            toast.error(t("checkout_error"));
+            toastService.error(t("checkout_error"));
         }
     };
 
@@ -302,15 +305,18 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                                 Terms of Use.
                             </Typography>
 
-                            <Button
+                            <LoadingButton
+                                loading={loading}
+                                loadingText="Processing..."
                                 variant="contained"
                                 fullWidth
                                 size="large"
-                                startIcon={<Lock className="w-4 h-4" />}
+                                startIcon={!loading ? <Lock className="w-4 h-4" /> : undefined}
                                 onClick={handleCheckout}
+                                disabled={!paymentMethod}
                             >
                                 Proceed
-                            </Button>
+                            </LoadingButton>
                         </Paper>
 
                         {/* Guarantee */}
@@ -336,5 +342,19 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Wrap the component with ErrorBoundary
+export default function Checkout(props: ICheckoutProps) {
+    return (
+        <ErrorBoundary
+            onError={(error, errorInfo) => {
+                console.error('Checkout component error:', error, errorInfo);
+                toastService.error('Something went wrong with checkout. Please refresh and try again.');
+            }}
+        >
+            <CheckoutComponent {...props} />
+        </ErrorBoundary>
     );
 }
