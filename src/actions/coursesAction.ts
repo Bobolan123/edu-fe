@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { ICourse } from "../../types/entities";
-import { sendRequest } from "../../utils/api";
+import { sendRequest, sendRequestFile } from "../../utils/api";
 
 export interface ICreateCoursePayload {
     title: string;
@@ -119,7 +119,7 @@ export const uploadThumbnail = async (
 ) => {
     const formData = new FormData();
     formData.append("thumbnail", thumbnail);
-    const res = await sendRequest<IBackendRes<any>>({
+    const res = await sendRequestFile<IBackendRes<any>>({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}/thumbnail`,
         body: formData,
@@ -166,18 +166,14 @@ export const getCourseContent = async (courseId: number) => {
 
 export const uploadLecture = async (
     access_token: string,
-    courseId: number,
-    sectionId: number,
-    lectureId: number,
     lectureFile: File
   ) => {
     const formData = new FormData();
     formData.append("lecture", lectureFile);
   
-    const res = await sendRequest<IBackendRes<any>>({
+    const res = await sendRequestFile<IBackendRes<any>>({
       method: "POST",
-      url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}/lecture`,
-      queryParams: { sectionId, lectureId }, 
+      url: `${process.env.NEXT_PUBLIC_SERVER}/courses/lecture`,
       body: formData,
       headers: {
         Authorization: `Bearer ${access_token}`,

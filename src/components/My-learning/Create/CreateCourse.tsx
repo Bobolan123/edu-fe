@@ -30,7 +30,6 @@ import {
     ExpandMore as ExpandMoreIcon,
     CloudUpload as CloudUploadIcon,
 } from "@mui/icons-material";
-// Assuming your type definitions are in a separate file
 import {
     ICategory,
     ICourseContent,
@@ -42,11 +41,11 @@ import {
     updateCourseContent,
     uploadThumbnail,
 } from "@/actions/coursesAction";
-import VideoUpload from "./VideoUpload";
 import { useSession } from "next-auth/react";
 import { LANGUAGES } from "../../../../common/constant";
 import { useTranslations } from "next-intl";
 import { useCurrency } from "../../../context/CurrencyContext";
+import VideoUpload from "@/components/common/courses/VideoUpload";
 
 interface CourseFormState {
     title: string;
@@ -72,14 +71,13 @@ const initialCourseState: CourseFormState = {
 
 // Default state for the course content section
 const initialContentState: ICourseContent = {
-    courseId: 0, // This would be assigned by the backend upon creation
+    courseId: 0,
     whatYoullLearn: [""],
     sections: [
         {
-            _id: "", // Frontend doesn't generate this
             title: "Introduction",
             totalLectures: 1,
-            lectures: [{ _id: "", title: "", videoUrl: "", totalDuration: 0 }],
+            lectures: [{  title: "", videoUrl: "", totalDuration: 0 }],
         },
     ],
     totalLength: 0,
@@ -99,52 +97,12 @@ export default function CreateCoursePage({
 
     const [course, setCourse] = useState<CourseFormState>(initialCourseState);
     const [content, setContent] = useState<ICourseContent>(initialContentState);
-
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState<{
         type: "success" | "error";
         text: string;
     } | null>(null);
-    const [uploadedLectureUrls, setUploadedLectureUrls] = useState<Map<string, string>>(
-        new Map()
-    );
-
-    const handleLectureUploadComplete = (
-        sectionIndex: number,
-        lectureIndex: number,
-        videoUrl: string,
-        duration?: number
-    ) => {
-        const lectureKey = `${sectionIndex}-${lectureIndex}`;
-        const newUploadedUrls = new Map(uploadedLectureUrls);
-        newUploadedUrls.set(lectureKey, videoUrl);
-        setUploadedLectureUrls(newUploadedUrls);
-
-        // Update the lecture videoUrl in the content state
-        updateLecture(sectionIndex, lectureIndex, "videoUrl", videoUrl);
-        
-        // If duration is provided, update it as well
-        if (duration) {
-            updateLecture(sectionIndex, lectureIndex, "totalDuration", Math.round(duration));
-        }
-    };
-
-    const handleLectureUploadError = (
-        sectionIndex: number,
-        lectureIndex: number,
-        error: string
-    ) => {
-        console.error(`Upload error for lecture ${sectionIndex}-${lectureIndex}:`, error);
-        setSubmitMessage({
-            type: "error",
-            text: t("upload_error", { 
-                section: sectionIndex + 1, 
-                lecture: lectureIndex + 1, 
-                error 
-            }),
-        });
-    };
 
     // Course metadata handlers
     const handleCourseChange = (
@@ -315,6 +273,35 @@ export default function CreateCoursePage({
         );
     };
 
+    // Count uploaded videos
+    const countUploadedVideos = () => {
+        return content.sections.reduce(
+            (total, section) =>
+                total +
+                section.lectures.filter((lecture) => lecture.videoUrl).length,
+            0
+        );
+    };
+
+    // Validate all videos are uploaded
+    const validateVideosUploaded = () => {
+        const missingVideos: string[] = [];
+
+        content.sections.forEach((section, sectionIndex) => {
+            section.lectures.forEach((lecture, lectureIndex) => {
+                if (!lecture.videoUrl || lecture.videoUrl.trim() === "") {
+                    missingVideos.push(
+                        `Section ${sectionIndex + 1}, Lecture ${
+                            lectureIndex + 1
+                        }`
+                    );
+                }
+            });
+        });
+
+        return missingVideos;
+    };
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setIsSubmitting(true);
@@ -330,37 +317,30 @@ export default function CreateCoursePage({
         }
 
         try {
-            // Validate that all lectures have videos uploaded
-            const missingVideos: string[] = [];
-            content.sections.forEach((section, sectionIndex) => {
-                section.lectures.forEach((lecture, lectureIndex) => {
-                    if (!lecture.videoUrl) {
-                        missingVideos.push(`Section ${sectionIndex + 1}, Lecture ${lectureIndex + 1}`);
-                    }
-                });
-            });
-
+            // Validate all videos are uploaded
+            const missingVideos = validateVideosUploaded();
             if (missingVideos.length > 0) {
                 setSubmitMessage({
                     type: "error",
-                    text: t("upload_videos_required", { missing: missingVideos.join(", ") }),
+                    text: t("upload_videos_required", {
+                        missing: missingVideos.join(", "),
+                    }),
                 });
                 setIsSubmitting(false);
                 return;
             }
 
-            // Find the corresponding ID for each selected category name.
+            // Find the corresponding ID for each selected category name
             const selectedCategoryIds = course.categories
                 .map((name) => {
-                    // The 'categories' prop is an array of ICategory objects, so we can find the id.
                     const foundCategory = categories.find(
                         (cat) => cat.name === name
                     );
                     return foundCategory ? foundCategory.id : null;
                 })
-                .filter((id): id is number => id !== null); // This filters out any nulls if a category wasn't found.
+                .filter((id): id is number => id !== null);
 
-            // === Step 1: Create the payload with the correct property name ===
+            // Step 1: Create the course
             const resCourse = await createCourse(session.user.access_token, {
                 title: course.title,
                 description: course.description,
@@ -369,7 +349,7 @@ export default function CreateCoursePage({
                 preview_url: course.preview_url,
                 active: course.active,
                 duration: Math.ceil(calculateTotalDuration() / 60),
-                categoryIds: selectedCategoryIds, // Use the correct property: 'categoryIds'
+                categoryIds: selectedCategoryIds,
             });
 
             if (!resCourse || !resCourse.id) {
@@ -377,8 +357,10 @@ export default function CreateCoursePage({
                     "Failed to get a valid response from course creation."
                 );
             }
+
             const newCourseId = resCourse.id;
 
+            // Step 2: Upload thumbnail if provided
             if (thumbnailFile) {
                 await uploadThumbnail(
                     session.user.access_token,
@@ -387,17 +369,33 @@ export default function CreateCoursePage({
                 );
             }
 
+            // Step 3: Update course content with all the video URLs
+            const contentToSave = {
+                ...content,
+                courseId: newCourseId,
+                totalLength: calculateTotalDuration(),
+                totalLectures: content.sections.reduce(
+                    (total, section) => total + section.lectures.length,
+                    0
+                ),
+            };
+
             await updateCourseContent(
                 session.user.access_token,
                 newCourseId,
-                content
+                contentToSave
             );
 
             console.log("Successfully created course with ID:", newCourseId);
+            console.log("Course content:", contentToSave);
+
             setSubmitMessage({
                 type: "success",
                 text: t("course_created_success"),
             });
+
+            // Optionally reset form or redirect
+            // resetForm();
         } catch (error) {
             console.error("Failed to create course:", error);
             const errorMessage =
@@ -487,7 +485,9 @@ export default function CreateCoursePage({
 
                                 <TextField
                                     fullWidth
-                                    label={`${t("price")} (${currency === "VND" ? "₫" : "$"})`}
+                                    label={`${t("price")} (${
+                                        currency === "VND" ? "₫" : "$"
+                                    })`}
                                     type="number"
                                     value={course.price}
                                     onChange={(e) =>
@@ -497,13 +497,13 @@ export default function CreateCoursePage({
                                                 0
                                         )
                                     }
-                                    inputProps={{ 
-                                        min: 0, 
-                                        step: currency === "VND" ? 1000 : 0.01 
+                                    inputProps={{
+                                        min: 0,
+                                        step: currency === "VND" ? 1000 : 0.01,
                                     }}
                                     helperText={
-                                        currency === "VND" 
-                                            ? "Giá tính bằng VND" 
+                                        currency === "VND"
+                                            ? "Giá tính bằng VND"
                                             : "Price in USD"
                                     }
                                 />
@@ -560,7 +560,11 @@ export default function CreateCoursePage({
                                     multiple
                                     value={course.categories}
                                     onChange={handleCategoryChange}
-                                    input={<OutlinedInput label={t("categories")} />}
+                                    input={
+                                        <OutlinedInput
+                                            label={t("categories")}
+                                        />
+                                    }
                                     renderValue={(selected) => (
                                         <Box
                                             sx={{
@@ -624,7 +628,9 @@ export default function CreateCoursePage({
                                                     e.target.value
                                                 )
                                             }
-                                            placeholder={t("build_fullstack_example")}
+                                            placeholder={t(
+                                                "build_fullstack_example"
+                                            )}
                                         />
                                         <IconButton
                                             onClick={() =>
@@ -671,7 +677,8 @@ export default function CreateCoursePage({
                                 >
                                     {t("total_duration")}:{" "}
                                     {Math.ceil(calculateTotalDuration() / 60)}{" "}
-                                    {t("minutes")}
+                                    {t("minutes")} | Uploaded Videos:{" "}
+                                    {countUploadedVideos()}
                                 </Typography>
                             }
                         />
@@ -711,7 +718,9 @@ export default function CreateCoursePage({
                                                     <div className="flex items-center gap-2">
                                                         <TextField
                                                             fullWidth
-                                                            label={t("section_title")}
+                                                            label={t(
+                                                                "section_title"
+                                                            )}
                                                             value={
                                                                 section.title
                                                             }
@@ -723,7 +732,9 @@ export default function CreateCoursePage({
                                                                         .value
                                                                 )
                                                             }
-                                                            placeholder={t("enter_section_title")}
+                                                            placeholder={t(
+                                                                "enter_section_title"
+                                                            )}
                                                         />
                                                         <IconButton
                                                             onClick={() =>
@@ -766,7 +777,9 @@ export default function CreateCoursePage({
                                                                     <div className="flex items-center gap-2">
                                                                         <TextField
                                                                             fullWidth
-                                                                            label={`${t("lecture_title")} ${
+                                                                            label={`${t(
+                                                                                "lecture_title"
+                                                                            )} ${
                                                                                 lectureIndex +
                                                                                 1
                                                                             }`}
@@ -785,7 +798,9 @@ export default function CreateCoursePage({
                                                                                         .value
                                                                                 )
                                                                             }
-                                                                            placeholder={t("enter_lecture_title")}
+                                                                            placeholder={t(
+                                                                                "enter_lecture_title"
+                                                                            )}
                                                                         />
                                                                         <IconButton
                                                                             onClick={() =>
@@ -808,30 +823,33 @@ export default function CreateCoursePage({
 
                                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                                         <VideoUpload
-                                                                            onUploadComplete={(videoUrl: string, duration?: number) =>
-                                                                                handleLectureUploadComplete(
+                                                                            label="Upload Video"
+                                                                            existingVideoUrl={
+                                                                                lecture.videoUrl
+                                                                            }
+                                                                            onVideoChange={(
+                                                                                videoUrl
+                                                                                
+                                                                            ) => {
+                                                                                // Update your lecture data
+                                                                                updateLecture(
                                                                                     sectionIndex,
                                                                                     lectureIndex,
-                                                                                    videoUrl,
-                                                                                    duration
-                                                                                )
-                                                                            }
-                                                                            onUploadError={(error) =>
-                                                                                handleLectureUploadError(
-                                                                                    sectionIndex,
-                                                                                    lectureIndex,
-                                                                                    error
-                                                                                )
-                                                                            }
-                                                                            label={`${t("upload_video")} ${lectureIndex + 1}`}
+                                                                                    "videoUrl",
+                                                                                    videoUrl
+                                                                                );
+                                                                            }}
                                                                         />
-                                                                        
+
                                                                         <TextField
                                                                             fullWidth
-                                                                            label={t("duration_seconds")}
+                                                                            label={t(
+                                                                                "duration_seconds"
+                                                                            )}
                                                                             type="number"
                                                                             value={
-                                                                                lecture.totalDuration
+                                                                                lecture.totalDuration ||
+                                                                                0
                                                                             }
                                                                             onChange={(
                                                                                 e
@@ -887,6 +905,67 @@ export default function CreateCoursePage({
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Upload Summary */}
+                    {countUploadedVideos() > 0 && (
+                        <Card className="shadow-lg">
+                            <CardHeader
+                                title={
+                                    <Typography
+                                        variant="h6"
+                                        component="h2"
+                                        className="font-semibold"
+                                    >
+                                        Upload Summary
+                                    </Typography>
+                                }
+                            />
+                            <CardContent>
+                                <div className="space-y-2">
+                                    {content.sections.map(
+                                        (section, sectionIndex) =>
+                                            section.lectures.map(
+                                                (lecture, lectureIndex) => {
+                                                    if (!lecture.videoUrl)
+                                                        return null;
+                                                    return (
+                                                        <div
+                                                            key={`${sectionIndex}-${lectureIndex}`}
+                                                            className="flex items-center justify-between p-2 bg-green-50 rounded"
+                                                        >
+                                                            <Typography
+                                                                variant="body2"
+                                                                className="font-medium"
+                                                            >
+                                                                Section{" "}
+                                                                {sectionIndex +
+                                                                    1}{" "}
+                                                                - Lecture{" "}
+                                                                {lectureIndex +
+                                                                    1}
+                                                                :{" "}
+                                                                {lecture.title ||
+                                                                    "Untitled"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="text.secondary"
+                                                            >
+                                                                {Math.round(
+                                                                    lecture.totalDuration ||
+                                                                        0
+                                                                )}
+                                                                s
+                                                            </Typography>
+                                                        </div>
+                                                    );
+                                                }
+                                            )
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
 
                     {/* Submit Actions */}
                     <div className="flex justify-center items-center gap-4 mt-8">

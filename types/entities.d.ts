@@ -115,11 +115,9 @@ export interface ILecture {
     title: string;
     totalDuration?: number;
     videoUrl: string;
-    _id:string;
 }
 
 export interface ISection {
-    _id:string;
     title: string;
     totalLectures: number;
     lectures: ILecture[];
