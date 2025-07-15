@@ -94,21 +94,21 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                         size={64}
                     />
                     <Typography variant="h5" gutterBottom>
-                        {t('emptyTitle')}
+                        {t('empty_title')}
                     </Typography>
                     <Typography
                         variant="body2"
                         color="text.secondary"
                         gutterBottom
                     >
-                        {t('emptyDescription')}
+                        {t('empty_description')}
                     </Typography>
                     <MUIButton
                         variant="contained"
                         sx={{ mt: 3 }}
                         color="primary"
                     >
-                        {t('browseCourses')}
+                        {t('browse_courses')}
                     </MUIButton>
                 </Card>
             </Box>
@@ -123,7 +123,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                         {t('title')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        {t('itemCount', { count: cartItems.length })}
+                        {t('item_count', { count: cartItems.length })}
                     </Typography>
                 </Box>
 
@@ -155,7 +155,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                 }
                                                 alt={
                                                     cartItem?.course?.title ||
-                                                    t('courseImage')
+                                                    t('course_image')
                                                 }
                                                 width={300}
                                                 height={200}
@@ -177,7 +177,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                     <Typography variant="h6">
                                                         {cartItem?.course
                                                             ?.title ||
-                                                            t('untitledCourse')}
+                                                            t('untitled_course')}
                                                     </Typography>
                                                     <MUIButton
                                                         size="small"
@@ -199,7 +199,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                 >
                                                     {cartItem?.course
                                                         ?.description ||
-                                                        t('noDescription')}
+                                                        t('no_description')}
                                                 </Typography>
 
                                                 <Box
@@ -228,7 +228,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                         {cartItem?.course
                                                             ?.instructor
                                                             ?.name ||
-                                                            t('unknownInstructor')}
+                                                            t('unknown_instructor')}
                                                     </Typography>
                                                 </Box>
 
@@ -301,7 +301,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                 borderRadius: 3,
                             }}
                         >
-                            <CardHeader title={t('orderSummary')} />
+                            <CardHeader title={t('order_summary')} />
 
                             <CardContent>
                                 <Box
@@ -341,7 +341,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         fullWidth
                                         sx={{ mt: 2 }}
                                     >
-                                        {t('continueShopping')}
+                                        {t('continue_shopping')}
                                     </MUIButton>
                                 </Link>
                                 <Box
@@ -355,13 +355,13 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                         variant="body2"
                                         color="green.800"
                                     >
-                                        {t('moneyBackGuarantee')}
+                                        {t('money_back_guarantee')}
                                     </Typography>
                                     <Typography
                                         variant="caption"
                                         color="green.600"
                                     >
-                                        {t('lifetimeAccess')}
+                                        {t('lifetime_access')}
                                     </Typography>
                                 </Box>
                             </CardContent>

@@ -21,7 +21,7 @@ import { Link } from "@/i18n/routing";
 import { customSignin } from "../../../utils/auth/action";
 import { IsValidEmail } from "../../../utils/utils";
 import ResendOtpModel from "./ResendOtp.model";
-import ForgotPasswordModel from "./ForgotPassword.model";
+import ForgotPasswordModel from "./forgotPassword.model";
 
 const LoginForm = () => {
     const t = useTranslations("Login");

@@ -34,6 +34,7 @@
         "empty_description": "Discover amazing courses and start learning today!",
         "browse_courses": "Browse Courses",
         "title": "Shopping Cart",
+        "item_count": "{count, plural, =0 {No items} =1 {1 item} other {# items}} in cart",
         "course": "course",
         "courses": "courses",
         "order_summary": "Order Summary",
@@ -45,7 +46,8 @@
         "course_image": "Course image",
         "untitled_course": "Untitled Course",
         "no_description": "No description available",
-        "unknown_instructor": "Unknown Instructor"
+        "unknown_instructor": "Unknown Instructor",
+        "instructor": "by"
     },
     "Checkout": {
         "title": "Checkout",
@@ -62,7 +64,8 @@
         "terms_agreement": "By completing your purchase, you agree to our Terms of Use",
         "proceed": "Proceed",
         "money_back_guarantee": "30-Day Money-Back Guarantee",
-        "money_back_description": "Not satisfied? Get a full refund within 30 days"
+        "money_back_description": "Not satisfied? Get a full refund within 30 days",
+        "checkout_error": "An error occurred during checkout. Please try again."
     },
     "ManageMyCourses": {
         "title": "My Courses",
@@ -224,33 +227,23 @@
         "lecture_title": "Lecture Title",
         "lecture_video": "Lecture Video",
         "submit": "Create Course",
-        "submitting": "Creating Course..."
-    },
-    "Footer": {
-        "brand_description": "Join the more than 150,000 creators who use MindfulMaze to share their knowledge...",
-        "section_explore": "Explore",
-        "section_company": "Company",
-        "section_support": "Support",
-        "products": "Products",
-        "features": "Features",
-        "pricing": "Pricing",
-        "staff_picks": "Staff picks",
-        "product_demo": "Product demo",
-        "careers": "Careers",
-        "blog": "Blog",
-        "press": "Press",
-        "partners": "Partners",
-        "newsletter": "Newsletter",
-        "help_center": "Help Center",
-        "house_rules": "House Rules",
-        "content_guidelines": "Content Guidelines",
-        "privacy_policy": "Privacy Policy",
-        "terms_of_use": "Terms of Use",
-        "cookies_policy": "Cookies Policy",
-        "cookie_preferences": "Cookie Preferences",
-        "ethics_line": "Ethics Line",
-        "accessibility": "Accessibility",
-        "copyright": "Copyright © {year} MindfulMaze, Inc. All rights reserved."
+        "submitting": "Creating Course...",
+        "must_be_logged_in": "You must be logged in to create a course",
+        "upload_videos_required": "Please upload videos for the following lectures: {missing}",
+        "course_created_success": "Course created successfully!",
+        "create_course_error": "Failed to create course: {error}",
+        "preview_url": "Preview URL",
+        "what_students_learn": "What Students Will Learn",
+        "learning_point": "Learning Point",
+        "build_fullstack_example": "e.g., Build a full-stack web application",
+        "add_learning_point": "Add Learning Point",
+        "total_duration": "Total Duration",
+        "minutes": "minutes",
+        "enter_section_title": "Enter section title",
+        "enter_lecture_title": "Enter lecture title",
+        "duration_seconds": "Duration (seconds)",
+        "creating": "Creating...",
+        "create_course": "Create Course"
     },
     "Payment": {
         "success_title": "Payment Successful!",

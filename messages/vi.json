@@ -34,6 +34,7 @@
         "empty_description": "Khám phá những khóa học tuyệt vời và bắt đầu học ngay hôm nay!",
         "browse_courses": "Duyệt Khóa Học",
         "title": "Giỏ Hàng",
+        "item_count": "{count, plural, =0 {Không có sản phẩm} =1 {1 sản phẩm} other {# sản phẩm}} trong giỏ hàng",
         "course": "khóa học",
         "courses": "khóa học",
         "order_summary": "Tóm Tắt Đơn Hàng",
@@ -45,7 +46,8 @@
         "course_image": "Hình ảnh khóa học",
         "untitled_course": "Khóa Học Chưa Có Tiêu Đề",
         "no_description": "Không có mô tả",
-        "unknown_instructor": "Giảng Viên Chưa Xác Định"
+        "unknown_instructor": "Giảng Viên Chưa Xác Định",
+        "instructor": "bởi"
     },
     "Checkout": {
         "title": "Thanh Toán",
@@ -62,7 +64,8 @@
         "terms_agreement": "Bằng cách hoàn tất mua hàng, bạn đồng ý với Điều khoản Sử dụng của chúng tôi",
         "proceed": "Tiếp Tục",
         "money_back_guarantee": "Đảm Bảo Hoàn Tiền 30 Ngày",
-        "money_back_description": "Không hài lòng? Nhận hoàn tiền đầy đủ trong vòng 30 ngày"
+        "money_back_description": "Không hài lòng? Nhận hoàn tiền đầy đủ trong vòng 30 ngày",
+        "checkout_error": "Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại."
     },
     "ManageMyCourses": {
         "title": "Khóa Học Của Tôi",
@@ -224,33 +227,23 @@
         "lecture_title": "Tiêu Đề Bài Giảng",
         "lecture_video": "Video Bài Giảng",
         "submit": "Tạo Khóa Học",
-        "submitting": "Đang Tạo Khóa Học..."
-    },
-    "Footer": {
-        "brand_description": "Tham gia cùng hơn 150,000 nhà sáng tạo sử dụng MindfulMaze để chia sẻ kiến thức...",
-        "section_explore": "Khám Phá",
-        "section_company": "Công Ty",
-        "section_support": "Hỗ Trợ",
-        "products": "Sản Phẩm",
-        "features": "Tính Năng",
-        "pricing": "Giá Cả",
-        "staff_picks": "Lựa chọn của nhân viên",
-        "product_demo": "Demo sản phẩm",
-        "careers": "Nghề Nghiệp",
-        "blog": "Blog",
-        "press": "Báo Chí",
-        "partners": "Đối Tác",
-        "newsletter": "Bản Tin",
-        "help_center": "Trung Tâm Trợ Giúp",
-        "house_rules": "Quy Tắc Nhà",
-        "content_guidelines": "Hướng Dẫn Nội Dung",
-        "privacy_policy": "Chính Sách Quyền Riêng Tư",
-        "terms_of_use": "Điều Khoản Sử Dụng",
-        "cookies_policy": "Chính Sách Cookie",
-        "cookie_preferences": "Tùy Chọn Cookie",
-        "ethics_line": "Đường Dây Đạo Đức",
-        "accessibility": "Khả Năng Truy Cập",
-        "copyright": "Bản quyền © {year} MindfulMaze, Inc. Tất cả quyền được bảo lưu."
+        "submitting": "Đang Tạo Khóa Học...",
+        "must_be_logged_in": "Bạn phải đăng nhập để tạo khóa học",
+        "upload_videos_required": "Vui lòng tải lên video cho các bài giảng sau: {missing}",
+        "course_created_success": "Khóa học đã được tạo thành công!",
+        "create_course_error": "Lỗi tạo khóa học: {error}",
+        "preview_url": "URL Xem Trước",
+        "what_students_learn": "Học Viên Sẽ Học Được Gì",
+        "learning_point": "Điểm Học Tập",
+        "build_fullstack_example": "ví dụ: Xây dựng ứng dụng web full-stack",
+        "add_learning_point": "Thêm Điểm Học Tập",
+        "total_duration": "Tổng Thời Lượng",
+        "minutes": "phút",
+        "enter_section_title": "Nhập tiêu đề phần",
+        "enter_lecture_title": "Nhập tiêu đề bài giảng",
+        "duration_seconds": "Thời lượng (giây)",
+        "creating": "Đang tạo...",
+        "create_course": "Tạo Khóa Học"
     },
     "Payment": {
         "success_title": "Thanh Toán Thành Công!",

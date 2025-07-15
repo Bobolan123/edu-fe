@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AuthError } from "next-auth";
 
 export class CustomAuthError extends AuthError {
