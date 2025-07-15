@@ -31,7 +31,7 @@ interface ExchangeRates {
     async convertPrice(
         amount: number,
         fromCurrency: string = 'VND',
-        toCurrency: string = 'USD'
+        toCurrency: string = 'VND'
       ): Promise<number> {
         if (fromCurrency === toCurrency) return amount;
       
@@ -60,13 +60,18 @@ interface ExchangeRates {
           USD: 'en-US',
         };
       
-        const locale = localeMap[currency] || 'en-US';
+        const locale = localeMap[currency] || 'vi-VN';
       
         return new Intl.NumberFormat(locale, {
           style: 'currency',
           currency,
           currencyDisplay: 'symbol',
         }).format(amount);
+      }
+
+      // Method to get payment currency based on payment method
+      getPaymentCurrency(paymentMethod: 'vnpay' | 'paypal'): string {
+        return paymentMethod === 'vnpay' ? 'VND' : 'USD';
       }
       
   }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { currencyService } from "@/service/currency";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
     Box,
     Typography,
@@ -24,6 +26,24 @@ import { useTranslations } from "next-intl";
 
 interface IFeaturedCoursesSectionProps {
     courses: ICourse[] | undefined;
+}
+
+// Component to handle currency formatting for individual course prices
+function CoursePrice({ price }: { price: number }) {
+    const { currency } = useCurrency();
+    const [convertedPrice, setConvertedPrice] = useState(price);
+
+    useEffect(() => {
+        if (currency === 'USD') {
+            currencyService.convertPrice(price, 'VND', 'USD')
+                .then(setConvertedPrice)
+                .catch(() => setConvertedPrice(price));
+        } else {
+            setConvertedPrice(price);
+        }
+    }, [price, currency]);
+
+    return <>{currencyService.formatPrice(convertedPrice, currency)}</>;
 }
 
 export default function FeaturedCoursesSection({
@@ -106,7 +126,7 @@ export default function FeaturedCoursesSection({
                                     color="primary"
                                     className="mt-2"
                                 >
-                                    ₫{course.price.toLocaleString("vi-VN")}
+                                    <CoursePrice price={course.price} />
                                 </Typography>
 
                                 {course.categories?.length > 0 && (

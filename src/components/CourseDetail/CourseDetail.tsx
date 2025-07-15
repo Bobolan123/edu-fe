@@ -18,6 +18,8 @@ import {
     Language as LanguageIcon,
     Check as CheckIcon,
 } from "@mui/icons-material";
+import { currencyService } from "@/service/currency";
+import { useCurrency } from "@/context/CurrencyContext";
 import { format } from "date-fns";
 import { ICourse, ICourseContent } from "../../../types/entities";
 import {
@@ -44,6 +46,7 @@ export default function CourseDetail({
 }: ICourseDetailProps) {
     const { data } = useSession();
     const t = useTranslations('CourseDetail');
+    const { currency } = useCurrency();
     
 
     const handleAddToCart = async (courseId: number) => {
@@ -342,10 +345,10 @@ export default function CourseDetail({
                                             variant="h4"
                                             fontWeight={600}
                                         >
-                                            ₫
-                                            {Number(
-                                                course?.price
-                                            ).toLocaleString("vi-VN")}
+                                            {currencyService.formatPrice(
+                                                Number(course?.price || 0),
+                                                currency
+                                            )}
                                         </Typography>
                                         
                                     </Box>

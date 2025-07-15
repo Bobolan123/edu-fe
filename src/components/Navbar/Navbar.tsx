@@ -6,10 +6,7 @@ import NavbarClient from "./NavbarClient";
 export default async function Navbar() {
     const session = await auth();
     try {
-        
-    } catch (error) {
-        
-    }
+    } catch (error) {}
     const cart = await sendRequest<IBackendRes<ICart>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/cart`,
@@ -21,8 +18,8 @@ export default async function Navbar() {
         },
     });
     return (
-        <>
+        <div className="fixed top-0 left-0 w-full z-50">
             <NavbarClient cart={cart?.data as ICart} />
-        </>         
+        </div>
     );
 }

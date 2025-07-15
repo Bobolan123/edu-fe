@@ -54,9 +54,13 @@ export default function Checkout({ cartItems, cartId }: ICheckoutProps) {
 
     const handleCheckout = async () => {
         try {
+            // Get payment currency based on payment method
+            const paymentCurrency = currencyService.getPaymentCurrency(paymentMethod as 'vnpay' | 'paypal');
+            const paymentAmount = paymentCurrency === 'VND' ? totalVND : totalUSD;
+            
             const res = await createOrder({
                 cartId,
-                totalPrice: totalVND, // Always in VND for server
+                totalPrice: paymentAmount, // Send currency based on payment method
                 paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
                 userId: session?.user.id || "",
                 access_token: session?.user?.access_token || "",

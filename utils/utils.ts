@@ -37,9 +37,3 @@ export async function exchangeCurrency(
     return to === "USD" ? amount / rate : amount * rate;
 }
 
-// Format currency based on locale
-export const formatCurrency = (amount: number, currency: string): string => {
-    return currency === "VND" || currency === "vi"
-        ? `₫${amount.toLocaleString("vi-VN")}`
-        : `$${amount.toFixed(2)}`;
-};
