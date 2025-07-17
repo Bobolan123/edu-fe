@@ -197,13 +197,6 @@ export default function CourseLesson({
                                                 >
                                                     {index + 1}. {lecture?.title}
                                                 </Typography>
-                                                <Typography
-                                                    variant="caption"
-                                                    className="text-gray-600 flex items-center"
-                                                >
-                                                    <span className="mr-1">▶</span>
-                                                    {lecture?.totalDuration}
-                                                </Typography>
                                             </div>
                                         </button>
                                     </div>

@@ -287,18 +287,6 @@ export default function CourseDetail({
                                                         {sub.title}
                                                     </Typography>
                                                 </Box>
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        gap: 1,
-                                                    }}
-                                                >
-                                                    <ClockIcon fontSize="small" />
-                                                    <Typography variant="body2">
-                                                        {sub.totalDuration}
-                                                    </Typography>
-                                                </Box>
                                             </Box>
                                         ))}
                                     </AccordionDetails>

@@ -113,7 +113,6 @@ export interface ISubscription {
 
 export interface ILecture {
     title: string;
-    totalDuration?: number;
     videoUrl: string;
 }
 

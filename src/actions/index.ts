@@ -10,7 +10,7 @@ export const uploadLectureVideo = async (
     formData: FormData
 ) => {
     const res = await sendRequestFile<
-        IBackendRes<{ videoUrl: string; totalDuration: string }>
+        IBackendRes<{ videoUrl: string }>
     >({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}/lecture`,
@@ -26,7 +26,7 @@ export async function saveCourseContent(
     sections: ISection[]
 ) {
     const res = await sendRequest<
-        IBackendRes<{ videoUrl: string; totalDuration: string }>
+        IBackendRes<{ videoUrl: string }>
     >({
         method: "PUT",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,

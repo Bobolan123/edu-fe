@@ -73,7 +73,6 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
         const updated = [...localSections];
         updated[sectionIndex].lectures.push({
             title: `New Lecture ${updated[sectionIndex].lectures.length + 1}`,
-            totalDuration: "00:00",
             videoUrl: "",
         });
         updated[sectionIndex].totalLectures += 1;
@@ -237,21 +236,6 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                     size="small"
                                                     sx={{ mr: 1 }}
                                                 />
-                                                <TextField
-                                                    value={
-                                                        lecture.totalDuration
-                                                    }
-                                                    onChange={(e) =>
-                                                        handleLectureFieldChange(
-                                                            sectionIndex,
-                                                            lectureIndex,
-                                                            "totalDuration",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    size="small"
-                                                    sx={{ width: "100px" }}
-                                                />
                                                 <IconButton
                                                     onClick={() =>
                                                         setEditingLecture(null)
@@ -266,12 +250,6 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                     {lecture.title}
                                                 </Typography>
                                                 <Box className="ml-auto flex items-center gap-2">
-                                                    <Typography
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                    >
-                                                        {lecture.totalDuration}
-                                                    </Typography>
                                                     <IconButton
                                                         onClick={() =>
                                                             toggleVideo(
