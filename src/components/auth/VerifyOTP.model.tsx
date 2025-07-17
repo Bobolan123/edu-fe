@@ -8,20 +8,23 @@ import Modal from "@mui/material/Modal";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import { TextField } from "@mui/material";
+import { TextField, CircularProgress, alpha } from "@mui/material";
 import { fetchResendOtp, fetchVerifyOTP } from "@/auth.service";
 import { toast } from "react-toastify";
 import { useTranslations } from 'next-intl';
+import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+import { toastService } from "@/services/toast";
 
 const style = {
     position: "absolute" as "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 400,
+    width: 440,
     bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
+    border: "none",
+    borderRadius: '20px',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.05)',
     p: 4,
 };
 
@@ -38,27 +41,47 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
     const [userId, setUserId] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
     const t = useTranslations('VerifyOTP');
+    
+    // Loading states
+    const { loading: isVerifying, withLoading: withVerifyLoading } = useLoadingState();
+    const { loading: isResending, withLoading: withResendLoading } = useLoadingState();
 
     const handleVerify = async () => {
-        const res = await fetchVerifyOTP(userId, +otp);
-
-        if (res?.data) {
-            toast.success(res?.message);
-
-            setStep(1);
-        } else {
-            toast.error(res?.message);
+        if (!otp.trim()) {
+            toastService.error('Please enter the OTP code');
+            return;
         }
+        
+        await withVerifyLoading(async () => {
+            try {
+                const res = await fetchVerifyOTP(userId, +otp);
+
+                if (res?.data) {
+                    toastService.success(res?.message);
+                    setStep(1);
+                } else {
+                    toastService.error(res?.message);
+                }
+            } catch (error) {
+                toastService.error('Verification failed. Please try again.');
+            }
+        });
     };
 
     const handleResendOtp = async (email: string) => {
-        const res = await fetchResendOtp(email);
-        if (res?.data) {
-            setUserId(res?.data?.id);
-            toast.success(res.message);
-        } else {
-            toast.error(res.message);
-        }
+        await withResendLoading(async () => {
+            try {
+                const res = await fetchResendOtp(email);
+                if (res?.data) {
+                    setUserId(res?.data?.id);
+                    toastService.success(res.message);
+                } else {
+                    toastService.error(res.message);
+                }
+            } catch (error) {
+                toastService.error('Failed to resend OTP. Please try again.');
+            }
+        });
     };
     const handleDone = async () => {
         handleCloseModelOpenVerify();
@@ -72,16 +95,32 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <Stepper activeStep={step} alternativeLabel>
-                        {steps.map((label) => (
-                            <Step key={label}>
-                                <StepLabel>{t(`steps.${label.toLowerCase()}`)}</StepLabel>
-                            </Step>
-                        ))}
-                    </Stepper>
+                    <Box sx={{ mb: 3 }}>
+                        <Typography 
+                            variant="h5" 
+                            sx={{ 
+                                fontWeight: 700,
+                                mb: 2,
+                                textAlign: 'center',
+                                background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                                backgroundClip: 'text',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                            }}
+                        >
+                            Email Verification
+                        </Typography>
+                        <Stepper activeStep={step} alternativeLabel>
+                            {steps.map((label) => (
+                                <Step key={label}>
+                                    <StepLabel>{t(`steps.${label.toLowerCase()}`)}</StepLabel>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    </Box>
                     <Box
                         mt={3}
-                        gap={2}
+                        gap={3}
                         display="flex"
                         flexDirection="column"
                         justifyContent="center"
@@ -89,36 +128,140 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
                     >
                         {step === 0 && (
                             <>
-                                <Typography>{t('verify_account')}</Typography>
+                                <Typography 
+                                    variant="body1" 
+                                    color="text.secondary"
+                                    sx={{ textAlign: 'center', mb: 2 }}
+                                >
+                                    {t('verify_account')}
+                                </Typography>
+                                <Typography 
+                                    variant="body2" 
+                                    color="text.secondary"
+                                    sx={{ textAlign: 'center', mb: 3 }}
+                                >
+                                    We've sent a verification code to <strong>{email}</strong>
+                                </Typography>
                                 <TextField
                                     name="otp"
-                                    size="small"
+                                    fullWidth
                                     id="otp"
-                                    label="OTP"
+                                    label="Enter OTP Code"
+                                    value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
+                                    disabled={isVerifying || isResending}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: '12px',
+                                            backgroundColor: alpha('#0ea5e9', 0.02),
+                                            '&:hover': {
+                                                backgroundColor: alpha('#0ea5e9', 0.04),
+                                            },
+                                            '&.Mui-focused': {
+                                                backgroundColor: alpha('#0ea5e9', 0.06),
+                                            },
+                                        },
+                                        mb: 2,
+                                    }}
+                                    inputProps={{
+                                        style: { textAlign: 'center', fontSize: '1.2rem', letterSpacing: '0.1em' },
+                                        maxLength: 6,
+                                    }}
                                 />
-                                <Button
+                                <LoadingButton
+                                    loading={isVerifying}
+                                    loadingText="Verifying..."
                                     variant="contained"
                                     onClick={handleVerify}
+                                    fullWidth
+                                    size="large"
+                                    sx={{
+                                        height: 48,
+                                        borderRadius: '12px',
+                                        fontSize: '1rem',
+                                        fontWeight: 600,
+                                        background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                                        boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                                            boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)',
+                                        },
+                                        mb: 2,
+                                    }}
+                                    disabled={!otp.trim()}
                                 >
                                     {t('verify_button')}
-                                </Button>
-                                <Button
+                                </LoadingButton>
+                                <LoadingButton
+                                    loading={isResending}
+                                    loadingText="Resending..."
                                     variant="text"
                                     onClick={() => handleResendOtp(email)}
+                                    disabled={isVerifying}
+                                    sx={{
+                                        fontWeight: 500,
+                                        textTransform: 'none',
+                                        '&:hover': {
+                                            backgroundColor: alpha('#0ea5e9', 0.04),
+                                        },
+                                    }}
                                 >
                                     {t('resend_otp')}
-                                </Button>
+                                </LoadingButton>
                             </>
                         )}
                         {step === 1 && (
                             <>
-                                <Typography>
-                                    {t('success_message')}
-                                </Typography>
+                                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                                    <Box
+                                        sx={{
+                                            width: 64,
+                                            height: 64,
+                                            borderRadius: '50%',
+                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            margin: '0 auto 16px',
+                                            fontSize: '24px',
+                                        }}
+                                    >
+                                        ✓
+                                    </Box>
+                                    <Typography 
+                                        variant="h6" 
+                                        sx={{ 
+                                            fontWeight: 600,
+                                            color: 'success.main',
+                                            mb: 1,
+                                        }}
+                                    >
+                                        Email Verified!
+                                    </Typography>
+                                    <Typography 
+                                        variant="body1" 
+                                        color="text.secondary"
+                                    >
+                                        {t('success_message')}
+                                    </Typography>
+                                </Box>
                                 <Button
                                     variant="contained"
                                     onClick={handleDone}
+                                    fullWidth
+                                    size="large"
+                                    sx={{
+                                        height: 48,
+                                        borderRadius: '12px',
+                                        fontSize: '1rem',
+                                        fontWeight: 600,
+                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                            boxShadow: '0 6px 20px rgba(16, 185, 129, 0.4)',
+                                        },
+                                    }}
                                 >
                                     {t('done_button')}
                                 </Button>

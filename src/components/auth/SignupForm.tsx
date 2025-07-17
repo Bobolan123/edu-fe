@@ -2,135 +2,286 @@
 
 import { useState } from "react";
 import {
-    TextField,
     Button,
     Box,
-    Grid,
     Typography,
-    IconButton,
-    InputAdornment,
 } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { IsValidEmail } from "../../../utils/utils";
 import { fetchRegister } from "@/auth.service";
+import { signupSchema, SignupFormData } from "@/lib/validationSchemas";
+import { FormTextField } from "@/components/common/FormComponents";
+import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+import { toastService } from "@/services/toast";
 import VerifyOtpModel from "./VerifyOTP.model";
 
 const SignupForm = () => {
     const t = useTranslations("Signup");
     const router = useRouter();
+    const { loading, withLoading } = useLoadingState();
 
-    const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [isOpenVerify, setIsOpenVerify] = useState(false);
+    const [emailModel, setEmailModel] = useState("");
 
     const handleCloseModelOpenVerify = () => setIsOpenVerify(false);
 
-    const handleClickShowPassword = () => setShowPassword(!showPassword);
+    const {
+        control,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+        getValues,
+    } = useForm<SignupFormData>({
+        resolver: zodResolver(signupSchema),
+        defaultValues: {
+            fullname: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+        },
+    });
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!fullName || !email || !password) {
-            toast.error("Please fill in all fields.");
-            return;
-        }
-
-        if (!IsValidEmail(email)) {
-            toast.error("Invalid email format.");
-            return;
-        }
-
-        const res = await fetchRegister(
-            email.toString(),
-            password.toString(),
-            fullName
-        );
-        if (res?.statusCode === 403) {
-            toast.error(res.message);
-            setIsOpenVerify(true);
-        } else if (res?.statusCode === 400) {
-            toast.error(res.message);
-        } else {
-            toast.success(res.message + " Please verify Email!");
-            setIsOpenVerify(true);
+    const onSubmit = async (data: SignupFormData) => {
+        try {
+            await withLoading(async () => {
+                const res = await fetchRegister(
+                    data.email,
+                    data.password,
+                    data.fullname
+                );
+                
+                if (res?.statusCode === 403) {
+                    toastService.error(res.message);
+                    setEmailModel(data.email);
+                    setIsOpenVerify(true);
+                } else if (res?.statusCode === 400) {
+                    toastService.error(res.message);
+                } else {
+                    toastService.success(res.message + " Please verify Email!");
+                    setEmailModel(data.email);
+                    setIsOpenVerify(true);
+                }
+            });
+        } catch (error) {
+            toastService.error("An unexpected error occurred. Please try again.");
         }
     };
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Typography variant="h5" align="center" gutterBottom>
-                {t("title")}
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate>
-                <TextField
-                    fullWidth
-                    required
-                    margin="normal"
-                    name="fullName"
-                    label={t("fullname")}
-                    variant="outlined"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                />
-                <TextField
-                    fullWidth
-                    required
-                    margin="normal"
-                    name="email"
-                    label={t("email")}
-                    variant="outlined"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <TextField
-                    fullWidth
-                    required
-                    margin="normal"
-                    name="password"
-                    label={t("password")}
-                    type={showPassword ? "text" : "password"}
-                    variant="outlined"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={handleClickShowPassword}>
-                                    {showPassword ? (
-                                        <VisibilityIcon />
-                                    ) : (
-                                        <VisibilityOffIcon />
-                                    )}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
+        <Box 
+            sx={{ 
+                display: "flex", 
+                flexDirection: "column",
+                maxWidth: "400px",
+                margin: "0 auto",
+                p: 4,
+            }}
+        >
+            {/* Header Section */}
+            <Box sx={{ textAlign: "center", mb: 4 }}>
+                <Typography 
+                    variant="h4" 
+                    sx={{ 
+                        fontWeight: 700,
+                        mb: 2,
+                        background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
                     }}
-                />
-                <Button
+                >
+                    {t("title")}
+                </Typography>
+                <Typography 
+                    variant="body1" 
+                    color="text.secondary"
+                    sx={{ mb: 4 }}
+                >
+                    Create your account to start your learning journey with us!
+                </Typography>
+            </Box>
+
+            {/* Form Section */}
+            <Box 
+                component="form" 
+                onSubmit={handleSubmit(onSubmit)} 
+                noValidate 
+                sx={{
+                    background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                    borderRadius: '20px',
+                    p: 4,
+                    boxShadow: '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                }}
+            >
+                <Box sx={{ mb: 3 }}>
+                    <FormTextField
+                        name="fullname"
+                        control={control}
+                        label={t("fullname")}
+                        type="text"
+                        required
+                        disabled={loading}
+                        placeholder="Enter your full name"
+                        startAdornment={
+                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                                <Box
+                                    sx={{
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: '50%',
+                                        backgroundColor: 'success.main',
+                                    }}
+                                />
+                            </Box>
+                        }
+                    />
+                </Box>
+
+                <Box sx={{ mb: 3 }}>
+                    <FormTextField
+                        name="email"
+                        control={control}
+                        label={t("email")}
+                        type="email"
+                        required
+                        disabled={loading}
+                        placeholder="your.email@example.com"
+                        startAdornment={
+                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                                <Box
+                                    sx={{
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: '50%',
+                                        backgroundColor: 'primary.main',
+                                    }}
+                                />
+                            </Box>
+                        }
+                    />
+                </Box>
+                
+                <Box sx={{ mb: 3 }}>
+                    <FormTextField
+                        name="password"
+                        control={control}
+                        label={t("password")}
+                        type="password"
+                        required
+                        disabled={loading}
+                        showPasswordToggle
+                        placeholder="Password"
+                        startAdornment={
+                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                                <Box
+                                    sx={{
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: '50%',
+                                        backgroundColor: 'secondary.main',
+                                    }}
+                                />
+                            </Box>
+                        }
+                    />
+                </Box>
+
+                <Box sx={{ mb: 4 }}>
+                    <FormTextField
+                        name="confirmPassword"
+                        control={control}
+                        label="Confirm Password"
+                        type="password"
+                        required
+                        disabled={loading}
+                        showPasswordToggle
+                        placeholder="Confirm your password"
+                        startAdornment={
+                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                                <Box
+                                    sx={{
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: '50%',
+                                        backgroundColor: 'warning.main',
+                                    }}
+                                />
+                            </Box>
+                        }
+                    />
+                </Box>
+
+                <LoadingButton
+                    loading={loading}
+                    loadingText="Creating account..."
                     fullWidth
                     type="submit"
                     variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
+                    size="large"
+                    sx={{
+                        height: 56,
+                        borderRadius: '16px',
+                        fontSize: '1.1rem',
+                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                        boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
+                        '&:hover': {
+                            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                            boxShadow: '0 8px 25px rgba(14, 165, 233, 0.4)',
+                            transform: 'translateY(-2px)',
+                        },
+                        '&:active': {
+                            transform: 'translateY(0)',
+                        },
+                        mb: 3,
+                    }}
                 >
                     {t("signup_button")}
-                </Button>
-                <Typography variant="body2" align="center">
+                </LoadingButton>
+
+                {/* Terms */}
+                <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{ textAlign: 'center', mb: 2 }}
+                >
                     {t("terms")}
                 </Typography>
-                <Grid container justifyContent="center" sx={{ mt: 2 }}>
-                    <Typography variant="body2">
-                        <Link href="/login"> {t("login_prompt")}</Link>
-                    </Typography>
-                </Grid>
             </Box>
+
+            {/* Login Link */}
+            <Box 
+                sx={{ 
+                    textAlign: 'center', 
+                    mt: 4,
+                    p: 3,
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(14, 165, 233, 0.04)',
+                    border: '1px solid',
+                    borderColor: 'rgba(14, 165, 233, 0.1)',
+                }}
+            >
+                <Typography variant="body2" color="text.secondary">
+                    Already have an account?{" "}
+                    <Link 
+                        href="/login"
+                        style={{
+                            color: '#0ea5e9',
+                            textDecoration: 'none',
+                            fontWeight: 600,
+                        }}
+                    >
+                        Sign in
+                    </Link>
+                </Typography>
+            </Box>
+
             <VerifyOtpModel
-                email={email}
+                email={emailModel}
                 handleCloseModelOpenVerify={handleCloseModelOpenVerify}
                 isOpenVerify={isOpenVerify}
             />

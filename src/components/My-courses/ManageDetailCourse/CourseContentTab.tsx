@@ -9,6 +9,9 @@ import {
     IconButton,
     TextField,
     Collapse,
+    CircularProgress,
+    LinearProgress,
+    Skeleton,
 } from "@mui/material";
 import {
     PlayArrow,
@@ -17,6 +20,7 @@ import {
     Visibility,
     Save as SaveIcon,
     ExpandMore,
+    CloudUpload,
 } from "@mui/icons-material";
 import { ILecture, ISection } from "../../../../types/entities";
 import { useEffect, useState } from "react";
@@ -24,6 +28,8 @@ import { sendRequest, sendRequestFile } from "../../../../utils/api";
 import { toast } from "react-toastify";
 import { revalidateTag } from "next/cache";
 import { saveCourseContent, uploadLectureVideo } from "@/actions";
+import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+import { toastService } from "@/services/toast";
 
 interface ICourseContentTabProps {
     sections: ISection[];
@@ -45,6 +51,18 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
     const [expandedVideos, setExpandedVideos] = useState<{
         [key: string]: boolean;
     }>({});
+    
+    // Loading states
+    const { loading: isSaving, withLoading } = useLoadingState();
+    const [uploadingVideos, setUploadingVideos] = useState<{
+        [key: string]: boolean;
+    }>({});
+    const [uploadProgress, setUploadProgress] = useState<{
+        [key: string]: number;
+    }>({});
+    const [deletingItems, setDeletingItems] = useState<{
+        [key: string]: boolean;
+    }>({});
 
     useEffect(() => {
         setLocalSections(sections);
@@ -64,9 +82,21 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
         setLocalSections([...localSections, newSection]);
     };
 
-    const handleDeleteSection = (sectionIndex: number) => {
-        const updated = localSections.filter((_, i) => i !== sectionIndex);
-        setLocalSections(updated);
+    const handleDeleteSection = async (sectionIndex: number) => {
+        const key = `section-${sectionIndex}`;
+        setDeletingItems(prev => ({ ...prev, [key]: true }));
+        
+        try {
+            // Add a small delay to show loading state
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const updated = localSections.filter((_, i) => i !== sectionIndex);
+            setLocalSections(updated);
+            toastService.success('Section deleted successfully');
+        } catch (error) {
+            toastService.error('Failed to delete section');
+        } finally {
+            setDeletingItems(prev => ({ ...prev, [key]: false }));
+        }
     };
 
     const handleAddLecture = (sectionIndex: number) => {
@@ -79,14 +109,26 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
         setLocalSections(updated);
     };
 
-    const handleDeleteLecture = (
+    const handleDeleteLecture = async (
         sectionIndex: number,
         lectureIndex: number
     ) => {
-        const updated = [...localSections];
-        updated[sectionIndex].lectures.splice(lectureIndex, 1);
-        updated[sectionIndex].totalLectures -= 1;
-        setLocalSections(updated);
+        const key = `lecture-${sectionIndex}-${lectureIndex}`;
+        setDeletingItems(prev => ({ ...prev, [key]: true }));
+        
+        try {
+            // Add a small delay to show loading state
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const updated = [...localSections];
+            updated[sectionIndex].lectures.splice(lectureIndex, 1);
+            updated[sectionIndex].totalLectures -= 1;
+            setLocalSections(updated);
+            toastService.success('Lecture deleted successfully');
+        } catch (error) {
+            toastService.error('Failed to delete lecture');
+        } finally {
+            setDeletingItems(prev => ({ ...prev, [key]: false }));
+        }
     };
 
     const handleSectionTitleChange = (
@@ -117,29 +159,53 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
         const file = e.target.files?.[0];
         if (!file) return;
 
+        const key = `${sectionIndex}-${lectureIndex}`;
+        setUploadingVideos(prev => ({ ...prev, [key]: true }));
+        setUploadProgress(prev => ({ ...prev, [key]: 0 }));
+
         const formData = new FormData();
         formData.append("file", file);
         formData.append("sectionIndex", sectionIndex.toString());
         formData.append("lectureIndex", lectureIndex.toString());
 
         try {
-            await uploadLectureVideo(courseId, formData);
+            // Simulate upload progress
+            const progressInterval = setInterval(() => {
+                setUploadProgress(prev => ({
+                    ...prev,
+                    [key]: Math.min((prev[key] || 0) + 10, 90)
+                }));
+            }, 200);
 
-            toast.success("Video uploaded and updated!");
+            await uploadLectureVideo(courseId, formData);
+            
+            clearInterval(progressInterval);
+            setUploadProgress(prev => ({ ...prev, [key]: 100 }));
+            
+            // Small delay to show 100% progress
+            setTimeout(() => {
+                setUploadProgress(prev => ({ ...prev, [key]: 0 }));
+            }, 1000);
+
+            toastService.success("Video uploaded and updated!");
         } catch (error) {
             console.error(error);
-            toast.error("Video upload failed.");
+            toastService.error("Video upload failed.");
+        } finally {
+            setUploadingVideos(prev => ({ ...prev, [key]: false }));
         }
     };
 
     const handleSaveChanges = async () => {
-        try {
-            const res = await saveCourseContent(courseId, localSections);
-            toast.success("Course content saved successfully!");
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to save course content.");
-        }
+        await withLoading(async () => {
+            try {
+                const res = await saveCourseContent(courseId, localSections);
+                toastService.success("Course content saved successfully!");
+            } catch (error) {
+                console.error(error);
+                toastService.error("Failed to save course content.");
+            }
+        });
     };
  
     return (
@@ -187,6 +253,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                     onClick={() =>
                                         setEditingSectionIndex(sectionIndex)
                                     }
+                                    disabled={isSaving}
                                 >
                                     <Edit fontSize="small" />
                                 </IconButton>
@@ -194,8 +261,13 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                     onClick={() =>
                                         handleDeleteSection(sectionIndex)
                                     }
+                                    disabled={isSaving || deletingItems[`section-${sectionIndex}`]}
                                 >
-                                    <Delete fontSize="small" color="error" />
+                                    {deletingItems[`section-${sectionIndex}`] ? (
+                                        <CircularProgress size={16} />
+                                    ) : (
+                                        <Delete fontSize="small" color="error" />
+                                    )}
                                 </IconButton>
                             </Box>
                         </Box>
@@ -257,6 +329,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                                 lectureIndex
                                                             )
                                                         }
+                                                        disabled={isSaving}
                                                     >
                                                         <Visibility fontSize="small" />
                                                     </IconButton>
@@ -267,6 +340,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                                 lectureIndex,
                                                             })
                                                         }
+                                                        disabled={isSaving}
                                                     >
                                                         <Edit fontSize="small" />
                                                     </IconButton>
@@ -277,11 +351,16 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                                 lectureIndex
                                                             )
                                                         }
+                                                        disabled={isSaving || deletingItems[`lecture-${sectionIndex}-${lectureIndex}`]}
                                                     >
-                                                        <Delete
-                                                            fontSize="small"
-                                                            color="error"
-                                                        />
+                                                        {deletingItems[`lecture-${sectionIndex}-${lectureIndex}`] ? (
+                                                            <CircularProgress size={16} />
+                                                        ) : (
+                                                            <Delete
+                                                                fontSize="small"
+                                                                color="error"
+                                                            />
+                                                        )}
                                                     </IconButton>
                                                 </Box>
                                             </>
@@ -316,6 +395,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                     lectureIndex
                                                 )
                                             }
+                                            disabled={uploadingVideos[`${sectionIndex}-${lectureIndex}`] || isSaving}
                                         />
                                         <label
                                             htmlFor={`video-upload-${sectionIndex}-${lectureIndex}`}
@@ -324,12 +404,35 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                 variant="outlined"
                                                 size="small"
                                                 component="span"
+                                                disabled={uploadingVideos[`${sectionIndex}-${lectureIndex}`] || isSaving}
+                                                startIcon={
+                                                    uploadingVideos[`${sectionIndex}-${lectureIndex}`] ? (
+                                                        <CircularProgress size={16} />
+                                                    ) : (
+                                                        <CloudUpload fontSize="small" />
+                                                    )
+                                                }
                                             >
-                                                {lecture.videoUrl
+                                                {uploadingVideos[`${sectionIndex}-${lectureIndex}`]
+                                                    ? "Uploading..."
+                                                    : lecture.videoUrl
                                                     ? "Replace Video"
                                                     : "Upload Video"}
                                             </Button>
                                         </label>
+                                        
+                                        {uploadingVideos[`${sectionIndex}-${lectureIndex}`] && (
+                                            <Box sx={{ mt: 1 }}>
+                                                <LinearProgress 
+                                                    variant="determinate" 
+                                                    value={uploadProgress[`${sectionIndex}-${lectureIndex}`] || 0}
+                                                    sx={{ height: 6, borderRadius: 3 }}
+                                                />
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {uploadProgress[`${sectionIndex}-${lectureIndex}`] || 0}% uploaded
+                                                </Typography>
+                                            </Box>
+                                        )}
                                     </Box>
                                 </Box>
                             );
@@ -340,6 +443,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                 variant="text"
                                 size="small"
                                 onClick={() => handleAddLecture(sectionIndex)}
+                                disabled={isSaving}
                             >
                                 + Add Lecture
                             </Button>
@@ -348,13 +452,20 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                 ))}
 
                 <Box className="flex justify-center mt-6">
-                    <Button
+                    <LoadingButton
+                        loading={isSaving}
+                        loadingText="Saving changes..."
                         variant="contained"
                         color="primary"
                         onClick={handleSaveChanges}
+                        size="large"
+                        sx={{
+                            minWidth: 160,
+                            height: 48,
+                        }}
                     >
                         Save Changes
-                    </Button>
+                    </LoadingButton>
                 </Box>
             </CardContent>
         </Card>

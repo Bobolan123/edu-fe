@@ -20,6 +20,9 @@ import {
     Button as MUIButton,
     Select,
     MenuItem,
+    CircularProgress,
+    Skeleton,
+    alpha,
 } from "@mui/material";
 import { ICartItem } from "../../../types/entities";
 import { deleteCartItem } from "@/actions";
@@ -31,6 +34,8 @@ import { useState, useEffect } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
 import { useTranslations } from "next-intl";
+import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+import { toastService } from "@/services/toast";
 
 interface ICartProps {
     cartItems?: ICartItem[];
@@ -44,33 +49,56 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
     const [convertedPrices, setConvertedPrices] = useState<
         Record<number, number>
     >({});
+    
+    // Loading states
+    const [deletingItems, setDeletingItems] = useState<
+        Record<number, boolean>
+    >({});
+    const [isConvertingPrices, setIsConvertingPrices] = useState(false);
+    const [isConvertingTotal, setIsConvertingTotal] = useState(false);
 
     const rawTotal =
         cartItems?.reduce((sum, item) => sum + (item.price || 0), 0) || 0;
 
     useEffect(() => {
         async function convertTotal() {
-            const result = await currencyService.convertPrice(
-                rawTotal,
-                "VND",
-                currency
-            );
-            setConvertedTotal(result);
+            setIsConvertingTotal(true);
+            try {
+                const result = await currencyService.convertPrice(
+                    rawTotal,
+                    "VND",
+                    currency
+                );
+                setConvertedTotal(result);
+            } catch (error) {
+                toastService.error('Failed to convert currency');
+            } finally {
+                setIsConvertingTotal(false);
+            }
         }
         convertTotal();
     }, [rawTotal, currency]);
     useEffect(() => {
         async function convertAllPrices() {
-            const newPrices: Record<number, number> = {};
-            for (const item of cartItems) {
-                const converted = await currencyService.convertPrice(
-                    item.price || 0,
-                    "VND",
-                    currency
-                );
-                newPrices[item.course.id] = converted;
+            if (cartItems.length === 0) return;
+            
+            setIsConvertingPrices(true);
+            try {
+                const newPrices: Record<number, number> = {};
+                for (const item of cartItems) {
+                    const converted = await currencyService.convertPrice(
+                        item.price || 0,
+                        "VND",
+                        currency
+                    );
+                    newPrices[item.course.id] = converted;
+                }
+                setConvertedPrices(newPrices);
+            } catch (error) {
+                toastService.error('Failed to convert prices');
+            } finally {
+                setIsConvertingPrices(false);
             }
-            setConvertedPrices(newPrices);
         }
         convertAllPrices();
     }, [cartItems, currency]);
@@ -78,11 +106,30 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
     const formatRating = (rating: number = 0) => rating.toFixed(1);
 
     const handleDeleteItem = async (courseId: number) => {
-        const res = await deleteCartItem(
-            courseId,
-            session?.user?.access_token as string
-        );
-        res && res.data ? toast.success(res.message) : toast.error(res.message);
+        setDeletingItems(prev => ({ ...prev, [courseId]: true }));
+        
+        try {
+            const res = await deleteCartItem(
+                courseId,
+                session?.user?.access_token as string
+            );
+            
+            if (res && res.data) {
+                toastService.success(res.message);
+                // Remove from local state to provide immediate feedback
+                setConvertedPrices(prev => {
+                    const newPrices = { ...prev };
+                    delete newPrices[courseId];
+                    return newPrices;
+                });
+            } else {
+                toastService.error(res.message);
+            }
+        } catch (error) {
+            toastService.error('Failed to remove item from cart');
+        } finally {
+            setDeletingItems(prev => ({ ...prev, [courseId]: false }));
+        }
     };
 
     if (cartItems.length === 0) {
@@ -188,8 +235,24 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                                     ?.course?.id
                                                             )
                                                         }
+                                                        disabled={deletingItems[cartItem?.course?.id]}
+                                                        sx={{
+                                                            minWidth: 40,
+                                                            minHeight: 40,
+                                                            borderRadius: 2,
+                                                            '&:hover': {
+                                                                backgroundColor: alpha('#ef4444', 0.1),
+                                                            },
+                                                        }}
                                                     >
-                                                        <Trash2 size={18} />
+                                                        {deletingItems[cartItem?.course?.id] ? (
+                                                            <CircularProgress 
+                                                                size={18} 
+                                                                color="error" 
+                                                            />
+                                                        ) : (
+                                                            <Trash2 size={18} />
+                                                        )}
                                                     </MUIButton>
                                                 </Box>
 
@@ -273,15 +336,23 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                     justifyContent="right"
                                                     mt={2}
                                                 >
-                                                    <Typography variant="h6">
-                                                        {currencyService.formatPrice(
-                                                            convertedPrices[
-                                                                cartItem.course
-                                                                    .id
-                                                            ] || 0,
-                                                            currency
-                                                        )}
-                                                    </Typography>
+                                                    {isConvertingPrices && !convertedPrices[cartItem.course.id] ? (
+                                                        <Skeleton 
+                                                            variant="text" 
+                                                            width={80} 
+                                                            height={32}
+                                                        />
+                                                    ) : (
+                                                        <Typography variant="h6">
+                                                            {currencyService.formatPrice(
+                                                                convertedPrices[
+                                                                    cartItem.course
+                                                                        .id
+                                                                ] || 0,
+                                                                currency
+                                                            )}
+                                                        </Typography>
+                                                    )}
                                                 </Box>
                                             </Box>
                                         </Grid>
@@ -315,22 +386,44 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                     >
                                         {t('total')}
                                     </Typography>
-                                    <Typography
-                                        variant="subtitle1"
-                                        fontWeight={600}
-                                    >
-                                        {currencyService.formatPrice(
-                                            convertedTotal,
-                                            currency
-                                        )}
-                                    </Typography>
+                                    {isConvertingTotal ? (
+                                        <Skeleton 
+                                            variant="text" 
+                                            width={100} 
+                                            height={32}
+                                        />
+                                    ) : (
+                                        <Typography
+                                            variant="subtitle1"
+                                            fontWeight={600}
+                                        >
+                                            {currencyService.formatPrice(
+                                                convertedTotal,
+                                                currency
+                                            )}
+                                        </Typography>
+                                    )}
                                 </Box>
                                 <Link href={`/checkout`}>
                                     <MUIButton
                                         variant="contained"
                                         fullWidth
-                                        sx={{ mt: 1.5 }}
+                                        sx={{ 
+                                            mt: 1.5,
+                                            height: 48,
+                                            fontSize: '1rem',
+                                            fontWeight: 600,
+                                            borderRadius: 2,
+                                            background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+                                            boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
+                                            '&:hover': {
+                                                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                                                boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)',
+                                                transform: 'translateY(-1px)',
+                                            },
+                                        }}
                                         startIcon={<CreditCard />}
+                                        disabled={isConvertingTotal || isConvertingPrices}
                                     >
                                         {t('checkout')}
                                     </MUIButton>
