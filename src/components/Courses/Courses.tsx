@@ -123,7 +123,6 @@ export default function Courses(props: ICoursesProps) {
         replace(`${pathname}?${params.toString()}`);
     };
 
-    /* ─────────────────────────────── render ─────────────────────────────── */
     return (
         <Container maxWidth="lg" sx={{ py: 6 }}>
             <Grid container spacing={4}>
@@ -200,6 +199,7 @@ export default function Courses(props: ICoursesProps) {
 
                     <Grid container spacing={3}>
                         {courses.map((course) => (
+                            !course.isPurchased && (
                             <Grid item key={course.id} xs={12}>
                                 <Link
                                     href={`/courses/${slugify(
@@ -338,6 +338,7 @@ export default function Courses(props: ICoursesProps) {
                                     </Card>
                                 </Link>
                             </Grid>
+                            )
                         ))}
                     </Grid>
                 </Grid>

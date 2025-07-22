@@ -17,9 +17,5 @@ export default async function Navbar() {
             tags: "cart",
         },
     });
-    return (
-        <div className="fixed top-0 left-0 w-full z-50">
-            <NavbarClient cart={cart?.data as ICart} />
-        </div>
-    );
+    return <NavbarClient cart={cart?.data as ICart} />;
 }

@@ -1,126 +1,146 @@
-# CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+  You are an expert in JavaScript, React, Node.js, Next.js App Router, Zustand, Shadcn UI, Radix UI, Tailwind, and Stylus.
 
-## Development Commands
+  Code Style and Structure
+  - Write concise, technical JavaScript code following Standard.js rules.
+  - Use functional and declarative programming patterns; avoid classes.
+  - Prefer iteration and modularization over code duplication.
+  - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+  - Structure files: exported component, subcomponents, helpers, static content.
 
-- `npm run dev` - Start development server (auto-finds available port starting from 3000)
-- `npm run build` - Build production application
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint code linting
+  Standard.js Rules
+  - Use 2 space indentation.
+  - Use single quotes for strings except to avoid escaping.
+  - No semicolons (unless required to disambiguate statements).
+  - No unused variables.
+  - Add a space after keywords.
+  - Add a space before a function declaration's parentheses.
+  - Always use === instead of ==.
+  - Infix operators must be spaced.
+  - Commas should have a space after them.
+  - Keep else statements on the same line as their curly braces.
+  - For multi-line if statements, use curly braces.
+  - Always handle the err function parameter.
+  - Use camelcase for variables and functions.
+  - Use PascalCase for constructors and React components.
 
-## Project Architecture
+  Naming Conventions
+  - Use lowercase with dashes for directories (e.g., components/auth-wizard).
+  - Favor named exports for components.
 
-### Core Framework & Structure
-- **Next.js 15** with App Router using TypeScript
-- **Internationalization**: next-intl with English (`en`) and Vietnamese (`vi`) support
-- **Styling**: Tailwind CSS with Material-UI components
-- **Authentication**: NextAuth.js with Google OAuth and credentials-based login
-- **State Management**: React Context (Currency, Authentication sessions)
+  React Best Practices
+  - Use functional components with prop-types for type checking.
+  - Use the "function" keyword for component definitions.
+  - Implement hooks correctly (useState, useEffect, useContext, useReducer, useMemo, useCallback).
+  - Follow the Rules of Hooks (only call hooks at the top level, only call hooks from React functions).
+  - Create custom hooks to extract reusable component logic.
+  - Use React.memo() for component memoization when appropriate.
+  - Implement useCallback for memoizing functions passed as props.
+  - Use useMemo for expensive computations.
+  - Avoid inline function definitions in render to prevent unnecessary re-renders.
+  - Prefer composition over inheritance.
+  - Use children prop and render props pattern for flexible, reusable components.
+  - Implement React.lazy() and Suspense for code splitting.
+  - Use refs sparingly and mainly for DOM access.
+  - Prefer controlled components over uncontrolled components.
+  - Implement error boundaries to catch and handle errors gracefully.
+  - Use cleanup functions in useEffect to prevent memory leaks.
+  - Use short-circuit evaluation and ternary operators for conditional rendering.
 
-### Key Architectural Patterns
+  State Management
+  - Use Zustand for global state management.
+  - Lift state up when needed to share state between components.
+  - Use context for intermediate state sharing when prop drilling becomes cumbersome.
 
-#### Routing & Internationalization
-- All routes are prefixed with locale: `/[locale]/page-name`
-- Locale routing handled by `src/i18n/routing.ts` and middleware
-- Middleware (`src/middleware.ts`) manages locale detection, authentication, and redirects
-- Translation files in `messages/en.json` and `messages/vi.json`
+  UI and Styling
+  - Use Shadcn UI and Radix UI for component foundations.
+  - Implement responsive design with Tailwind CSS; use a mobile-first approach.
+  - Use Stylus as CSS Modules for component-specific styles:
+    - Create a .module.styl file for each component that needs custom styling.
+    - Use camelCase for class names in Stylus files.
+    - Leverage Stylus features like nesting, variables, and mixins for efficient styling.
+  - Implement a consistent naming convention for CSS classes (e.g., BEM) within Stylus modules.
+  - Use Tailwind for utility classes and rapid prototyping.
+  - Combine Tailwind utility classes with Stylus modules for a hybrid approach:
+    - Use Tailwind for common utilities and layout.
+    - Use Stylus modules for complex, component-specific styles.
+    - Never use the @apply directive
 
-#### Authentication Flow
-- NextAuth.js configuration in `src/auth.ts`
-- Supports Google OAuth and credential-based login
-- Custom authentication service in `src/auth.service.ts`
-- Session management integrated with backend API via JWT tokens
-- Custom error handling for authentication states
+  File Structure for Styling
+  - Place Stylus module files next to their corresponding component files.
+  - Example structure:
+    components/
+      Button/
+        Button.js
+        Button.module.styl
+      Card/
+        Card.js
+        Card.module.styl
 
-#### API Communication
-- Centralized API utilities in `utils/api.ts`
-- `sendRequest<T>()` for JSON requests with generic typing
-- `sendRequestFile<T>()` for file uploads (FormData)
-- All API calls include proper error handling and status code management
-- Backend integration via `process.env.NEXT_PUBLIC_SERVER`
+  Stylus Best Practices
+  - Use variables for colors, fonts, and other repeated values.
+  - Create mixins for commonly used style patterns.
+  - Utilize Stylus' parent selector (&) for nesting and pseudo-classes.
+  - Keep specificity low by avoiding deep nesting.
 
-#### Component Architecture
-- **Feature-based organization**: Components grouped by feature (Auth, Cart, Courses, etc.)
-- **Shared components**: Common UI elements in `src/components/common/`
-- **Layout components**: Navigation, toasts, and providers in layout structure
-- **Form handling**: React Hook Form with Zod validation schemas
+  Integration with React
+  - Import Stylus modules in React components:
+    import styles from './ComponentName.module.styl'
+  - Apply classes using the styles object:
+    <div className={styles.containerClass}>
 
-### Data Flow & Types
+  Performance Optimization
+  - Minimize 'use client', 'useEffect', and 'useState'; favor React Server Components (RSC).
+  - Wrap client components in Suspense with fallback.
+  - Use dynamic loading for non-critical components.
+  - Optimize images: use WebP format, include size data, implement lazy loading.
+  - Implement route-based code splitting in Next.js.
+  - Minimize the use of global styles; prefer modular, scoped styles.
+  - Use PurgeCSS with Tailwind to remove unused styles in production.
 
-#### Entity Types
-- Comprehensive TypeScript interfaces in `types/entities.d.ts`
-- Core entities: `ICourse`, `IUser`, `ICategory`, `IEnrollment`, `IOrder`
-- Course content structure: `ISection` containing `ILecture` arrays
-- Payment integration: `OrderStatus`, `PaymentMethod` enums
+  Forms and Validation
+  - Use controlled components for form inputs.
+  - Implement form validation (client-side and server-side).
+  - Consider using libraries like react-hook-form for complex forms.
+  - Use Zod or Joi for schema validation.
 
-#### Server Actions
-- Course management actions in `src/actions/coursesAction.ts`
-- CRUD operations with proper error handling and cache revalidation
-- File upload handling for thumbnails and lecture videos
-- Content management for course sections and lectures
+  Error Handling and Validation
+  - Prioritize error handling and edge cases.
+  - Handle errors and edge cases at the beginning of functions.
+  - Use early returns for error conditions to avoid deeply nested if statements.
+  - Place the happy path last in the function for improved readability.
+  - Avoid unnecessary else statements; use if-return pattern instead.
+  - Use guard clauses to handle preconditions and invalid states early.
+  - Implement proper error logging and user-friendly error messages.
+  - Model expected errors as return values in Server Actions.
 
-#### Validation & Forms
-- Zod schemas in `src/lib/validationSchemas.ts`
-- Comprehensive form validation for authentication, course creation, profiles
-- File upload validation with size and type constraints
-- Type inference for form data throughout the application
+  Accessibility (a11y)
+  - Use semantic HTML elements.
+  - Implement proper ARIA attributes.
+  - Ensure keyboard navigation support.
 
-### Key Features
+  Testing
+  - Write unit tests for components using Jest and React Testing Library.
+  - Implement integration tests for critical user flows.
+  - Use snapshot testing judiciously.
 
-#### Course Management
-- Multi-step course creation with sections and lectures
-- Video upload and processing for course content
-- Thumbnail management via Cloudinary integration
-- Course categorization and filtering
+  Security
+  - Sanitize user inputs to prevent XSS attacks.
+  - Use dangerouslySetInnerHTML sparingly and only with sanitized content.
 
-#### E-commerce Integration
-- Shopping cart with persistent state
-- Multiple payment methods (VNPAY, PayPal)
-- Currency conversion (VND/USD) with exchange rate API
-- Order management and transaction tracking
+  Internationalization (i18n)
+  - Use libraries like react-intl or next-i18next for internationalization.
 
-#### User Experience
-- Responsive design with mobile-first approach
-- Toast notifications via centralized service (`src/services/toast.ts`)
-- Loading states and error boundaries
-- Accessibility considerations with proper ARIA labels
+  Key Conventions
+  - Use 'nuqs' for URL search parameter state management.
+  - Optimize Web Vitals (LCP, CLS, FID).
+  - Limit 'use client':
+    - Favor server components and Next.js SSR.
+    - Use only for Web API access in small components.
+    - Avoid for data fetching or state management.
+  - Balance the use of Tailwind utility classes with Stylus modules:
+    - Use Tailwind for rapid development and consistent spacing/sizing.
+    - Use Stylus modules for complex, unique component styles.
 
-### Environment & Configuration
-
-#### Required Environment Variables
-- `NEXT_PUBLIC_SERVER` - Backend API URL
-- Authentication provider secrets (Google OAuth)
-- Database and external service configurations
-
-#### Development Setup
-- The application auto-detects available ports during development
-- Cloudinary integration for image/video storage
-- Material-UI theme configuration in `src/app/[locale]/theme.ts`
-
-### Common Development Tasks
-
-#### Adding New Features
-1. Create feature-specific components in appropriate directories
-2. Add necessary validation schemas in `src/lib/validationSchemas.ts`
-3. Implement server actions if backend integration is required
-4. Add internationalization strings to both `messages/en.json` and `messages/vi.json`
-5. Update TypeScript types in `types/entities.d.ts` if needed
-
-#### Working with Forms
-- Use React Hook Form with Zod resolvers
-- Import validation schemas from `src/lib/validationSchemas.ts`
-- Implement proper error handling with toast notifications
-- Follow existing form patterns in authentication components
-
-#### API Integration
-- Use `sendRequest` or `sendRequestFile` from `utils/api.ts`
-- Implement proper error handling for API responses
-- Add loading states and user feedback
-- Follow existing patterns in `src/actions/` directory
-
-### Code Quality & Standards
-- ESLint configuration with Next.js recommended rules
-- TypeScript strict mode enabled
-- Consistent component structure and naming conventions
-- Comprehensive error handling throughout the application
+  Follow Next.js docs for Data Fetching, Rendering, and Routing.
+    

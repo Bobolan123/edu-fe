@@ -53,7 +53,7 @@ export default async function LocaleLayout({
                         <ThemeProvider theme={theme}>
                             <SessionProvider>
                                 <CurrencyProvider>
-                                    <div className="mb-16">
+                                    <div className="mb-28">
                                         <Navbar />
                                     </div>
                                     {children}

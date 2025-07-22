@@ -1,13 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-    Button,
-    Box,
-    Grid,
-    Typography,
-    Link as MuiLink,
-} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -16,7 +9,6 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { customSignin } from "../../../utils/auth/action";
 import { loginSchema, LoginFormData } from "@/lib/validationSchemas";
-import { FormTextField } from "@/components/common/FormComponents";
 import { LoadingButton, useLoadingState } from "@/components/common/Loading";
 import { toastService } from "@/services/toast";
 import ResendOtpModel from "./ResendOtp.model";
@@ -37,7 +29,7 @@ const LoginForm = () => {
     const {
         control,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors },
         getValues,
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -71,175 +63,107 @@ const LoginForm = () => {
     };
 
     return (
-        <Box 
-            sx={{ 
-                display: "flex", 
-                flexDirection: "column",
-                maxWidth: "400px",
-                margin: "0 auto",
-                p: 4,
-            }}
-        >
-            {/* Header Section */}
-            <Box sx={{ textAlign: "center", mb: 4 }}>
-                <Typography 
-                    variant="h4" 
-                    sx={{ 
-                        fontWeight: 700,
-                        mb: 2,
-                        background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                    }}
-                >
-                    {t("title")}
-                </Typography>
-                <Typography 
-                    variant="body1" 
-                    color="text.secondary"
-                    sx={{ mb: 4 }}
-                >
-                    Welcome back! Please sign in to continue your learning journey.
-                </Typography>
-            </Box>
+        <div>
+            <div className="text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900">{t("welcome_back")}</h2>
+                <p className="mt-2 text-sm text-gray-600">{t("subtitle")}</p>
+            </div>
 
-            {/* Form Section */}
-            <Box 
-                component="form" 
-                onSubmit={handleSubmit(onSubmit)} 
-                noValidate 
-                sx={{
-                    background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
-                    borderRadius: '20px',
-                    p: 4,
-                    boxShadow: '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                }}
-            >
-                <Box sx={{ mb: 3 }}>
-                    <FormTextField
-                        name="email"
-                        control={control}
-                        label={t("email")}
-                        type="email"
-                        required
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                            {t("email")}
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="email"
+                                type="email"
+                                autoComplete="email"
+                                required
+                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder={t("email_placeholder")}
+                                {...control.register("email")}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                            {t("password")}
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="password"
+                                type="password"
+                                autoComplete="current-password"
+                                required
+                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder={t("password_placeholder")}
+                                {...control.register("password")}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-end">
+                    <div className="text-sm">
+                        <button
+                            type="button"
+                            onClick={() => setIsOpenModelForgotPassword(true)}
+                            className="font-medium text-blue-600 hover:text-blue-500"
+                        >
+                            {t("forgot_password")}
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <button
+                        type="submit"
                         disabled={loading}
-                        placeholder="your.email@example.com"
-                        startAdornment={
-                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                                <Box
-                                    sx={{
-                                        width: 6,
-                                        height: 6,
-                                        borderRadius: '50%',
-                                        backgroundColor: 'primary.main',
-                                    }}
-                                />
-                            </Box>
-                        }
-                    />
-                </Box>
-                
-                <Box sx={{ mb: 4 }}>
-                    <FormTextField
-                        name="password"
-                        control={control}
-                        label={t("password")}
-                        type="password"
-                        required
-                        disabled={loading}
-                        showPasswordToggle
-                        placeholder="Enter your password"
-                        startAdornment={
-                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                                <Box
-                                    sx={{
-                                        width: 6,
-                                        height: 6,
-                                        borderRadius: '50%',
-                                        backgroundColor: 'secondary.main',
-                                    }}
-                                />
-                            </Box>
-                        }
-                    />
-                </Box>
-
-                <LoadingButton
-                    loading={loading}
-                    loadingText="Signing in..."
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    sx={{
-                        height: 56,
-                        borderRadius: '16px',
-                        fontSize: '1.1rem',
-                        fontWeight: 600,
-                        background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-                        boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
-                        '&:hover': {
-                            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                            boxShadow: '0 8px 25px rgba(14, 165, 233, 0.4)',
-                            transform: 'translateY(-2px)',
-                        },
-                        '&:active': {
-                            transform: 'translateY(0)',
-                        },
-                        mb: 3,
-                    }}
-                >
-                    {t("login_button")}
-                </LoadingButton>
-                {/* Footer Links */}
-                <Box sx={{ textAlign: 'center', mt: 2 }}>
-                    <Typography
-                        variant="body2"
-                        color="primary"
-                        sx={{ 
-                            cursor: "pointer",
-                            textDecoration: 'underline',
-                            mb: 2,
-                            '&:hover': {
-                                color: 'primary.dark',
-                            },
-                        }}
-                        onClick={() => setIsOpenModelForgotPassword(true)}
+                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
-                        {t("forgot_password")}
-                    </Typography>
-                </Box>
-            </Box>
+                        {loading ? t("signing_in") : t("login_button")}
+                    </button>
+                </div>
 
-            {/* Sign Up Link */}
-            <Box 
-                sx={{ 
-                    textAlign: 'center', 
-                    mt: 4,
-                    p: 3,
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(14, 165, 233, 0.04)',
-                    border: '1px solid',
-                    borderColor: 'rgba(14, 165, 233, 0.1)',
-                }}
-            >
-                <Typography variant="body2" color="text.secondary">
-                    {t("signup_prompt")}{" "}
-                    <Link 
-                        href="/signup"
-                        style={{
-                            color: '#0ea5e9',
-                            textDecoration: 'none',
-                            fontWeight: 600,
-                        }}
+                <div>
+                    <button
+                        type="button"
+                        onClick={() => signIn("google")}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                     >
+                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                            <path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                fill="#4285F4"
+                            />
+                            <path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                fill="#34A853"
+                            />
+                            <path
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                fill="#FBBC05"
+                            />
+                            <path
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                fill="#EA4335"
+                            />
+                        </svg>
+                        {t("google_signin")}
+                    </button>
+                </div>
+
+                <div className="text-center text-sm">
+                    <span className="text-gray-600">{t("signup_prompt")} </span>
+                    <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
                         {t("signup_button")}
                     </Link>
-                </Typography>
-            </Box>
+                </div>
+            </form>
+
             <ResendOtpModel
                 isOpenModelResendOtp={isOpenModelResendOtp}
                 handleCloseModelResendOtp={handleCloseModelResendOtp}
@@ -249,7 +173,7 @@ const LoginForm = () => {
                 isOpenModelForgotPassword={isOpenModelForgotPassword}
                 handleCloseModelForgotPassword={handleCloseModelForgotPassword}
             />
-        </Box>
+        </div>
     );
 };
 

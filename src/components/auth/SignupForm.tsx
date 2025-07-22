@@ -1,11 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-    Button,
-    Box,
-    Typography,
-} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -13,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { fetchRegister } from "@/auth.service";
 import { signupSchema, SignupFormData } from "@/lib/validationSchemas";
-import { FormTextField } from "@/components/common/FormComponents";
 import { LoadingButton, useLoadingState } from "@/components/common/Loading";
 import { toastService } from "@/services/toast";
 import VerifyOtpModel from "./VerifyOTP.model";
@@ -70,222 +64,107 @@ const SignupForm = () => {
     };
 
     return (
-        <Box 
-            sx={{ 
-                display: "flex", 
-                flexDirection: "column",
-                maxWidth: "400px",
-                margin: "0 auto",
-                p: 4,
-            }}
-        >
-            {/* Header Section */}
-            <Box sx={{ textAlign: "center", mb: 4 }}>
-                <Typography 
-                    variant="h4" 
-                    sx={{ 
-                        fontWeight: 700,
-                        mb: 2,
-                        background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                    }}
-                >
-                    {t("title")}
-                </Typography>
-                <Typography 
-                    variant="body1" 
-                    color="text.secondary"
-                    sx={{ mb: 4 }}
-                >
-                    Create your account to start your learning journey with us!
-                </Typography>
-            </Box>
+        <div>
+            <div className="text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900">{t("welcome_title")}</h2>
+                <p className="mt-2 text-sm text-gray-600">{t("subtitle")}</p>
+            </div>
 
-            {/* Form Section */}
-            <Box 
-                component="form" 
-                onSubmit={handleSubmit(onSubmit)} 
-                noValidate 
-                sx={{
-                    background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
-                    borderRadius: '20px',
-                    p: 4,
-                    boxShadow: '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                }}
-            >
-                <Box sx={{ mb: 3 }}>
-                    <FormTextField
-                        name="fullname"
-                        control={control}
-                        label={t("fullname")}
-                        type="text"
-                        required
-                        disabled={loading}
-                        placeholder="Enter your full name"
-                        startAdornment={
-                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                                <Box
-                                    sx={{
-                                        width: 6,
-                                        height: 6,
-                                        borderRadius: '50%',
-                                        backgroundColor: 'success.main',
-                                    }}
-                                />
-                            </Box>
-                        }
-                    />
-                </Box>
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="fullname" className="block text-sm font-medium text-gray-700">
+                            {t("fullname")}
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="fullname"
+                                type="text"
+                                autoComplete="name"
+                                required
+                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder={t("fullname_placeholder")}
+                                {...control.register("fullname")}
+                            />
+                        </div>
+                    </div>
 
-                <Box sx={{ mb: 3 }}>
-                    <FormTextField
-                        name="email"
-                        control={control}
-                        label={t("email")}
-                        type="email"
-                        required
-                        disabled={loading}
-                        placeholder="your.email@example.com"
-                        startAdornment={
-                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                                <Box
-                                    sx={{
-                                        width: 6,
-                                        height: 6,
-                                        borderRadius: '50%',
-                                        backgroundColor: 'primary.main',
-                                    }}
-                                />
-                            </Box>
-                        }
-                    />
-                </Box>
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                            {t("email")}
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="email"
+                                type="email"
+                                autoComplete="email"
+                                required
+                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder={t("email_placeholder")}
+                                {...control.register("email")}
+                            />
+                        </div>
+                    </div>
                 
-                <Box sx={{ mb: 3 }}>
-                    <FormTextField
-                        name="password"
-                        control={control}
-                        label={t("password")}
-                        type="password"
-                        required
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                            {t("password")}
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="password"
+                                type="password"
+                                autoComplete="new-password"
+                                required
+                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder={t("password_placeholder")}
+                                {...control.register("password")}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                            {t("confirm_password")}
+                        </label>
+                        <div className="mt-1">
+                            <input
+                                id="confirmPassword"
+                                type="password"
+                                autoComplete="new-password"
+                                required
+                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                placeholder={t("confirm_password_placeholder")}
+                                {...control.register("confirmPassword")}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <button
+                        type="submit"
                         disabled={loading}
-                        showPasswordToggle
-                        placeholder="Password"
-                        startAdornment={
-                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                                <Box
-                                    sx={{
-                                        width: 6,
-                                        height: 6,
-                                        borderRadius: '50%',
-                                        backgroundColor: 'secondary.main',
-                                    }}
-                                />
-                            </Box>
-                        }
-                    />
-                </Box>
-
-                <Box sx={{ mb: 4 }}>
-                    <FormTextField
-                        name="confirmPassword"
-                        control={control}
-                        label="Confirm Password"
-                        type="password"
-                        required
-                        disabled={loading}
-                        showPasswordToggle
-                        placeholder="Confirm your password"
-                        startAdornment={
-                            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                                <Box
-                                    sx={{
-                                        width: 6,
-                                        height: 6,
-                                        borderRadius: '50%',
-                                        backgroundColor: 'warning.main',
-                                    }}
-                                />
-                            </Box>
-                        }
-                    />
-                </Box>
-
-                <LoadingButton
-                    loading={loading}
-                    loadingText="Creating account..."
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    sx={{
-                        height: 56,
-                        borderRadius: '16px',
-                        fontSize: '1.1rem',
-                        fontWeight: 600,
-                        background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-                        boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
-                        '&:hover': {
-                            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                            boxShadow: '0 8px 25px rgba(14, 165, 233, 0.4)',
-                            transform: 'translateY(-2px)',
-                        },
-                        '&:active': {
-                            transform: 'translateY(0)',
-                        },
-                        mb: 3,
-                    }}
-                >
-                    {t("signup_button")}
-                </LoadingButton>
-
-                {/* Terms */}
-                <Typography 
-                    variant="body2" 
-                    color="text.secondary"
-                    sx={{ textAlign: 'center', mb: 2 }}
-                >
-                    {t("terms")}
-                </Typography>
-            </Box>
-
-            {/* Login Link */}
-            <Box 
-                sx={{ 
-                    textAlign: 'center', 
-                    mt: 4,
-                    p: 3,
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(14, 165, 233, 0.04)',
-                    border: '1px solid',
-                    borderColor: 'rgba(14, 165, 233, 0.1)',
-                }}
-            >
-                <Typography variant="body2" color="text.secondary">
-                    Already have an account?{" "}
-                    <Link 
-                        href="/login"
-                        style={{
-                            color: '#0ea5e9',
-                            textDecoration: 'none',
-                            fontWeight: 600,
-                        }}
+                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
-                        Sign in
+                        {loading ? t("creating_account") : t("signup_button")}
+                    </button>
+                </div>
+
+                <div className="text-center text-sm">
+                    <span className="text-gray-600">{t("login_prompt")} </span>
+                    <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+                        {t("login_button")}
                     </Link>
-                </Typography>
-            </Box>
+                </div>
+            </form>
 
             <VerifyOtpModel
                 email={emailModel}
                 handleCloseModelOpenVerify={handleCloseModelOpenVerify}
                 isOpenVerify={isOpenVerify}
             />
-        </Box>
+        </div>
     );
 };
 

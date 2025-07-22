@@ -296,22 +296,37 @@
     },
     "Signup": {
         "title": "Sign up and start learning",
-        "fullname": "Full name",
-        "email": "Email",
+        "welcome_title": "Create Account",
+        "subtitle": "Sign up to start your learning journey",
+        "fullname": "Full Name",
+        "fullname_placeholder": "Enter your full name",
+        "email": "Email Address",
+        "email_placeholder": "your.email@example.com",
         "password": "Password",
-        "signup_button": "SIGN UP",
+        "password_placeholder": "Enter your password",
+        "confirm_password": "Confirm Password",
+        "confirm_password_placeholder": "Confirm your password",
+        "signup_button": "Sign Up",
+        "creating_account": "Creating account...",
         "terms": "By signing up, you agree to our Terms of Use and Privacy Policy.",
-        "login_prompt": "Already have an account? Log in"
+        "login_prompt": "Already have an account?",
+        "login_button": "Sign in"
     },
     "Login": {
         "title": "Log in to explore your learning journey",
-        "email": "Email",
+        "welcome_back": "Welcome Back",
+        "subtitle": "Sign in to your account",
+        "email": "Email Address",
+        "email_placeholder": "your.email@example.com",
         "password": "Password",
-        "login_button": "LOG IN",
+        "password_placeholder": "Enter your password",
+        "login_button": "Sign In",
+        "signing_in": "Signing in...",
+        "google_signin": "Continue with Google",
         "terms": "By logging in, you agree to our Terms of Use and Privacy Policy.",
         "signup_prompt": "Don't have an account?",
         "signup_button": "Sign up",
-        "forgot_password": "Forgot password"
+        "forgot_password": "Forgot your password?"
     },
     "VerifyOTP": {
         "steps": {

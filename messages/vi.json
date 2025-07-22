@@ -311,22 +311,37 @@
     },
     "Signup": {
         "title": "Đăng ký và bắt đầu học",
-        "fullname": "Họ và tên",
-        "email": "Email",
-        "password": "Mật khẩu",
-        "signup_button": "ĐĂNG KÝ",
+        "welcome_title": "Tạo Tài Khoản",
+        "subtitle": "Đăng ký để bắt đầu hành trình học tập",
+        "fullname": "Họ và Tên",
+        "fullname_placeholder": "Nhập họ và tên của bạn",
+        "email": "Địa Chỉ Email",
+        "email_placeholder": "email.cua.ban@example.com",
+        "password": "Mật Khẩu",
+        "password_placeholder": "Nhập mật khẩu",
+        "confirm_password": "Xác Nhận Mật Khẩu",
+        "confirm_password_placeholder": "Xác nhận mật khẩu của bạn",
+        "signup_button": "Đăng Ký",
+        "creating_account": "Đang tạo tài khoản...",
         "terms": "Bằng cách đăng ký, bạn đồng ý với Điều khoản Sử dụng và Chính sách Quyền riêng tư của chúng tôi.",
-        "login_prompt": "Đã có tài khoản? Đăng nhập"
+        "login_prompt": "Đã có tài khoản?",
+        "login_button": "Đăng nhập"
     },
     "Login": {
         "title": "Đăng nhập để khám phá hành trình học tập của bạn",
-        "email": "Email",
-        "password": "Mật khẩu",
-        "login_button": "ĐĂNG NHẬP",
+        "welcome_back": "Chào Mừng Trở Lại",
+        "subtitle": "Đăng nhập vào tài khoản của bạn",
+        "email": "Địa Chỉ Email",
+        "email_placeholder": "email.cua.ban@example.com",
+        "password": "Mật Khẩu",
+        "password_placeholder": "Nhập mật khẩu của bạn",
+        "login_button": "Đăng Nhập",
+        "signing_in": "Đang đăng nhập...",
+        "google_signin": "Tiếp tục với Google",
         "terms": "Bằng cách đăng nhập, bạn đồng ý với Điều khoản Sử dụng và Chính sách Quyền riêng tư của chúng tôi.",
         "signup_prompt": "Chưa có tài khoản?",
         "signup_button": "Đăng ký",
-        "forgot_password": "Quên mật khẩu"
+        "forgot_password": "Quên mật khẩu?"
     },
     "VerifyOTP": {
         "steps": {
