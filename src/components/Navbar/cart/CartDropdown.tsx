@@ -99,7 +99,7 @@ export default function CartDropdown({ cartItems = [] }: CartDropdownProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-8 right-2 mt-2 w-[380px] bg-white border rounded-md shadow-lg z-50">
+        <div className="absolute top-8 right-2 mt-2 w-[380px] bg-white border rounded-md shadow-lg z-[2000]">
           <div className="max-h-[400px] overflow-y-auto">
             {cartItems.map((item) => (
               <Link key={item.id} href={`/course/${item.course?.id ?? ""}`}>

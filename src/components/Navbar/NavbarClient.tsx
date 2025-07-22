@@ -14,6 +14,7 @@ import {
     Toolbar,
     Typography,
 } from "@mui/material";
+import { useState, useEffect } from "react";
 import { AccountCircle, Search as SearchIcon } from "@mui/icons-material";
 import LocaleSwitcher from "./LocaleSwitcher";
 import Image from "next/image";
@@ -69,7 +70,43 @@ interface INavbarClientProps {
 export default function NavbarClient({ cart }: INavbarClientProps) {
     const { data: session, status } = useSession();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [isScrolled, setIsScrolled] = useState(false);
     const t = useTranslations("Navbar");
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            setIsScrolled(scrollTop > 50);
+        };
+
+        // Throttle scroll events for better performance
+        let ticking = false;
+        const throttledHandleScroll = () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+
+        window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', throttledHandleScroll);
+    }, []);
+
+    // Add padding to body when navbar becomes fixed to prevent content jump
+    useEffect(() => {
+        if (isScrolled) {
+            document.body.style.paddingTop = '112px'; // Approximate navbar height
+        } else {
+            document.body.style.paddingTop = '0';
+        }
+        
+        return () => {
+            document.body.style.paddingTop = '0';
+        };
+    }, [isScrolled]);
 
     const isMenuOpen = Boolean(anchorEl);
 
@@ -106,10 +143,31 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
     );
 
     return (
-        <Box>
+        <Box
+            sx={{
+                position: isScrolled ? 'fixed' : 'static',
+                top: 0,
+                left: 0,
+                right: 0,
+                width: '100%',
+                zIndex: 1150,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: isScrolled ? 'translateY(0)' : 'translateY(0)',
+                boxShadow: isScrolled ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+                backdropFilter: isScrolled ? 'blur(10px)' : 'none',
+                backgroundColor: isScrolled ? 'rgba(255,255,255,0.95)' : 'white'
+            }}
+        >
             <AppBar
                 position="static"
-                sx={{ backgroundColor: "white", color: "black" , paddingX:2}}
+                sx={{ 
+                    backgroundColor: "transparent", 
+                    color: "black", 
+                    paddingX: 2,
+                    boxShadow: 'none',
+                    borderBottom: isScrolled ? '1px solid rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
             >
                 <Toolbar>
                     <Image src="/logo.png" width={90} height={90} alt="Logo" />

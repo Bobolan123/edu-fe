@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Container,
     Grid,
@@ -47,6 +47,30 @@ export default function CourseDetail({
     const { data } = useSession();
     const t = useTranslations('CourseDetail');
     const { currency } = useCurrency();
+    const [isCardSticky, setIsCardSticky] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            setIsCardSticky(scrollTop > 50);   
+        };
+
+        // Throttle scroll events for better performance
+        let ticking = false;
+        const throttledHandleScroll = () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+
+        window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', throttledHandleScroll);
+    }, []);
+
     
 
     const handleAddToCart = async (courseId: number) => {
@@ -297,7 +321,14 @@ export default function CourseDetail({
 
                     {/* Right Column - Sticky Card */}
                     <Grid item xs={12} md={4}>
-                        <Box sx={{ position: "sticky", top: 80, zIndex: 1 }}>
+                        <Box 
+                            sx={{ 
+                                position: isCardSticky ? "sticky" : "static", 
+                                top: isCardSticky ? 120 : "auto", // Account for navbar height when sticky
+                                zIndex: 10,
+                                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                            }}
+                        >
                             <Card
                                 sx={{
                                     boxShadow: 6,
@@ -307,7 +338,7 @@ export default function CourseDetail({
                                     borderColor: "divider",
                                     transition: "transform 0.3s ease",
                                     "&:hover": {
-                                        transform: "translateY(-4px)",
+                                        transform: "translateY(-5px)",
                                     },
                                 }}
                             >
