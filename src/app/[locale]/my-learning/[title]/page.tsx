@@ -46,7 +46,7 @@ export default async function CourseDetailPage({
 
     return (
         <div className="min-h-screen bg-white">
-            <CourseLearningNavbar course={resCourse?.data as ICourse} />
+            <CourseLearningNavbar course={resCourse?.data as ICourse} courseContent={resContent?.data as ICourseContent} />
             <CourseLesson
                 courseContent={resContent?.data as ICourseContent}
                 course={resCourse?.data as ICourse}

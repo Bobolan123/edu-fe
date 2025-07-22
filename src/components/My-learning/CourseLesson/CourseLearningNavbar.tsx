@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ICourse } from "../../../../types/entities";
+import { ICourse, ICourseContent } from "../../../../types/entities";
 import { Typography, Box, IconButton, Tooltip, LinearProgress, CircularProgress, CircularProgressProps } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, Share as ShareIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { useState } from "react";
 
 interface CourseLearningNavbarProps {
     course: ICourse;
+    courseContent?: ICourseContent;
 }
 
 // Helper component to display progress inside the circular progress bar
@@ -40,7 +41,7 @@ function CircularProgressWithLabel(props: CircularProgressProps & { value: numbe
 }
 
 
-export default function CourseLearningNavbar({ course }: CourseLearningNavbarProps) {
+export default function CourseLearningNavbar({ course, courseContent }: CourseLearningNavbarProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -52,8 +53,26 @@ export default function CourseLearningNavbar({ course }: CourseLearningNavbarPro
         setAnchorEl(null);
     };
 
-    // Mock progress - replace with actual progress from your backend
-    const progress = 35; // Example progress percentage
+    // Calculate progress based on finished lectures
+    const calculateProgress = (): number => {
+        if (!courseContent?.sections) return 0;
+        
+        let totalLectures = 0;
+        let completedLectures = 0;
+        
+        courseContent.sections.forEach(section => {
+            section.lectures?.forEach(lecture => {
+                totalLectures++;
+                if (lecture.isFinished) {
+                    completedLectures++;
+                }
+            });
+        });
+        
+        return totalLectures > 0 ? Math.round((completedLectures / totalLectures) * 100) : 0;
+    };
+
+    const progress = calculateProgress();
 
     return (
         <div className="bg-white border-b border-gray-200">

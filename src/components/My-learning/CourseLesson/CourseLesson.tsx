@@ -48,6 +48,7 @@ import {
     Box,
     Chip,
     Tooltip,
+    Checkbox,
 } from "@mui/material";
 import {
     ExpandMore,
@@ -63,6 +64,9 @@ import { ICourse, ICourseContent } from "../../../../types/entities";
 import CourseOverview from "./Overview";
 import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
+import { useSession } from "next-auth/react";
+import { updateCourseContent } from "@/actions/coursesAction";
+import { toast } from "react-toastify";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
@@ -75,6 +79,7 @@ export default function CourseLesson({
     course,
     reviewDistribution,
 }: ICourseLesson) {
+    const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState(0);
     const [expandedSection, setExpandedSection] = useState<string | false>(
         false
@@ -88,10 +93,9 @@ export default function CourseLesson({
     const [isVideoLoading, setIsVideoLoading] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [useFallbackPlayer, setUseFallbackPlayer] = useState(false);
-    const [currentQuality, setCurrentQuality] = useState<string>("Auto");
-    const [currentPlaybackRate, setCurrentPlaybackRate] = useState<number>(1);
-    const [isBuffering, setIsBuffering] = useState(false);
-    const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+    const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(
+        null
+    );
 
     const muxPlayerRef = useRef<any>(null);
 
@@ -125,48 +129,44 @@ export default function CourseLesson({
         };
     }, [loadingTimeout]);
 
-    const handleLectureChange = useCallback((lecture: any) => {
-        console.log("Lecture change triggered:", lecture);
-        console.log("Video URL:", lecture.videoUrl);
-        
-        // Clear any existing timeout
-        if (loadingTimeout) {
-            clearTimeout(loadingTimeout);
-        }
-        
-        setIsVideoLoading(true);
-        setUseFallbackPlayer(false); // Reset fallback player
-        
-        // Set timeout for video loading (15 seconds)
-        const timeout = setTimeout(() => {
-            console.warn("Video loading timeout - switching to fallback player");
-            setUseFallbackPlayer(true);
-            setIsVideoLoading(false);
-        }, 15000);
-        setLoadingTimeout(timeout);
-        
-        // Add delay to ensure state updates
-        setTimeout(() => {
-            setCurVideoUrl(lecture.videoUrl);
-            setCurrentLecture({
-                title: lecture.title,
-                videoUrl: lecture.videoUrl,
-                lectureId: lecture._id || "",
-            });
-        }, 100);
-    }, [loadingTimeout]);
+    const handleLectureChange = useCallback(
+        (lecture: any) => {
+            // Clear any existing timeout
+            if (loadingTimeout) {
+                clearTimeout(loadingTimeout);
+            }
+
+            setIsVideoLoading(true);
+            setUseFallbackPlayer(false); // Reset fallback player
+
+            // Set timeout for video loading (15 seconds)
+            const timeout = setTimeout(() => {
+                setUseFallbackPlayer(true);
+                setIsVideoLoading(false);
+            }, 15000);
+            setLoadingTimeout(timeout);
+
+            // Add delay to ensure state updates
+            setTimeout(() => {
+                setCurVideoUrl(lecture.videoUrl);
+                setCurrentLecture({
+                    title: lecture.title,
+                    videoUrl: lecture.videoUrl,
+                    lectureId: lecture._id || "",
+                });
+            }, 100);
+        },
+        [loadingTimeout]
+    );
 
     const handleVideoLoadStart = () => {
-        console.log("Video loading started");
         setIsVideoLoading(true);
-        setIsBuffering(false);
     };
 
     const handleVideoCanPlay = () => {
         console.log("Video can play");
         setIsVideoLoading(false);
-        setIsBuffering(false);
-        
+
         // Clear loading timeout since video loaded successfully
         if (loadingTimeout) {
             clearTimeout(loadingTimeout);
@@ -175,26 +175,31 @@ export default function CourseLesson({
     };
 
     const handleMuxError = (e: any) => {
-        console.error("Mux Player error:", e);
         setUseFallbackPlayer(true);
         setIsVideoLoading(false);
     };
 
-    const handleRateChange = (e: any) => {
-        setCurrentPlaybackRate(parseFloat(e.target.playbackRate) || 1);
-    };
+    const handleLectureToggle = async (lectureId: string) => {
+        const updatedContent = { ...courseContent };
 
-    const handleWaiting = () => {
-        setIsBuffering(true);
-    };
-
-    const handlePlaying = () => {
-        setIsBuffering(false);
-    };
-
-    const handleQualityChange = (quality: string) => {
-        setCurrentQuality(quality);
-        // You can implement manual quality selection here if needed
+        updatedContent.sections = updatedContent.sections?.map((section) => ({
+            ...section,
+            lectures: section.lectures?.map((lecture) =>
+                lecture._id === lectureId
+                    ? { ...lecture, isFinished: !lecture.isFinished }
+                    : lecture
+            ),
+        }));
+        try {
+            await updateCourseContent(
+                session?.user?.access_token || "",
+                course.id,
+                updatedContent
+            );
+        } catch (error:any) {
+            toast.error("Failed to update lecture completion", error);
+        }
+       
     };
 
     return (
@@ -258,9 +263,6 @@ export default function CourseLesson({
                                     onLoadStart={handleVideoLoadStart}
                                     onCanPlay={handleVideoCanPlay}
                                     onError={handleMuxError}
-                                    onRateChange={handleRateChange}
-                                    onWaiting={handleWaiting}
-                                    onPlaying={handlePlaying}
                                     // Enhanced quality control settings
                                     accentColor="#0ea5e9"
                                     preload="metadata"
@@ -287,89 +289,6 @@ export default function CourseLesson({
                                 </div>
                             </div>
                         )}
-
-                        {/* Enhanced Quality Control Indicators */}
-                        <Box className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
-                            {/* Playback Speed Indicator */}
-                            <Tooltip title="Playback Speed" arrow>
-                                <Chip
-                                    icon={<Speed />}
-                                    label={`${currentPlaybackRate}x`}
-                                    size="small"
-                                    sx={{
-                                        backgroundColor: "rgba(0, 0, 0, 0.7)",
-                                        color: "white",
-                                        backdropFilter: "blur(10px)",
-                                        "& .MuiChip-icon": { color: "#0ea5e9" },
-                                    }}
-                                />
-                            </Tooltip>
-
-                            {/* Video Quality Indicator */}
-                            <Tooltip title="Video Quality" arrow>
-                                <Chip
-                                    label={currentQuality}
-                                    size="small"
-                                    sx={{
-                                        backgroundColor:
-                                            "rgba(14, 165, 233, 0.9)",
-                                        color: "white",
-                                        backdropFilter: "blur(10px)",
-                                        fontWeight: "bold",
-                                    }}
-                                />
-                            </Tooltip>
-
-                            {/* Buffering Indicator */}
-                            {isBuffering && (
-                                <Chip
-                                    label="Buffering..."
-                                    size="small"
-                                    sx={{
-                                        backgroundColor:
-                                            "rgba(255, 152, 0, 0.9)",
-                                        color: "white",
-                                        backdropFilter: "blur(10px)",
-                                        animation: "pulse 1.5s infinite",
-                                    }}
-                                />
-                            )}
-                        </Box>
-
-                        {/* Custom Quality Selection Menu */}
-                        <Box className="absolute top-4 right-4 z-10">
-                            <Tooltip title="Quality Settings" arrow>
-                                <IconButton
-                                    size="small"
-                                    sx={{
-                                        backgroundColor: "rgba(0, 0, 0, 0.6)",
-                                        color: "white",
-                                        backdropFilter: "blur(10px)",
-                                        "&:hover": {
-                                            backgroundColor:
-                                                "rgba(14, 165, 233, 0.8)",
-                                        },
-                                    }}
-                                    onClick={() => {
-                                        // Right-click on video to access quality settings
-                                        const video = muxPlayerRef.current;
-                                        if (video) {
-                                            // Focus on video to show settings
-                                            video.focus();
-                                        }
-                                    }}
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="currentColor"
-                                    >
-                                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
-                                    </svg>
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
                     </div>
 
                     {/* Tabs */}
@@ -512,19 +431,42 @@ export default function CourseLesson({
                                     {section.lectures?.map((lecture, index) => (
                                         <div
                                             key={lecture?._id}
-                                            className={`flex items-center py-3 px-3 rounded-lg transition-all duration-200 cursor-pointer group ${
+                                            className={`flex items-center py-3 px-3 rounded-lg transition-all duration-200 group ${
                                                 currentLecture?.lectureId ===
                                                 lecture?._id
                                                     ? "bg-blue-50 border-l-4 border-blue-500"
                                                     : "hover:bg-gray-100"
                                             }`}
                                         >
+                                            {/* Checkbox for lecture completion */}
+                                            <Checkbox
+                                                checked={
+                                                    lecture?.isFinished || false
+                                                }
+                                                onChange={(e) => {
+                                                    e.stopPropagation();
+                                                    handleLectureToggle(
+                                                        lecture?._id
+                                                    );
+                                                }}
+                                                size="small"
+                                                className="mr-2"
+                                                sx={{
+                                                    color: lecture?.isFinished
+                                                        ? "#10b981"
+                                                        : "#6b7280",
+                                                    "&.Mui-checked": {
+                                                        color: "#10b981",
+                                                    },
+                                                }}
+                                            />
+
                                             <button
                                                 type="button"
                                                 onClick={() =>
                                                     handleLectureChange(lecture)
                                                 }
-                                                className="w-full text-left flex items-center gap-3"
+                                                className="w-full text-left flex items-center gap-3 cursor-pointer"
                                             >
                                                 {/* Play/Current Indicator */}
                                                 <Box className="flex-shrink-0">

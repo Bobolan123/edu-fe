@@ -1,3 +1,5 @@
+'use server'
+
 import { revalidateTag } from "next/cache";
 import { ICourse } from "../../types/entities";
 import { sendRequest, sendRequestFile } from "../../utils/api";
@@ -139,8 +141,9 @@ export const updateCourseContent = async (
     courseId: number,
     content: any
 ) => {
+    console.log(content)
     const res = await sendRequest<IBackendRes<any>>({
-        method: "PUT",
+        method: "PATCH",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
         body: content,
         headers: {
@@ -150,8 +153,8 @@ export const updateCourseContent = async (
     if (!res?.data) {
         throw new Error(res.message);
     }
-
     
+    revalidateTag(`course-content-${courseId}`);
     return res.data;
 };
 

@@ -1,3 +1,5 @@
+'use server'
+
 import { ICategory } from "../../types/entities";
 import { sendRequest } from "../../utils/api";
 

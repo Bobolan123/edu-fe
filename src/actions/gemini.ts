@@ -1,3 +1,5 @@
+'use server'
+
 import { sendRequest } from "../../utils/api";
 
 export const generateGeminiResponse = async (prompt: string) => {
