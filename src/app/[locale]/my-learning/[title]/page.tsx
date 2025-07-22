@@ -7,6 +7,7 @@ import {
 import { sendRequest } from "../../../../../utils/api";
 import { extractIds } from "../../../../../utils/utils";
 import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
+import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLearningNavbar";
 import { IReviewDistribution } from "../../../../../types/resData";
 
 interface Params {
@@ -37,13 +38,16 @@ export default async function CourseDetailPage({
         }
     });
 
-        return (
-        <div>
-            <CourseLesson
-                courseContent={resContent?.data as ICourseContent}
-                course={resCourse?.data as ICourse}
-                reviewDistribution={reviewDistribution?.data as IReviewDistribution} 
-            />
+    return (
+        <div className="min-h-screen bg-white">
+            <CourseLearningNavbar course={resCourse?.data as ICourse} />
+            <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
+                <CourseLesson
+                    courseContent={resContent?.data as ICourseContent}
+                    course={resCourse?.data as ICourse}
+                    reviewDistribution={reviewDistribution?.data as IReviewDistribution} 
+                />
+            </div>
         </div>
     );
 }

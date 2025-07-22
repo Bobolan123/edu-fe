@@ -367,8 +367,6 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                         <Card
                             elevation={3}
                             sx={{
-                                position: "sticky",
-                                top: 20,
                                 borderRadius: 3,
                             }}
                         >

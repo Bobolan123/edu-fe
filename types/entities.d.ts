@@ -114,11 +114,13 @@ export interface ISubscription {
 }
 
 export interface ILecture {
+    _id:string;
     title: string;
     videoUrl: string;
 }
 
 export interface ISection {
+    _id:string;
     title: string;
     totalLectures: number;
     lectures: ILecture[];

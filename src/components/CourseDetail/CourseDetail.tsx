@@ -47,29 +47,8 @@ export default function CourseDetail({
     const { data } = useSession();
     const t = useTranslations('CourseDetail');
     const { currency } = useCurrency();
-    const [isCardSticky, setIsCardSticky] = useState(false);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            const scrollTop = window.scrollY;
-            setIsCardSticky(scrollTop > 50);   
-        };
 
-        // Throttle scroll events for better performance
-        let ticking = false;
-        const throttledHandleScroll = () => {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    handleScroll();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        };
-
-        window.addEventListener('scroll', throttledHandleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', throttledHandleScroll);
-    }, []);
 
     
 
@@ -138,15 +117,12 @@ export default function CourseDetail({
                             </Box>
                             <Typography>
                                 {t('last_updated')}{" "}
-                                {format(
-                                    new Date(course?.last_updated),
-                                    "MMM dd, yyyy"
-                                )}
+                             
                             </Typography>
                         </Box>
 
                         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                            {course.categories.map((category, i) => (
+                            {course?.categories?.map((category, i) => (
                                 <Chip label={category?.name} key={i} />
                             ))}
                         </Box>
@@ -323,8 +299,8 @@ export default function CourseDetail({
                     <Grid item xs={12} md={4}>
                         <Box 
                             sx={{ 
-                                position: isCardSticky ? "sticky" : "static", 
-                                top: isCardSticky ? 120 : "auto", // Account for navbar height when sticky
+                                position: 'sticky',
+                                top:  "auto", 
                                 zIndex: 10,
                                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                             }}

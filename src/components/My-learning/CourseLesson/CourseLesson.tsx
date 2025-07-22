@@ -1,7 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import ReactPlayer from "react-player";
+import { useState, useRef, useCallback, useEffect } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamically import MuxPlayer to avoid SSR issues
+const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), {
+    ssr: false,
+    loading: () => (
+        <div className="w-full h-full flex items-center justify-center bg-black">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-white">Loading video player...</p>
+            </div>
+        </div>
+    ),
+});
+
+// Fallback video player component
+const FallbackVideoPlayer = ({ src, onLoadStart, onCanPlay, onError }: any) => (
+    <video
+        controls
+        style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+        }}
+        onLoadStart={onLoadStart}
+        onCanPlay={onCanPlay}
+        onError={onError}
+        preload="metadata"
+        className="bg-black"
+    >
+        <source src={src} type="video/mp4" />
+        Your browser does not support the video tag.
+    </video>
+);
 import {
     Typography,
     IconButton,
@@ -12,8 +45,19 @@ import {
     AccordionDetails,
     Rating,
     LinearProgress,
+    Box,
+    Chip,
+    Tooltip,
 } from "@mui/material";
-import { ExpandMore, Close } from "@mui/icons-material";
+import {
+    ExpandMore,
+    Close,
+    PlayArrow,
+    Pause,
+    VolumeUp,
+    Fullscreen,
+    Speed,
+} from "@mui/icons-material";
 import { Bot } from "lucide-react";
 import { ICourse, ICourseContent } from "../../../../types/entities";
 import CourseOverview from "./Overview";
@@ -31,197 +75,545 @@ export default function CourseLesson({
     course,
     reviewDistribution,
 }: ICourseLesson) {
-    const [isPlaying, setIsPlaying] = useState(true);
     const [activeTab, setActiveTab] = useState(0);
     const [expandedSection, setExpandedSection] = useState<string | false>(
         false
     );
     const [isOpen, setIsOpen] = useState(false);
+    const [currentLecture, setCurrentLecture] = useState<{
+        title: string;
+        videoUrl: string;
+        lectureId: string;
+    } | null>(null);
+    const [isVideoLoading, setIsVideoLoading] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [useFallbackPlayer, setUseFallbackPlayer] = useState(false);
+    const [currentQuality, setCurrentQuality] = useState<string>("Auto");
+    const [currentPlaybackRate, setCurrentPlaybackRate] = useState<number>(1);
+    const [isBuffering, setIsBuffering] = useState(false);
+    const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
 
-    const videoUrl = courseContent?.sections?.[0]?.lectures?.[0]?.videoUrl ?? "";
+    const muxPlayerRef = useRef<any>(null);
+
+    // Initialize with first lecture
+    const videoUrl =
+        courseContent?.sections?.[0]?.lectures?.[0]?.videoUrl ?? "";
+    const firstLecture = courseContent?.sections?.[0]?.lectures?.[0];
+
     const [curVideoUrl, setCurVideoUrl] = useState(videoUrl);
 
+    // Ensure component is mounted (client-side only)
+    useEffect(() => {
+        setIsMounted(true);
+
+        // Initialize current lecture after mount
+        if (firstLecture) {
+            setCurrentLecture({
+                title: firstLecture.title,
+                videoUrl: firstLecture.videoUrl,
+                lectureId: firstLecture._id || "",
+            });
+        }
+    }, [firstLecture]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (loadingTimeout) {
+                clearTimeout(loadingTimeout);
+            }
+        };
+    }, [loadingTimeout]);
+
+    const handleLectureChange = useCallback((lecture: any) => {
+        console.log("Lecture change triggered:", lecture);
+        console.log("Video URL:", lecture.videoUrl);
+        
+        // Clear any existing timeout
+        if (loadingTimeout) {
+            clearTimeout(loadingTimeout);
+        }
+        
+        setIsVideoLoading(true);
+        setUseFallbackPlayer(false); // Reset fallback player
+        
+        // Set timeout for video loading (15 seconds)
+        const timeout = setTimeout(() => {
+            console.warn("Video loading timeout - switching to fallback player");
+            setUseFallbackPlayer(true);
+            setIsVideoLoading(false);
+        }, 15000);
+        setLoadingTimeout(timeout);
+        
+        // Add delay to ensure state updates
+        setTimeout(() => {
+            setCurVideoUrl(lecture.videoUrl);
+            setCurrentLecture({
+                title: lecture.title,
+                videoUrl: lecture.videoUrl,
+                lectureId: lecture._id || "",
+            });
+        }, 100);
+    }, [loadingTimeout]);
+
+    const handleVideoLoadStart = () => {
+        console.log("Video loading started");
+        setIsVideoLoading(true);
+        setIsBuffering(false);
+    };
+
+    const handleVideoCanPlay = () => {
+        console.log("Video can play");
+        setIsVideoLoading(false);
+        setIsBuffering(false);
+        
+        // Clear loading timeout since video loaded successfully
+        if (loadingTimeout) {
+            clearTimeout(loadingTimeout);
+            setLoadingTimeout(null);
+        }
+    };
+
+    const handleMuxError = (e: any) => {
+        console.error("Mux Player error:", e);
+        setUseFallbackPlayer(true);
+        setIsVideoLoading(false);
+    };
+
+    const handleRateChange = (e: any) => {
+        setCurrentPlaybackRate(parseFloat(e.target.playbackRate) || 1);
+    };
+
+    const handleWaiting = () => {
+        setIsBuffering(true);
+    };
+
+    const handlePlaying = () => {
+        setIsBuffering(false);
+    };
+
+    const handleQualityChange = (quality: string) => {
+        setCurrentQuality(quality);
+        // You can implement manual quality selection here if needed
+    };
+
     return (
-        <div className="flex h-screen bg-gray-100 relative">
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col">
-                {/* Video */}
-                <div className="bg-black w-full" style={{ height: "calc(130vh * 0.5)" }}>
-                    <ReactPlayer
-                        url={curVideoUrl}
-                        playing={isPlaying}
-                        controls
-                        onPause={() => setIsPlaying(false)}
-                        onPlay={() => setIsPlaying(true)}
-                        width="100%"
-                        height="100%"
-                    />
-                </div>
-
-                {/* Tabs */}
-                <div className="bg-white border-t">
-                    <Tabs
-                        value={activeTab}
-                        onChange={(_, val) => setActiveTab(val)}
-                        className="px-4"
+        <>
+            <div className="flex h-screen bg-gray-100 relative">
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col">
+                    {/* Enhanced Video Player with Mux */}
+                    <div
+                        className="relative bg-black w-full"
+                        style={{ height: "calc(130vh * 0.5)" }}
                     >
-                        <Tab label="Overview" />
-                        <Tab label="Reviews" />
-                    </Tabs>
-                </div>
-
-                {/* Tab Content */}
-                <div className="p-4">
-                    {activeTab === 0 && <CourseOverview course={course} />}
-
-                    {activeTab === 1 && (
-                        <div>
+                        {/* Video Title Overlay */}
+                        <Box className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2">
                             <Typography
-                                variant="h5"
-                                className="mb-6 font-semibold text-gray-800"
+                                variant="h6"
+                                className="text-white font-semibold"
                             >
-                                Student feedback
+                                {currentLecture?.title || "Loading..."}
                             </Typography>
-                            <div className="flex items-start space-x-8">
-                                <div className="text-center">
+                        </Box>
+
+                        {/* Loading Overlay */}
+                        {isVideoLoading && (
+                            <Box className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                                <Box className="text-center">
+                                    <Box className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></Box>
                                     <Typography
-                                        variant="h2"
-                                        className="font-bold text-orange-500 mb-2"
+                                        variant="body1"
+                                        className="text-white"
                                     >
-                                        {reviewDistribution?.average_rating ?? "N/A"}
+                                        Loading video...
                                     </Typography>
-                                    <Rating
-                                        value={reviewDistribution?.average_rating ?? 0}
-                                        readOnly
-                                        precision={0.1}
-                                    />
-                                    <Typography variant="body2" className="text-gray-600 mt-1">
-                                        {reviewDistribution?.total_reviews ?? 0} reviews
-                                    </Typography>
-                                </div>
-                                <div className="flex-1 space-y-2">
-                                    {reviewDistribution?.distribution?.map(
-                                        ({ stars, percentage, count }) => (
-                                            <div
-                                                key={stars}
-                                                className="flex items-center space-x-3"
-                                            >
-                                                <Rating
-                                                    value={stars}
-                                                    readOnly
-                                                    size="small"
-                                                />
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={percentage}
-                                                    className="flex-1 h-2 bg-gray-200"
-                                                    sx={{
-                                                        "& .MuiLinearProgress-bar": {
-                                                            backgroundColor:
-                                                                stars >= 4
-                                                                    ? "#f59e0b"
-                                                                    : "#6b7280",
-                                                        },
-                                                    }}
-                                                />
-                                                <Typography
-                                                    variant="body2"
-                                                    className="text-blue-600 font-medium w-12"
-                                                >
-                                                    {percentage}%
-                                                </Typography>
-                                            </div>
-                                        )
-                                    )}
+                                </Box>
+                            </Box>
+                        )}
+
+                        {/* Video Player - Mux with Fallback */}
+                        {isMounted && curVideoUrl ? (
+                            useFallbackPlayer ? (
+                                <FallbackVideoPlayer
+                                    src={curVideoUrl}
+                                    onLoadStart={handleVideoLoadStart}
+                                    onCanPlay={handleVideoCanPlay}
+                                    onError={handleMuxError}
+                                />
+                            ) : (
+                                <MuxPlayer
+                                    key={curVideoUrl}
+                                    ref={muxPlayerRef}
+                                    src={curVideoUrl}
+                                    autoPlay={false}
+                                    loop={false}
+                                    muted={false}
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "contain",
+                                    }}
+                                    // Event handlers for quality monitoring
+                                    onLoadStart={handleVideoLoadStart}
+                                    onCanPlay={handleVideoCanPlay}
+                                    onError={handleMuxError}
+                                    onRateChange={handleRateChange}
+                                    onWaiting={handleWaiting}
+                                    onPlaying={handlePlaying}
+                                    // Enhanced quality control settings
+                                    accentColor="#0ea5e9"
+                                    preload="metadata"
+                                    playbackRates={[
+                                        0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,
+                                    ]}
+                                    streamType="on-demand"
+                                    preferPlayback="mse"
+                                    startTime={0}
+                                    defaultShowRemainingTime={true}
+                                    noVolumePref={false}
+                                    disablePictureInPicture={false}
+                                    crossOrigin="anonymous"
+                                    targetLiveWindow={10}
+                                />
+                            )
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-black">
+                                <div className="text-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                                    <p className="text-white">
+                                        Initializing video player...
+                                    </p>
                                 </div>
                             </div>
+                        )}
+
+                        {/* Enhanced Quality Control Indicators */}
+                        <Box className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
+                            {/* Playback Speed Indicator */}
+                            <Tooltip title="Playback Speed" arrow>
+                                <Chip
+                                    icon={<Speed />}
+                                    label={`${currentPlaybackRate}x`}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: "rgba(0, 0, 0, 0.7)",
+                                        color: "white",
+                                        backdropFilter: "blur(10px)",
+                                        "& .MuiChip-icon": { color: "#0ea5e9" },
+                                    }}
+                                />
+                            </Tooltip>
+
+                            {/* Video Quality Indicator */}
+                            <Tooltip title="Video Quality" arrow>
+                                <Chip
+                                    label={currentQuality}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor:
+                                            "rgba(14, 165, 233, 0.9)",
+                                        color: "white",
+                                        backdropFilter: "blur(10px)",
+                                        fontWeight: "bold",
+                                    }}
+                                />
+                            </Tooltip>
+
+                            {/* Buffering Indicator */}
+                            {isBuffering && (
+                                <Chip
+                                    label="Buffering..."
+                                    size="small"
+                                    sx={{
+                                        backgroundColor:
+                                            "rgba(255, 152, 0, 0.9)",
+                                        color: "white",
+                                        backdropFilter: "blur(10px)",
+                                        animation: "pulse 1.5s infinite",
+                                    }}
+                                />
+                            )}
+                        </Box>
+
+                        {/* Custom Quality Selection Menu */}
+                        <Box className="absolute top-4 right-4 z-10">
+                            <Tooltip title="Quality Settings" arrow>
+                                <IconButton
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                                        color: "white",
+                                        backdropFilter: "blur(10px)",
+                                        "&:hover": {
+                                            backgroundColor:
+                                                "rgba(14, 165, 233, 0.8)",
+                                        },
+                                    }}
+                                    onClick={() => {
+                                        // Right-click on video to access quality settings
+                                        const video = muxPlayerRef.current;
+                                        if (video) {
+                                            // Focus on video to show settings
+                                            video.focus();
+                                        }
+                                    }}
+                                >
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                    >
+                                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
+                                    </svg>
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="bg-white border-t">
+                        <Tabs
+                            value={activeTab}
+                            onChange={(_, val) => setActiveTab(val)}
+                            className="px-4"
+                        >
+                            <Tab label="Overview" />
+                            <Tab label="Reviews" />
+                        </Tabs>
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="p-4">
+                        {activeTab === 0 && <CourseOverview course={course} />}
+
+                        {activeTab === 1 && (
+                            <div>
+                                <Typography
+                                    variant="h5"
+                                    className="mb-6 font-semibold text-gray-800"
+                                >
+                                    Student feedback
+                                </Typography>
+                                <div className="flex items-start space-x-8">
+                                    <div className="text-center">
+                                        <Typography
+                                            variant="h2"
+                                            className="font-bold text-orange-500 mb-2"
+                                        >
+                                            {reviewDistribution?.average_rating ??
+                                                "N/A"}
+                                        </Typography>
+                                        <Rating
+                                            value={
+                                                reviewDistribution?.average_rating ??
+                                                0
+                                            }
+                                            readOnly
+                                            precision={0.1}
+                                        />
+                                        <Typography
+                                            variant="body2"
+                                            className="text-gray-600 mt-1"
+                                        >
+                                            {reviewDistribution?.total_reviews ??
+                                                0}{" "}
+                                            reviews
+                                        </Typography>
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        {reviewDistribution?.distribution?.map(
+                                            ({ stars, percentage, count }) => (
+                                                <div
+                                                    key={stars}
+                                                    className="flex items-center space-x-3"
+                                                >
+                                                    <Rating
+                                                        value={stars}
+                                                        readOnly
+                                                        size="small"
+                                                    />
+                                                    <LinearProgress
+                                                        variant="determinate"
+                                                        value={percentage}
+                                                        className="flex-1 h-2 bg-gray-200"
+                                                        sx={{
+                                                            "& .MuiLinearProgress-bar":
+                                                                {
+                                                                    backgroundColor:
+                                                                        stars >=
+                                                                        4
+                                                                            ? "#f59e0b"
+                                                                            : "#6b7280",
+                                                                },
+                                                        }}
+                                                    />
+                                                    <Typography
+                                                        variant="body2"
+                                                        className="text-blue-600 font-medium w-12"
+                                                    >
+                                                        {percentage}%
+                                                    </Typography>
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Sidebar */}
+                <div className="w-4/12 bg-white border-l border-gray-200 flex flex-col">
+                    <div className="flex items-center justify-between p-4 border-b">
+                        <Typography variant="h6" className="font-semibold">
+                            Course content
+                        </Typography>
+                        <IconButton size="small">
+                            <Close />
+                        </IconButton>
+                    </div>
+                    <div className="flex-1 overflow-auto">
+                        {courseContent?.sections?.map((section) => (
+                            <Accordion
+                                key={section._id}
+                                expanded={expandedSection === section._id}
+                                onChange={() =>
+                                    setExpandedSection(
+                                        expandedSection === section._id
+                                            ? false
+                                            : section._id
+                                    )
+                                }
+                                className="shadow-none border-b"
+                            >
+                                <AccordionSummary
+                                    expandIcon={<ExpandMore />}
+                                    className="px-4"
+                                >
+                                    <div className="flex-1">
+                                        <Typography
+                                            variant="subtitle2"
+                                            className="font-semibold mb-1"
+                                        >
+                                            {section.title}
+                                        </Typography>
+                                        <Typography
+                                            variant="caption"
+                                            className="text-gray-600"
+                                        >
+                                            {section.lectures?.length} lectures
+                                        </Typography>
+                                    </div>
+                                </AccordionSummary>
+                                <AccordionDetails className="px-4">
+                                    {section.lectures?.map((lecture, index) => (
+                                        <div
+                                            key={lecture?._id}
+                                            className={`flex items-center py-3 px-3 rounded-lg transition-all duration-200 cursor-pointer group ${
+                                                currentLecture?.lectureId ===
+                                                lecture?._id
+                                                    ? "bg-blue-50 border-l-4 border-blue-500"
+                                                    : "hover:bg-gray-100"
+                                            }`}
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleLectureChange(lecture)
+                                                }
+                                                className="w-full text-left flex items-center gap-3"
+                                            >
+                                                {/* Play/Current Indicator */}
+                                                <Box className="flex-shrink-0">
+                                                    {currentLecture?.lectureId ===
+                                                    lecture?._id ? (
+                                                        <Box className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                                                            <PlayArrow
+                                                                className="text-white"
+                                                                fontSize="small"
+                                                            />
+                                                        </Box>
+                                                    ) : (
+                                                        <Box className="w-8 h-8 rounded-full bg-gray-200 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                                            <Typography
+                                                                variant="caption"
+                                                                className="font-bold text-gray-600 group-hover:text-blue-600"
+                                                            >
+                                                                {index + 1}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+                                                </Box>
+
+                                                <div className="flex-1 min-w-0">
+                                                    <Typography
+                                                        variant="body2"
+                                                        className={`font-medium line-clamp-2 ${
+                                                            currentLecture?.lectureId ===
+                                                            lecture?._id
+                                                                ? "text-blue-700"
+                                                                : "text-gray-800 group-hover:text-blue-600"
+                                                        }`}
+                                                    >
+                                                        {lecture?.title}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="caption"
+                                                        className="text-gray-500 mt-1"
+                                                    >
+                                                        Video • 5:30
+                                                    </Typography>
+                                                </div>
+
+                                                {/* Status indicators */}
+                                                <Box className="flex-shrink-0 flex items-center gap-1">
+                                                    {currentLecture?.lectureId ===
+                                                        lecture?._id && (
+                                                        <Chip
+                                                            label="Playing"
+                                                            size="small"
+                                                            color="primary"
+                                                            variant="outlined"
+                                                            sx={{
+                                                                height: 20,
+                                                                fontSize:
+                                                                    "0.65rem",
+                                                            }}
+                                                        />
+                                                    )}
+                                                </Box>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Chat Widget */}
+                <div className="fixed bottom-4 right-4 z-50 p-1 sm:p-0">
+                    <button
+                        onClick={() => setIsOpen((prev) => !prev)}
+                        className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg flex items-center justify-center hover:scale-105 transition-all duration-200"
+                    >
+                        {isOpen ? (
+                            <Close className="w-5 h-5" />
+                        ) : (
+                            <Bot className="w-5 h-5" />
+                        )}
+                    </button>
+
+                    {isOpen && (
+                        <div className="animate-fade-in mt-2 w-[350px] h-[500px] rounded-xl overflow-hidden shadow-xl">
+                            <ChatBot />
                         </div>
                     )}
                 </div>
             </div>
-
-            {/* Sidebar */}
-            <div className="w-4/12 bg-white border-l border-gray-200 flex flex-col">
-                <div className="flex items-center justify-between p-4 border-b">
-                    <Typography variant="h6" className="font-semibold">
-                        Course content
-                    </Typography>
-                    <IconButton size="small">
-                        <Close />
-                    </IconButton>
-                </div>
-                <div className="flex-1 overflow-auto">
-                    {courseContent?.sections?.map((section) => (
-                        <Accordion
-                            key={section._id}
-                            expanded={expandedSection === section._id}
-                            onChange={() =>
-                                setExpandedSection(
-                                    expandedSection === section._id
-                                        ? false
-                                        : section._id
-                                )
-                            }
-                            className="shadow-none border-b"
-                        >
-                            <AccordionSummary expandIcon={<ExpandMore />} className="px-4">
-                                <div className="flex-1">
-                                    <Typography
-                                        variant="subtitle2"
-                                        className="font-semibold mb-1"
-                                    >
-                                        {section.title}
-                                    </Typography>
-                                    <Typography variant="caption" className="text-gray-600">
-                                        {section.lectures?.length} lectures
-                                    </Typography>
-                                </div>
-                            </AccordionSummary>
-                            <AccordionDetails className="px-4">
-                                {section.lectures?.map((lecture, index) => (
-                                    <div
-                                        key={lecture?._id}
-                                        className="flex items-center py-1 px-1 hover:bg-gray-100"
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setCurVideoUrl(lecture?.videoUrl ?? "")
-                                            }
-                                            className="w-full text-left"
-                                        >
-                                            <div className="flex-1">
-                                                <Typography
-                                                    variant="body2"
-                                                    className="mb-1"
-                                                >
-                                                    {index + 1}. {lecture?.title}
-                                                </Typography>
-                                            </div>
-                                        </button>
-                                    </div>
-                                ))}
-                            </AccordionDetails>
-                        </Accordion>
-                    ))}
-                </div>
-            </div>
-
-            {/* Chat Widget */}
-            <div className="fixed bottom-4 right-4 z-50 p-1 sm:p-0">
-                <button
-                    onClick={() => setIsOpen((prev) => !prev)}
-                    className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg flex items-center justify-center hover:scale-105 transition-all duration-200"
-                >
-                    {isOpen ? <Close className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
-                </button>
-
-                {isOpen && (
-                    <div className="animate-fade-in mt-2 w-[350px] h-[500px] rounded-xl overflow-hidden shadow-xl">
-                        <ChatBot />
-                    </div>
-                )}
-            </div>
-        </div>
+        </>
     );
 }

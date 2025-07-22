@@ -9,7 +9,7 @@ export default function HeroSection() {
         <div className="flex items-center h-[500px] relative">
             <section>
                 <video
-                    className="absolute top-0 left-0 w-full h-full object-fill"
+                    className="absolute top-0 left-0 w-full h-full object-fill z-0"
                     autoPlay
                     loop
                     muted
