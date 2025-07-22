@@ -7,3 +7,5 @@ export const generateGeminiResponse = async (prompt: string) => {
         body: { prompt },
     });
 };
+
+

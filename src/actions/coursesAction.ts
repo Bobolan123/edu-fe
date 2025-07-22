@@ -150,6 +150,8 @@ export const updateCourseContent = async (
     if (!res?.data) {
         throw new Error(res.message);
     }
+
+    
     return res.data;
 };
 

@@ -25,29 +25,33 @@ export default async function CourseDetailPage({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
     });
+
     const resContent = await sendRequest<IBackendRes<ICourseContent>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
+        nextOption: {
+            next: {
+                tags: [`course-content-${id}`],
+            },
+        },
     });
 
     const reviewDistribution = await sendRequest<IBackendRes<IReviewDistribution>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/distribution`,
         queryParams:{
-            id
+           id
         }
     });
 
     return (
         <div className="min-h-screen bg-white">
             <CourseLearningNavbar course={resCourse?.data as ICourse} />
-            <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
-                <CourseLesson
-                    courseContent={resContent?.data as ICourseContent}
-                    course={resCourse?.data as ICourse}
-                    reviewDistribution={reviewDistribution?.data as IReviewDistribution} 
-                />
-            </div>
+            <CourseLesson
+                courseContent={resContent?.data as ICourseContent}
+                course={resCourse?.data as ICourse}
+                reviewDistribution={reviewDistribution?.data as IReviewDistribution} 
+            />
         </div>
     );
 }

@@ -27,7 +27,7 @@ export default async function CourseDetailPage({
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
         nextOption: {
             next: {
-                tags: ["course-content"],
+                tags: [`course-content-${id}`],
             },
         },
     });

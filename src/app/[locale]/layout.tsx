@@ -10,11 +10,10 @@ import "../globals.css";
 import ToastProvider from "@/components/Toastify/ToastContainer";
 import ClientSideToastContainer from "@/components/Toastify/ToastContainer";
 import { SessionProvider } from "next-auth/react";
-import NavbarClient from "@/components/Navbar/NavbarClient";
 import Navbar from "@/components/Navbar/Navbar";
+import ConditionalNavbar from "@/components/Navbar/ConditionalNavbar";
 import { getExchangeRateVND } from "../../../utils/utils";
-import { cookies } from "next/headers";
-import { setExchangeRateCookie } from "@/actions";
+import { cookies, headers } from "next/headers";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 
 const roboto = Roboto({
@@ -53,7 +52,9 @@ export default async function LocaleLayout({
                         <ThemeProvider theme={theme}>
                             <SessionProvider>
                                 <CurrencyProvider>
-                                    <Navbar />
+                                    <ConditionalNavbar>
+                                        <Navbar />
+                                    </ConditionalNavbar>
                                     <div id="main-content">
                                         {children}
                                     </div>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ICourse } from "../../../../types/entities";
-import { AppBar, Toolbar, Typography, Box, IconButton, Tooltip, LinearProgress, CircularProgress, CircularProgressProps } from "@mui/material";
+import { Typography, Box, IconButton, Tooltip, LinearProgress, CircularProgress, CircularProgressProps } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, Share as ShareIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { useState } from "react";
 
@@ -56,19 +56,18 @@ export default function CourseLearningNavbar({ course }: CourseLearningNavbarPro
     const progress = 35; // Example progress percentage
 
     return (
-        <>
-            <AppBar position="fixed" color="default" elevation={1} className="bg-white/80 backdrop-blur-sm">
-                <Box className="w-full">
-                    <LinearProgress variant="determinate" value={progress} />
-                </Box>
-                <Toolbar className="container mx-auto">
+        <div className="bg-white border-b border-gray-200">
+            <div className="w-full">
+                <LinearProgress variant="determinate" value={progress} />
+            </div>
+            <div className="container mx-auto px-4 py-2 flex items-center min-h-[64px]">
                     <Tooltip title="Back to Courses">
                         <IconButton
                             edge="start"
                             color="inherit"
                             aria-label="back to courses"
                             component={Link}
-                            href="/"
+                            href="/my-learning"
                             className="hover:bg-gray-200 transition-colors"
                         >
                             <ArrowBackIcon />
@@ -121,8 +120,7 @@ export default function CourseLearningNavbar({ course }: CourseLearningNavbarPro
                         </Tooltip>
                         {/* Note: The Menu component for more options can be added here if needed */}
                     </Box>
-                </Toolbar>
-            </AppBar>
-        </>
+            </div>
+        </div>
     );
 }

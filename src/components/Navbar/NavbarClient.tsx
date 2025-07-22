@@ -24,7 +24,6 @@ import { signOut, useSession } from "next-auth/react";
 import CartDropdown from "./cart/CartDropdown";
 import { ICart, ICartItem } from "../../../types/entities";
 import CurrencySelector from "./CurrencySelector";
-import { usePathname } from "next/navigation";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -71,24 +70,43 @@ interface INavbarClientProps {
 export default function NavbarClient({ cart }: INavbarClientProps) {
     const { data: session, status } = useSession();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const pathname = usePathname();
+    const [isScrolled, setIsScrolled] = useState(false);
     const t = useTranslations("Navbar");
-    
-    // Hide navbar on my-learning course pages
-    const isMyLearningCoursePage = pathname?.includes('/my-learning/') && pathname?.split('/').length > 3;
-    
-    if (isMyLearningCoursePage) {
-        return null;
-    }
 
-    // Add fixed padding to body for always-fixed navbar
     useEffect(() => {
-        document.body.style.paddingTop = '112px'; // Fixed navbar height
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            setIsScrolled(scrollTop > 50);
+        };
+
+        // Throttle scroll events for better performance
+        let ticking = false;
+        const throttledHandleScroll = () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+
+        window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', throttledHandleScroll);
+    }, []);
+
+    // Add padding to body when navbar becomes fixed to prevent content jump
+    useEffect(() => {
+        if (isScrolled) {
+            document.body.style.paddingTop = '112px'; // Approximate navbar height
+        } else {
+            document.body.style.paddingTop = '0';
+        }
         
         return () => {
             document.body.style.paddingTop = '0';
         };
-    }, []);
+    }, [isScrolled]);
 
     const isMenuOpen = Boolean(anchorEl);
 
@@ -127,14 +145,17 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
     return (
         <Box
             sx={{
-                position: 'fixed',
+                position:  'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
                 width: '100%',
                 zIndex: 1150,
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                backgroundColor: 'white'
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: isScrolled ? 'translateY(0)' : 'translateY(0)',
+                boxShadow: isScrolled ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+                backdropFilter: isScrolled ? 'blur(10px)' : 'none',
+                backgroundColor: isScrolled ? 'rgba(255,255,255,0.95)' : 'white'
             }}
         >
             <AppBar
@@ -143,7 +164,9 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
                     backgroundColor: "transparent", 
                     color: "black", 
                     paddingX: 2,
-                    boxShadow: 'none'
+                    boxShadow: 'none',
+                    borderBottom: isScrolled ? '1px solid rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
             >
                 <Toolbar>
