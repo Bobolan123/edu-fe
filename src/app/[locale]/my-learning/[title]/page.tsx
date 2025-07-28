@@ -3,12 +3,19 @@ import {
     ICategory,
     ICourse,
     ICourseContent,
+    IEnrollment,
+    ILecture,
 } from "../../../../../types/entities";
 import { sendRequest } from "../../../../../utils/api";
 import { extractIds } from "../../../../../utils/utils";
 import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
 import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLearningNavbar";
 import { IReviewDistribution } from "../../../../../types/resData";
+
+type EnrollmentProgress = IEnrollment & {
+    lectureProgress: ILecture[];
+    progressPercentage: number;
+};
 
 interface Params {
     params: { title: string };
@@ -35,22 +42,41 @@ export default async function CourseDetailPage({
             },
         },
     });
+ 
+    const resEnrollmentProgress = await sendRequest<IBackendRes<EnrollmentProgress>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/${id}/progress`,
+        nextOption: {
+            next: {
+                tags: [`enrollment-progress-${id}`],
+            },
+        },
+    });
 
-    const reviewDistribution = await sendRequest<IBackendRes<IReviewDistribution>>({
+    const reviewDistribution = await sendRequest<
+        IBackendRes<IReviewDistribution>
+    >({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/distribution`,
-        queryParams:{
-           id
-        }
+        queryParams: {
+            id,
+        },
     });
 
     return (
         <div className="min-h-screen bg-white">
-            <CourseLearningNavbar course={resCourse?.data as ICourse} courseContent={resContent?.data as ICourseContent} />
+            <CourseLearningNavbar
+                course={resCourse?.data as ICourse}
+                courseContent={resContent?.data as ICourseContent}
+                enrollmentProgress={resEnrollmentProgress?.data as EnrollmentProgress}
+            />
             <CourseLesson
                 courseContent={resContent?.data as ICourseContent}
                 course={resCourse?.data as ICourse}
-                reviewDistribution={reviewDistribution?.data as IReviewDistribution} 
+                enrollmentProgress={resEnrollmentProgress?.data as EnrollmentProgress}
+                reviewDistribution={
+                    reviewDistribution?.data as IReviewDistribution
+                }
             />
         </div>
     );

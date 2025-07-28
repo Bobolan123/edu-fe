@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ICourse, ICourseContent } from "../../../../types/entities";
+import { ICourse, ICourseContent, IEnrollment, ILecture } from "../../../../types/entities";
+
+type EnrollmentProgress = IEnrollment & {
+    lectureProgress: ILecture[];
+    progressPercentage: number;
+};
 import { Typography, Box, IconButton, Tooltip, LinearProgress, CircularProgress, CircularProgressProps } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, Share as ShareIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { useState } from "react";
@@ -10,6 +15,7 @@ import { useState } from "react";
 interface CourseLearningNavbarProps {
     course: ICourse;
     courseContent?: ICourseContent;
+    enrollmentProgress?: EnrollmentProgress;
 }
 
 // Helper component to display progress inside the circular progress bar
@@ -41,7 +47,7 @@ function CircularProgressWithLabel(props: CircularProgressProps & { value: numbe
 }
 
 
-export default function CourseLearningNavbar({ course, courseContent }: CourseLearningNavbarProps) {
+export default function CourseLearningNavbar({ course, courseContent, enrollmentProgress }: CourseLearningNavbarProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -53,9 +59,14 @@ export default function CourseLearningNavbar({ course, courseContent }: CourseLe
         setAnchorEl(null);
     };
 
-    // Calculate progress based on finished lectures
+    // Calculate progress based on enrollment progress data
     const calculateProgress = (): number => {
-        if (!courseContent?.sections) return 0;
+        if (enrollmentProgress?.progressPercentage !== undefined) {
+            return Math.round(enrollmentProgress.progressPercentage);
+        }
+        
+        // Fallback calculation if progressPercentage is not available
+        if (!courseContent?.sections || !enrollmentProgress?.lectureProgress) return 0;
         
         let totalLectures = 0;
         let completedLectures = 0;
@@ -63,7 +74,11 @@ export default function CourseLearningNavbar({ course, courseContent }: CourseLe
         courseContent.sections.forEach(section => {
             section.lectures?.forEach(lecture => {
                 totalLectures++;
-                if (lecture.isFinished) {
+                // Check if this lecture is in the completed lectures from enrollment progress
+                const isCompleted = enrollmentProgress.lectureProgress.some(
+                    progressLecture => progressLecture._id === lecture._id
+                );
+                if (isCompleted) {
                     completedLectures++;
                 }
             });

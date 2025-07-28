@@ -117,7 +117,6 @@ export interface ILecture {
     _id:string;
     title: string;
     videoUrl: string;
-    isFinished:boolean;
 }
 
 export interface ISection {

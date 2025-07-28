@@ -15,7 +15,7 @@ import { IsValidEmail } from "../../../utils/utils";
 import { useTranslations } from "next-intl";
 
 const style = {
-    position: "absolute" as "absolute",
+    position: "absolute" as const,
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
@@ -27,12 +27,10 @@ const style = {
 };
 
 interface IForgotPasswordModelProps {
-    handleCloseModelForgotPassword: any;
+    handleCloseModelForgotPassword: () => void;
     isOpenModelForgotPassword: boolean;
-    email: string;
-    id: number;
 }
-export default function ForgotPasswordModel(props: any) {
+export default function ForgotPasswordModel(props: IForgotPasswordModelProps) {
     const { isOpenModelForgotPassword, handleCloseModelForgotPassword } = props;
     const t = useTranslations("ForgotPassword");
 
@@ -41,6 +39,8 @@ export default function ForgotPasswordModel(props: any) {
     const [confirmPassword, setConfirmPassword] = React.useState<string>("");
     const [step, setStep] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
+    const [isResendLoading, setIsResendLoading] = React.useState<boolean>(false);
 
     const steps = [t("steps.login"), t("steps.verify"), t("steps.done")];
 
@@ -49,11 +49,21 @@ export default function ForgotPasswordModel(props: any) {
             toast.error("Email is invalid");
             return;
         }
-        const res = await fetchResendOtp(email);
-        if (res?.data) {
-            setStep(1);
-        } else {
-            toast.error(res?.message);
+        setIsResendLoading(true);
+        try {
+            const res = await fetchResendOtp(email);
+            if (res?.data) {
+                toast.success("OTP sent successfully!");
+                if (step === 0) {
+                    setStep(1);
+                }
+            } else {
+                toast.error(res?.message);
+            }
+        } catch {
+            toast.error("Failed to send OTP");
+        } finally {
+            setIsResendLoading(false);
         }
     };
 
@@ -62,18 +72,24 @@ export default function ForgotPasswordModel(props: any) {
         password: string,
         confirmPassword: string
     ) => {
-        const res = await fetchChangePassword(
-            email,
-            password,
-            confirmPassword,
-            otp || "0"
-        );
-        if (res?.data) {
-            toast.success(res?.message);
-
-            setStep(2);
-        } else {
-            toast.error(res?.message);
+        setIsLoading(true);
+        try {
+            const res = await fetchChangePassword(
+                email,
+                password,
+                confirmPassword,
+                otp || "0"
+            );
+            if (res?.data) {
+                toast.success(res?.message);
+                setStep(2);
+            } else {
+                toast.error(res?.message);
+            }
+        } catch {
+            toast.error("Failed to change password");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -124,8 +140,9 @@ export default function ForgotPasswordModel(props: any) {
                                 <Button
                                     variant="contained"
                                     onClick={() => handleResendOtp(email)}
+                                    disabled={isResendLoading}
                                 >
-                                    {t("send_otp")}
+                                    {isResendLoading ? "Sending..." : t("send_otp")}
                                 </Button>
                             </>
                         )}
@@ -169,18 +186,30 @@ export default function ForgotPasswordModel(props: any) {
                                         setConfirmPassword(e.target.value)
                                     }
                                 />
-                                <Button
-                                    variant="contained"
-                                    onClick={() =>
-                                        handleChangePassword(
-                                            email,
-                                            password,
-                                            confirmPassword
-                                        )
-                                    }
-                                >
-                                    {t("change_password")}
-                                </Button>
+                                <Box display="flex" gap={2} width="100%">
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => handleResendOtp(email)}
+                                        disabled={isResendLoading}
+                                        size="small"
+                                    >
+                                        {isResendLoading ? "Resending..." : "Resend OTP"}
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() =>
+                                            handleChangePassword(
+                                                email,
+                                                password,
+                                                confirmPassword
+                                            )
+                                        }
+                                        disabled={isLoading}
+                                        fullWidth
+                                    >
+                                        {isLoading ? "Changing..." : t("change_password")}
+                                    </Button>
+                                </Box>
                             </>
                         )}
 

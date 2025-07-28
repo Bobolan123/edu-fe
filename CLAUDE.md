@@ -1,146 +1,113 @@
 
-  You are an expert in JavaScript, React, Node.js, Next.js App Router, Zustand, Shadcn UI, Radix UI, Tailwind, and Stylus.
+# CLAUDE.md
 
-  Code Style and Structure
-  - Write concise, technical JavaScript code following Standard.js rules.
-  - Use functional and declarative programming patterns; avoid classes.
-  - Prefer iteration and modularization over code duplication.
-  - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
-  - Structure files: exported component, subcomponents, helpers, static content.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-  Standard.js Rules
-  - Use 2 space indentation.
-  - Use single quotes for strings except to avoid escaping.
-  - No semicolons (unless required to disambiguate statements).
-  - No unused variables.
-  - Add a space after keywords.
-  - Add a space before a function declaration's parentheses.
-  - Always use === instead of ==.
-  - Infix operators must be spaced.
-  - Commas should have a space after them.
-  - Keep else statements on the same line as their curly braces.
-  - For multi-line if statements, use curly braces.
-  - Always handle the err function parameter.
-  - Use camelcase for variables and functions.
-  - Use PascalCase for constructors and React components.
+## Project Overview
 
-  Naming Conventions
-  - Use lowercase with dashes for directories (e.g., components/auth-wizard).
-  - Favor named exports for components.
+This is an educational platform frontend built with Next.js 15, featuring:
+- Multi-language support (English/Vietnamese) with next-intl
+- Course management and video learning with Mux player
+- Authentication via NextAuth with Google OAuth and credentials
+- Payment integration with PayPal
+- Real-time video communication with Agora RTC
+- Material-UI design system with Tailwind CSS
 
-  React Best Practices
-  - Use functional components with prop-types for type checking.
-  - Use the "function" keyword for component definitions.
-  - Implement hooks correctly (useState, useEffect, useContext, useReducer, useMemo, useCallback).
-  - Follow the Rules of Hooks (only call hooks at the top level, only call hooks from React functions).
-  - Create custom hooks to extract reusable component logic.
-  - Use React.memo() for component memoization when appropriate.
-  - Implement useCallback for memoizing functions passed as props.
-  - Use useMemo for expensive computations.
-  - Avoid inline function definitions in render to prevent unnecessary re-renders.
-  - Prefer composition over inheritance.
-  - Use children prop and render props pattern for flexible, reusable components.
-  - Implement React.lazy() and Suspense for code splitting.
-  - Use refs sparingly and mainly for DOM access.
-  - Prefer controlled components over uncontrolled components.
-  - Implement error boundaries to catch and handle errors gracefully.
-  - Use cleanup functions in useEffect to prevent memory leaks.
-  - Use short-circuit evaluation and ternary operators for conditional rendering.
+## Common Development Commands
 
-  State Management
-  - Use Zustand for global state management.
-  - Lift state up when needed to share state between components.
-  - Use context for intermediate state sharing when prop drilling becomes cumbersome.
+```bash
+# Development
+npm run dev          # Start development server
 
-  UI and Styling
-  - Use Shadcn UI and Radix UI for component foundations.
-  - Implement responsive design with Tailwind CSS; use a mobile-first approach.
-  - Use Stylus as CSS Modules for component-specific styles:
-    - Create a .module.styl file for each component that needs custom styling.
-    - Use camelCase for class names in Stylus files.
-    - Leverage Stylus features like nesting, variables, and mixins for efficient styling.
-  - Implement a consistent naming convention for CSS classes (e.g., BEM) within Stylus modules.
-  - Use Tailwind for utility classes and rapid prototyping.
-  - Combine Tailwind utility classes with Stylus modules for a hybrid approach:
-    - Use Tailwind for common utilities and layout.
-    - Use Stylus modules for complex, component-specific styles.
-    - Never use the @apply directive
+# Build and Deployment  
+npm run build        # Build for production
+npm run start        # Start production server
 
-  File Structure for Styling
-  - Place Stylus module files next to their corresponding component files.
-  - Example structure:
-    components/
-      Button/
-        Button.js
-        Button.module.styl
-      Card/
-        Card.js
-        Card.module.styl
+# Code Quality
+npm run lint         # Run ESLint
+```
 
-  Stylus Best Practices
-  - Use variables for colors, fonts, and other repeated values.
-  - Create mixins for commonly used style patterns.
-  - Utilize Stylus' parent selector (&) for nesting and pseudo-classes.
-  - Keep specificity low by avoiding deep nesting.
+## Project Architecture
 
-  Integration with React
-  - Import Stylus modules in React components:
-    import styles from './ComponentName.module.styl'
-  - Apply classes using the styles object:
-    <div className={styles.containerClass}>
+### Core Technologies
+- **Next.js 15** with App Router and RSC
+- **TypeScript** for type safety
+- **NextAuth v5** for authentication
+- **next-intl** for internationalization
+- **Material-UI v6** + Tailwind CSS for styling
+- **React Hook Form** + Zod for form validation
+- **Mux Player** for video streaming
 
-  Performance Optimization
-  - Minimize 'use client', 'useEffect', and 'useState'; favor React Server Components (RSC).
-  - Wrap client components in Suspense with fallback.
-  - Use dynamic loading for non-critical components.
-  - Optimize images: use WebP format, include size data, implement lazy loading.
-  - Implement route-based code splitting in Next.js.
-  - Minimize the use of global styles; prefer modular, scoped styles.
-  - Use PurgeCSS with Tailwind to remove unused styles in production.
+### Key Directory Structure
+```
+src/
+├── app/[locale]/           # Localized pages (en/vi)
+├── components/             # Reusable UI components
+├── actions/               # Server actions for data mutations
+├── auth.ts               # NextAuth configuration
+├── middleware.ts         # Locale routing & auth middleware
+├── context/              # React contexts (Currency)
+├── services/             # Client-side services
+└── utils/                # Shared utilities
+```
 
-  Forms and Validation
-  - Use controlled components for form inputs.
-  - Implement form validation (client-side and server-side).
-  - Consider using libraries like react-hook-form for complex forms.
-  - Use Zod or Joi for schema validation.
+### Authentication Flow
+- NextAuth v5 handles session management
+- Supports Google OAuth and email/password
+- Middleware handles auth redirects and locale routing
+- Session data includes user info and access tokens
 
-  Error Handling and Validation
-  - Prioritize error handling and edge cases.
-  - Handle errors and edge cases at the beginning of functions.
-  - Use early returns for error conditions to avoid deeply nested if statements.
-  - Place the happy path last in the function for improved readability.
-  - Avoid unnecessary else statements; use if-return pattern instead.
-  - Use guard clauses to handle preconditions and invalid states early.
-  - Implement proper error logging and user-friendly error messages.
-  - Model expected errors as return values in Server Actions.
+### Internationalization
+- Route-based localization: `/en/...` and `/vi/...`
+- Translation files in `messages/` directory
+- Middleware handles automatic locale detection/routing
+- `next-intl` provides navigation utilities
 
-  Accessibility (a11y)
-  - Use semantic HTML elements.
-  - Implement proper ARIA attributes.
-  - Ensure keyboard navigation support.
+### API Integration
+- Server actions in `src/actions/` for data mutations
+- `utils/api.ts` contains request utilities
+- Environment variable `NEXT_PUBLIC_SERVER` for backend URL
+- Uses revalidateTag for cache invalidation
 
-  Testing
-  - Write unit tests for components using Jest and React Testing Library.
-  - Implement integration tests for critical user flows.
-  - Use snapshot testing judiciously.
+### State Management
+- React Context for global state (Currency)
+- Server state via Next.js caching and revalidation
+- Form state with React Hook Form
+- Session state via NextAuth
 
-  Security
-  - Sanitize user inputs to prevent XSS attacks.
-  - Use dangerouslySetInnerHTML sparingly and only with sanitized content.
+## Development Guidelines
 
-  Internationalization (i18n)
-  - Use libraries like react-intl or next-i18next for internationalization.
+### Authentication
+- Use `auth()` from `src/auth.ts` for server-side session checks
+- Access user data via session: `session.user.access_token`
+- Protected routes defined in middleware.ts
 
-  Key Conventions
-  - Use 'nuqs' for URL search parameter state management.
-  - Optimize Web Vitals (LCP, CLS, FID).
-  - Limit 'use client':
-    - Favor server components and Next.js SSR.
-    - Use only for Web API access in small components.
-    - Avoid for data fetching or state management.
-  - Balance the use of Tailwind utility classes with Stylus modules:
-    - Use Tailwind for rapid development and consistent spacing/sizing.
-    - Use Stylus modules for complex, unique component styles.
+### Internationalization  
+- Import navigation utilities from `src/i18n/routing.ts`
+- Use `useTranslations()` hook for client components
+- Add translations to both `messages/en.json` and `messages/vi.json`
 
-  Follow Next.js docs for Data Fetching, Rendering, and Routing.
+### API Calls
+- Use server actions for mutations (in `src/actions/`)
+- Server actions automatically handle revalidation
+- Use `sendRequest` utility for custom API calls
+- Include Authorization header with access token when needed
+
+### Styling
+- Material-UI components for complex UI elements
+- Tailwind for utility classes and layout
+- Custom theme defined in `src/app/[locale]/theme.ts`
+- Responsive design with mobile-first approach
+
+### Forms
+- React Hook Form for form state management
+- Zod schemas for validation (see `lib/validationSchemas.ts`)
+- Server-side validation in server actions
+
+### Video Integration
+- Mux Player React for video playback
+- Course content structured with sections and lectures
+- Video upload via server actions to backend
+
+You are an expert in JavaScript, React, Node.js, Next.js App Router, Material-UI, next-intl, NextAuth, and Tailwind CSS.
     

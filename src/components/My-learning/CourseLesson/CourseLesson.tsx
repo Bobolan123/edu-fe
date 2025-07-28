@@ -60,26 +60,36 @@ import {
     Speed,
 } from "@mui/icons-material";
 import { Bot } from "lucide-react";
-import { ICourse, ICourseContent } from "../../../../types/entities";
+import { ICourse, ICourseContent, IEnrollment, ILecture } from "../../../../types/entities";
+
+type EnrollmentProgress = IEnrollment & {
+    lectureProgress: ILecture[];
+    progressPercentage: number;
+};
 import CourseOverview from "./Overview";
 import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
 import { useSession } from "next-auth/react";
 import { updateCourseContent } from "@/actions/coursesAction";
+import { markLectureAsCompleted } from "@/actions/enrollmentAction";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
     course: ICourse;
     reviewDistribution?: IReviewDistribution;
+    enrollmentProgress?: EnrollmentProgress;
 }
 
-export default function CourseLesson({
+export default function     CourseLesson({
     courseContent,
     course,
     reviewDistribution,
+    enrollmentProgress,
 }: ICourseLesson) {
     const { data: session } = useSession();
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
     const [expandedSection, setExpandedSection] = useState<string | false>(
         false
@@ -98,6 +108,41 @@ export default function CourseLesson({
     );
 
     const muxPlayerRef = useRef<any>(null);
+
+    // Function to check if a lecture is completed based on enrollment progress
+    const isLectureCompleted = (lectureId: string): boolean => {
+        if (!enrollmentProgress?.lectureProgress) return false;
+        return enrollmentProgress.lectureProgress.some(
+            progressLecture => progressLecture._id === lectureId
+        );
+    };
+
+    // Function to handle lecture completion toggle
+    const handleLectureToggle = async (lectureId: string) => {
+        console.log(session?.user?.access_token, enrollmentProgress?.id, course?.id)
+        if (!session?.user?.access_token || !enrollmentProgress?.id || !course?.id) {
+            toast.error("Authentication required");
+            return;
+        }
+
+        try {
+            const res = await markLectureAsCompleted(
+                session.user.access_token,
+                enrollmentProgress.id.toString(),
+                lectureId,
+                course.id
+            );
+            console.log(res)
+            toast.success("Lecture marked as completed!");
+            
+            // Refresh the page to update progress
+            router.refresh();
+            
+        } catch (error) {
+            console.error("Failed to mark lecture as completed:", error);
+            toast.error("Failed to update lecture status");
+        }
+    };
 
     // Initialize with first lecture
     const videoUrl =
@@ -179,28 +224,6 @@ export default function CourseLesson({
         setIsVideoLoading(false);
     };
 
-    const handleLectureToggle = async (lectureId: string) => {
-        const updatedContent = { ...courseContent };
-
-        updatedContent.sections = updatedContent.sections?.map((section) => ({
-            ...section,
-            lectures: section.lectures?.map((lecture) =>
-                lecture._id === lectureId
-                    ? { ...lecture, isFinished: !lecture.isFinished }
-                    : lecture
-            ),
-        }));
-        try {
-            await updateCourseContent(
-                session?.user?.access_token || "",
-                course.id,
-                updatedContent
-            );
-        } catch (error:any) {
-            toast.error("Failed to update lecture completion", error);
-        }
-       
-    };
 
     return (
         <>
@@ -440,19 +463,17 @@ export default function CourseLesson({
                                         >
                                             {/* Checkbox for lecture completion */}
                                             <Checkbox
-                                                checked={
-                                                    lecture?.isFinished || false
-                                                }
+                                                checked={isLectureCompleted(lecture?._id || "")}
                                                 onChange={(e) => {
                                                     e.stopPropagation();
-                                                    handleLectureToggle(
-                                                        lecture?._id
-                                                    );
+                                                    if (lecture?._id) {
+                                                        handleLectureToggle(lecture._id);
+                                                    }
                                                 }}
                                                 size="small"
                                                 className="mr-2"
                                                 sx={{
-                                                    color: lecture?.isFinished
+                                                    color: isLectureCompleted(lecture?._id || "")
                                                         ? "#10b981"
                                                         : "#6b7280",
                                                     "&.Mui-checked": {
@@ -506,7 +527,7 @@ export default function CourseLesson({
                                                         variant="caption"
                                                         className="text-gray-500 mt-1"
                                                     >
-                                                        Video • 5:30
+                                                        Video 
                                                     </Typography>
                                                 </div>
 
@@ -523,6 +544,22 @@ export default function CourseLesson({
                                                                 height: 20,
                                                                 fontSize:
                                                                     "0.65rem",
+                                                            }}
+                                                        />
+                                                    )}
+                                                    {isLectureCompleted(lecture?._id || "") && (
+                                                        <Chip
+                                                            label="Completed"
+                                                            size="small"
+                                                            color="success"
+                                                            variant="outlined"
+                                                            sx={{
+                                                                height: 20,
+                                                                fontSize:
+                                                                    "0.65rem",
+                                                                bgcolor: "#f0fdf4",
+                                                                borderColor: "#10b981",
+                                                                color: "#10b981",
                                                             }}
                                                         />
                                                     )}
