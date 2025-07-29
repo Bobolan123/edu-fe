@@ -1,5 +1,5 @@
 import CreateCoursePage from "@/components/My-learning/Create/CreateCourse";
-import { getCategories } from "@/actions/categories";
+import { getCategories } from "@/actions/categoriesAction";
 
 export default async function CreateACoursePage() {
     const categories = await getCategories()

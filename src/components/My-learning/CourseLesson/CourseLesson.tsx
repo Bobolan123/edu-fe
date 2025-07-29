@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
-
 // Dynamically import MuxPlayer to avoid SSR issues
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), {
     ssr: false,
@@ -61,11 +60,6 @@ import {
 } from "@mui/icons-material";
 import { Bot } from "lucide-react";
 import { ICourse, ICourseContent, IEnrollment, ILecture } from "../../../../types/entities";
-
-type EnrollmentProgress = IEnrollment & {
-    lectureProgress: ILecture[];
-    progressPercentage: number;
-};
 import CourseOverview from "./Overview";
 import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
@@ -74,6 +68,7 @@ import { updateCourseContent } from "@/actions/coursesAction";
 import { markLectureAsCompleted } from "@/actions/enrollmentAction";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { EnrollmentProgress } from "@/app/[locale]/my-learning/[title]/page";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
@@ -88,7 +83,6 @@ export default function     CourseLesson({
     reviewDistribution,
     enrollmentProgress,
 }: ICourseLesson) {
-    const { data: session } = useSession();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
     const [expandedSection, setExpandedSection] = useState<string | false>(
@@ -113,26 +107,24 @@ export default function     CourseLesson({
     const isLectureCompleted = (lectureId: string): boolean => {
         if (!enrollmentProgress?.lectureProgress) return false;
         return enrollmentProgress.lectureProgress.some(
-            progressLecture => progressLecture._id === lectureId
+            progressLecture => progressLecture.lectureId === lectureId
         );
     };
 
     // Function to handle lecture completion toggle
     const handleLectureToggle = async (lectureId: string) => {
-        console.log(session?.user?.access_token, enrollmentProgress?.id, course?.id)
-        if (!session?.user?.access_token || !enrollmentProgress?.id || !course?.id) {
+        if (!enrollmentProgress?.enrollment.id || !course?.id) {
             toast.error("Authentication required");
             return;
         }
 
         try {
+            
             const res = await markLectureAsCompleted(
-                session.user.access_token,
-                enrollmentProgress.id.toString(),
+                enrollmentProgress.enrollment.id.toString(),
                 lectureId,
                 course.id
             );
-            console.log(res)
             toast.success("Lecture marked as completed!");
             
             // Refresh the page to update progress

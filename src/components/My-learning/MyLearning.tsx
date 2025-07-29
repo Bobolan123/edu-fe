@@ -1,231 +1,370 @@
-
-
 "use client";
 
-import { useState } from "react";
+import { EnrolledCourse } from "@/app/[locale]/my-learning/page";
 import {
-    Container,
-    Typography,
-    Grid,
     Card,
     CardContent,
     CardMedia,
-    Box,
-    LinearProgress,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    SelectChangeEvent,
+    Typography,
     Chip,
+    LinearProgress,
+    Avatar,
+    Box,
+    Grid,
+    Container,
+    Paper,
+    Fade,
+    Grow,
+    IconButton,
+    Tooltip,
 } from "@mui/material";
-import { AccessTime, Category } from "@mui/icons-material";
+import {
+    Star,
+    Clock,
+    Calendar,
+    BookOpen,
+    PlayCircle,
+    TrendingUp,
+    Award,
+    Users,
+} from "lucide-react";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
 import { slugify } from "../../../utils/utils";
 
-// Sample data - replace with actual data from your backend
-const myCourses = [
-    {
-        id: 1,
-        title: "Web Development Bootcamp",
-        progress: 75,
-        lastAccessed: "2024-02-20T10:00:00Z",
-        category: "Web Development",
-        thumbnail: "/sample/web-dev.jpg",
-    },
-    {
-        id: 2,
-        title: "Data Science Fundamentals",
-        progress: 30,
-        lastAccessed: "2024-02-19T15:30:00Z",
-        category: "Data Science",
-        thumbnail: "/logo.png",
-    },
-    {
-        id: 3,
-        title: "Mobile App Development",
-        progress: 50,
-        lastAccessed: "2024-02-18T09:15:00Z",
-        category: "Mobile Development",
-        thumbnail: "/sample/mobile-dev.jpg",
-    },
-];
+interface MyLearningProps {
+    enrolledCourses: EnrolledCourse[];
+}
 
-type SortOption = "recent" | "progress" | "name";
+function formatDate(dateString: string) {
+    return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+}
 
-export default function MyLearning() {
-    const locale = useLocale();
-    const t = useTranslations("MyLearning");
-    const [sortBy, setSortBy] = useState<SortOption>("recent");
-    const [categoryFilter, setCategoryFilter] = useState<string>("all");
+function formatPrice(price: number) {
+    if (price === 0) return "Free";
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+    }).format(price / 100); // Assuming price is in cents
+}
 
-    const handleSortChange = (event: SelectChangeEvent) => {
-        setSortBy(event.target.value as SortOption);
-    };
+function getProgressStatus(progress: number) {
+    if (progress === 0) return { text: "Not Started", color: "bg-gray-500" };
+    if (progress < 50) return { text: "In Progress", color: "bg-blue-500" };
+    if (progress < 100) return { text: "Almost Done", color: "bg-orange-500" };
+    return { text: "Completed", color: "bg-green-500" };
+}
 
-    const handleCategoryChange = (event: SelectChangeEvent) => {
-        setCategoryFilter(event.target.value);
-    };
-
-    const categories = Array.from(
-        new Set(myCourses.map((course) => course.category))
-    );
-
-    const sortCourses = (courses: typeof myCourses) => {
-        switch (sortBy) {
-            case "recent":
-                return [...courses].sort(
-                    (a, b) =>
-                        new Date(b.lastAccessed).getTime() -
-                        new Date(a.lastAccessed).getTime()
-                );
-            case "progress":
-                return [...courses].sort((a, b) => b.progress - a.progress);
-            case "name":
-                return [...courses].sort((a, b) =>
-                    a.title.localeCompare(b.title)
-                );
-            default:
-                return courses;
-        }
-    };
-
-    const filteredAndSortedCourses = sortCourses(
-        categoryFilter === "all"
-            ? myCourses
-            : myCourses.filter((course) => course.category === categoryFilter)
-    );
+export default function MyLearning({ enrolledCourses }: MyLearningProps) {
+    const totalCourses = enrolledCourses.length;
+    const completedCourses = enrolledCourses.filter(
+        (course) => course.progress === 100
+    ).length;
+    const inProgressCourses = enrolledCourses.filter(
+        (course) => course.progress > 0 && course.progress < 100
+    ).length;
 
     return (
-        <Container maxWidth="lg" sx={{ py: 6 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
-                {t("title")}
-            </Typography>
-
-            <Box sx={{ mb: 4, display: "flex", gap: 2 }}>
-                <FormControl sx={{ minWidth: 200 }}>
-                    <InputLabel>{t("sort_by")}</InputLabel>
-                    <Select
-                        value={sortBy}
-                        label={t("sort_by")}
-                        onChange={handleSortChange}
+        <Box className="min-h-screen bg-gray-50 py-8">
+            <Container maxWidth="xl">
+                {/* Header */}
+                <Box className="mb-8">
+                    <Typography
+                        variant="h3"
+                        className="font-bold text-gray-900 mb-2"
                     >
-                        <MenuItem value="recent">{t("most_recent")}</MenuItem>
-                        <MenuItem value="progress">{t("progress")}</MenuItem>
-                        <MenuItem value="name">{t("course_name")}</MenuItem>
-                    </Select>
-                </FormControl>
+                        My Learning
+                    </Typography>
+                    <Typography variant="body1" className="text-gray-600">
+                        Continue your learning journey
+                    </Typography>
+                </Box>
 
-                <FormControl sx={{ minWidth: 200 }}>
-                    <InputLabel>{t("category")}</InputLabel>
-                    <Select
-                        value={categoryFilter}
-                        label={t("category")}
-                        onChange={handleCategoryChange}
-                    >
-                        <MenuItem value="all">{t("all_categories")}</MenuItem>
-                        {categories.map((category) => (
-                            <MenuItem key={category} value={category}>
-                                {category}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </Box>
-
-            <Grid container spacing={3}>
-                {filteredAndSortedCourses.map((course) => (
-                    <Grid item key={course.id} xs={12} sm={6} md={4}>
-                        <Card
-                            sx={{
-                                height: "100%",
-                                display: "flex",
-                                flexDirection: "column",
-                            }}
-                        >
-                            <Link
-                                href={`my-learning/${slugify(
-                                    course.title
-                                )}id?=${course.id}`}
-                            >
-                                <CardMedia
-                                    component="div"
-                                    sx={{
-                                        height: 200,
-                                        backgroundColor: "grey.200",
-                                    }}
-                                    title={course.title}
-                                    image={course.thumbnail}
-                                />
-                            </Link>
-
-                            <CardContent sx={{ flexGrow: 1 }}>
-                                <Box sx={{ mb: 2 }}>
-                                    <Chip
-                                        label={course.category}
-                                        size="small"
-                                        icon={
-                                            <Category sx={{ fontSize: 16 }} />
-                                        }
-                                    />
-                                </Box>
-                                <Typography variant="h6" gutterBottom>
-                                    <Link
-                                        href={`classroom/course/${course.title}`}
-                                    >
-                                        {course.title}
-                                    </Link>
-                                </Typography>
-                                <Box sx={{ mb: 2 }}>
+                {/* Stats */}
+                <Grid container spacing={2} className="mt-6 mb-8">
+                    <Grid item xs={12} sm={4}>
+                        <Paper className="p-4 shadow-sm">
+                            <Box className="flex items-center">
+                                <BookOpen className="h-8 w-8 text-blue-500" />
+                                <Box className="ml-3">
                                     <Typography
                                         variant="body2"
-                                        color="text.secondary"
-                                        sx={{ mb: 1 }}
+                                        className="font-medium text-gray-500"
                                     >
-                                        {t("progress")}
+                                        Total Courses
                                     </Typography>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={course.progress}
-                                        sx={{ height: 8, borderRadius: 4 }}
-                                    />
                                     <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        align="right"
+                                        variant="h4"
+                                        className="font-bold text-gray-900"
                                     >
-                                        {course.progress}%
+                                        {totalCourses}
                                     </Typography>
                                 </Box>
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 1,
-                                    }}
-                                >
-                                    <AccessTime
-                                        sx={{
-                                            fontSize: 16,
-                                            color: "text.secondary",
-                                        }}
-                                    />
-                                    <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                    >
-                                        {t("last_accessed")}: {" "}
-                                        {new Date(
-                                            course.lastAccessed
-                                        ).toLocaleDateString()}
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
+                            </Box>
+                        </Paper>
                     </Grid>
-                ))}
-            </Grid>
-        </Container>
+                    <Grid item xs={12} sm={4}>
+                        <Paper className="p-4 shadow-sm">
+                            <Box className="flex items-center">
+                                <Clock className="h-8 w-8 text-orange-500" />
+                                <Box className="ml-3">
+                                    <Typography
+                                        variant="body2"
+                                        className="font-medium text-gray-500"
+                                    >
+                                        In Progress
+                                    </Typography>
+                                    <Typography
+                                        variant="h4"
+                                        className="font-bold text-gray-900"
+                                    >
+                                        {inProgressCourses}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <Paper className="p-4 shadow-sm">
+                            <Box className="flex items-center">
+                                <Star className="h-8 w-8 text-green-500" />
+                                <Box className="ml-3">
+                                    <Typography
+                                        variant="body2"
+                                        className="font-medium text-gray-500"
+                                    >
+                                        Completed
+                                    </Typography>
+                                    <Typography
+                                        variant="h4"
+                                        className="font-bold text-gray-900"
+                                    >
+                                        {completedCourses}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                </Grid>
+
+                {/* Course Grid */}
+                <Grid container spacing={3}>
+                    {enrolledCourses.map((course) => {
+                        const progressStatus = getProgressStatus(
+                            course.progress
+                        );
+
+                        return (
+                            <Grid item xs={12} md={6} lg={4} key={course.id}>
+                                <Link href={`/my-learning/${slugify(course.title)}?id=${course.id}`}>
+                                    <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer h-full">
+                                        <Box className="relative">
+                                            <CardMedia
+                                                component="img"
+                                                height="200"
+                                                image={
+                                                    course.thumbnail_url ||
+                                                    `/placeholder.svg?height=200&width=400&text=${encodeURIComponent(
+                                                        course.title
+                                                    )}`
+                                                }
+                                                alt={course.title}
+                                                className="h-48 object-cover"
+                                            />
+                                            <Box className="absolute top-3 right-3">
+                                                <Chip
+                                                    label={progressStatus.text}
+                                                    size="small"
+                                                    className={`${progressStatus.color} text-white`}
+                                                />
+                                            </Box>
+                                            {course.price > 0 && (
+                                                <Box className="absolute top-3 left-3">
+                                                    <Chip
+                                                        label={formatPrice(
+                                                            course.price
+                                                        )}
+                                                        variant="outlined"
+                                                        size="small"
+                                                        className="bg-white"
+                                                    />
+                                                </Box>
+                                            )}
+                                        </Box>
+
+                                        <CardContent className="flex-1 space-y-4">
+                                            <Box>
+                                                <Typography
+                                                    variant="h6"
+                                                    className="line-clamp-2 mb-2"
+                                                >
+                                                    {course.title}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    className="text-gray-600 line-clamp-2"
+                                                >
+                                                    {course.description}
+                                                </Typography>
+                                            </Box>
+
+                                            {/* Progress */}
+                                            <Box className="space-y-2">
+                                                <Box className="flex justify-between">
+                                                    <Typography
+                                                        variant="body2"
+                                                        className="text-gray-600"
+                                                    >
+                                                        Progress
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        className="font-medium"
+                                                    >
+                                                        {course.progress}%
+                                                    </Typography>
+                                                </Box>
+                                                <LinearProgress
+                                                    variant="determinate"
+                                                    value={course.progress}
+                                                    className="h-2"
+                                                />
+                                                {course.lectureProgress > 0 && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        className="text-gray-500"
+                                                    >
+                                                        {course.lectureProgress}{" "}
+                                                        lecture
+                                                        {course.lectureProgress !==
+                                                        1
+                                                            ? "s"
+                                                            : ""}{" "}
+                                                        completed
+                                                    </Typography>
+                                                )}
+                                            </Box>
+
+                                            {/* Instructor */}
+                                            {course.instructor && (
+                                                <Box className="flex items-center space-x-2">
+                                                    <Avatar
+                                                        src={
+                                                            course.instructor
+                                                                .avatar_url ||
+                                                            undefined
+                                                        }
+                                                        className="w-6 h-6"
+                                                    >
+                                                        {course.instructor.name
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+                                                    </Avatar>
+                                                    <Typography
+                                                        variant="body2"
+                                                        className="text-gray-600"
+                                                    >
+                                                        {course.instructor.name}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+
+                                            {/* Rating */}
+                                            {course.average_rating > 0 && (
+                                                <Box className="flex items-center space-x-1">
+                                                    <Box className="flex items-center">
+                                                        {[...Array(5)].map(
+                                                            (_, i) => (
+                                                                <Star
+                                                                    key={i}
+                                                                    className={`h-4 w-4 ${
+                                                                        i <
+                                                                        Math.floor(
+                                                                            course.average_rating
+                                                                        )
+                                                                            ? "text-yellow-400 fill-current"
+                                                                            : "text-gray-300"
+                                                                    }`}
+                                                                />
+                                                            )
+                                                        )}
+                                                    </Box>
+                                                    <Typography
+                                                        variant="body2"
+                                                        className="text-gray-600"
+                                                    >
+                                                        {course.average_rating}{" "}
+                                                        ({course.total_reviews}{" "}
+                                                        review
+                                                        {course.total_reviews !==
+                                                        1
+                                                            ? "s"
+                                                            : ""}
+                                                        )
+                                                    </Typography>
+                                                </Box>
+                                            )}
+
+                                            {/* Categories */}
+                                            {course.categories.length > 0 && (
+                                                <Box className="flex flex-wrap gap-1">
+                                                    {course.categories.map(
+                                                        (category) => (
+                                                            <Chip
+                                                                key={
+                                                                    category.id
+                                                                }
+                                                                label={
+                                                                    category.name
+                                                                }
+                                                                variant="outlined"
+                                                                size="small"
+                                                            />
+                                                        )
+                                                    )}
+                                                </Box>
+                                            )}
+
+                                            {/* Enrollment Date */}
+                                            <Box className="flex items-center">
+                                                <Calendar className="h-3 w-3 mr-1 text-gray-500" />
+                                                <Typography
+                                                    variant="caption"
+                                                    className="text-gray-500"
+                                                >
+                                                    Enrolled on{" "}
+                                                    {formatDate(
+                                                        course.dateEnrolled.toString()
+                                                    )}
+                                                </Typography>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
+                            </Grid>
+                        );
+                    })}
+                </Grid>
+
+                {/* Empty State */}
+                {enrolledCourses.length === 0 && (
+                    <Box className="text-center py-12">
+                        <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <Typography
+                            variant="h5"
+                            className="font-medium text-gray-900 mb-2"
+                        >
+                            No courses yet
+                        </Typography>
+                        <Typography variant="body1" className="text-gray-600">
+                            Start learning by enrolling in your first course!
+                        </Typography>
+                    </Box>
+                )}
+            </Container>
+        </Box>
     );
 }

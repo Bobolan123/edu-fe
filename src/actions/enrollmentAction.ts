@@ -2,6 +2,8 @@
 
 import { revalidateTag } from "next/cache";
 import { sendRequest } from "../../utils/api";
+import { auth } from "@/auth";
+import { getAccessToken } from ".";
 
 export const getEnrollmentWithProgress = async (
     access_token: string,
@@ -22,11 +24,11 @@ export const getEnrollmentWithProgress = async (
 };
 
 export const markLectureAsCompleted = async (
-    access_token: string,
     enrollmentId: string,
     lectureId: string,
     courseId: number
 ): Promise<IBackendRes<any>> => {
+    const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<any>>({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/${enrollmentId}/lectures/${lectureId}/complete`,
@@ -38,12 +40,11 @@ export const markLectureAsCompleted = async (
         },
     });
 
-    console.log(res)
-    if (res?.statusCode !== 200 || !res?.data) {
+    if (res?.statusCode !== 201 || !res?.data) {
+        console.log(res);
         throw new Error(res?.message || "Failed to mark lecture as completed");
     }
 
-    // Revalidate the enrollment progress cache
     revalidateTag(`enrollment-progress-${courseId}`);
 
     return res;

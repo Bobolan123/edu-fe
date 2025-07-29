@@ -50,18 +50,15 @@ export default function Courses(props: ICoursesProps) {
     const pathname = usePathname();
     const { replace } = useRouter();
 
-    /* ──────────────────────── pagination & filter state ──────────────────────── */
     const [page, setPage] = useState(currentPage || 1);
     const [ratingFilter, setRatingFilter] = useState<number[]>([0, 5]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-    /* ────────────────────────────── currency state ───────────────────────────── */
     const { currency } = useCurrency();
     const [convertedPrices, setConvertedPrices] = useState<
         Record<number, number>
     >({});
 
-    /* ───────────────────────── price conversion effect ───────────────────────── */
     useEffect(() => {
         if (!courses.length) return;
 
@@ -85,7 +82,6 @@ export default function Courses(props: ICoursesProps) {
         };
     }, [courses, currency]);
 
-    /* ────────────────────────────── handlers ────────────────────────────── */
     const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
         const params = new URLSearchParams(searchParams);
@@ -126,7 +122,6 @@ export default function Courses(props: ICoursesProps) {
     return (
         <Container maxWidth="lg" sx={{ py: 6 }}>
             <Grid container spacing={4}>
-                {/* ───────────────────────── filters sidebar ───────────────────────── */}
                 <Grid item xs={12} md={3}>
                     <Box sx={{ position: "sticky", top: 20 }}>
                         <Typography variant="h6" gutterBottom>
@@ -186,7 +181,6 @@ export default function Courses(props: ICoursesProps) {
                     </Box>
                 </Grid>
 
-                {/* ─────────────────────────── course list ─────────────────────────── */}
                 <Grid item xs={12} md={9}>
                     <Box sx={{ mb: 3 }}>
                         <Typography variant="h5" component="h2" gutterBottom>
@@ -344,7 +338,7 @@ export default function Courses(props: ICoursesProps) {
                 </Grid>
             </Grid>
 
-            {/* ──────────────────────────── pagination ──────────────────────────── */}
+        
             {totalPages > 1 && (
                 <Box
                     sx={{

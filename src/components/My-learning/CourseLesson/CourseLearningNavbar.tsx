@@ -3,14 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ICourse, ICourseContent, IEnrollment, ILecture } from "../../../../types/entities";
-
-type EnrollmentProgress = IEnrollment & {
-    lectureProgress: ILecture[];
-    progressPercentage: number;
-};
 import { Typography, Box, IconButton, Tooltip, LinearProgress, CircularProgress, CircularProgressProps } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, Share as ShareIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { useState } from "react";
+import { EnrollmentProgress } from "@/app/[locale]/my-learning/[title]/page";
 
 interface CourseLearningNavbarProps {
     course: ICourse;
@@ -49,50 +45,15 @@ function CircularProgressWithLabel(props: CircularProgressProps & { value: numbe
 
 export default function CourseLearningNavbar({ course, courseContent, enrollmentProgress }: CourseLearningNavbarProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    // Calculate progress based on enrollment progress data
-    const calculateProgress = (): number => {
-        if (enrollmentProgress?.progressPercentage !== undefined) {
-            return Math.round(enrollmentProgress.progressPercentage);
-        }
-        
-        // Fallback calculation if progressPercentage is not available
-        if (!courseContent?.sections || !enrollmentProgress?.lectureProgress) return 0;
-        
-        let totalLectures = 0;
-        let completedLectures = 0;
-        
-        courseContent.sections.forEach(section => {
-            section.lectures?.forEach(lecture => {
-                totalLectures++;
-                // Check if this lecture is in the completed lectures from enrollment progress
-                const isCompleted = enrollmentProgress.lectureProgress.some(
-                    progressLecture => progressLecture._id === lecture._id
-                );
-                if (isCompleted) {
-                    completedLectures++;
-                }
-            });
-        });
-        
-        return totalLectures > 0 ? Math.round((completedLectures / totalLectures) * 100) : 0;
-    };
-
-    const progress = calculateProgress();
-
     return (
         <div className="bg-white border-b border-gray-200">
             <div className="w-full">
-                <LinearProgress variant="determinate" value={progress} />
+                <LinearProgress variant="determinate" value={enrollmentProgress?.progressPercentage} />
             </div>
             <div className="container mx-auto px-4 py-2 flex items-center min-h-[64px]">
                     <Tooltip title="Back to Courses">
@@ -130,10 +91,10 @@ export default function CourseLearningNavbar({ course, courseContent, enrollment
                     </Box>
 
                     <Box className="flex items-center gap-4">
-                       <Tooltip title={`${progress}% Complete`}>
+                       <Tooltip title={`${enrollmentProgress?.progressPercentage}% Complete`}>
                          <div className="flex items-center gap-2">
-                             <CircularProgressWithLabel value={progress} size={40} thickness={4}/>
-                         </div>
+                             <CircularProgressWithLabel value={enrollmentProgress?.progressPercentage || 0} size={40} thickness={4}/>
+                         </div> 
                        </Tooltip>
                        
                         <Tooltip title="Share Course">

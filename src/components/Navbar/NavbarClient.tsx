@@ -95,18 +95,8 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
         return () => window.removeEventListener('scroll', throttledHandleScroll);
     }, []);
 
-    // Add padding to body when navbar becomes fixed to prevent content jump
-    useEffect(() => {
-        if (isScrolled) {
-            document.body.style.paddingTop = '112px'; // Approximate navbar height
-        } else {
-            document.body.style.paddingTop = '0';
-        }
-        
-        return () => {
-            document.body.style.paddingTop = '0';
-        };
-    }, [isScrolled]);
+    // Remove dynamic body padding that causes flickering
+    // The layout will handle proper spacing instead
 
     const isMenuOpen = Boolean(anchorEl);
 

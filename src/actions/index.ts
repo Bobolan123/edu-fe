@@ -4,6 +4,7 @@ import { revalidateTag } from "next/cache";
 import { sendRequest, sendRequestFile } from "../../utils/api";
 import { ICart, IOrder, ISection, PaymentMethod } from "../../types/entities";
 import { cookies } from "next/headers";
+import { auth } from "@/auth";
 
 export const uploadLectureVideo = async (
     courseId: number,
@@ -108,4 +109,9 @@ export async function setExchangeRateCookie(rate: number) {
         maxAge: 3600, // 1 hour
         path: "/",
     });
+}
+
+export const getAccessToken = async () => {
+    const session = await auth()
+    return session?.user?.access_token
 }

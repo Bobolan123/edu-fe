@@ -1,10 +1,17 @@
-import ManageMyCourses from "@/components/My-courses/ManageMyCourses";
 import { sendRequest } from "../../../../utils/api";
 import { ICourse } from "../../../../types/entities";
 import { auth } from "@/auth";
 import MyLearning from "@/components/My-learning/MyLearning";
 
-export default async function ManageMyCoursesPage(props: {
+
+export type EnrolledCourse = ICourse & {
+  enrollmentId: number;
+  progress: number;
+  lectureProgress: number;
+  dateEnrolled:Date;
+};
+
+export default async function MyLearningPage(props: {
   searchParams?: {
     filter?: string;
     page?: string;
@@ -15,28 +22,18 @@ export default async function ManageMyCoursesPage(props: {
 }) {
   const searchParams = props.searchParams || {};
   const session = await auth();
-
-  let courses: ICourse[] | undefined = [];
-
-  try {
-    const resCourses = await sendRequest<IModelPaginate<ICourse>>({
-      method: "GET",
-      url: `${process.env.NEXT_PUBLIC_SERVER}/courses`,
-      queryParams: {
-        search: searchParams?.filter,
-        rating: searchParams?.rating,
-        categoryIds: searchParams?.categoryIds,
-      },
-    //   nextOption: { cache: "no-cache" },
-    });
-
-    if (!resCourses?.data?.result) throw new Error("No course data found");
-
-    courses = resCourses.data.result;
-  } catch (error) {
-    console.error("Error fetching courses:", error);
-    courses = undefined;
-  }
-
-  return <MyLearning  />;
+  
+  const resEnrolledCourses = await sendRequest<IModelPaginate<EnrolledCourse>>({
+    method: "GET",
+    url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/user/${session?.user?.id}/courses`,
+    queryParams: {
+      search: searchParams?.filter,
+      page: searchParams?.page,
+      take: searchParams?.take,
+    },
+    headers: {
+      Authorization: `Bearer ${session?.user?.access_token}`,
+    },
+  });
+  return <MyLearning enrolledCourses={resEnrolledCourses?.data?.result || []} />;
 }

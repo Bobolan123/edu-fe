@@ -1,5 +1,15 @@
 import queryString from 'query-string';
 
+interface IRequest {
+    url: string;
+    method: string;
+    body?: any;
+    queryParams?: any;
+    useCredentials?: boolean;
+    headers?: any;
+    nextOption?: any;
+}
+
 export const sendRequest = async <T>(props: IRequest) => { //type
     let {
         url,

@@ -88,7 +88,7 @@ export interface IPermission {
 // Enrollment Interface
 export interface IEnrollment {
     id: number;
-    user: IUser;
+    student: IUser;
     course: ICourse;
     enrollment_date: Date;
     completion_status: string;
@@ -115,6 +115,7 @@ export interface ISubscription {
 
 export interface ILecture {
     _id:string;
+    lectureId?:string;
     title: string;
     videoUrl: string;
 }

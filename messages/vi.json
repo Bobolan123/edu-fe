@@ -10,6 +10,31 @@
         "label": "Tiền Tệ",
         "selector_label": "Chọn Tiền Tệ"
     },
+    "MyLearning": {
+        "title": "Bảng Điều Khiển Học Tập",
+        "subtitle": "Theo dõi tiến độ và tiếp tục hành trình giáo dục của bạn",
+        "stats": {
+            "total_courses": "Tổng Khóa Học",
+            "in_progress": "Đang Học",
+            "completed": "Đã Hoàn Thành"
+        },
+        "progress_label": "Tiến Độ",
+        "lectures_completed": "{count} bài giảng đã hoàn thành",
+        "lectures_completed_plural": "{count} bài giảng đã hoàn thành",
+        "enrolled_on": "Đăng ký vào {date}",
+        "review": "đánh giá",
+        "reviews": "đánh giá",
+        "empty_state": {
+            "title": "Chưa đăng ký khóa học nào",
+            "subtitle": "Bắt đầu hành trình học tập bằng cách khám phá và đăng ký các khóa học phù hợp với sở thích của bạn."
+        },
+        "status": {
+            "not_started": "Chưa Bắt Đầu",
+            "in_progress": "Đang Học",
+            "almost_done": "Sắp Hoàn Thành", 
+            "completed": "Đã Hoàn Thành"
+        }
+    },
     "VideoUpload": {
         "upload_video": "Tải Video Lên",
         "select_file": "Vui lòng chọn tệp video",
@@ -31,13 +56,21 @@
     },
     "MyLearning": {
         "title": "Học Tập Của Tôi",
+        "subtitle": "Tiếp tục hành trình học tập với {count} khóa học đã đăng ký",
         "sort_by": "Sắp Xếp Theo",
         "most_recent": "Gần Đây Nhất",
         "progress": "Tiến Độ",
         "course_name": "Tên Khóa Học",
         "category": "Danh Mục",
         "all_categories": "Tất Cả Danh Mục",
-        "last_accessed": "Lần truy cập cuối"
+        "last_accessed": "Lần truy cập cuối",
+        "sections": "chương",
+        "continue": "Tiếp Tục",
+        "no_courses": "Chưa Có Khóa Học",
+        "no_courses_description": "Bạn chưa đăng ký khóa học nào. Bắt đầu hành trình học tập bằng cách khám phá danh mục khóa học của chúng tôi.",
+        "browse_courses": "Duyệt Khóa Học",
+        "error_loading": "Không thể tải khóa học của bạn. Vui lòng thử làm mới trang.",
+        "search_courses": "Tìm kiếm khóa học..."
     },
     "Cart": {
         "empty_title": "Giỏ hàng của bạn đang trống",

@@ -11,8 +11,10 @@ import { extractIds } from "../../../../../utils/utils";
 import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
 import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLearningNavbar";
 import { IReviewDistribution } from "../../../../../types/resData";
+import { auth } from "@/auth";
 
-type EnrollmentProgress = IEnrollment & {
+export type EnrollmentProgress = {
+    enrollment: IEnrollment;
     lectureProgress: ILecture[];
     progressPercentage: number;
 };
@@ -28,10 +30,7 @@ export default async function CourseDetailPage({
 }: Params) {
     const { id } = await searchParams;
 
-    const resCourse = await sendRequest<IBackendRes<ICourse>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
-    });
+    const session = await auth()
 
     const resContent = await sendRequest<IBackendRes<ICourseContent>>({
         method: "GET",
@@ -45,7 +44,7 @@ export default async function CourseDetailPage({
  
     const resEnrollmentProgress = await sendRequest<IBackendRes<EnrollmentProgress>>({
         method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/${id}/progress`,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/user/${session?.user?.id}/course/${id}/progress`,
         nextOption: {
             next: {
                 tags: [`enrollment-progress-${id}`],
@@ -66,13 +65,13 @@ export default async function CourseDetailPage({
     return (
         <div className="min-h-screen bg-white">
             <CourseLearningNavbar
-                course={resCourse?.data as ICourse}
+                course={resEnrollmentProgress?.data?.enrollment?.course as ICourse}
                 courseContent={resContent?.data as ICourseContent}
                 enrollmentProgress={resEnrollmentProgress?.data as EnrollmentProgress}
             />
             <CourseLesson
                 courseContent={resContent?.data as ICourseContent}
-                course={resCourse?.data as ICourse}
+                course={resEnrollmentProgress?.data?.enrollment?.course as ICourse}
                 enrollmentProgress={resEnrollmentProgress?.data as EnrollmentProgress}
                 reviewDistribution={
                     reviewDistribution?.data as IReviewDistribution
