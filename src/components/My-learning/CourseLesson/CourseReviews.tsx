@@ -20,7 +20,7 @@ import {
 import { Star, StarOutline, FilterList } from "@mui/icons-material";
 import { IReviewDistribution } from "../../../../types/resData";
 import { IReview } from "../../../../types/entities";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatDistanceToNow } from 'date-fns';
 
 interface ICourseReviews {

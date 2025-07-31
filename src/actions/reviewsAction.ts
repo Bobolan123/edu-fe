@@ -23,6 +23,7 @@ export const getReviewDistribution = async (courseId: number): Promise<IBackendR
 };
 
 interface GetReviewsParams {
+    courseId?: number;
     page?: number;
     take?: number;
     search?: string;
@@ -48,13 +49,13 @@ export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IBac
 
     const res = await sendRequest<IBackendRes<IModelPaginate<IReview>>>({
         method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews`,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/course/${params.courseId}`,
         queryParams,
         headers: {
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: ['reviews'] }
+            next: { tags: [`reviews-course-${params.courseId}`] }
         }
     });
 

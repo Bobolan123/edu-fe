@@ -12,6 +12,7 @@ import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
 import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLearningNavbar";
 import { IReviewDistribution } from "../../../../../types/resData";
 import { auth } from "@/auth";
+import { getAllReviews } from "@/actions/reviewsAction";
 
 export type EnrollmentProgress = {
     enrollment: IEnrollment;
@@ -30,7 +31,7 @@ export default async function CourseDetailPage({
 }: Params) {
     const { id } = await searchParams;
 
-    const session = await auth()
+    const session = await auth();
 
     const resContent = await sendRequest<IBackendRes<ICourseContent>>({
         method: "GET",
@@ -41,8 +42,10 @@ export default async function CourseDetailPage({
             },
         },
     });
- 
-    const resEnrollmentProgress = await sendRequest<IBackendRes<EnrollmentProgress>>({
+
+    const resEnrollmentProgress = await sendRequest<
+        IBackendRes<EnrollmentProgress>
+    >({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/user/${session?.user?.id}/course/${id}/progress`,
         nextOption: {
@@ -62,17 +65,30 @@ export default async function CourseDetailPage({
         },
     });
 
-    return (
+    const resUserReviews = await getAllReviews({
+        courseId: +id,
+    });
+    console.log(resUserReviews)
+    
+    return (    
         <div className="min-h-screen bg-white">
             <CourseLearningNavbar
-                course={resEnrollmentProgress?.data?.enrollment?.course as ICourse}
+                course={
+                    resEnrollmentProgress?.data?.enrollment?.course as ICourse
+                }
                 courseContent={resContent?.data as ICourseContent}
-                enrollmentProgress={resEnrollmentProgress?.data as EnrollmentProgress}
+                enrollmentProgress={
+                    resEnrollmentProgress?.data as EnrollmentProgress
+                }
             />
             <CourseLesson
                 courseContent={resContent?.data as ICourseContent}
-                course={resEnrollmentProgress?.data?.enrollment?.course as ICourse}
-                enrollmentProgress={resEnrollmentProgress?.data as EnrollmentProgress}
+                course={
+                    resEnrollmentProgress?.data?.enrollment?.course as ICourse
+                }
+                enrollmentProgress={
+                    resEnrollmentProgress?.data as EnrollmentProgress
+                }
                 reviewDistribution={
                     reviewDistribution?.data as IReviewDistribution
                 }
