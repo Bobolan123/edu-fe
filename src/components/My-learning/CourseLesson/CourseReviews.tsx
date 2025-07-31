@@ -26,27 +26,45 @@ import { formatDistanceToNow } from 'date-fns';
 interface ICourseReviews {
     reviewDistribution?: IReviewDistribution;
     reviews?: IReview[];
-    onFilterChange?: (stars: number[], sortBy: string) => void;
+    onFilterChange?: (stars: number | undefined, sortBy: string) => void;
 }
 
 type SortOption = 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating';
 
 export default function CourseReviews({ reviewDistribution, reviews = [], onFilterChange }: ICourseReviews) {
-    const [selectedStars, setSelectedStars] = useState<number[]>([]);
-    const [sortBy, setSortBy] = useState<SortOption>('newest');
+    // Get initial values from URL
+    const searchParams = new URLSearchParams(window.location.search);
+    const initialRating = searchParams.get('rating') ? Number(searchParams.get('rating')) : undefined;
+    const initialSort = (searchParams.get('sort') as SortOption) || 'newest';
 
-    const handleStarFilter = (stars: number) => {
-        const newStars = selectedStars.includes(stars)
-            ? selectedStars.filter(s => s !== stars)
-            : [...selectedStars, stars];
-        setSelectedStars(newStars);
-        onFilterChange?.(newStars, sortBy);
+    const [selectedRating, setSelectedRating] = useState<number | undefined>(initialRating);
+    const [sortBy, setSortBy] = useState<SortOption>(initialSort);
+
+    const handleRatingFilter = (rating: number) => {
+        const newRating = selectedRating === rating ? undefined : rating;
+        setSelectedRating(newRating);
+        onFilterChange?.(newRating, sortBy);
     };
 
     const handleSortChange = (newSortBy: SortOption) => {
         setSortBy(newSortBy);
-        onFilterChange?.(selectedStars, newSortBy);
+        onFilterChange?.(selectedRating, newSortBy);
     };
+
+    // Sync with URL parameters
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const urlRating = searchParams.get('rating') ? Number(searchParams.get('rating')) : undefined;
+        const urlSort = searchParams.get('sort') as SortOption;
+
+        if (urlSort && urlSort !== sortBy) {
+            setSortBy(urlSort);
+        }
+        
+        if (urlRating !== selectedRating) {
+            setSelectedRating(urlRating);
+        }
+    }, [window.location.search]);
 
     return (
         <Box className="space-y-6">
@@ -258,8 +276,8 @@ export default function CourseReviews({ reviewDistribution, reviews = [], onFilt
                                 Filter Reviews
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                {selectedStars.length > 0 
-                                    ? `Showing ${selectedStars.join(', ')} star reviews` 
+                                {selectedRating 
+                                    ? `Showing ${selectedRating} star reviews` 
                                     : 'Showing all reviews'}
                             </Typography>
                         </Box>
@@ -285,36 +303,27 @@ export default function CourseReviews({ reviewDistribution, reviews = [], onFilt
                                 <InputLabel id="rating-filter-label">Filter by Rating</InputLabel>
                                 <Select
                                     labelId="rating-filter-label"
-                                    multiple
-                                    value={selectedStars}
+                                    value={selectedRating || ''}
                                     label="Filter by Rating"
                                     onChange={(e) => {
-                                        const newStars = e.target.value as number[];
-                                        setSelectedStars(newStars);
-                                        onFilterChange?.(newStars, sortBy);
+                                        const newRating = e.target.value ? Number(e.target.value) : undefined;
+                                        setSelectedRating(newRating);
+                                        onFilterChange?.(newRating, sortBy);
                                     }}
                                     renderValue={(selected) => (
-                                        <Box className="flex flex-wrap gap-1">
-                                            {(selected as number[]).map((star) => (
-                                                <Chip
-                                                    key={star}
-                                                    size="small"
-                                                    label={
-                                                        <Box className="flex items-center">
-                                                            <span>{star}</span>
-                                                            <Star sx={{ fontSize: 14, ml: 0.5 }} />
-                                                        </Box>
-                                                    }
-                                                    sx={{
-                                                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                                                        borderRadius: 1,
-                                                        height: 24
-                                                    }}
-                                                />
-                                            ))}
+                                        <Box className="flex items-center gap-1">
+                                            <span>{selected}</span>
+                                            <Star sx={{ fontSize: 14 }} />
                                         </Box>
                                     )}
                                 >
+                                    <MenuItem value="">
+                                        <Box className="flex items-center gap-1">
+                                            <Typography variant="body2" color="text.secondary">
+                                                All Ratings
+                                            </Typography>
+                                        </Box>
+                                    </MenuItem>
                                     {[5, 4, 3, 2, 1].map((star) => (
                                         <MenuItem key={star} value={star}>
                                             <Box className="flex items-center gap-1">
@@ -394,92 +403,79 @@ export default function CourseReviews({ reviewDistribution, reviews = [], onFilt
                             key={review.id}
                             elevation={1}
                             sx={{
-                                borderRadius: 3,
-                                transition: 'all 0.3s ease',
-                                border: '1px solid rgba(0,0,0,0.06)',
+                                borderRadius: 2,
+                                transition: 'all 0.2s ease',
+                                border: '1px solid rgba(0,0,0,0.08)',
+                                boxShadow: 'none',
                                 '&:hover': {
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: '0 12px 24px rgba(0,0,0,0.06)',
-                                    borderColor: 'rgba(25,118,210,0.1)',
+                                    borderColor: 'rgba(0,0,0,0.12)',
+                                    backgroundColor: 'rgba(0,0,0,0.01)'
                                 }
                             }}
                         >
                             <CardContent sx={{ p: 3 }}>
-                                <Box className="flex items-start gap-4">
-                                    <Avatar
-                                        src={review.user.avatar_url || undefined}
-                                        alt={review.user.name}
-                                        sx={{ 
-                                            width: 48, 
-                                            height: 48,
-                                            border: '2px solid white',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                        }}
-                                    />
-                                    <Box className="flex-1">
-                                        <Box className="flex items-start sm:items-center flex-col sm:flex-row sm:justify-between gap-2 mb-3">
-                                            <Box>
-                                                <Typography 
-                                                    variant="subtitle1" 
-                                                    sx={{
-                                                        fontWeight: 600,
-                                                        color: 'text.primary',
-                                                        mb: 0.5
-                                                    }}
-                                                >
-                                                    {review.user.name}
-                                                </Typography>
-                                                <Box className="flex items-center gap-2">
-                                                    <Typography 
-                                                        variant="caption" 
-                                                        sx={{
-                                                            color: 'text.secondary',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: 0.5
-                                                        }}
-                                                    >
-                                                        {formatDistanceToNow(new Date(review.date_reviewed), { addSuffix: true })}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
+                                <Box className="flex flex-col gap-4">
+                                    <Box className="flex items-center gap-3">
+                                        <Avatar
+                                            src={review.user.avatar_url || undefined}
+                                            alt={review.user.name}
+                                            sx={{ 
+                                                width: 40, 
+                                                height: 40,
+                                                bgcolor: '#1976d2',
+                                                fontSize: '1.2rem',
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            {review.user.name.charAt(0).toUpperCase()}
+                                        </Avatar>
+                                        <Box className="flex-1">
+                                            <Typography 
+                                                variant="subtitle1" 
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: 'text.primary',
+                                                    fontSize: '1rem',
+                                                    lineHeight: 1.2
+                                                }}
+                                            >
+                                                {review.user.name}
+                                            </Typography>
                                             <Box className="flex items-center gap-2">
                                                 <Rating
                                                     value={review.rating}
                                                     readOnly
                                                     size="small"
                                                     sx={{
-                                                        "& .MuiRating-iconFilled": {
-                                                            color: "#1976d2",
+                                                        fontSize: '1rem',
+                                                        color: '#f59e0b',
+                                                        '& .MuiRating-iconFilled': {
+                                                            color: '#f59e0b'
                                                         }
                                                     }}
                                                 />
                                                 <Typography 
                                                     variant="caption" 
-                                                    sx={{ 
+                                                    sx={{
                                                         color: 'text.secondary',
-                                                        backgroundColor: 'rgba(25,118,210,0.08)',
-                                                        px: 1,
-                                                        py: 0.5,
-                                                        borderRadius: 1,
-                                                        fontWeight: 500
+                                                        fontSize: '0.85rem'
                                                     }}
                                                 >
-                                                    {review.rating}.0
+                                                    {formatDistanceToNow(new Date(review.date_reviewed), { addSuffix: true })}
                                                 </Typography>
                                             </Box>
                                         </Box>
-                                        <Typography 
-                                            variant="body2" 
-                                            sx={{
-                                                color: 'text.primary',
-                                                lineHeight: 1.6,
-                                                letterSpacing: 0.2
-                                            }}
-                                        >
-                                            {review.comment}
-                                        </Typography>
                                     </Box>
+                                    <Typography 
+                                        variant="body1" 
+                                        sx={{
+                                            color: 'text.primary',
+                                            lineHeight: 1.6,
+                                            fontSize: '0.95rem'
+                                        }}
+                                    >
+                                        {review.comment}
+                                    </Typography>
                                 </Box>
                             </CardContent>
                         </Card>

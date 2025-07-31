@@ -59,11 +59,12 @@ import {
     Speed,
 } from "@mui/icons-material";
 import { Bot } from "lucide-react";
-import { ICourse, ICourseContent, IEnrollment, ILecture } from "../../../../types/entities";
+import { ICourse, ICourseContent, IEnrollment, ILecture, IReview } from "../../../../types/entities";
 import CourseOverview from "./Overview";
 import CourseReviews from "./CourseReviews";
 import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
+
 import { useSession } from "next-auth/react";
 import { updateCourseContent } from "@/actions/coursesAction";
 import { markLectureAsCompleted } from "@/actions/enrollmentAction";
@@ -76,6 +77,7 @@ interface ICourseLesson {
     course: ICourse;
     reviewDistribution?: IReviewDistribution;
     enrollmentProgress?: EnrollmentProgress;
+    resUserReviews?: IModelPaginate<IReview>;
 }
 
 export default function     CourseLesson({
@@ -83,6 +85,7 @@ export default function     CourseLesson({
     course,
     reviewDistribution,
     enrollmentProgress,
+    resUserReviews,
 }: ICourseLesson) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
@@ -324,7 +327,15 @@ export default function     CourseLesson({
                         {activeTab === 0 && <CourseOverview course={course} />}
 
                         {activeTab === 1 && (
-                            <CourseReviews reviewDistribution={reviewDistribution} />
+                            <CourseReviews 
+                                reviewDistribution={reviewDistribution}
+                                reviews={resUserReviews?.data?.result}
+                                onFilterChange={(stars, sortBy) => {
+                                    router.push(`?id=${course.id}&rating=${stars}&sort=${sortBy}`, {
+                                        scroll: false
+                                    });
+                                }}
+                            />
                         )}
                     </div>
                 </div>
@@ -518,3 +529,4 @@ export default function     CourseLesson({
         </>
     );
 }
+    

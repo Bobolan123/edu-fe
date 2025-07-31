@@ -22,7 +22,11 @@ export type EnrollmentProgress = {
 
 interface Params {
     params: { title: string };
-    searchParams: { id: string };
+    searchParams: { 
+        id: string;
+        rating?: string;
+        sort?: string;
+    };
 }
 
 export default async function CourseDetailPage({
@@ -65,10 +69,13 @@ export default async function CourseDetailPage({
         },
     });
 
+    const { rating, sort } = searchParams;
+    
     const resUserReviews = await getAllReviews({
         courseId: +id,
+        rating: rating ? Number(rating) : undefined,
+        sortBy: sort as 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating' | undefined
     });
-    console.log(resUserReviews)
     
     return (    
         <div className="min-h-screen bg-white">
@@ -92,6 +99,7 @@ export default async function CourseDetailPage({
                 reviewDistribution={
                     reviewDistribution?.data as IReviewDistribution
                 }
+                resUserReviews={resUserReviews}
             />
         </div>
     );

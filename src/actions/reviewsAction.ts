@@ -27,7 +27,7 @@ interface GetReviewsParams {
     page?: number;
     take?: number;
     search?: string;
-    stars?: number[];
+    rating?: number;
     minRating?: number;
     maxRating?: number;
     sortBy?: 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating';
@@ -42,7 +42,9 @@ export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IBac
     };
 
     if (params.search) queryParams.search = params.search;
-    if (params.stars && params.stars.length > 0) queryParams.stars = params.stars.join(',');
+    if (params.rating) {
+        queryParams.rating = params.rating;
+    }
     if (params.minRating) queryParams.minRating = params.minRating;
     if (params.maxRating) queryParams.maxRating = params.maxRating;
     if (params.sortBy) queryParams.sortBy = params.sortBy;
@@ -96,7 +98,9 @@ export const getCourseReviews = async (params: GetCourseReviewsParams): Promise<
     };
 
     if (params.search) queryParams.search = params.search;
-    if (params.stars && params.stars.length > 0) queryParams.stars = params.stars.join(',');
+    if (params.rating) {
+        queryParams.rating = params.rating;
+    }
     if (params.minRating) queryParams.minRating = params.minRating;
     if (params.maxRating) queryParams.maxRating = params.maxRating;
     if (params.sortBy) queryParams.sortBy = params.sortBy;
@@ -134,7 +138,9 @@ export const getUserReviews = async (params: GetUserReviewsParams): Promise<IBac
     };
 
     if (params.search) queryParams.search = params.search;
-    if (params.stars && params.stars.length > 0) queryParams.stars = params.stars.join(',');
+    if (params.rating) {
+        queryParams.rating = params.rating;
+    }
     if (params.minRating) queryParams.minRating = params.minRating;
     if (params.maxRating) queryParams.maxRating = params.maxRating;
     if (params.sortBy) queryParams.sortBy = params.sortBy;
