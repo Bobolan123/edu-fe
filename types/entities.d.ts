@@ -65,7 +65,7 @@ export interface IReview {
     course: ICourse;
     rating: number;
     comment: string;
-    date_posted: Date;
+    date_reviewed: Date;
 }
 
 // Role Interface

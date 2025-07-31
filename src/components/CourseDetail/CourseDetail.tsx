@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {
     Container,
     Grid,
@@ -20,7 +19,6 @@ import {
 } from "@mui/icons-material";
 import { currencyService } from "@/service/currency";
 import { useCurrency } from "@/context/CurrencyContext";
-import { format } from "date-fns";
 import { ICourse, ICourseContent } from "../../../types/entities";
 import {
     PlayArrow as PlayIcon,
@@ -47,10 +45,6 @@ export default function CourseDetail({
     const { data } = useSession();
     const t = useTranslations('CourseDetail');
     const { currency } = useCurrency();
-
-
-
-    
 
     const handleAddToCart = async (courseId: number) => {
         const res = await addCartItem(courseId, data?.user?.access_token || "");

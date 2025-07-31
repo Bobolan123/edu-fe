@@ -22,7 +22,6 @@ import {
     Language,
     School,
     PlayCircleOutline,
-    ClosedCaption,
     TrendingUp,
 } from "@mui/icons-material";
 import { ICourse } from "../../../../types/entities";
@@ -284,10 +283,10 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                                     color="text.secondary"
                                                     sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
                                                 >
-                                                    Skill Level
+                                                    Price
                                                 </Typography>
-                                                <Typography variant="body1" fontWeight={500}>
-                                                    Beginner Level
+                                                <Typography variant="h6" fontWeight={600} color="primary">
+                                                    ${course?.price ?? 0}
                                                 </Typography>
                                             </Box>
                                             <Box>
@@ -357,14 +356,11 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                                     color="text.secondary"
                                                     sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
                                                 >
-                                                    Captions Available
+                                                    Created Date
                                                 </Typography>
-                                                <Box display="flex" alignItems="center" gap={1}>
-                                                    <ClosedCaption fontSize="small" color="success" />
-                                                    <Typography variant="body1" fontWeight={500} color="success.main">
-                                                        Yes
-                                                    </Typography>
-                                                </Box>
+                                                <Typography variant="body1" fontWeight={500}>
+                                                    {formatDate(course?.date_created)}
+                                                </Typography>
                                             </Box>
                                         </Stack>
                                     </Grid>

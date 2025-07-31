@@ -61,6 +61,7 @@ import {
 import { Bot } from "lucide-react";
 import { ICourse, ICourseContent, IEnrollment, ILecture } from "../../../../types/entities";
 import CourseOverview from "./Overview";
+import CourseReviews from "./CourseReviews";
 import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
 import { useSession } from "next-auth/react";
@@ -323,78 +324,7 @@ export default function     CourseLesson({
                         {activeTab === 0 && <CourseOverview course={course} />}
 
                         {activeTab === 1 && (
-                            <div>
-                                <Typography
-                                    variant="h5"
-                                    className="mb-6 font-semibold text-gray-800"
-                                >
-                                    Student feedback
-                                </Typography>
-                                <div className="flex items-start space-x-8">
-                                    <div className="text-center">
-                                        <Typography
-                                            variant="h2"
-                                            className="font-bold text-orange-500 mb-2"
-                                        >
-                                            {reviewDistribution?.average_rating ??
-                                                "N/A"}
-                                        </Typography>
-                                        <Rating
-                                            value={
-                                                reviewDistribution?.average_rating ??
-                                                0
-                                            }
-                                            readOnly
-                                            precision={0.1}
-                                        />
-                                        <Typography
-                                            variant="body2"
-                                            className="text-gray-600 mt-1"
-                                        >
-                                            {reviewDistribution?.total_reviews ??
-                                                0}{" "}
-                                            reviews
-                                        </Typography>
-                                    </div>
-                                    <div className="flex-1 space-y-2">
-                                        {reviewDistribution?.distribution?.map(
-                                            ({ stars, percentage, count }) => (
-                                                <div
-                                                    key={stars}
-                                                    className="flex items-center space-x-3"
-                                                >
-                                                    <Rating
-                                                        value={stars}
-                                                        readOnly
-                                                        size="small"
-                                                    />
-                                                    <LinearProgress
-                                                        variant="determinate"
-                                                        value={percentage}
-                                                        className="flex-1 h-2 bg-gray-200"
-                                                        sx={{
-                                                            "& .MuiLinearProgress-bar":
-                                                                {
-                                                                    backgroundColor:
-                                                                        stars >=
-                                                                        4
-                                                                            ? "#f59e0b"
-                                                                            : "#6b7280",
-                                                                },
-                                                        }}
-                                                    />
-                                                    <Typography
-                                                        variant="body2"
-                                                        className="text-blue-600 font-medium w-12"
-                                                    >
-                                                        {percentage}%
-                                                    </Typography>
-                                                </div>
-                                            )
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <CourseReviews reviewDistribution={reviewDistribution} />
                         )}
                     </div>
                 </div>
