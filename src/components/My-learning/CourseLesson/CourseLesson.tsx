@@ -78,6 +78,7 @@ interface ICourseLesson {
     reviewDistribution?: IReviewDistribution;
     enrollmentProgress?: EnrollmentProgress;
     resUserReviews?: IModelPaginate<IReview>;
+    userReview?: IReview;
 }
 
 export default function     CourseLesson({
@@ -86,6 +87,7 @@ export default function     CourseLesson({
     reviewDistribution,
     enrollmentProgress,
     resUserReviews,
+    userReview,
 }: ICourseLesson) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
@@ -330,6 +332,7 @@ export default function     CourseLesson({
                             <CourseReviews 
                                 reviewDistribution={reviewDistribution}
                                 reviews={resUserReviews?.data?.result}
+                                userReview={userReview}
                                 onFilterChange={(stars, sortBy) => {
                                     router.push(`?id=${course.id}&rating=${stars}&sort=${sortBy}`, {
                                         scroll: false

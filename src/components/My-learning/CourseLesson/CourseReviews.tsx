@@ -26,12 +26,13 @@ import { formatDistanceToNow } from 'date-fns';
 interface ICourseReviews {
     reviewDistribution?: IReviewDistribution;
     reviews?: IReview[];
+    userReview?: IReview;
     onFilterChange?: (stars: number | undefined, sortBy: string) => void;
 }
 
 type SortOption = 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating';
 
-export default function CourseReviews({ reviewDistribution, reviews = [], onFilterChange }: ICourseReviews) {
+export default function CourseReviews({ reviewDistribution, reviews = [], userReview, onFilterChange }: ICourseReviews) {
     // Get initial values from URL
     const searchParams = new URLSearchParams(window.location.search);
     const initialRating = searchParams.get('rating') ? Number(searchParams.get('rating')) : undefined;
@@ -39,6 +40,11 @@ export default function CourseReviews({ reviewDistribution, reviews = [], onFilt
 
     const [selectedRating, setSelectedRating] = useState<number | undefined>(initialRating);
     const [sortBy, setSortBy] = useState<SortOption>(initialSort);
+
+    // Filter out user's review from the main reviews list
+    const filteredReviews = reviews.filter(review => 
+        !userReview || review.id !== userReview.id
+    );
 
     const handleRatingFilter = (rating: number) => {
         const newRating = selectedRating === rating ? undefined : rating;
@@ -65,6 +71,117 @@ export default function CourseReviews({ reviewDistribution, reviews = [], onFilt
             setSelectedRating(urlRating);
         }
     }, [window.location.search]);
+
+    // Component to render a single review
+    const ReviewCard = ({ review, isUserReview = false }: { review: IReview; isUserReview?: boolean }) => (
+        <Card
+            key={review.id}
+            elevation={isUserReview ? 2 : 1}
+            sx={{
+                borderRadius: 2,
+                transition: 'all 0.2s ease',
+                border: isUserReview 
+                    ? '2px solid #1976d2' 
+                    : '1px solid rgba(0,0,0,0.08)',
+                boxShadow: isUserReview 
+                    ? '0 4px 12px rgba(25, 118, 210, 0.15)' 
+                    : 'none',
+                backgroundColor: isUserReview 
+                    ? 'rgba(25, 118, 210, 0.02)' 
+                    : 'white',
+                '&:hover': {
+                    borderColor: isUserReview 
+                        ? '#1976d2' 
+                        : 'rgba(0,0,0,0.12)',
+                    backgroundColor: isUserReview 
+                        ? 'rgba(25, 118, 210, 0.04)' 
+                        : 'rgba(0,0,0,0.01)'
+                }
+            }}
+        >
+            {isUserReview && (
+                <Box 
+                    sx={{ 
+                        backgroundColor: '#1976d2',
+                        color: 'white',
+                        px: 2,
+                        py: 1,
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: 1
+                    }}
+                >
+                    Your Review
+                </Box>
+            )}
+            <CardContent sx={{ p: 3 }}>
+                <Box className="flex flex-col gap-4">
+                    <Box className="flex items-center gap-3">
+                        <Avatar
+                            src={review.user.avatar_url || undefined}
+                            alt={review.user.name}
+                            sx={{ 
+                                width: 40, 
+                                height: 40,
+                                bgcolor: isUserReview ? '#1976d2' : '#1976d2',
+                                fontSize: '1.2rem',
+                                fontWeight: 600
+                            }}
+                        >
+                            {review.user.name.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Box className="flex-1">
+                            <Typography 
+                                variant="subtitle1" 
+                                sx={{
+                                    fontWeight: 600,
+                                    color: 'text.primary',
+                                    fontSize: '1rem',
+                                    lineHeight: 1.2
+                                }}
+                            >
+                                {review.user.name}
+                            </Typography>
+                            <Box className="flex items-center gap-2">
+                                <Rating
+                                    value={review.rating}
+                                    readOnly
+                                    size="small"
+                                    sx={{
+                                        fontSize: '1rem',
+                                        color: '#f59e0b',
+                                        '& .MuiRating-iconFilled': {
+                                            color: '#f59e0b'
+                                        }
+                                    }}
+                                />
+                                <Typography 
+                                    variant="caption" 
+                                    sx={{
+                                        color: 'text.secondary',
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    {formatDistanceToNow(new Date(review.date_reviewed), { addSuffix: true })}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Box>
+                    <Typography 
+                        variant="body1" 
+                        sx={{
+                            color: 'text.primary',
+                            lineHeight: 1.6,
+                            fontSize: '0.95rem'
+                        }}
+                    >
+                        {review.comment}
+                    </Typography>
+                </Box>
+            </CardContent>
+        </Card>
+    );
 
     return (
         <Box className="space-y-6">
@@ -396,90 +513,28 @@ export default function CourseReviews({ reviewDistribution, reviews = [], onFilt
             </Card>
 
             {/* User Reviews */}
-            {reviews.length > 0 ? (
-                <Stack spacing={2}>
-                    {reviews.map((review) => (
-                        <Card
-                            key={review.id}
-                            elevation={1}
-                            sx={{
-                                borderRadius: 2,
-                                transition: 'all 0.2s ease',
-                                border: '1px solid rgba(0,0,0,0.08)',
-                                boxShadow: 'none',
-                                '&:hover': {
-                                    borderColor: 'rgba(0,0,0,0.12)',
-                                    backgroundColor: 'rgba(0,0,0,0.01)'
-                                }
-                            }}
-                        >
-                            <CardContent sx={{ p: 3 }}>
-                                <Box className="flex flex-col gap-4">
-                                    <Box className="flex items-center gap-3">
-                                        <Avatar
-                                            src={review.user.avatar_url || undefined}
-                                            alt={review.user.name}
-                                            sx={{ 
-                                                width: 40, 
-                                                height: 40,
-                                                bgcolor: '#1976d2',
-                                                fontSize: '1.2rem',
-                                                fontWeight: 600
-                                            }}
-                                        >
-                                            {review.user.name.charAt(0).toUpperCase()}
-                                        </Avatar>
-                                        <Box className="flex-1">
-                                            <Typography 
-                                                variant="subtitle1" 
-                                                sx={{
-                                                    fontWeight: 600,
-                                                    color: 'text.primary',
-                                                    fontSize: '1rem',
-                                                    lineHeight: 1.2
-                                                }}
-                                            >
-                                                {review.user.name}
-                                            </Typography>
-                                            <Box className="flex items-center gap-2">
-                                                <Rating
-                                                    value={review.rating}
-                                                    readOnly
-                                                    size="small"
-                                                    sx={{
-                                                        fontSize: '1rem',
-                                                        color: '#f59e0b',
-                                                        '& .MuiRating-iconFilled': {
-                                                            color: '#f59e0b'
-                                                        }
-                                                    }}
-                                                />
-                                                <Typography 
-                                                    variant="caption" 
-                                                    sx={{
-                                                        color: 'text.secondary',
-                                                        fontSize: '0.85rem'
-                                                    }}
-                                                >
-                                                    {formatDistanceToNow(new Date(review.date_reviewed), { addSuffix: true })}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                    <Typography 
-                                        variant="body1" 
-                                        sx={{
-                                            color: 'text.primary',
-                                            lineHeight: 1.6,
-                                            fontSize: '0.95rem'
-                                        }}
-                                    >
-                                        {review.comment}
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    ))}
+            {userReview || filteredReviews.length > 0 ? (
+                <Stack spacing={3}>
+                    {/* User's Review - Always displayed at the top if it exists */}
+                    {userReview && (
+                        <Box>
+                            <ReviewCard review={userReview} isUserReview={true} />
+                            {filteredReviews.length > 0 && (
+                                <Divider sx={{ my: 3 }}>
+                                    <Chip label="Other Reviews" sx={{ px: 2 }} />
+                                </Divider>
+                            )}
+                        </Box>
+                    )}
+                    
+                    {/* Other Reviews */}
+                    {filteredReviews.length > 0 && (
+                        <Stack spacing={2}>
+                            {filteredReviews.map((review) => (
+                                <ReviewCard key={review.id} review={review} />
+                            ))}
+                        </Stack>
+                    )}
                 </Stack>
             ) : (
                 <Card 

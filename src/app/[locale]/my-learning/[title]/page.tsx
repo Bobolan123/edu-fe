@@ -5,6 +5,7 @@ import {
     ICourseContent,
     IEnrollment,
     ILecture,
+    IReview,
 } from "../../../../../types/entities";
 import { sendRequest } from "../../../../../utils/api";
 import { extractIds } from "../../../../../utils/utils";
@@ -69,14 +70,25 @@ export default async function CourseDetailPage({
         },
     });
 
-    const { rating, sort } = searchParams;
+    const { rating, sort } = await searchParams;
     
     const resUserReviews = await getAllReviews({
         courseId: +id,
         rating: rating ? Number(rating) : undefined,
         sortBy: sort as 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating' | undefined
     });
-    
+
+    const resUserReview = await sendRequest<IBackendRes<IReview>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/user/${session?.user?.id}/course/${id}`,
+        nextOption: {
+            next: {
+                tags: [`user-reviews-${id}`],
+            },
+        },
+    });
+    console.log(resUserReview)
+
     return (    
         <div className="min-h-screen bg-white">
             <CourseLearningNavbar
@@ -100,6 +112,7 @@ export default async function CourseDetailPage({
                     reviewDistribution?.data as IReviewDistribution
                 }
                 resUserReviews={resUserReviews}
+                userReview={resUserReview?.data}
             />
         </div>
     );

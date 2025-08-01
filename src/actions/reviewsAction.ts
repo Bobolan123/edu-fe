@@ -33,7 +33,7 @@ interface GetReviewsParams {
     sortBy?: 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating';
 }
 
-export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IBackendRes<IModelPaginate<IReview>>> => {
+export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IModelPaginate<IReview>> => {
     const access_token = await getAccessToken();
     
     const queryParams: any = {
@@ -49,7 +49,7 @@ export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IBac
     if (params.maxRating) queryParams.maxRating = params.maxRating;
     if (params.sortBy) queryParams.sortBy = params.sortBy;
 
-    const res = await sendRequest<IBackendRes<IModelPaginate<IReview>>>({
+    const res = await sendRequest<IModelPaginate<IReview>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/course/${params.courseId}`,
         queryParams,
@@ -63,23 +63,6 @@ export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IBac
 
     if (res?.statusCode !== 200 || !res?.data) {
         throw new Error(res?.message || "Failed to get reviews");
-    }
-
-    return res;
-};
-
-export const getReviewById = async (id: number): Promise<IBackendRes<IReview>> => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<IReview>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/${id}`,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (res?.statusCode !== 200 || !res?.data) {
-        throw new Error(res?.message || "Failed to get review");
     }
 
     return res;
@@ -116,7 +99,6 @@ export const getCourseReviews = async (params: GetCourseReviewsParams): Promise<
             next: { tags: [`course-reviews-${params.courseId}`] }
         }
     });
-    console.log(res)
 
     if (res?.statusCode !== 200 || !res?.data) {
         throw new Error(res?.message || "Failed to get course reviews");
@@ -164,11 +146,18 @@ export const getUserReviews = async (params: GetUserReviewsParams): Promise<IBac
     return res;
 };
 
-export const addOrUpdateReview = async (reviewData: any): Promise<IBackendRes<IReview>> => {
+interface ICreateReview {
+    userId: number;
+    courseId: number;
+    rating: number;
+    comment: string;
+}
+
+export const createReview = async (reviewData: ICreateReview): Promise<IBackendRes<IReview>> => {
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<IReview>>({
         method: "POST",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/rate`,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/`,
         headers: {
             Authorization: `Bearer ${access_token}`,
         },
@@ -179,16 +168,14 @@ export const addOrUpdateReview = async (reviewData: any): Promise<IBackendRes<IR
         throw new Error(res?.message || "Failed to submit review");
     }
 
-    // Revalidate the course reviews cache
     revalidateTag(`course-reviews-${reviewData.courseId}`);
-
     return res;
 };
 
 export const updateReview = async (id: number, reviewData: Partial<IReview>): Promise<IBackendRes<IReview>> => {
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<IReview>>({
-        method: "PUT",
+        method: "PATCH",
         url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/${id}`,
         headers: {
             Authorization: `Bearer ${access_token}`,
