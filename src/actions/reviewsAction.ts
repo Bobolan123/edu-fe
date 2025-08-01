@@ -1,11 +1,17 @@
-import { getAccessToken } from "./index";
+"use server";
+
+import { getAccessToken, getUserId } from "./index";
 import { sendRequest } from "../../utils/api";
 import { IReview } from "../../types/entities";
 import { revalidateTag } from "next/cache";
-import { IReviewDistribution, ICourseReviewsResponse } from "../../types/resData";
+import {
+    IReviewDistribution,
+    ICourseReviewsResponse,
+} from "../../types/resData";
 
-
-export const getReviewDistribution = async (courseId: number): Promise<IBackendRes<IReviewDistribution[]>> => {
+export const getReviewDistribution = async (
+    courseId: number
+): Promise<IBackendRes<IReviewDistribution[]>> => {
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<IReviewDistribution[]>>({
         method: "GET",
@@ -30,12 +36,14 @@ interface GetReviewsParams {
     rating?: number;
     minRating?: number;
     maxRating?: number;
-    sortBy?: 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating';
+    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
 }
 
-export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IModelPaginate<IReview>> => {
+export const getAllReviews = async (
+    params: GetReviewsParams = {}
+): Promise<IModelPaginate<IReview>> => {
     const access_token = await getAccessToken();
-    
+
     const queryParams: any = {
         page: params.page || 1,
         take: params.take || 10,
@@ -57,8 +65,8 @@ export const getAllReviews = async (params: GetReviewsParams = {}): Promise<IMod
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`reviews-course-${params.courseId}`] }
-        }
+            next: { tags: [`reviews-course-${params.courseId}`] },
+        },
     });
 
     if (res?.statusCode !== 200 || !res?.data) {
@@ -72,9 +80,11 @@ interface GetCourseReviewsParams extends GetReviewsParams {
     courseId: number;
 }
 
-export const getCourseReviews = async (params: GetCourseReviewsParams): Promise<IBackendRes<ICourseReviewsResponse>> => {
+export const getCourseReviews = async (
+    params: GetCourseReviewsParams
+): Promise<IBackendRes<ICourseReviewsResponse>> => {
     const access_token = await getAccessToken();
-    
+
     const queryParams: any = {
         page: params.page || 1,
         take: params.take || 10,
@@ -96,8 +106,8 @@ export const getCourseReviews = async (params: GetCourseReviewsParams): Promise<
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`course-reviews-${params.courseId}`] }
-        }
+            next: { tags: [`course-reviews-${params.courseId}`] },
+        },
     });
 
     if (res?.statusCode !== 200 || !res?.data) {
@@ -111,9 +121,11 @@ interface GetUserReviewsParams extends GetReviewsParams {
     userId: number;
 }
 
-export const getUserReviews = async (params: GetUserReviewsParams): Promise<IBackendRes<IModelPaginate<IReview>>> => {
+export const getUserReviews = async (
+    params: GetUserReviewsParams
+): Promise<IBackendRes<IModelPaginate<IReview>>> => {
     const access_token = await getAccessToken();
-    
+
     const queryParams: any = {
         page: params.page || 1,
         take: params.take || 10,
@@ -135,8 +147,8 @@ export const getUserReviews = async (params: GetUserReviewsParams): Promise<IBac
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`user-reviews-${params.userId}`] }
-        }
+            next: { tags: [`user-reviews-${params.userId}`] },
+        },
     });
 
     if (res?.statusCode !== 200 || !res?.data) {
@@ -147,32 +159,41 @@ export const getUserReviews = async (params: GetUserReviewsParams): Promise<IBac
 };
 
 interface ICreateReview {
-    userId: number;
     courseId: number;
     rating: number;
     comment: string;
 }
-
-export const createReview = async (reviewData: ICreateReview): Promise<IBackendRes<IReview>> => {
+export const createReview = async (
+    reviewData: ICreateReview
+): Promise<IBackendRes<IReview>> => {
+    const userId = await getUserId();
+    let data = {
+        ...reviewData,
+        userId: userId,
+    }
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<IReview>>({
         method: "POST",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/`,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews`,
         headers: {
             Authorization: `Bearer ${access_token}`,
         },
-        body: reviewData,
+        body: data,
     });
 
     if (res?.statusCode !== 201 || !res?.data) {
         throw new Error(res?.message || "Failed to submit review");
     }
 
-    revalidateTag(`course-reviews-${reviewData.courseId}`);
+    revalidateTag(`user-review`);
+    revalidateTag(`review-distribution`);
     return res;
 };
 
-export const updateReview = async (id: number, reviewData: Partial<IReview>): Promise<IBackendRes<IReview>> => {
+export const updateReview = async (
+    id: number,
+    reviewData: Partial<IReview>
+): Promise<IBackendRes<IReview>> => {
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<IReview>>({
         method: "PATCH",
@@ -187,15 +208,17 @@ export const updateReview = async (id: number, reviewData: Partial<IReview>): Pr
         throw new Error(res?.message || "Failed to update review");
     }
 
-    // Revalidate the course reviews cache if courseId is available
-    if ('course' in reviewData && reviewData.course?.id) {
-        revalidateTag(`course-reviews-${reviewData.course.id}`);
-    }
+    revalidateTag(`user-review`);
+    revalidateTag(`review-distribution`);
 
     return res;
 };
 
-export const deleteReview = async (id: number, courseId: number): Promise<IBackendRes<void>> => {
+export const deleteReview = async (
+    id: number,
+    courseId: number
+): Promise<IBackendRes<void>> => {
+    const userId = await getUserId();
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<void>>({
         method: "DELETE",
@@ -210,7 +233,8 @@ export const deleteReview = async (id: number, courseId: number): Promise<IBacke
     }
 
     // Revalidate the course reviews cache
-    revalidateTag(`course-reviews-${courseId}`);
+    revalidateTag(`user-review`);
+    revalidateTag(`review-distribution`);   
 
     return res;
 };

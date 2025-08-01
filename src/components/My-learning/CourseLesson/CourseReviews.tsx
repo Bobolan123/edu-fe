@@ -16,23 +16,35 @@ import {
     Stack,
     Avatar,
     Divider,
+    IconButton,
+    Button,
+    TextField,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    CircularProgress,
 } from "@mui/material";
-import { Star, StarOutline, FilterList } from "@mui/icons-material";
+import { Star, StarOutline, FilterList, Edit, Delete, Add, Save, Cancel } from "@mui/icons-material";
 import { IReviewDistribution } from "../../../../types/resData";
 import { IReview } from "../../../../types/entities";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from 'date-fns';
+import { createReview, updateReview, deleteReview } from "@/actions/reviewsAction";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 interface ICourseReviews {
     reviewDistribution?: IReviewDistribution;
     reviews?: IReview[];
     userReview?: IReview;
+    courseId: number;
     onFilterChange?: (stars: number | undefined, sortBy: string) => void;
 }
 
 type SortOption = 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating';
 
-export default function CourseReviews({ reviewDistribution, reviews = [], userReview, onFilterChange }: ICourseReviews) {
+export default function CourseReviews({ reviewDistribution, reviews = [], userReview, courseId, onFilterChange }: ICourseReviews) {
     // Get initial values from URL
     const searchParams = new URLSearchParams(window.location.search);
     const initialRating = searchParams.get('rating') ? Number(searchParams.get('rating')) : undefined;
@@ -40,6 +52,15 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
 
     const [selectedRating, setSelectedRating] = useState<number | undefined>(initialRating);
     const [sortBy, setSortBy] = useState<SortOption>(initialSort);
+    
+    // State for review editing/creating
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [editRating, setEditRating] = useState<number>(userReview?.rating || 5);
+    const [editComment, setEditComment] = useState<string>(userReview?.comment || "");
+    
+    const router = useRouter();
 
     // Filter out user's review from the main reviews list
     const filteredReviews = reviews.filter(review => 
@@ -71,6 +92,62 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
             setSelectedRating(urlRating);
         }
     }, [window.location.search]);
+
+    // Reset form when user review changes
+    useEffect(() => {
+        setEditRating(userReview?.rating || 5);
+        setEditComment(userReview?.comment || "");
+    }, [userReview]);
+
+    const handleCreateOrUpdateReview = async () => {
+        setIsLoading(true);
+        try {
+            if (userReview) {
+                // Update existing review
+                await updateReview(userReview.id, {
+                    rating: editRating,
+                    comment: editComment
+                });
+                toast.success("Review updated successfully!");
+            } else {
+                // Create new review
+                await createReview({
+                    courseId: courseId,
+                    rating: editRating,
+                    comment: editComment
+                });
+                toast.success("Review created successfully!");
+            }
+            setIsEditDialogOpen(false);
+            router.refresh();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to save review");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDeleteReview = async () => {
+        if (!userReview) return;
+        
+        setIsLoading(true);
+        try {
+            await deleteReview(userReview.id, courseId);
+            toast.success("Review deleted successfully!");
+            setIsDeleteDialogOpen(false);
+            router.refresh();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to delete review");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const openEditDialog = () => {
+        setEditRating(userReview?.rating || 5);
+        setEditComment(userReview?.comment || "");
+        setIsEditDialogOpen(true);
+    };
 
     // Component to render a single review
     const ReviewCard = ({ review, isUserReview = false }: { review: IReview; isUserReview?: boolean }) => (
@@ -167,6 +244,35 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                                 </Typography>
                             </Box>
                         </Box>
+                        {/* Edit and Delete buttons for user's review */}
+                        {isUserReview && (
+                            <Box className="flex gap-1">
+                                <IconButton
+                                    size="small"
+                                    onClick={openEditDialog}
+                                    sx={{
+                                        color: '#1976d2',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(25, 118, 210, 0.1)'
+                                        }
+                                    }}
+                                >
+                                    <Edit fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                    sx={{
+                                        color: '#d32f2f',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(211, 47, 47, 0.1)'
+                                        }
+                                    }}
+                                >
+                                    <Delete fontSize="small" />
+                                </IconButton>
+                            </Box>
+                        )}
                     </Box>
                     <Typography 
                         variant="body1" 
@@ -512,6 +618,57 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                 </CardContent>
             </Card>
 
+            {/* Add Review Button - Show only if user hasn't reviewed */}
+            {!userReview && (
+                <Card 
+                    elevation={1}
+                    sx={{
+                        borderRadius: 3,
+                        border: '2px dashed #1976d2',
+                        backgroundColor: 'rgba(25, 118, 210, 0.02)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                            borderColor: '#1565c0',
+                            transform: 'translateY(-1px)',
+                        }
+                    }}
+                >
+                    <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                        <Button
+                            variant="contained"
+                            startIcon={<Add />}
+                            onClick={() => setIsEditDialogOpen(true)}
+                            sx={{
+                                borderRadius: 2,
+                                px: 4,
+                                py: 1.5,
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+                                    transform: 'translateY(-1px)',
+                                    boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)'
+                                }
+                            }}
+                        >
+                            Write a Review
+                        </Button>
+                        <Typography 
+                            variant="body2" 
+                            sx={{ 
+                                color: 'text.secondary', 
+                                mt: 2,
+                                fontSize: '0.9rem'
+                            }}
+                        >
+                            Share your experience with this course
+                        </Typography>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* User Reviews */}
             {userReview || filteredReviews.length > 0 ? (
                 <Stack spacing={3}>
@@ -576,6 +733,167 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                     </CardContent>
                 </Card>
             )}
+
+            {/* Edit/Create Review Dialog */}
+            <Dialog 
+                open={isEditDialogOpen} 
+                onClose={() => setIsEditDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        p: 1
+                    }
+                }}
+            >
+                <DialogTitle sx={{ pb: 1, fontWeight: 600, color: '#1976d2' }}>
+                    {userReview ? 'Edit Review' : 'Write Review'}
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, fontWeight: 400 }}>
+                        Share your honest experience with this course
+                    </Typography>
+                </DialogTitle>
+                <DialogContent sx={{ py: 3 }}>
+                    <Stack spacing={3}>
+                        <Box>
+                            <Typography 
+                                variant="subtitle1" 
+                                sx={{ 
+                                    fontWeight: 600, 
+                                    mb: 2,
+                                    color: 'text.primary'
+                                }}
+                            >
+                                Rating *
+                            </Typography>
+                            <Rating
+                                value={editRating}
+                                onChange={(_, value) => setEditRating(value || 1)}
+                                size="large"
+                                sx={{
+                                    color: '#f59e0b',
+                                    '& .MuiRating-iconFilled': {
+                                        color: '#f59e0b'
+                                    },
+                                    '& .MuiRating-iconHover': {
+                                        color: '#fbbf24'
+                                    }
+                                }}
+                            />
+                        </Box>
+                        <TextField
+                            label="Your Review"
+                            placeholder="Tell others about your experience with this course..."
+                            multiline
+                            rows={4}
+                            value={editComment}
+                            onChange={(e) => setEditComment(e.target.value)}
+                            variant="outlined"
+                            fullWidth
+                            required
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2,
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#1976d2',
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#1976d2',
+                                    },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#1976d2',
+                                }
+                            }}
+                        />
+                    </Stack>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button 
+                        onClick={() => setIsEditDialogOpen(false)}
+                        sx={{ 
+                            borderRadius: 2,
+                            px: 3,
+                            color: 'text.secondary'
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleCreateOrUpdateReview}
+                        variant="contained"
+                        disabled={isLoading || !editComment.trim()}
+                        startIcon={isLoading ? <CircularProgress size={16} /> : <Save />}
+                        sx={{
+                            borderRadius: 2,
+                            px: 4,
+                            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+                            },
+                            '&:disabled': {
+                                background: '#e0e0e0',
+                                color: '#9e9e9e'
+                            }
+                        }}
+                    >
+                        {isLoading ? 'Saving...' : (userReview ? 'Update Review' : 'Submit Review')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        p: 1
+                    }
+                }}
+            >
+                <DialogTitle sx={{ pb: 2, fontWeight: 600, color: '#d32f2f' }}>
+                    Delete Review
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1" sx={{ color: 'text.primary' }}>
+                        Are you sure you want to delete your review? This action cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button 
+                        onClick={() => setIsDeleteDialogOpen(false)}
+                        sx={{ 
+                            borderRadius: 2,
+                            px: 3,
+                            color: 'text.secondary'
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleDeleteReview}
+                        variant="contained"
+                        disabled={isLoading}
+                        startIcon={isLoading ? <CircularProgress size={16} /> : <Delete />}
+                        sx={{
+                            borderRadius: 2,
+                            px: 4,
+                            backgroundColor: '#d32f2f',
+                            '&:hover': {
+                                backgroundColor: '#c62828',
+                            },
+                            '&:disabled': {
+                                background: '#e0e0e0',
+                                color: '#9e9e9e'
+                            }
+                        }}
+                    >
+                        {isLoading ? 'Deleting...' : 'Delete Review'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

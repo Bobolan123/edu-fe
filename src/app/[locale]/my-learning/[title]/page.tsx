@@ -68,6 +68,11 @@ export default async function CourseDetailPage({
         queryParams: {
             id,
         },
+        nextOption: {
+            next: {
+                tags: [`review-distribution`],
+            },
+        },
     });
 
     const { rating, sort } = await searchParams;
@@ -83,11 +88,10 @@ export default async function CourseDetailPage({
         url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/user/${session?.user?.id}/course/${id}`,
         nextOption: {
             next: {
-                tags: [`user-reviews-${id}`],
+                tags: [`user-review`],
             },
         },
     });
-    console.log(resUserReview)
 
     return (    
         <div className="min-h-screen bg-white">

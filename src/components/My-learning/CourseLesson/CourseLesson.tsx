@@ -333,6 +333,7 @@ export default function     CourseLesson({
                                 reviewDistribution={reviewDistribution}
                                 reviews={resUserReviews?.data?.result}
                                 userReview={userReview}
+                                courseId={course.id}
                                 onFilterChange={(stars, sortBy) => {
                                     router.push(`?id=${course.id}&rating=${stars}&sort=${sortBy}`, {
                                         scroll: false
