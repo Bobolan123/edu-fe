@@ -11,22 +11,53 @@
         "selector_label": "Select Currency"
     },
     "MyLearning": {
-        "title": "My Learning Dashboard",
-        "subtitle": "Track your progress and continue your educational journey",
-        "stats": {
-            "total_courses": "Total Courses",
-            "in_progress": "In Progress", 
-            "completed": "Completed"
+        "title": "My Learning Journey ✨",
+        "subtitle": "🚀 Keep exploring, keep growing! Your future self will thank you 💪",
+        "search_placeholder": "🔍 Search your amazing courses...",
+        "filter_label": "✨ Filter",
+        "sort_label": "📊 Sort",
+        "showing_results": "🎯 Showing {filtered} of {total} amazing courses",
+        "filters": {
+            "all": "🎯 All Courses",
+            "in_progress": "🔄 In Progress",
+            "completed": "🎉 Completed",
+            "not_started": "🌟 Not Started"
         },
-        "progress_label": "Progress",
-        "lectures_completed": "{count} lecture completed",
-        "lectures_completed_plural": "{count} lectures completed",
-        "enrolled_on": "Enrolled on {date}",
+        "sort_options": {
+            "recent": "⏰ Recently Enrolled",
+            "alphabetical": "🔤 A-Z",
+            "progress": "📈 Progress",
+            "rating": "⭐ Rating"
+        },
+        "stats": {
+            "total_courses": "📚 Total Courses",
+            "total_subtitle": "Keep collecting! 🎯",
+            "in_progress": "🚀 In Progress",
+            "in_progress_subtitle": "You're crushing it! 💪",
+            "completed": "🏆 Completed",
+            "completed_subtitle": "🎉 Amazing work!",
+            "completed_subtitle_empty": "First win coming soon! ✨"
+        },
+        "progress_label": "📊 Progress",
+        "lectures_completed": "✅ {count} lecture completed",
+        "lectures_completed_plural": "✅ {count} lectures completed",
+        "enrolled_on": "📅 Enrolled on {date}",
         "review": "review",
         "reviews": "reviews",
+        "instructor_prefix": "👨‍🏫",
+        "category_prefix": "🏷️",
+        "price_free": "Free",
+        "buttons": {
+            "start_learning": "🚀 Start Learning",
+            "continue": "📚 Continue",
+            "clear_filters": "🧹 Clear All Filters",
+            "browse_courses": "🎯 Browse Amazing Courses"
+        },
         "empty_state": {
-            "title": "No courses enrolled yet",
-            "subtitle": "Start your learning journey by exploring and enrolling in courses that match your interests."
+            "no_results_title": "🔍 No courses found",
+            "no_results_subtitle": "Hmm, we couldn't find any courses matching your search. Let's try something else! ✨",
+            "no_courses_title": "🌟 Ready to start learning?",
+            "no_courses_subtitle": "Your learning adventure begins here! Discover amazing courses and unlock your potential. 🚀"
         },
         "status": {
             "not_started": "Not Started",
@@ -53,24 +84,6 @@
         "upload_timeout": "Upload timed out. Please try again.",
         "network_error": "Network error. Please check your connection.",
         "server_error": "Server error. Please try again later."
-    },
-    "MyLearning": {
-        "title": "My Learning",
-        "subtitle": "Continue your learning journey with {count} enrolled courses",
-        "sort_by": "Sort By",
-        "most_recent": "Most Recent",
-        "progress": "Progress",
-        "course_name": "Course Name",
-        "category": "Category",
-        "all_categories": "All Categories",
-        "last_accessed": "Last accessed",
-        "sections": "sections",
-        "continue": "Continue",
-        "no_courses": "No Courses Yet",
-        "no_courses_description": "You haven't enrolled in any courses yet. Start your learning journey by exploring our course catalog.",
-        "browse_courses": "Browse Courses",
-        "error_loading": "Failed to load your courses. Please try refreshing the page.",
-        "search_courses": "Search courses..."
     },
     "Cart": {
         "empty_title": "Your cart is empty",

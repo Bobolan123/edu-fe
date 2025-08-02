@@ -44,6 +44,7 @@ import {
 import Link from "next/link";
 import { slugify } from "../../../utils/utils";
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 interface MyLearningProps {
     enrolledCourses: EnrolledCourse[];
@@ -57,22 +58,23 @@ function formatDate(dateString: string) {
     });
 }
 
-function formatPrice(price: number) {
-    if (price === 0) return "Free";
+function formatPrice(price: number, t: any) {
+    if (price === 0) return t("price_free");
     return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
     }).format(price / 100); // Assuming price is in cents
 }
 
-function getProgressStatus(progress: number) {
-    if (progress === 0) return { text: "Not Started", color: "bg-gray-500" };
-    if (progress < 50) return { text: "In Progress", color: "bg-blue-500" };
-    if (progress < 100) return { text: "Almost Done", color: "bg-orange-500" };
-    return { text: "Completed", color: "bg-green-500" };
+function getProgressStatus(progress: number, t: any) {
+    if (progress === 0) return { text: t("status.not_started"), color: "bg-gray-500" };
+    if (progress < 50) return { text: t("status.in_progress"), color: "bg-blue-500" };
+    if (progress < 100) return { text: t("status.almost_done"), color: "bg-orange-500" };
+    return { text: t("status.completed"), color: "bg-green-500" };
 }
 
 export default function MyLearning({ enrolledCourses }: MyLearningProps) {
+    const t = useTranslations("MyLearning");
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBy, setFilterBy] = useState("all");
     const [sortBy, setSortBy] = useState("recent");
@@ -135,11 +137,11 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                             variant="h2"
                             className="bg-gradient-to-r from-pink-600 to-pink-600 bg-clip-text text-transparent"
                         >
-                            My Learning Journey ✨
+                            {t("title")}
                         </Typography>
                     </Box>
                     <Typography variant="h6" className="text-gray-600 mb-6 font-medium">
-                        🚀 Keep exploring, keep growing! Your future self will thank you 💪
+                        {t("subtitle")}
                     </Typography>
 
                     {/* Search and Filters */}
@@ -153,7 +155,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                             className="mb-4"
                         >
                             <TextField
-                                placeholder="🔍 Search your amazing courses..."
+                                placeholder={t("search_placeholder")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 variant="outlined"
@@ -181,11 +183,11 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                             />
                             
                             <FormControl size="medium" className="min-w-[160px]">
-                                <InputLabel className="text-purple-600">✨ Filter</InputLabel>
+                                <InputLabel className="text-purple-600">{t("filter_label")}</InputLabel>
                                 <Select
                                     value={filterBy}
                                     onChange={(e) => setFilterBy(e.target.value)}
-                                    label="✨ Filter"
+                                    label={t("filter_label")}
                                     sx={{
                                         borderRadius: '20px',
                                         backgroundColor: 'rgba(255,255,255,0.8)',
@@ -194,19 +196,19 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                         }
                                     }}
                                 >
-                                    <MenuItem value="all">🎯 All Courses</MenuItem>
-                                    <MenuItem value="in-progress">🔄 In Progress</MenuItem>
-                                    <MenuItem value="completed">🎉 Completed</MenuItem>
-                                    <MenuItem value="not-started">🌟 Not Started</MenuItem>
+                                    <MenuItem value="all">{t("filters.all")}</MenuItem>
+                                    <MenuItem value="in-progress">{t("filters.in_progress")}</MenuItem>
+                                    <MenuItem value="completed">{t("filters.completed")}</MenuItem>
+                                    <MenuItem value="not-started">{t("filters.not_started")}</MenuItem>
                                 </Select>
                             </FormControl>
 
                             <FormControl size="medium" className="min-w-[160px]">
-                                <InputLabel className="text-pink-600">📊 Sort</InputLabel>
+                                <InputLabel className="text-pink-600">{t("sort_label")}</InputLabel>
                                 <Select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    label="📊 Sort"
+                                    label={t("sort_label")}
                                     sx={{
                                         borderRadius: '20px',
                                         backgroundColor: 'rgba(255,255,255,0.8)',
@@ -215,10 +217,10 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                         }
                                     }}
                                 >
-                                    <MenuItem value="recent">⏰ Recently Enrolled</MenuItem>
-                                    <MenuItem value="alphabetical">🔤 A-Z</MenuItem>
-                                    <MenuItem value="progress">📈 Progress</MenuItem>
-                                    <MenuItem value="rating">⭐ Rating</MenuItem>
+                                    <MenuItem value="recent">{t("sort_options.recent")}</MenuItem>
+                                    <MenuItem value="alphabetical">{t("sort_options.alphabetical")}</MenuItem>
+                                    <MenuItem value="progress">{t("sort_options.progress")}</MenuItem>
+                                    <MenuItem value="rating">{t("sort_options.rating")}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Stack>
@@ -226,7 +228,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                         {/* Results count */}
                         <Box className="text-center">
                             <Chip 
-                                label={`🎯 Showing ${filteredAndSortedCourses.length} of ${totalCourses} amazing courses`}
+                                label={t("showing_results", { filtered: filteredAndSortedCourses.length, total: totalCourses })}
                                 className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 font-medium"
                                 variant="filled"
                             />
@@ -249,7 +251,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                     variant="body2"
                                     className="font-bold text-emerald-800 mb-1 tracking-wide text-sm"
                                 >
-                                    📚 Total Courses
+                                    {t("stats.total_courses")}
                                 </Typography>
                                 <Typography
                                     variant="h4"
@@ -261,7 +263,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                     variant="caption"
                                     className="text-emerald-600 font-medium"
                                 >
-                                    Keep collecting! 🎯
+                                    {t("stats.total_subtitle")}
                                 </Typography>
                             </Box>
                         </Paper>
@@ -279,7 +281,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                     variant="body2"
                                     className="font-bold text-amber-800 mb-1 tracking-wide text-sm"
                                 >
-                                    🚀 In Progress
+                                    {t("stats.in_progress")}
                                 </Typography>
                                 <Typography
                                     variant="h4"
@@ -291,7 +293,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                     variant="caption"
                                     className="text-amber-600 font-medium"
                                 >
-                                    You're crushing it! 💪
+                                    {t("stats.in_progress_subtitle")}
                                 </Typography>
                             </Box>
                         </Paper>
@@ -309,7 +311,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                     variant="body2"
                                     className="font-bold text-violet-800 mb-1 tracking-wide text-sm"
                                 >
-                                    🏆 Completed
+                                    {t("stats.completed")}
                                 </Typography>
                                 <Typography
                                     variant="h4"
@@ -321,7 +323,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                     variant="caption"
                                     className="text-violet-600 font-medium"
                                 >
-                                    {completedCourses > 0 ? "🎉 Amazing work!" : "First win coming soon! ✨"}
+                                    {completedCourses > 0 ? t("stats.completed_subtitle") : t("stats.completed_subtitle_empty")}
                                 </Typography>
                             </Box>
                         </Paper>
@@ -332,7 +334,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                 <Grid container spacing={3}>
                     {filteredAndSortedCourses.map((course) => {
                         const progressStatus = getProgressStatus(
-                            course.progress
+                            course.progress, t
                         );
 
                         return (
@@ -374,7 +376,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                             {course.price > 0 && (
                                                 <Box className="absolute top-4 left-4 ">
                                                     <Chip
-                                                        label={formatPrice(course.price)}
+                                                        label={formatPrice(course.price, t)}
                                                         variant="filled"
                                                         size="small"
                                                         className="bg-white/95 text-gray-800 font-bold shadow-md"
@@ -413,7 +415,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                             }
                                                         }}
                                                     >
-                                                        {course.progress === 0 ? "🚀 Start Learning" : "📚 Continue"}
+                                                        {course.progress === 0 ? t("buttons.start_learning") : t("buttons.continue")}
                                                     </Button>
                                                 </Stack>
                                             </Box>
@@ -425,7 +427,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                         variant="body2"
                                                         className="text-gray-700 font-medium flex items-center gap-1"
                                                     >
-                                                        📊 Progress
+                                                        {t("progress_label")}
                                                     </Typography>
                                                     <Typography
                                                         variant="body2"
@@ -453,7 +455,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                         variant="caption"
                                                         className="text-gray-600 font-medium flex items-center gap-1"
                                                     >
-                                                        ✅ {course.lectureProgress} lecture{course.lectureProgress !== 1 ? "s" : ""} completed
+                                                        {course.lectureProgress === 1 ? t("lectures_completed", { count: course.lectureProgress }) : t("lectures_completed_plural", { count: course.lectureProgress })}
                                                     </Typography>
                                                 )}
                                             </Box>
@@ -478,7 +480,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                             variant="body2"
                                                             className="text-gray-700 font-medium"
                                                         >
-                                                            👨‍🏫 {course.instructor.name}
+                                                            {t("instructor_prefix")} {course.instructor.name}
                                                         </Typography>
                                                     </Box>
                                                 )}
@@ -513,7 +515,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                     {course.categories.slice(0, 2).map((category) => (
                                                         <Chip
                                                             key={category.id}
-                                                            label={`🏷️ ${category.name}`}
+                                                            label={`${t("category_prefix")} ${category.name}`}
                                                             variant="outlined"
                                                             size="small"
                                                             className="rounded-full border-purple-200 text-purple-700 bg-purple-50 font-medium"
@@ -537,7 +539,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                     variant="caption"
                                                     className="text-gray-600 font-medium"
                                                 >
-                                                    📅 Enrolled {formatDate(course.dateEnrolled.toString())}
+                                                    {t("enrolled_on", { date: formatDate(course.dateEnrolled.toString()) })}
                                                 </Typography>
                                             </Box>
                                         </CardContent>
@@ -559,10 +561,10 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                             variant="h4"
                             className="font-bold text-gray-800 mb-3"
                         >
-                            🔍 No courses found
+                            {t("empty_state.no_results_title")}
                         </Typography>
                         <Typography variant="h6" className="text-gray-600 mb-6 max-w-md mx-auto">
-                            Hmm, we couldn't find any courses matching your search. Let's try something else! ✨
+                            {t("empty_state.no_results_subtitle")}
                         </Typography>
                         <Button 
                             variant="contained"
@@ -581,7 +583,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                             }}
                             startIcon={<RotateCcw className="h-5 w-5" />}
                         >
-                            🧹 Clear All Filters
+                            {t("buttons.clear_filters")}
                         </Button>
                     </Box>
                 )}
@@ -595,10 +597,10 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                             variant="h3"
                             className="font-bold text-gray-800 mb-4"
                         >
-                            🌟 Ready to start learning?
+                            {t("empty_state.no_courses_title")}
                         </Typography>
                         <Typography variant="h6" className="text-gray-600 mb-8 max-w-lg mx-auto leading-relaxed">
-                            Your learning adventure begins here! Discover amazing courses and unlock your potential. 🚀
+                            {t("empty_state.no_courses_subtitle")}
                         </Typography>
                         <Button 
                             variant="contained" 
@@ -612,7 +614,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                             }}
                             startIcon={<TrendingUp className="h-6 w-6" />}
                         >
-                            🎯 Browse Amazing Courses
+                            {t("buttons.browse_courses")}
                         </Button>
                     </Box>
                 )}
