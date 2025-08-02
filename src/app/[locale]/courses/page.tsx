@@ -22,11 +22,12 @@ export default async function CoursesPage(props: {
             page: currentPage,
             take,
             search: searchParams?.filter,
-            rating: searchParams?.rating,
+            minRating: searchParams?.rating,
             categoryIds: searchParams?.categoryIds,
         },
         nextOption: { cache: "no-cache" },
     });
+    console.log(resCourses)
 
     const resCategories = await sendRequest<IModelPaginate<ICategory>>({
         method: "GET",

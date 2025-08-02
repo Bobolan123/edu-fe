@@ -37,7 +37,7 @@ interface ICoursesProps {
 }
 
 export default function Courses(props: ICoursesProps) {
-    const t = useTranslations('Courses');
+    const t = useTranslations("Courses");
     const {
         courses = [],
         currentPage,
@@ -51,7 +51,10 @@ export default function Courses(props: ICoursesProps) {
     const { replace } = useRouter();
 
     const [page, setPage] = useState(currentPage || 1);
-    const [ratingFilter, setRatingFilter] = useState<number[]>([0, 5]);
+    const [ratingFilter, setRatingFilter] = useState<number | null>(() => {
+        const rating = searchParams.get("rating");
+        return rating ? parseInt(rating, 10) : null;
+    });
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
     const { currency } = useCurrency();
@@ -90,10 +93,17 @@ export default function Courses(props: ICoursesProps) {
     };
 
     const handleRatingRadioChange = (r: number) => {
-        setRatingFilter([r, 5]);
+        const newRating = ratingFilter === r ? null : r;
+        setRatingFilter(newRating);
         setPage(1);
         const params = new URLSearchParams(searchParams);
-        params.set("rating", r.toString());
+
+        if (newRating === null) {
+            params.delete("rating");
+        } else {
+            params.set("rating", newRating.toString());
+        }
+
         params.set("page", "1");
         replace(`${pathname}?${params.toString()}`);
     };
@@ -125,25 +135,25 @@ export default function Courses(props: ICoursesProps) {
                 <Grid item xs={12} md={3}>
                     <Box sx={{ position: "sticky", top: 20 }}>
                         <Typography variant="h6" gutterBottom>
-                            {t('filters')}
+                            {t("filters")}
                         </Typography>
 
                         {/* Rating */}
                         <Box sx={{ mb: 4 }}>
-                            <Typography gutterBottom>{t('ratings')}</Typography>
+                            <Typography gutterBottom>{t("ratings")}</Typography>
                             <FormGroup>
-                                {[4.5, 4.0, 3.5, 3.0].map((r) => (
+                                {[4, 3, 2, 1].map((r) => (
                                     <FormControlLabel
                                         key={r}
                                         control={
                                             <Radio
-                                                checked={ratingFilter[0] === r}
+                                                checked={ratingFilter === r}
                                                 onChange={() =>
                                                     handleRatingRadioChange(r)
                                                 }
                                             />
                                         }
-                                        label={t('rating_up', { rating: r })}
+                                        label={t("rating_up", { rating: r })}
                                     />
                                 ))}
                             </FormGroup>
@@ -156,7 +166,9 @@ export default function Courses(props: ICoursesProps) {
                             component="fieldset"
                             sx={{ width: "100%" }}
                         >
-                            <FormLabel component="legend">{t('categories')}</FormLabel>
+                            <FormLabel component="legend">
+                                {t("categories")}
+                            </FormLabel>
                             <FormGroup>
                                 {categories.map((category) => (
                                     <FormControlLabel
@@ -184,161 +196,173 @@ export default function Courses(props: ICoursesProps) {
                 <Grid item xs={12} md={9}>
                     <Box sx={{ mb: 3 }}>
                         <Typography variant="h5" component="h2" gutterBottom>
-                            {t('all_courses')}
+                            {t("all_courses")}
                         </Typography>
                         <Typography color="text.secondary">
-                            {t('courses_found', { count: totalItems })}
+                            {t("courses_found", { count: totalItems })}
                         </Typography>
                     </Box>
 
                     <Grid container spacing={3}>
-                        {courses.map((course) => (
-                            !course.isPurchased && (
-                            <Grid item key={course.id} xs={12}>
-                                <Link
-                                    href={`/courses/${slugify(
-                                        course.title
-                                    )}/?id=${course.id}`}
-                                    style={{ textDecoration: "none" }}
-                                >
-                                    <Card
-                                        sx={{
-                                            display: "flex",
-                                            p: 2,
-                                            boxShadow: 1,
-                                            borderRadius: 2,
-                                            height: "220px",
-                                            cursor: "pointer",
-                                            transition:
-                                                "transform 0.2s ease-in-out",
-                                            ":hover": {
-                                                transform: "translateY(-3px)",
-                                            },
-                                        }}
-                                    >
-                                        <CardMedia
-                                            component="img"
-                                            sx={{
-                                                width: 200,
-                                                height: "100%",
-                                                objectFit: "cover",
-                                                borderRadius: 2,
-                                                mr: 2,
-                                            }}
-                                            image={
-                                                course.thumbnail_url ||
-                                                "/img_not_found.png"
-                                            }
-                                            alt={course.title}
-                                        />
-
-                                        {/* content */}
-                                        <Box
-                                            sx={{
-                                                flex: 1,
-                                                display: "flex",
-                                                flexDirection: "column",
-                                                justifyContent: "space-between",
-                                            }}
+                        {courses.map(
+                            (course) =>
+                                !course.isPurchased && (
+                                    <Grid item key={course.id} xs={12}>
+                                        <Link
+                                            href={`/courses/${slugify(
+                                                course.title
+                                            )}/?id=${course.id}`}
+                                            style={{ textDecoration: "none" }}
                                         >
-                                            <Box>
-                                                <Typography
-                                                    variant="h6"
-                                                    fontWeight={700}
-                                                    sx={{ mb: 0.5 }}
-                                                >
-                                                    {course.title}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                    noWrap
-                                                    sx={{ mb: 1 }}
-                                                >
-                                                    {course.description}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                    sx={{ mb: 1 }}
-                                                >
-                                                    {t('instructor_placeholder')}
-                                                </Typography>
-
-                                                {/* rating */}
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        mb: 1,
-                                                    }}
-                                                >
-                                                    <Typography
-                                                        variant="subtitle1"
-                                                        fontWeight={700}
-                                                        color="#b4690e"
-                                                        sx={{ mr: 0.5 }}
-                                                    >
-                                                        {course.average_rating.toFixed(
-                                                            1
-                                                        )}
-                                                    </Typography>
-                                                    <Rating
-                                                        value={
-                                                            course.average_rating ||
-                                                            4.7
-                                                        }
-                                                        precision={0.1}
-                                                        readOnly
-                                                        size="small"
-                                                    />
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        sx={{ ml: 0.5 }}
-                                                    >
-                                                        {course.total_reviews}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-
-                                            {/* price */}
-                                            <Box
+                                            <Card
                                                 sx={{
                                                     display: "flex",
-                                                    justifyContent:
-                                                        "space-between",
-                                                    alignItems: "center",
+                                                    p: 2,
+                                                    boxShadow: 1,
+                                                    borderRadius: 2,
+                                                    height: "220px",
+                                                    cursor: "pointer",
+                                                    transition:
+                                                        "transform 0.2s ease-in-out",
+                                                    ":hover": {
+                                                        transform:
+                                                            "translateY(-3px)",
+                                                    },
                                                 }}
                                             >
-                                                {convertedPrices[course.id] ===
-                                                undefined ? (
-                                                    <Skeleton width={80} />
-                                                ) : (
-                                                    <Typography
-                                                        variant="h6"
-                                                        fontWeight={700}
+                                                <CardMedia
+                                                    component="img"
+                                                    sx={{
+                                                        width: 200,
+                                                        height: "100%",
+                                                        objectFit: "cover",
+                                                        borderRadius: 2,
+                                                        mr: 2,
+                                                    }}
+                                                    image={
+                                                        course.thumbnail_url ||
+                                                        "/img_not_found.png"
+                                                    }
+                                                    alt={course.title}
+                                                />
+
+                                                {/* content */}
+                                                <Box
+                                                    sx={{
+                                                        flex: 1,
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        justifyContent:
+                                                            "space-between",
+                                                    }}
+                                                >
+                                                    <Box>
+                                                        <Typography
+                                                            variant="h6"
+                                                            fontWeight={700}
+                                                            sx={{ mb: 0.5 }}
+                                                        >
+                                                            {course.title}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                            noWrap
+                                                            sx={{ mb: 1 }}
+                                                        >
+                                                            {course.description}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                            sx={{ mb: 1 }}
+                                                        >
+                                                            {t(
+                                                                "instructor_placeholder"
+                                                            )}
+                                                        </Typography>
+
+                                                        {/* rating */}
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                alignItems:
+                                                                    "center",
+                                                                mb: 1,
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                variant="subtitle1"
+                                                                fontWeight={700}
+                                                                color="#b4690e"
+                                                                sx={{ mr: 0.5 }}
+                                                            >
+                                                                {course.average_rating.toFixed(
+                                                                    1
+                                                                )}
+                                                            </Typography>
+                                                            <Rating
+                                                                value={
+                                                                    course.average_rating ||
+                                                                    4.7
+                                                                }
+                                                                precision={0.1}
+                                                                readOnly
+                                                                size="small"
+                                                            />
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="text.secondary"
+                                                                sx={{ ml: 0.5 }}
+                                                            >
+                                                                {
+                                                                    course.total_reviews
+                                                                }
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+
+                                                    {/* price */}
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            justifyContent:
+                                                                "space-between",
+                                                            alignItems:
+                                                                "center",
+                                                        }}
                                                     >
-                                                        {currencyService.formatPrice(
-                                                            convertedPrices[
-                                                                course.id
-                                                            ],
-                                                            currency
+                                                        {convertedPrices[
+                                                            course.id
+                                                        ] === undefined ? (
+                                                            <Skeleton
+                                                                width={80}
+                                                            />
+                                                        ) : (
+                                                            <Typography
+                                                                variant="h6"
+                                                                fontWeight={700}
+                                                            >
+                                                                {currencyService.formatPrice(
+                                                                    convertedPrices[
+                                                                        course
+                                                                            .id
+                                                                    ],
+                                                                    currency
+                                                                )}
+                                                            </Typography>
                                                         )}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        </Box>
-                                    </Card>
-                                </Link>
-                            </Grid>
-                            )
-                        ))}
+                                                    </Box>
+                                                </Box>
+                                            </Card>
+                                        </Link>
+                                    </Grid>
+                                )
+                        )}
                     </Grid>
                 </Grid>
             </Grid>
 
-        
             {totalPages > 1 && (
                 <Box
                     sx={{
