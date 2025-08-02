@@ -8,6 +8,13 @@ export default async function CoursesPage(props: {
         page?: string;
         take?: string;
         rating?: string;
+        minRating?: string;
+        maxRating?: string;
+        minPrice?: string;
+        maxPrice?: string;
+        instructorSearch?: string;
+        orderBy?: string;
+        order?: string;
         categoryIds?: string | string[]; 
     };
 }) {
@@ -22,7 +29,13 @@ export default async function CoursesPage(props: {
             page: currentPage,
             take,
             search: searchParams?.filter,
-            minRating: searchParams?.rating,
+            minRating: searchParams?.minRating || searchParams?.rating,
+            maxRating: searchParams?.maxRating,
+            minPrice: searchParams?.minPrice,
+            maxPrice: searchParams?.maxPrice,
+            instructorSearch: searchParams?.instructorSearch,
+            orderBy: searchParams?.orderBy || 'id',
+            order: searchParams?.order || 'DESC',
             categoryIds: searchParams?.categoryIds,
         },
         nextOption: { cache: "no-cache" },

@@ -181,7 +181,18 @@
         "rating_up": "{rating} & up",
         "all_courses": "All Courses",
         "courses_found": "{count} courses found",
-        "instructor_placeholder": "Instructor Name"
+        "instructor_placeholder": "Instructor Name",
+        "price_range": "Price Range",
+        "instructor": "Instructor",
+        "search_instructor": "Search instructor...",
+        "sort_by": "Sort By",
+        "newest_first": "Newest First",
+        "oldest_first": "Oldest First",
+        "price_low_high": "Price: Low to High",
+        "price_high_low": "Price: High to Low",
+        "highest_rated": "Highest Rated",
+        "lowest_rated": "Lowest Rated",
+        "clear_all_filters": "Clear All Filters"
     },
     "CourseDetail": {
         "students": "students",

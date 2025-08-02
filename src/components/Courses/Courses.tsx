@@ -19,6 +19,16 @@ import {
     Divider,
     Radio,
     Skeleton,
+    TextField,
+    Slider,
+    Button,
+    Select,
+    MenuItem,
+    InputLabel,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    Chip,
 } from "@mui/material";
 import { ICategory, ICourse } from "../../../types/entities";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
@@ -27,6 +37,9 @@ import { slugify } from "../../../utils/utils";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
 import { useTranslations } from "next-intl";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import ClearIcon from "@mui/icons-material/Clear";
 
 interface ICoursesProps {
     courses: ICourse[] | undefined;
@@ -52,10 +65,16 @@ export default function Courses(props: ICoursesProps) {
 
     const [page, setPage] = useState(currentPage || 1);
     const [ratingFilter, setRatingFilter] = useState<number | null>(() => {
-        const rating = searchParams.get("rating");
+        const rating =
+            searchParams.get("rating") || searchParams.get("minRating");
         return rating ? parseInt(rating, 10) : null;
     });
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [priceRange, setPriceRange] = useState<[number, number]>([
+        0, 1000000,
+    ]);
+    const [sortBy, setSortBy] = useState<string>("id");
+    const [sortOrder, setSortOrder] = useState<string>("DESC");
 
     const { currency } = useCurrency();
     const [convertedPrices, setConvertedPrices] = useState<
@@ -95,17 +114,49 @@ export default function Courses(props: ICoursesProps) {
     const handleRatingRadioChange = (r: number) => {
         const newRating = ratingFilter === r ? null : r;
         setRatingFilter(newRating);
+        updateFilters({ minRating: newRating });
+    };
+
+    const updateFilters = (newFilters: Record<string, any>) => {
         setPage(1);
         const params = new URLSearchParams(searchParams);
 
-        if (newRating === null) {
-            params.delete("rating");
-        } else {
-            params.set("rating", newRating.toString());
-        }
+        Object.entries(newFilters).forEach(([key, value]) => {
+            if (value === null || value === undefined || value === "") {
+                params.delete(key);
+            } else {
+                params.set(key, value.toString());
+            }
+        });
 
         params.set("page", "1");
         replace(`${pathname}?${params.toString()}`);
+    };
+
+    const handlePriceRangeChange = (
+        event: Event,
+        newValue: number | number[]
+    ) => {
+        const range = newValue as [number, number];
+        setPriceRange(range);
+        updateFilters({ minPrice: range[0], maxPrice: range[1] });
+    };
+
+    const handleSortChange = (field: string, order: string) => {
+        setSortBy(field);
+        setSortOrder(order);
+        updateFilters({ orderBy: field, order });
+    };
+
+    const clearAllFilters = () => {
+        setRatingFilter(null);
+        setSelectedCategories([]);
+        setPriceRange([0, 1000000]);
+
+        setSortBy("id");
+        setSortOrder("DESC");
+        setPage(1);
+        replace(pathname);
     };
 
     const handleCategoryChange = (categoryName: string) => {
@@ -138,15 +189,49 @@ export default function Courses(props: ICoursesProps) {
                             {t("filters")}
                         </Typography>
 
+                          {/* Sort Options */}
+                          <Box sx={{ mb: 4 }}>
+                            <Typography gutterBottom>{t("sort_by")}</Typography>
+                            <FormControl fullWidth size="small" sx={{ mt: 1 }}>
+                                <Select
+                                    value={`${sortBy}-${sortOrder}`}
+                                    onChange={(e) => {
+                                        const [field, order] =
+                                            e.target.value.split("-");
+                                        handleSortChange(field, order);
+                                    }}
+                                >
+                                    <MenuItem value="id-DESC">
+                                        {t("newest_first")}
+                                    </MenuItem>
+                                    <MenuItem value="id-ASC">
+                                        {t("oldest_first")}
+                                    </MenuItem>
+                                    <MenuItem value="price-ASC">
+                                        {t("price_low_high")}
+                                    </MenuItem>
+                                    <MenuItem value="price-DESC">
+                                        {t("price_high_low")}
+                                    </MenuItem>
+                                    <MenuItem value="average_rating-DESC">
+                                        {t("highest_rated")}
+                                    </MenuItem>
+                                    <MenuItem value="average_rating-ASC">
+                                        {t("lowest_rated")}
+                                    </MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+
                         {/* Rating */}
                         <Box sx={{ mb: 4 }}>
                             <Typography gutterBottom>{t("ratings")}</Typography>
                             <FormGroup>
-                                {[4, 3, 2, 1].map((r) => (
+                                {[5, 4, 3, 2, 1].map((r) => (
                                     <FormControlLabel
                                         key={r}
                                         control={
-                                            <Radio
+                                            <Checkbox
                                                 checked={ratingFilter === r}
                                                 onChange={() =>
                                                     handleRatingRadioChange(r)
@@ -160,6 +245,55 @@ export default function Courses(props: ICoursesProps) {
                         </Box>
 
                         <Divider sx={{ my: 2 }} />
+
+                        {/* Price Range */}
+                        <Box sx={{ mb: 4 }}>
+                            <Typography gutterBottom>
+                                {t("price_range")}
+                            </Typography>
+                            <Slider
+                                value={priceRange}
+                                onChange={handlePriceRangeChange}
+                                valueLabelDisplay="auto"
+                                min={0}
+                                max={1000000}
+                                step={10000}
+                                valueLabelFormat={(value) =>
+                                    currencyService.formatPrice(value, currency)
+                                }
+                                sx={{ mt: 2 }}
+                            />
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    mt: 1,
+                                }}
+                            >
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    {currencyService.formatPrice(
+                                        priceRange[0],
+                                        currency
+                                    )}
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    {currencyService.formatPrice(
+                                        priceRange[1],
+                                        currency
+                                    )}
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <Divider sx={{ my: 2 }} />
+
+                      
 
                         {/* Categories */}
                         <FormControl
@@ -190,6 +324,22 @@ export default function Courses(props: ICoursesProps) {
                                 ))}
                             </FormGroup>
                         </FormControl>
+
+                        <Divider sx={{ my: 2 }} />
+
+                        {/* Clear Filters */}
+                        <Box sx={{ mb: 4 }}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                startIcon={<ClearIcon />}
+                                onClick={clearAllFilters}
+                                color="primary"
+                            >
+                                {t("clear_all_filters")}
+                            </Button>
+                        </Box>
+
                     </Box>
                 </Grid>
 

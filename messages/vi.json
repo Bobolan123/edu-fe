@@ -181,7 +181,18 @@
         "rating_up": "{rating} & trở lên",
         "all_courses": "Tất Cả Khóa Học",
         "courses_found": "Tìm thấy {count} khóa học",
-        "instructor_placeholder": "Tên Giảng Viên"
+        "instructor_placeholder": "Tên Giảng Viên",
+        "price_range": "Khoảng Giá",
+        "instructor": "Giảng Viên",
+        "search_instructor": "Tìm giảng viên...",
+        "sort_by": "Sắp Xếp Theo",
+        "newest_first": "Mới Nhất Trước",
+        "oldest_first": "Cũ Nhất Trước",
+        "price_low_high": "Giá: Thấp đến Cao",
+        "price_high_low": "Giá: Cao đến Thấp",
+        "highest_rated": "Đánh Giá Cao Nhất",
+        "lowest_rated": "Đánh Giá Thấp Nhất",
+        "clear_all_filters": "Xóa Tất Cả Bộ Lọc"
     },
     "CourseDetail": {
         "students": "học viên",
