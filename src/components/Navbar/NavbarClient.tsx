@@ -134,8 +134,9 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
 
     return (
         <Box
+            data-navbar="true"
             sx={{
-                position:  'fixed',
+                position: 'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
@@ -156,7 +157,8 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
                     paddingX: 2,
                     boxShadow: 'none',
                     borderBottom: isScrolled ? '1px solid rgba(0,0,0,0.1)' : 'none',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    minHeight: '80px' // Ensure consistent height
                 }}
             >
                 <Toolbar>

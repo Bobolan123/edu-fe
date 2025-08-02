@@ -12,6 +12,7 @@ import ClientSideToastContainer from "@/components/Toastify/ToastContainer";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/Navbar/Navbar";
 import ConditionalNavbar from "@/components/Navbar/ConditionalNavbar";
+import MainContentWrapper from "@/components/Layout/MainContentWrapper";
 import { getExchangeRateVND } from "../../../utils/utils";
 import { cookies, headers } from "next/headers";
 import { CurrencyProvider } from "@/context/CurrencyContext";
@@ -55,9 +56,9 @@ export default async function LocaleLayout({
                                     <ConditionalNavbar>
                                         <Navbar />
                                     </ConditionalNavbar>
-                                    <div id="main-content">
+                                    <MainContentWrapper>
                                         {children}
-                                    </div>
+                                    </MainContentWrapper>
                                     <ClientSideToastContainer />
                                 </CurrencyProvider>
                             </SessionProvider>

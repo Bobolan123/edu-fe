@@ -94,7 +94,7 @@ export default async function CourseDetailPage({
     });
 
     return (    
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen">
             <CourseLearningNavbar
                 course={
                     resEnrollmentProgress?.data?.enrollment?.course as ICourse
