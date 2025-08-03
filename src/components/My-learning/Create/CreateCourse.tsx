@@ -38,9 +38,10 @@ const initialContentState: ICourseContent = {
     whatYoullLearn: [""],
     sections: [
         {
+            _id: "",
             title: "Introduction",
             totalLectures: 1,
-            lectures: [{ title: "", videoUrl: "" }],
+            lectures: [{ title: "", videoUrl: "", _id: "" }],
         },
     ],
     totalLength: 0,
@@ -125,7 +126,7 @@ export default function CreateCoursePage({
                 courseData.durationMinutes
             );
 
-            const resCourse = await createCourse(session.user.access_token, {
+            const resCourse = await createCourse({
                 title: courseData.title,
                 description: courseData.description,
                 language: courseData.language,
@@ -146,7 +147,6 @@ export default function CreateCoursePage({
 
             if (thumbnailFile) {
                 await uploadThumbnail(
-                    session.user.access_token,
                     newCourseId.toString(),
                     thumbnailFile
                 );
@@ -186,7 +186,6 @@ export default function CreateCoursePage({
 
         try {
             await updateCourseContent(
-                session.user.access_token,
                 createdCourseId,
                 contentData
             );

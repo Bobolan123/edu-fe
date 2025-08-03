@@ -49,3 +49,34 @@ export const markLectureAsCompleted = async (
 
     return res;
 };
+
+
+export const updateWatchTime = async (
+    enrollmentId: string,
+    lectureId: string,
+    courseId: number,
+    watchTime: number
+): Promise<IBackendRes<any>> => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<any>>({
+        method: "PATCH",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/${enrollmentId}/lectures/${lectureId}/watch-time`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        body: {
+            courseId: courseId,
+            watchTime: watchTime,
+        },
+    });
+
+    if (res?.statusCode !== 200) {
+        console.log(res);
+        throw new Error(res?.message || "Failed to update watch time");
+    }
+
+    // Don't revalidate to prevent infinite refresh loop
+    // revalidateTag(`enrollment-progress-${courseId}`);
+
+    return res;
+};

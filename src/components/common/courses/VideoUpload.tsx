@@ -93,7 +93,6 @@ export default function VideoUpload({
 
 
             const uploadedVideoUrl = await uploadLecture(
-                session.user.access_token,
                 file
             );
 

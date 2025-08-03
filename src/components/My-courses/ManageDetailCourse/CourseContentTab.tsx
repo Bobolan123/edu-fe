@@ -75,6 +75,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
 
     const handleAddSection = () => {
         const newSection: ISection = {
+            _id: "",
             title: `New Section ${localSections.length + 1}`,
             totalLectures: 0,
             lectures: [],
@@ -104,6 +105,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
         updated[sectionIndex].lectures.push({
             title: `New Lecture ${updated[sectionIndex].lectures.length + 1}`,
             videoUrl: "",
+            _id: "",
         });
         updated[sectionIndex].totalLectures += 1;
         setLocalSections(updated);

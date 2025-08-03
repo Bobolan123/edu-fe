@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import {
     BookOpen,
@@ -11,6 +11,9 @@ import {
     Star,
     Clock,
     DollarSign,
+    Filter,
+    SortAsc,
+    RotateCcw,
 } from "lucide-react";
 import {
     Card,
@@ -27,6 +30,12 @@ import {
     Container,
     Box,
     Rating,
+    Paper,
+    Stack,
+    FormControl,
+    InputLabel,
+    Select,
+    Grow,
 } from "@mui/material";
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";

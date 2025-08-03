@@ -3,6 +3,7 @@
 import { revalidateTag } from "next/cache";
 import { ICourse } from "../../types/entities";
 import { sendRequest, sendRequestFile } from "../../utils/api";
+import { getAccessToken } from "./index";
 
 export interface ICreateCoursePayload {
     title: string;
@@ -16,9 +17,9 @@ export interface ICreateCoursePayload {
 }
 
 export const createCourse = async (
-    access_token: string,
     data: ICreateCoursePayload
 ) => {
+    const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<ICourse>>({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses`,
@@ -76,10 +77,10 @@ export const getCourseById = async (id: string) => {
 };
 
 export const updateCourse = async (
-    access_token: string,
     id: string,
     data: Partial<ICourse>
 ) => {
+    const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<any>>({
         method: "PATCH",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
@@ -97,7 +98,8 @@ export const updateCourse = async (
     return res.data;
 };
 
-export const deleteCourse = async (access_token: string, id: string) => {
+export const deleteCourse = async (id: string) => {
+    const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<any>>({
         method: "DELETE",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
@@ -115,10 +117,10 @@ export const deleteCourse = async (access_token: string, id: string) => {
 };
 
 export const uploadThumbnail = async (
-    access_token: string,
     id: string,
     thumbnail: File
 ) => {
+    const access_token = await getAccessToken();
     const formData = new FormData();
     formData.append("thumbnail", thumbnail);
     const res = await sendRequestFile<IBackendRes<any>>({
@@ -137,11 +139,10 @@ export const uploadThumbnail = async (
 };
 
 export const updateCourseContent = async (
-    access_token: string,
     courseId: number,
     content: any
 ) => {
-    console.log(content)
+    const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<any>>({
         method: "PATCH",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
@@ -170,9 +171,9 @@ export const getCourseContent = async (courseId: number) => {
 };
 
 export const uploadLecture = async (
-    access_token: string,
     lectureFile: File
   ) => {
+    const access_token = await getAccessToken();
     const formData = new FormData();
     formData.append("lecture", lectureFile);
   
@@ -192,9 +193,9 @@ export const uploadLecture = async (
   };
 
 export const uploadVideoFile = async (
-    access_token: string,
     videoFile: File
   ) => {
+    const access_token = await getAccessToken();
     const formData = new FormData();
     formData.append("video", videoFile);
   
