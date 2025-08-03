@@ -399,7 +399,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
 
                                     {/* Course Stats */}
                                     <Box className="space-y-3 p-5 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl border border-blue-100/50">
-                                        <Box className="flex justify-between items-center">
+                                        <Box className="flex gap-3">
                                             <Typography
                                                 variant="body2"
                                                 className="text-gray-700 font-medium flex items-center gap-1"
@@ -425,12 +425,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                     {course.average_rating} ({course.total_reviews})
                                                 </Typography>
                                             </Box>
-                                            <Box className="flex items-center gap-1 text-gray-500">
-                                                <Clock className="w-3 h-3" />
-                                                <Typography variant="caption">
-                                                    0h
-                                                </Typography>
-                                            </Box>
+                                            
                                         </Box>
                                     </Box>
 

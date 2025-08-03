@@ -33,8 +33,7 @@ import {
     People,
     Star,
     MonetizationOn,
-    AccessTime,
-    Event,
+
     BarChart,
     TrendingUp,
     PlayArrow,
@@ -620,7 +619,7 @@ export default function ManageDetailCourse({
                                     </Paper>
                                 </Grid>
 
-                                {/* Duration */}
+                                {/* Language */}
                                 <Grid item xs={12} md={6}>
                                     <Paper 
                                         elevation={0}
@@ -630,19 +629,19 @@ export default function ManageDetailCourse({
                                             variant="h6" 
                                             className="font-bold text-blue-800 mb-4 flex items-center gap-2"
                                         >
-                                            ⏱️ Duration
+                                            🌐 Course Language
                                         </Typography>
                                         <Typography 
                                             variant="h4" 
                                             className="font-black text-blue-900"
                                         >
-                                            {totalLectures} lectures
+                                            {course.language === 'Vietnamese' ? '🇻🇳 Tiếng Việt' : '🇺🇸 English'}
                                         </Typography>
                                         <Typography 
                                             variant="body2" 
                                             className="text-blue-600 font-medium mt-2"
                                         >
-                                            {totalLectures} lectures included
+                                            All content and materials
                                         </Typography>
                                     </Paper>
                                 </Grid>
