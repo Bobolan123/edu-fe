@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import {
     BookOpen,
@@ -11,9 +11,6 @@ import {
     Star,
     Clock,
     DollarSign,
-    Filter,
-    SortAsc,
-    RotateCcw,
 } from "lucide-react";
 import {
     Card,
@@ -31,11 +28,6 @@ import {
     Box,
     Rating,
     Paper,
-    Stack,
-    FormControl,
-    InputLabel,
-    Select,
-    Grow,
 } from "@mui/material";
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";
@@ -206,7 +198,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                 {/* Stats */}
                 <Grid container spacing={3} className="mb-8">
                     <Grid item xs={12} sm={6} md={3}>
-                        <Box 
+                        <Paper 
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-50 border border-emerald-100/50"
                         >
@@ -233,10 +225,10 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                     Keep creating! 🎯
                                 </Typography>
                             </Box>
-                        </Box>
+                        </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                        <Box 
+                        <Paper 
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-amber-100 via-amber-50 to-orange-50 border border-amber-100/50"
                         >
@@ -263,10 +255,10 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                     Growing audience! 🚀
                                 </Typography>
                             </Box>
-                        </Box>
+                        </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                        <Box 
+                        <Paper 
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-violet-100 via-violet-50 to-purple-50 border border-violet-100/50"
                         >
@@ -293,10 +285,10 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                     Keep earning! 💎
                                 </Typography>
                             </Box>
-                        </Box>
+                        </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                        <Box 
+                            <Paper 
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-50 border border-blue-100/50"
                         >
@@ -323,7 +315,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                     Excellence! ✨
                                 </Typography>
                             </Box>
-                        </Box>
+                        </Paper>
                     </Grid>
                 </Grid>
 
@@ -436,7 +428,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                             <Box className="flex items-center gap-1 text-gray-500">
                                                 <Clock className="w-3 h-3" />
                                                 <Typography variant="caption">
-                                                    {course.duration}h
+                                                    0h
                                                 </Typography>
                                             </Box>
                                         </Box>

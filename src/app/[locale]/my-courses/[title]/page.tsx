@@ -15,6 +15,11 @@ export default async function ManageDetailCoursePage({
     const resCourse = await sendRequest<IBackendRes<ICourse>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
+        nextOption: {
+            next: {
+                tags: [`course-${id}`, "courses"],
+            },
+        },
     });
 
     if (!resCourse?.data) throw new Error("No course data found");
@@ -24,7 +29,7 @@ export default async function ManageDetailCoursePage({
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
         nextOption: {
             next: {
-                tags: ["course-content"],
+                tags: [`course-content-${id}`, "course-content"],
             },
         },
     });

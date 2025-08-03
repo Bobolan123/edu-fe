@@ -28,9 +28,6 @@ const initialCourseState: CourseFormState = {
     thumbnail_url: null,
     categories: [],
     active: true,
-    duration: "",
-    durationHours: "",
-    durationMinutes: "",
 };
 
 const initialContentState: ICourseContent = {
@@ -96,11 +93,6 @@ export default function CreateCoursePage({
         }
     };
 
-    const calculateTotalDurationInMinutes = (hours: string, minutes: string): number => {
-        const hoursNum = parseInt(hours) || 0;
-        const minutesNum = parseInt(minutes) || 0;
-        return hoursNum * 60 + minutesNum;
-    };
 
     const handleCourseSubmit = async (courseData: CourseFormState, thumbnailFile: File | null): Promise<number> => {
         if (!session?.user?.access_token) {
@@ -120,12 +112,6 @@ export default function CreateCoursePage({
                 })
                 .filter((id): id is number => id !== null);
 
-            // Calculate total duration in minutes
-            const totalDurationInMinutes = calculateTotalDurationInMinutes(
-                courseData.durationHours,
-                courseData.durationMinutes
-            );
-
             const resCourse = await createCourse({
                 title: courseData.title,
                 description: courseData.description,
@@ -133,7 +119,6 @@ export default function CreateCoursePage({
                 price: courseData.price,
                 preview_url: courseData.preview_url,
                 active: courseData.active,
-                duration: totalDurationInMinutes,
                 categoryIds: selectedCategoryIds,
             });
 

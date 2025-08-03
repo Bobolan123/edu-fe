@@ -102,12 +102,12 @@ export default function CourseDetail({
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <AccessTimeIcon sx={{ mr: 1 }} />
                                 <Typography>
-                                    {Math.round(course?.duration / 60)} {t('hours')}
+                                    {course?.sections?.reduce((total, section) => total + section.totalLectures, 0) || 0} {t('lectures')}
                                 </Typography>
                             </Box>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <LanguageIcon sx={{ mr: 1 }} />
-                                <Typography>{t('language')}</Typography>
+                                <Typography>{course?.language || 'English'}</Typography>
                             </Box>
                             <Typography>
                                 {t('last_updated')}{" "}

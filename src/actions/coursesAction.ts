@@ -12,7 +12,6 @@ export interface ICreateCoursePayload {
     price: number;
     preview_url: string;
     active: boolean;
-    duration: number;
     categoryIds: number[];
 }
 
@@ -94,7 +93,8 @@ export const updateCourse = async (
         throw new Error(res.message);
     }
 
-    // revalidateTag("courses");
+    revalidateTag("courses");
+    revalidateTag(`course-${id}`);
     return res.data;
 };
 

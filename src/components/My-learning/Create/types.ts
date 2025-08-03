@@ -2,9 +2,6 @@ import { ICategory, ICourseContent } from "../../../../types/entities";
 import { SelectChangeEvent } from "@mui/material";
 
 export interface CourseFormState {
-    duration: string;
-    durationHours: string;
-    durationMinutes: string;
     title: string;
     description: string;
     language: string;

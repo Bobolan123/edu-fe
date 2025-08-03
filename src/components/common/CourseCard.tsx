@@ -293,7 +293,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <TimeIcon fontSize="small" color="action" />
             <Typography variant="caption" color="text.secondary">
-              {course.duration ? `${Math.floor(course.duration / 60)}h ${course.duration % 60}m` : 'N/A'}
+              {course.language || 'English'}
             </Typography>
           </Box>
         </Box>

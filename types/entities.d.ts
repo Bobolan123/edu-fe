@@ -4,7 +4,6 @@ export interface ICourse {
     title: string;
     description: string;
     instructor: IUser;
-    duration: number;
     date_created: Date;
     last_updated: Date;
     price: number;

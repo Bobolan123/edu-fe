@@ -94,7 +94,8 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
             setLocalSections(updated);
             toastService.success('Section deleted successfully');
         } catch (error) {
-            toastService.error('Failed to delete section');
+            const errorMessage = error instanceof Error ? error.message : 'Failed to delete section';
+            toastService.error(errorMessage);
         } finally {
             setDeletingItems(prev => ({ ...prev, [key]: false }));
         }
@@ -127,7 +128,8 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
             setLocalSections(updated);
             toastService.success('Lecture deleted successfully');
         } catch (error) {
-            toastService.error('Failed to delete lecture');
+            const errorMessage = error instanceof Error ? error.message : 'Failed to delete lecture';
+            toastService.error(errorMessage);
         } finally {
             setDeletingItems(prev => ({ ...prev, [key]: false }));
         }
@@ -192,7 +194,8 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
             toastService.success("Video uploaded and updated!");
         } catch (error) {
             console.error(error);
-            toastService.error("Video upload failed.");
+            const errorMessage = error instanceof Error ? error.message : "Video upload failed.";
+            toastService.error(errorMessage);
         } finally {
             setUploadingVideos(prev => ({ ...prev, [key]: false }));
         }
@@ -205,7 +208,8 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                 toastService.success("Course content saved successfully!");
             } catch (error) {
                 console.error(error);
-                toastService.error("Failed to save course content.");
+                const errorMessage = error instanceof Error ? error.message : "Failed to save course content.";
+                toastService.error(errorMessage);
             }
         });
     };

@@ -26,14 +26,10 @@ import {
 } from "@mui/icons-material";
 import { ICourse } from "../../../../types/entities";
 
-const formatDuration = (minutes?: number) => {
-    if (!minutes) return "N/A";
-    if (minutes < 60) return `${minutes} minutes`;
-    const hours = Math.floor(minutes / 60);
-    const remaining = minutes % 60;
-    return remaining > 0
-        ? `${hours}h ${remaining}m`
-        : `${hours} hour${hours > 1 ? "s" : ""}`;
+const formatLectureCount = (course?: ICourse) => {
+    if (!course?.sections) return "0 lectures";
+    const totalLectures = course.sections.reduce((total, section) => total + section.totalLectures, 0);
+    return `${totalLectures} lecture${totalLectures !== 1 ? "s" : ""}`;
 };
 
 const formatDate = (date?: Date | string) => {
@@ -154,7 +150,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                             <Box className="flex items-center gap-2">
                                 <AccessTime fontSize="small" sx={{ opacity: 0.8 }} />
                                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                    {formatDuration(course?.duration)}
+                                    {formatLectureCount(course)}
                                 </Typography>
                             </Box>
                         </Stack>
@@ -341,12 +337,12 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                                     color="text.secondary"
                                                     sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
                                                 >
-                                                    Total Duration
+                                                    Total Lectures
                                                 </Typography>
                                                 <Box display="flex" alignItems="center" gap={1}>
                                                     <AccessTime fontSize="small" color="action" />
                                                     <Typography variant="body1" fontWeight={500}>
-                                                        {formatDuration(course?.duration)}
+                                                        {formatLectureCount(course)}
                                                     </Typography>
                                                 </Box>
                                             </Box>

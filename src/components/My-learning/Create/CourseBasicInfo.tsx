@@ -100,11 +100,8 @@ export default function CourseBasicInfo({
                                             onCourseChange("language", e.target.value)
                                         }
                                     >
-                                        {LANGUAGES.map((lang) => (
-                                            <MenuItem key={lang} value={lang}>
-                                                {lang}
-                                            </MenuItem>
-                                        ))}
+                                        <MenuItem value="English">🇺🇸 English</MenuItem>
+                                        <MenuItem value="Vietnamese">🇻🇳 Tiếng Việt</MenuItem>
                                     </Select>
                                 </FormControl>
 
@@ -130,37 +127,6 @@ export default function CourseBasicInfo({
                                             ? `VND - ${currencyService.formatPrice(course.price, currency)}`
                                             : `USD - ${currencyService.formatPrice(course.price, currency)}`
                                     }
-                                />
-                            </div>
-                            <div className="flex gap-4">
-                                <TextField
-                                    fullWidth
-                                    label={t("duration")}
-                                    type="number"
-                                    size="small"
-                                    value={course.durationHours}
-                                    onChange={(e) =>
-                                        onCourseChange("durationHours", e.target.value)
-                                    }
-                                    inputProps={{
-                                        min: 0,
-                                    }}
-                                    helperText="Duration in hours"
-                                />
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    label={t("duration_minutes")}
-                                    type="number"
-                                    value={course.durationMinutes}
-                                    onChange={(e) =>
-                                        onCourseChange("durationMinutes", e.target.value)
-                                    }
-                                    inputProps={{
-                                        min: 0,
-                                        max: 59
-                                    }}
-                                    helperText="Duration in minutes"
                                 />
                             </div>
                           

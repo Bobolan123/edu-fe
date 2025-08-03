@@ -24,6 +24,10 @@ import {
     Stack,
     CardMedia,
     Rating,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from "@mui/material";
 import {
     People,
@@ -46,6 +50,10 @@ import {
 } from "@mui/icons-material";
 import { ICourse, ICourseContent } from "../../../../types/entities";
 import CourseContentTab from "./CourseContentTab";
+import { updateCourse } from "@/actions/coursesAction";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { TextField } from "@mui/material";
 
 interface ManageDetailCourseProps {
     course: ICourse;
@@ -70,10 +78,18 @@ export default function ManageDetailCourse({
     course,
     courseContent,
 }: ManageDetailCourseProps) {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedCourse, setEditedCourse] = useState<Partial<ICourse>>({
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        language: course.language,
+        preview_url: course.preview_url,
+    });
+    const [isSaving, setIsSaving] = useState(false);
 
-    const totalDurationHours = Math.floor(course.duration / 60);
-    const totalDurationMinutes = course.duration % 60;
     const totalLectures = courseContent?.sections.reduce(
         (acc, section) => acc + section.totalLectures,
         0
@@ -123,12 +139,6 @@ export default function ManageDetailCourse({
                                         </Typography>
                                     </Box>
                                     <Box className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                                        <Schedule className="h-4 w-4" />
-                                        <Typography variant="body2">
-                                            {totalDurationHours}h {totalDurationMinutes}m
-                                        </Typography>
-                                    </Box>
-                                    <Box className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
                                         <MenuBook className="h-4 w-4" />
                                         <Typography variant="body2">
                                             {totalLectures} lectures
@@ -147,26 +157,170 @@ export default function ManageDetailCourse({
                         </Box>
                         
                         <CardContent className="p-6">
-                            <Box className="flex flex-col md:flex-row justify-between items-start gap-6">
-                                <Box className="flex-1">
-                                    <Box className="flex flex-wrap gap-2 mb-4">
-                                        {course.categories.map((cat) => (
-                                            <Chip
-                                                key={cat.id}
-                                                label={cat.name}
-                                                size="medium"
-                                                sx={{
-                                                    borderRadius: '16px',
-                                                    backgroundColor: '#faf5ff',
-                                                    borderColor: '#d8b4fe',
-                                                    color: '#7c3aed',
-                                                    fontWeight: 'medium',
-                                                    border: '1px solid'
-                                                }}
-                                            />
-                                        ))}
-                                    </Box>
+                            {isEditing ? (
+                                /* Edit Form */
+                                <Box className="space-y-6">
+                                    <Typography variant="h5" className="font-bold text-gray-800 mb-6">
+                                        🎨 Edit Course Details
+                                    </Typography>
+                                    
+                                    <TextField
+                                        fullWidth
+                                        label="Course Title"
+                                        value={editedCourse.title || ''}
+                                        onChange={(e) => setEditedCourse(prev => ({ ...prev, title: e.target.value }))}
+                                        variant="outlined"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: '16px',
+                                            }
+                                        }}
+                                    />
+                                    
+                                    <TextField
+                                        fullWidth
+                                        label="Course Description"
+                                        value={editedCourse.description || ''}
+                                        onChange={(e) => setEditedCourse(prev => ({ ...prev, description: e.target.value }))}
+                                        variant="outlined"
+                                        multiline
+                                        rows={4}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: '16px',
+                                            }
+                                        }}
+                                    />
+                                    
+                                    <TextField
+                                        fullWidth
+                                        label="Price (VND)"
+                                        type="number"
+                                        value={editedCourse.price || 0}
+                                        onChange={(e) => setEditedCourse(prev => ({ ...prev, price: Number(e.target.value) }))}
+                                        variant="outlined"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: '16px',
+                                            }
+                                        }}
+                                    />
+                                    
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: '16px',
+                                            }
+                                        }}
+                                    >
+                                        <InputLabel>Language</InputLabel>
+                                        <Select
+                                            value={editedCourse.language || ''}
+                                            onChange={(e) => setEditedCourse(prev => ({ ...prev, language: e.target.value }))}
+                                            label="Language"
+                                        >
+                                            <MenuItem value="English">🇺🇸 English</MenuItem>
+                                            <MenuItem value="Vietnamese">🇻🇳 Tiếng Việt</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    
+                                    <TextField
+                                        fullWidth
+                                        label="Preview URL (Optional)"
+                                        value={editedCourse.preview_url || ''}
+                                        onChange={(e) => setEditedCourse(prev => ({ ...prev, preview_url: e.target.value }))}
+                                        variant="outlined"
+                                        placeholder="https://example.com/preview-video"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: '16px',
+                                            }
+                                        }}
+                                    />
+                                    
+                                    <Stack direction="row" spacing={2} justifyContent="center">
+                                        <Button
+                                            variant="contained"
+                                            onClick={async () => {
+                                                setIsSaving(true);
+                                                try {
+                                                    await updateCourse(course.id.toString(), editedCourse);
+                                                    toast.success('Course updated successfully!');
+                                                    setIsEditing(false);
+                                                    router.refresh();
+                                                } catch (error) {
+                                                    console.error('Failed to update course:', error);
+                                                    const errorMessage = error instanceof Error ? error.message : 'Failed to update course';
+                                                    toast.error(errorMessage);
+                                                } finally {
+                                                    setIsSaving(false);
+                                                }
+                                            }}
+                                            disabled={isSaving}
+                                            sx={{
+                                                background: 'linear-gradient(45deg, #10b981, #059669)',
+                                                borderRadius: '16px',
+                                                textTransform: 'none',
+                                                px: 4,
+                                                py: 1.5,
+                                                fontWeight: 'bold',
+                                                minWidth: 120
+                                            }}
+                                        >
+                                            {isSaving ? 'Saving...' : '💾 Save Changes'}
+                                        </Button>
+                                        
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => {
+                                                setIsEditing(false);
+                                                setEditedCourse({
+                                                    title: course.title,
+                                                    description: course.description,
+                                                    price: course.price,
+                                                    language: course.language,
+                                                    preview_url: course.preview_url,
+                                                });
+                                            }}
+                                            disabled={isSaving}
+                                            sx={{
+                                                borderRadius: '16px',
+                                                textTransform: 'none',
+                                                px: 4,
+                                                py: 1.5,
+                                                fontWeight: 'bold',
+                                                borderColor: '#d1d5db',
+                                                color: '#6b7280'
+                                            }}
+                                        >
+                                            ❌ Cancel
+                                        </Button>
+                                    </Stack>
                                 </Box>
+                            ) : (
+                                /* Normal View */
+                                <Box className="flex flex-col md:flex-row justify-between items-start gap-6">
+                                    <Box className="flex-1">
+                                        <Box className="flex flex-wrap gap-2 mb-4">
+                                            {course.categories.map((cat) => (
+                                                <Chip
+                                                    key={cat.id}
+                                                    label={cat.name}
+                                                    size="medium"
+                                                    sx={{
+                                                        borderRadius: '16px',
+                                                        backgroundColor: '#faf5ff',
+                                                        borderColor: '#d8b4fe',
+                                                        color: '#7c3aed',
+                                                        fontWeight: 'medium',
+                                                        border: '1px solid'
+                                                    }}
+                                                />
+                                            ))}
+                                        </Box>
+                                    </Box>
                                 
                                 <Box className="flex items-center gap-4">
                                     <Box className="flex items-center gap-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl px-4 py-2 border border-yellow-200">
@@ -185,8 +339,23 @@ export default function ManageDetailCourse({
                                         <Button
                                             variant="contained"
                                             startIcon={<EditOutlined />}
+                                            onClick={() => {
+                                                setIsEditing(!isEditing);
+                                                if (isEditing) {
+                                                    // Reset form when canceling
+                                                    setEditedCourse({
+                                                        title: course.title,
+                                                        description: course.description,
+                                                        price: course.price,
+                                                        language: course.language,
+                                                        preview_url: course.preview_url,
+                                                    });
+                                                }
+                                            }}
                                             sx={{
-                                                background: 'linear-gradient(45deg, #2563eb, #3b82f6)',
+                                                background: isEditing ? 
+                                                    'linear-gradient(45deg, #dc2626, #b91c1c)' :
+                                                    'linear-gradient(45deg, #2563eb, #3b82f6)',
                                                 borderRadius: '16px',
                                                 textTransform: 'none',
                                                 px: 3,
@@ -194,7 +363,7 @@ export default function ManageDetailCourse({
                                                 fontWeight: 'bold'
                                             }}
                                         >
-                                            Edit Course
+                                            {isEditing ? 'Cancel Edit' : 'Edit Course'}
                                         </Button>
                                         <Button
                                             variant="outlined"
@@ -214,6 +383,7 @@ export default function ManageDetailCourse({
                                     </Stack>
                                 </Box>
                             </Box>
+                            )}
                         </CardContent>
                     </Card>
                 </Box>
@@ -466,7 +636,7 @@ export default function ManageDetailCourse({
                                             variant="h4" 
                                             className="font-black text-blue-900"
                                         >
-                                            {Math.floor(course.duration / 60)}h {course.duration % 60}m
+                                            {totalLectures} lectures
                                         </Typography>
                                         <Typography 
                                             variant="body2" 

@@ -317,8 +317,8 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                         icon={<Clock />}
                                                         label={`${
                                                             cartItem?.course
-                                                                ?.duration || 0
-                                                        }h`}
+                                                                ?.language || 'English'
+                                                        }`}
                                                         color="info"
                                                     />
                                                     <Chip
