@@ -113,7 +113,7 @@ export const deleteCourse = async (id: string) => {
         throw new Error(res.message);
     }
 
-    // revalidateTag("courses");
+    revalidateTag("courses");
     return res;
 };
 
@@ -135,8 +135,8 @@ export const uploadThumbnail = async (
     if (!res?.data) {
         throw new Error(res.message);
     }
-    // revalidateTag("courses");
-    return res.data;
+    revalidateTag("courses");
+    return res;
 };
 
 export const updateCourseContent = async (
