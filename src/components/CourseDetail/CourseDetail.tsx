@@ -28,7 +28,7 @@ import {
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Play } from "lucide-react";
-import { addCartItem } from "@/actions";
+import { addCartItem } from "@/actions/cartActions";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";

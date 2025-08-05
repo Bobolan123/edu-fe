@@ -25,7 +25,7 @@ import {
     alpha,
 } from "@mui/material";
 import { ICartItem } from "../../../types/entities";
-import { deleteCartItem } from "@/actions";
+import { deleteCartItem } from "@/actions/cartActions";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { slugify } from "../../../utils/utils";

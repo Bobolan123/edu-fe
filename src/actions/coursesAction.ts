@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidateTag } from "next/cache";
-import { ICourse } from "../../types/entities";
+import { ICourse, ISection } from "../../types/entities";
 import { sendRequest, sendRequestFile } from "../../utils/api";
 import { getAccessToken } from "./index";
 
@@ -213,4 +213,35 @@ export const uploadVideoFile = async (
     }
     return res.data;
   };
-  
+
+export const uploadLectureVideo = async (
+    courseId: number,
+    formData: FormData
+) => {
+    const res = await sendRequestFile<
+        IBackendRes<{ videoUrl: string }>
+    >({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}/lecture`,
+        body: formData,
+    });
+
+    console.log(res)
+    revalidateTag("course-content");
+    return res;
+};
+
+export async function saveCourseContent(
+    courseId: number,
+    sections: ISection[]
+) {
+    const res = await sendRequest<
+        IBackendRes<{ videoUrl: string }>
+    >({
+        method: "PATCH",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
+        body: { sections },
+    }); 
+    revalidateTag("course-content");
+    return res;
+}

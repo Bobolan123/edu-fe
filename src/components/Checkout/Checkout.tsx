@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { Lock, Shield } from "lucide-react";
 import { ICartItem, PaymentMethod } from "../../../types/entities";
-import { createOrder } from "@/actions";
+import { createOrder } from "@/actions/orderActions";
 import { useSession } from "next-auth/react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";

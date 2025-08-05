@@ -12,7 +12,12 @@ const nextConfig = {
             pathname: '/dekzljlu0/image/upload/**',
           },
         ],
-      },    
+      },
+    experimental: {
+        serverActions: {
+            bodySizeLimit: 100 * 1024 * 1024 * 1024, // 1000MB in bytes
+        },
+    },
 };
 
-export default withNextIntl(nextConfig);
+export default withNextIntl(nextConfig); 

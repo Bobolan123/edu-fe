@@ -27,7 +27,7 @@ import {
 } from "@mui/icons-material";
 import { ILecture, ISection } from "../../../../types/entities";
 import { useEffect, useState } from "react";
-import { saveCourseContent, uploadLectureVideo } from "@/actions";
+import { saveCourseContent, uploadLectureVideo } from "@/actions/coursesAction";
 import { useLoadingState } from "@/components/common/Loading";
 import { toastService } from "@/services/toast";
 import { isValidCloudinaryVideoUrl } from "../../../../utils/utils";
@@ -178,10 +178,13 @@ export default function ManageCourseContentModal({
         setUploadingVideos((prev) => ({ ...prev, [key]: true }));
         setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
 
+        const section = localSections[sectionIndex];
+        const lecture = section.lectures[lectureIndex];
+        
         const formData = new FormData();
-        formData.append("file", file);
-        formData.append("sectionIndex", sectionIndex.toString());
-        formData.append("lectureIndex", lectureIndex.toString());
+        formData.append("lecture", file);
+        formData.append("sectionId", section._id);
+        formData.append("lectureId", lecture._id);
 
         try {
             const progressInterval = setInterval(() => {
@@ -191,8 +194,9 @@ export default function ManageCourseContentModal({
                 }));
             }, 200);
 
-            await uploadLectureVideo(courseId, formData);
-
+           const res = await uploadLectureVideo(courseId, formData);
+            toastService.success(res.message);
+           
             clearInterval(progressInterval);
             setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
 
