@@ -218,15 +218,18 @@ export const uploadLectureVideo = async (
     courseId: number,
     formData: FormData
 ) => {
+    const access_token = await getAccessToken();
     const res = await sendRequestFile<
         IBackendRes<{ videoUrl: string }>
     >({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}/lecture`,
         body: formData,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
     });
 
-    console.log(res)
     revalidateTag("course-content");
     return res;
 };
@@ -235,12 +238,16 @@ export async function saveCourseContent(
     courseId: number,
     sections: ISection[]
 ) {
+    const access_token = await getAccessToken();
     const res = await sendRequest<
         IBackendRes<{ videoUrl: string }>
     >({
         method: "PATCH",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
         body: { sections },
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
     }); 
     revalidateTag("course-content");
     return res;

@@ -195,7 +195,11 @@ export default function ManageCourseContentModal({
             }, 200);
 
            const res = await uploadLectureVideo(courseId, formData);
+           if(res.statusCode === 201) {
             toastService.success(res.message);
+           } else {
+            toastService.error(res.message);
+           }
            
             clearInterval(progressInterval);
             setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
@@ -204,7 +208,6 @@ export default function ManageCourseContentModal({
                 setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
             }, 1000);
 
-            toastService.success("Video uploaded and updated!");
         } catch (error) {
             console.error(error);
             const errorMessage =
@@ -219,8 +222,11 @@ export default function ManageCourseContentModal({
         await withLoading(async () => {
             try {
                 const res = await saveCourseContent(courseId, localSections);
-                toastService.success(res.message);
-                toastService.success("Course content saved successfully!");
+                if(res.statusCode === 200) {
+                    toastService.success(res.message);
+                } else {
+                    toastService.error(res.message);
+                }
                 onClose();
             } catch (error) {
                 console.error(error);

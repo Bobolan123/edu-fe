@@ -47,7 +47,7 @@ export default function CourseDetail({
     const { currency } = useCurrency();
 
     const handleAddToCart = async (courseId: number) => {
-        const res = await addCartItem(courseId, data?.user?.access_token || "");
+        const res = await addCartItem(courseId);
         if (res && res?.data) {
             toast.success(res?.message);
         } else {

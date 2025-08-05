@@ -65,8 +65,6 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
                 cartId,
                 totalPrice: paymentAmount, // Send currency based on payment method
                 paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
-                userId: session?.user.id || "",
-                access_token: session?.user?.access_token || "",
             });
             if (res?.paymentUrl) {
                 window.location.href = res.paymentUrl;

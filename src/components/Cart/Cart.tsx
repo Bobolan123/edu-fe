@@ -109,10 +109,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
         setDeletingItems(prev => ({ ...prev, [courseId]: true }));
         
         try {
-            const res = await deleteCartItem(
-                courseId,
-                session?.user?.access_token as string
-            );
+            const res = await deleteCartItem(courseId);
             
             if (res && res.data) {
                 toastService.success(res.message);

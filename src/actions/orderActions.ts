@@ -3,22 +3,22 @@
 import { revalidateTag } from "next/cache";
 import { sendRequest } from "../../utils/api";
 import { IOrder, PaymentMethod } from "../../types/entities";
+import { getAccessToken, getUserId } from "./index";
 
 interface CreateOrderParams {
     cartId: number;
     totalPrice: number;
     paymentMethod: PaymentMethod;
-    userId: string;
-    access_token: string;
 }
 
 export const createOrder = async ({
     cartId,
     totalPrice,
     paymentMethod,
-    userId,
-    access_token,
 }: CreateOrderParams): Promise<{ paymentUrl: string; order: IOrder }> => {
+    const access_token = await getAccessToken();
+    const userId = await getUserId();
+    
     const res = await sendRequest<
         IBackendRes<{
             paymentUrl: string;
