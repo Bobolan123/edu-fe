@@ -6,7 +6,6 @@ import { IReview } from "../../types/entities";
 import { revalidateTag } from "next/cache";
 import {
     IReviewDistribution,
-    ICourseReviewsResponse,
 } from "../../types/resData";
 
 export const getReviewDistribution = async (
@@ -65,53 +64,12 @@ export const getAllReviews = async (
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`reviews-course-${params.courseId}`] },
+            next: { tags: [`reviews-course`] },
         },
     });
 
     if (res?.statusCode !== 200 || !res?.data) {
         throw new Error(res?.message || "Failed to get reviews");
-    }
-
-    return res;
-};
-
-interface GetCourseReviewsParams extends GetReviewsParams {
-    courseId: number;
-}
-
-export const getCourseReviews = async (
-    params: GetCourseReviewsParams
-): Promise<IBackendRes<ICourseReviewsResponse>> => {
-    const access_token = await getAccessToken();
-
-    const queryParams: any = {
-        page: params.page || 1,
-        take: params.take || 10,
-    };
-
-    if (params.search) queryParams.search = params.search;
-    if (params.rating) {
-        queryParams.rating = params.rating;
-    }
-    if (params.minRating) queryParams.minRating = params.minRating;
-    if (params.maxRating) queryParams.maxRating = params.maxRating;
-    if (params.sortBy) queryParams.sortBy = params.sortBy;
-
-    const res = await sendRequest<IBackendRes<ICourseReviewsResponse>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/course/${params.courseId}`,
-        queryParams,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-        nextOption: {
-            next: { tags: [`course-reviews-${params.courseId}`] },
-        },
-    });
-
-    if (res?.statusCode !== 200 || !res?.data) {
-        throw new Error(res?.message || "Failed to get course reviews");
     }
 
     return res;

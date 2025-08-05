@@ -7,12 +7,14 @@ interface ServerPaginationProps {
     currentPage: number;
     totalPages: number;
     baseUrl: string;
+    pageParamName?: string;
 }
 
 export default function ServerPagination({
     currentPage,
     totalPages,
     baseUrl,
+    pageParamName = 'page',
 }: ServerPaginationProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -25,11 +27,11 @@ export default function ServerPagination({
         // Preserve current search params (like tab) and add/update the page parameter
         const currentParams = new URLSearchParams(searchParams.toString());
         for (const [key, value] of currentParams.entries()) {
-            if (key !== 'page') {
+            if (key !== pageParamName) {
                 allParams.set(key, value);
             }
         }
-        allParams.set('page', page.toString());
+        allParams.set(pageParamName, page.toString());
         
         const newUrl = `${basePath}?${allParams.toString()}`;
         router.push(newUrl, { scroll: false });

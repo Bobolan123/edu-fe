@@ -12,11 +12,6 @@ export interface IReviewDistribution {
     distribution: IReviewDistributionItem[]; // List of counts per rating level
 }
 
-export interface ICourseReviewsResponse {
-    distribution: IReviewDistribution;
-    reviews: IModelPaginate<IReview>;
-}
-
 export interface IStudentEnrollment {
     enrollmentId: number;
     student: {

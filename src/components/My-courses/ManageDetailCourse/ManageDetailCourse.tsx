@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "../../../i18n/routing";
 import {
     Box,
     Card,
@@ -47,7 +48,7 @@ import {
     SettingsOutlined,
     DeleteOutlined,
 } from "@mui/icons-material";
-import { ICourse, ICourseContent } from "../../../../types/entities";
+import { ICourse, ICourseContent, IReview } from "../../../../types/entities";
 import { IStudentsResponse } from "../../../../types/resData";
 import CourseContentTab from "./CourseContentTab";
 import EditCourseModal from "./EditCourseModal";
@@ -58,7 +59,9 @@ interface ManageDetailCourseProps {
     course: ICourse;
     courseContent: ICourseContent | undefined;
     studentsData: IStudentsResponse | null;
-    currentPage: number;
+    reviewsData: IModelPaginate<IReview> | null;
+    studentsCurrentPage: number;
+    reviewsCurrentPage: number;
     baseUrl: string;
     initialTab: number;
 }
@@ -81,21 +84,26 @@ export default function ManageDetailCourse({
     course,
     courseContent,
     studentsData,
-    currentPage,
+    reviewsData,
+    studentsCurrentPage,
+    reviewsCurrentPage,
     baseUrl,
     initialTab,
 }: ManageDetailCourseProps) {
-    const [activeTab, setActiveTab] = useState(initialTab);
+    const router = useRouter();
     const [editCourseModalOpen, setEditCourseModalOpen] = useState(false);
     const [manageContentModalOpen, setManageContentModalOpen] = useState(false);
+
 
     const totalLectures = courseContent?.sections.reduce(
         (acc, section) => acc + section.totalLectures,
         0
     );
 
-    const handleTabChange = (_: any, newValue: number) =>
-        setActiveTab(newValue);
+    const handleTabChange = (_: any, newValue: number) => {
+        const url = `${baseUrl}&tab=${newValue}`;
+        router.push(url);
+    };
 
     return (
         <Box className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 py-4">
@@ -374,7 +382,7 @@ export default function ManageDetailCourse({
                     className="mb-6 rounded-3xl border border-white/50 bg-white/95 backdrop-blur-sm overflow-hidden"
                 >
                     <Tabs
-                        value={activeTab}
+                        value={initialTab}
                         onChange={handleTabChange}
                         variant="scrollable"
                         scrollButtons="auto"
@@ -406,7 +414,7 @@ export default function ManageDetailCourse({
                     </Tabs>
                 </Paper>
 
-                {activeTab === 0 && (
+                {initialTab === 0 && (
                     <Card 
                         elevation={0}
                         className="rounded-3xl border border-white/50 bg-white/95 backdrop-blur-sm"
@@ -545,7 +553,7 @@ export default function ManageDetailCourse({
                     </Card>
                 )}
 
-                {activeTab === 1 && (
+                {initialTab === 1 && (
                     <Box>
                         {courseContent ? (
                             <CourseContentTab
@@ -570,7 +578,7 @@ export default function ManageDetailCourse({
                     </Box>
                 )}
 
-                {activeTab === 2 && (
+                {initialTab === 2 && (
                     <Card 
                         elevation={0}
                         className="rounded-3xl border border-white/50 bg-white/95 backdrop-blur-sm"
@@ -683,15 +691,16 @@ export default function ManageDetailCourse({
 
                             {/* Pagination */}
                             <ServerPagination
-                                currentPage={currentPage}
+                                currentPage={studentsCurrentPage}
                                 totalPages={studentsData?.meta?.pageCount || 1}
                                 baseUrl={baseUrl}
+                                pageParamName="studentsPage"
                             />
                         </CardContent>
                     </Card>
                 )}
 
-                {activeTab === 3 && (
+                {initialTab === 3 && (
                     <Card 
                         elevation={0}
                         className="rounded-3xl border border-white/50 bg-white/95 backdrop-blur-sm"
@@ -701,78 +710,106 @@ export default function ManageDetailCourse({
                                 variant="h4" 
                                 className="font-bold text-gray-800 mb-8 text-center flex items-center justify-center gap-2"
                             >
-                                ⭐ Student Reviews ({course.reviews?.length || 0})
+                                ⭐ Student Reviews ({reviewsData?.data?.meta?.itemCount || 0})
                             </Typography>
 
-                            <Paper 
-                                elevation={0}
-                                className="p-6 rounded-2xl bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-100/50 hover:shadow-lg transition-shadow duration-200"
-                            >
-                                <Box className="flex flex-col md:flex-row gap-6">
-                                    <Avatar 
-                                        sx={{ 
-                                            width: 64, 
-                                            height: 64,
-                                            background: 'linear-gradient(45deg, #f59e0b, #d97706)',
-                                            border: '3px solid white',
-                                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
-                                            fontSize: '1.5rem',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        {review.studentName.charAt(0)}
-                                    </Avatar>
-                                    <Box className="flex-1">
-                                        <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
-                                            <Typography 
-                                                variant="h6" 
-                                                className="font-bold text-gray-800"
-                                            >
-                                                {review.studentName}
-                                            </Typography>
-                                            <Box className="flex items-center gap-2">
-                                                <Rating
-                                                    value={review.rating}
-                                                    precision={1}
-                                                    size="small"
-                                                    readOnly
-                                                />
-                                                <Typography 
-                                                    variant="body2" 
-                                                    className="font-bold text-yellow-700"
-                                                >
-                                                    {review.rating}/5
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                        <Typography 
-                                            variant="body1" 
-                                            className="text-gray-700 leading-relaxed mb-3 bg-white/80 p-4 rounded-xl border border-yellow-200"
+                            {reviewsData?.data?.result && reviewsData.data.result.length > 0 ? (
+                                <Stack spacing={3}>
+                                    {reviewsData.data.result.map((review) => (
+                                        <Paper 
+                                            key={review.id}
+                                            elevation={0}
+                                            className="p-6 rounded-2xl bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-100/50 hover:shadow-lg transition-shadow duration-200"
                                         >
-                                            “{review.comment}”
-                                        </Typography>
-                                        <Box className="flex items-center gap-2">
-                                            <Chip
-                                                label={`${review.daysAgo} days ago`}
-                                                size="small"
-                                                className="bg-orange-100 text-orange-700 font-medium"
-                                                sx={{ borderRadius: '12px' }}
-                                            />
-                                            <Chip
-                                                label="Verified Purchase"
-                                                size="small"
-                                                className="bg-green-100 text-green-700 font-medium"
-                                                sx={{ borderRadius: '12px' }}
-                                            />
-                                        </Box>
-                                    </Box>
-                                </Box>
-                            </Paper>
+                                            <Box className="flex flex-col md:flex-row gap-6">
+                                                <Avatar 
+                                                    sx={{ 
+                                                        width: 64, 
+                                                        height: 64,
+                                                        background: 'linear-gradient(45deg, #f59e0b, #d97706)',
+                                                        border: '3px solid white',
+                                                        boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                                                        fontSize: '1.5rem',
+                                                        fontWeight: 'bold'
+                                                    }}
+                                                >
+                                                    {review.user?.name?.charAt(0) || 'U'}
+                                                </Avatar>
+                                                <Box className="flex-1">
+                                                    <Box className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
+                                                        <Typography 
+                                                            variant="h6" 
+                                                            className="font-bold text-gray-800"
+                                                        >
+                                                            {review.user?.name || 'Anonymous'}
+                                                        </Typography>
+                                                        <Box className="flex items-center gap-2">
+                                                            <Rating
+                                                                value={review.rating}
+                                                                precision={1}
+                                                                size="small"
+                                                                readOnly
+                                                            />
+                                                            <Typography 
+                                                                variant="body2" 
+                                                                className="font-bold text-yellow-700"
+                                                            >
+                                                                {review.rating}/5
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                    <Typography 
+                                                        variant="body1" 
+                                                        className="text-gray-700 leading-relaxed mb-3 bg-white/80 p-4 rounded-xl border border-yellow-200"
+                                                    >
+                                                        "{review.comment}"
+                                                    </Typography>
+                                                    <Box className="flex items-center gap-2">
+                                                        <Chip
+                                                            label={new Date(review.date_reviewed).toLocaleDateString()}
+                                                            size="small"
+                                                            className="bg-orange-100 text-orange-700 font-medium"
+                                                            sx={{ borderRadius: '12px' }}
+                                                        />
+                                                        <Chip
+                                                            label="Verified Purchase"
+                                                            size="small"
+                                                            className="bg-green-100 text-green-700 font-medium"
+                                                            sx={{ borderRadius: '12px' }}
+                                                        />
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+                                        </Paper>
+                                    ))}
+                                    
+                                    {reviewsData.data && reviewsData.data.meta.pageCount > 1 && (
+                                        <ServerPagination
+                                            currentPage={reviewsCurrentPage}
+                                            totalPages={reviewsData.data.meta.pageCount}
+                                            baseUrl={baseUrl}
+                                            pageParamName="reviewsPage"
+                                        />
+                                    )}
+                                </Stack>
+                            ) : (
+                                <Paper 
+                                    elevation={0}
+                                    className="p-8 rounded-2xl bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 text-center"
+                                >
+                                    <Typography variant="h6" className="text-gray-600 mb-2">
+                                        No reviews yet
+                                    </Typography>
+                                    <Typography variant="body2" className="text-gray-500">
+                                        Be the first to leave a review for this course!
+                                    </Typography>
+                                </Paper>
+                            )}
                         </CardContent>
                     </Card>
                 )}
 
-                {activeTab === 4 && (
+                {initialTab === 4 && (
                     <Card 
                         elevation={0}
                         className="rounded-3xl border border-white/50 bg-white/95 backdrop-blur-sm"

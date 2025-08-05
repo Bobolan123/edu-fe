@@ -2,6 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { ICourse, ISection } from "../../types/entities";
+import { IStudentsResponse } from "../../types/resData";
 import { sendRequest, sendRequestFile } from "../../utils/api";
 import { getAccessToken } from "./index";
 
@@ -257,7 +258,7 @@ export const getCourseStudents = async (
     courseId: number,
     page: number = 1,
     take: number = 10
-) => {
+): Promise<IStudentsResponse | null> => {
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<any>>({
         method: "GET",
@@ -269,7 +270,8 @@ export const getCourseStudents = async (
     });
 
     if (!res?.data) {
-        throw new Error(res.message);
+        console.error("Failed to fetch course students:", res?.message || "Unknown error");
+        return null;
     }
     
     return res.data;
