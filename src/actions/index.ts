@@ -29,10 +29,10 @@ export async function saveCourseContent(
     const res = await sendRequest<
         IBackendRes<{ videoUrl: string }>
     >({
-        method: "PUT",
+        method: "PATCH",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
         body: { sections },
-    });
+    }); 
     revalidateTag("course-content");
     return res;
 }

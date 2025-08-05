@@ -17,7 +17,7 @@ export default async function ManageDetailCoursePage({
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
         nextOption: {
             next: {
-                tags: [`course-${id}`, "courses"],
+                tags: ["courses"],
             },
         },
     });
@@ -29,7 +29,7 @@ export default async function ManageDetailCoursePage({
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
         nextOption: {
             next: {
-                tags: [`course-content-${id}`, "course-content"],
+                tags: ["course-content"],
             },
         },
     });

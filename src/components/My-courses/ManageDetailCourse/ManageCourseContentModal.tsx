@@ -30,6 +30,7 @@ import { useEffect, useState } from "react";
 import { saveCourseContent, uploadLectureVideo } from "@/actions";
 import { useLoadingState } from "@/components/common/Loading";
 import { toastService } from "@/services/toast";
+import { isValidCloudinaryVideoUrl } from "../../../../utils/utils";
 
 interface ManageCourseContentModalProps {
     open: boolean;
@@ -55,7 +56,7 @@ export default function ManageCourseContentModal({
     const [expandedVideos, setExpandedVideos] = useState<{
         [key: string]: boolean;
     }>({});
-    
+
     // Loading states
     const { loading: isSaving, withLoading } = useLoadingState();
     const [uploadingVideos, setUploadingVideos] = useState<{
@@ -91,18 +92,21 @@ export default function ManageCourseContentModal({
 
     const handleDeleteSection = async (sectionIndex: number) => {
         const key = `section-${sectionIndex}`;
-        setDeletingItems(prev => ({ ...prev, [key]: true }));
-        
+        setDeletingItems((prev) => ({ ...prev, [key]: true }));
+
         try {
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise((resolve) => setTimeout(resolve, 300));
             const updated = localSections.filter((_, i) => i !== sectionIndex);
             setLocalSections(updated);
-            toastService.success('Section deleted successfully');
+            toastService.success("Section deleted successfully");
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to delete section';
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to delete section";
             toastService.error(errorMessage);
         } finally {
-            setDeletingItems(prev => ({ ...prev, [key]: false }));
+            setDeletingItems((prev) => ({ ...prev, [key]: false }));
         }
     };
 
@@ -122,20 +126,23 @@ export default function ManageCourseContentModal({
         lectureIndex: number
     ) => {
         const key = `lecture-${sectionIndex}-${lectureIndex}`;
-        setDeletingItems(prev => ({ ...prev, [key]: true }));
-        
+        setDeletingItems((prev) => ({ ...prev, [key]: true }));
+
         try {
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise((resolve) => setTimeout(resolve, 300));
             const updated = [...localSections];
             updated[sectionIndex].lectures.splice(lectureIndex, 1);
             updated[sectionIndex].totalLectures -= 1;
             setLocalSections(updated);
-            toastService.success('Lecture deleted successfully');
+            toastService.success("Lecture deleted successfully");
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to delete lecture';
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to delete lecture";
             toastService.error(errorMessage);
         } finally {
-            setDeletingItems(prev => ({ ...prev, [key]: false }));
+            setDeletingItems((prev) => ({ ...prev, [key]: false }));
         }
     };
 
@@ -168,8 +175,8 @@ export default function ManageCourseContentModal({
         if (!file) return;
 
         const key = `${sectionIndex}-${lectureIndex}`;
-        setUploadingVideos(prev => ({ ...prev, [key]: true }));
-        setUploadProgress(prev => ({ ...prev, [key]: 0 }));
+        setUploadingVideos((prev) => ({ ...prev, [key]: true }));
+        setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
 
         const formData = new FormData();
         formData.append("file", file);
@@ -178,40 +185,45 @@ export default function ManageCourseContentModal({
 
         try {
             const progressInterval = setInterval(() => {
-                setUploadProgress(prev => ({
+                setUploadProgress((prev) => ({
                     ...prev,
-                    [key]: Math.min((prev[key] || 0) + 10, 90)
+                    [key]: Math.min((prev[key] || 0) + 10, 90),
                 }));
             }, 200);
 
             await uploadLectureVideo(courseId, formData);
-            
+
             clearInterval(progressInterval);
-            setUploadProgress(prev => ({ ...prev, [key]: 100 }));
-            
+            setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
+
             setTimeout(() => {
-                setUploadProgress(prev => ({ ...prev, [key]: 0 }));
+                setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
             }, 1000);
 
             toastService.success("Video uploaded and updated!");
         } catch (error) {
             console.error(error);
-            const errorMessage = error instanceof Error ? error.message : "Video upload failed.";
+            const errorMessage =
+                error instanceof Error ? error.message : "Video upload failed.";
             toastService.error(errorMessage);
         } finally {
-            setUploadingVideos(prev => ({ ...prev, [key]: false }));
+            setUploadingVideos((prev) => ({ ...prev, [key]: false }));
         }
     };
 
     const handleSaveChanges = async () => {
         await withLoading(async () => {
             try {
-                await saveCourseContent(courseId, localSections);
+                const res = await saveCourseContent(courseId, localSections);
+                toastService.success(res.message);
                 toastService.success("Course content saved successfully!");
                 onClose();
             } catch (error) {
                 console.error(error);
-                const errorMessage = error instanceof Error ? error.message : "Failed to save course content.";
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to save course content.";
                 toastService.error(errorMessage);
             }
         });
@@ -225,22 +237,23 @@ export default function ManageCourseContentModal({
             fullWidth
             PaperProps={{
                 sx: {
-                    borderRadius: '24px',
-                    background: 'linear-gradient(135deg, #faf5ff 0%, #f0f9ff 100%)',
-                    border: '1px solid rgba(255, 255, 255, 0.5)',
-                    boxShadow: '0 20px 60px rgba(139, 92, 246, 0.15)',
-                    backdropFilter: 'blur(10px)',
-                    maxHeight: '90vh',
-                }
+                    borderRadius: "24px",
+                    background:
+                        "linear-gradient(135deg, #faf5ff 0%, #f0f9ff 100%)",
+                    border: "1px solid rgba(255, 255, 255, 0.5)",
+                    boxShadow: "0 20px 60px rgba(139, 92, 246, 0.15)",
+                    backdropFilter: "blur(10px)",
+                    maxHeight: "90vh",
+                },
             }}
         >
             <DialogTitle
                 sx={{
-                    background: 'linear-gradient(45deg, #2563eb, #3b82f6)',
-                    color: 'white',
-                    borderRadius: '24px 24px 0 0',
-                    position: 'relative',
-                    textAlign: 'center',
+                    background: "linear-gradient(45deg, #2563eb, #3b82f6)",
+                    color: "white",
+                    borderRadius: "24px 24px 0 0",
+                    position: "relative",
+                    textAlign: "center",
                     py: 3,
                     mb: 2,
                 }}
@@ -251,23 +264,26 @@ export default function ManageCourseContentModal({
                 <IconButton
                     onClick={onClose}
                     sx={{
-                        position: 'absolute',
+                        position: "absolute",
                         right: 16,
                         top: 16,
-                        color: 'white',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        '&:hover': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                        }
+                        color: "white",
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        },
                     }}
                 >
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
 
-            <DialogContent sx={{ p: 4, maxHeight: '60vh', overflowY: 'auto' }}>
+            <DialogContent sx={{ p: 4, maxHeight: "60vh", overflowY: "auto" }}>
                 <Box className="flex justify-between items-center mb-4">
-                    <Typography variant="h6" className="font-bold text-gray-800">
+                    <Typography
+                        variant="h6"
+                        className="font-bold text-gray-800"
+                    >
                         Course Sections
                     </Typography>
                     <Button
@@ -275,10 +291,11 @@ export default function ManageCourseContentModal({
                         startIcon={<AddIcon />}
                         onClick={handleAddSection}
                         sx={{
-                            background: 'linear-gradient(45deg, #2563eb, #3b82f6)',
-                            borderRadius: '16px',
-                            textTransform: 'none',
-                            fontWeight: 'bold',
+                            background:
+                                "linear-gradient(45deg, #2563eb, #3b82f6)",
+                            borderRadius: "16px",
+                            textTransform: "none",
+                            fontWeight: "bold",
                         }}
                     >
                         Add Section
@@ -303,9 +320,9 @@ export default function ManageCourseContentModal({
                                     size="small"
                                     onBlur={() => setEditingSectionIndex(null)}
                                     sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: '12px',
-                                        }
+                                        "& .MuiOutlinedInput-root": {
+                                            borderRadius: "12px",
+                                        },
                                     }}
                                 />
                             ) : (
@@ -323,30 +340,45 @@ export default function ManageCourseContentModal({
                                     }
                                     disabled={isSaving}
                                     sx={{
-                                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                                        }
+                                        backgroundColor:
+                                            "rgba(37, 99, 235, 0.1)",
+                                        "&:hover": {
+                                            backgroundColor:
+                                                "rgba(37, 99, 235, 0.2)",
+                                        },
                                     }}
                                 >
-                                    <Edit fontSize="small" sx={{ color: '#2563eb' }} />
+                                    <Edit
+                                        fontSize="small"
+                                        sx={{ color: "#2563eb" }}
+                                    />
                                 </IconButton>
                                 <IconButton
                                     onClick={() =>
                                         handleDeleteSection(sectionIndex)
                                     }
-                                    disabled={isSaving || deletingItems[`section-${sectionIndex}`]}
+                                    disabled={
+                                        isSaving ||
+                                        deletingItems[`section-${sectionIndex}`]
+                                    }
                                     sx={{
-                                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(220, 38, 38, 0.2)',
-                                        }
+                                        backgroundColor:
+                                            "rgba(220, 38, 38, 0.1)",
+                                        "&:hover": {
+                                            backgroundColor:
+                                                "rgba(220, 38, 38, 0.2)",
+                                        },
                                     }}
                                 >
-                                    {deletingItems[`section-${sectionIndex}`] ? (
+                                    {deletingItems[
+                                        `section-${sectionIndex}`
+                                    ] ? (
                                         <CircularProgress size={16} />
                                     ) : (
-                                        <Delete fontSize="small" color="error" />
+                                        <Delete
+                                            fontSize="small"
+                                            color="error"
+                                        />
                                     )}
                                 </IconButton>
                             </Box>
@@ -372,7 +404,10 @@ export default function ManageCourseContentModal({
                                     className="flex flex-col bg-blue-50/50 rounded-xl p-3 mb-2 border border-blue-100"
                                 >
                                     <Box className="flex items-center gap-2 w-full">
-                                        <PlayArrow fontSize="small" sx={{ color: '#2563eb' }} />
+                                        <PlayArrow
+                                            fontSize="small"
+                                            sx={{ color: "#2563eb" }}
+                                        />
                                         {isEditing ? (
                                             <>
                                                 <TextField
@@ -386,11 +421,13 @@ export default function ManageCourseContentModal({
                                                         )
                                                     }
                                                     size="small"
-                                                    sx={{ 
+                                                    sx={{
                                                         mr: 1,
-                                                        '& .MuiOutlinedInput-root': {
-                                                            borderRadius: '12px',
-                                                        }
+                                                        "& .MuiOutlinedInput-root":
+                                                            {
+                                                                borderRadius:
+                                                                    "12px",
+                                                            },
                                                     }}
                                                 />
                                                 <IconButton
@@ -398,13 +435,19 @@ export default function ManageCourseContentModal({
                                                         setEditingLecture(null)
                                                     }
                                                     sx={{
-                                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                                        '&:hover': {
-                                                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                                                        }
+                                                        backgroundColor:
+                                                            "rgba(16, 185, 129, 0.1)",
+                                                        "&:hover": {
+                                                            backgroundColor:
+                                                                "rgba(16, 185, 129, 0.2)",
+                                                        },
                                                     }}
                                                 >
-                                                    <SaveIcon sx={{ color: '#10b981' }} />
+                                                    <SaveIcon
+                                                        sx={{
+                                                            color: "#10b981",
+                                                        }}
+                                                    />
                                                 </IconButton>
                                             </>
                                         ) : (
@@ -422,13 +465,20 @@ export default function ManageCourseContentModal({
                                                         }
                                                         disabled={isSaving}
                                                         sx={{
-                                                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                                            '&:hover': {
-                                                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                                                            }
+                                                            backgroundColor:
+                                                                "rgba(59, 130, 246, 0.1)",
+                                                            "&:hover": {
+                                                                backgroundColor:
+                                                                    "rgba(59, 130, 246, 0.2)",
+                                                            },
                                                         }}
                                                     >
-                                                        <Visibility fontSize="small" sx={{ color: '#3b82f6' }} />
+                                                        <Visibility
+                                                            fontSize="small"
+                                                            sx={{
+                                                                color: "#3b82f6",
+                                                            }}
+                                                        />
                                                     </IconButton>
                                                     <IconButton
                                                         onClick={() =>
@@ -439,13 +489,20 @@ export default function ManageCourseContentModal({
                                                         }
                                                         disabled={isSaving}
                                                         sx={{
-                                                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                                                            '&:hover': {
-                                                                backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                                                            }
+                                                            backgroundColor:
+                                                                "rgba(37, 99, 235, 0.1)",
+                                                            "&:hover": {
+                                                                backgroundColor:
+                                                                    "rgba(37, 99, 235, 0.2)",
+                                                            },
                                                         }}
                                                     >
-                                                        <Edit fontSize="small" sx={{ color: '#2563eb' }} />
+                                                        <Edit
+                                                            fontSize="small"
+                                                            sx={{
+                                                                color: "#2563eb",
+                                                            }}
+                                                        />
                                                     </IconButton>
                                                     <IconButton
                                                         onClick={() =>
@@ -454,16 +511,27 @@ export default function ManageCourseContentModal({
                                                                 lectureIndex
                                                             )
                                                         }
-                                                        disabled={isSaving || deletingItems[`lecture-${sectionIndex}-${lectureIndex}`]}
+                                                        disabled={
+                                                            isSaving ||
+                                                            deletingItems[
+                                                                `lecture-${sectionIndex}-${lectureIndex}`
+                                                            ]
+                                                        }
                                                         sx={{
-                                                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                                                            '&:hover': {
-                                                                backgroundColor: 'rgba(220, 38, 38, 0.2)',
-                                                            }
+                                                            backgroundColor:
+                                                                "rgba(220, 38, 38, 0.1)",
+                                                            "&:hover": {
+                                                                backgroundColor:
+                                                                    "rgba(220, 38, 38, 0.2)",
+                                                            },
                                                         }}
                                                     >
-                                                        {deletingItems[`lecture-${sectionIndex}-${lectureIndex}`] ? (
-                                                            <CircularProgress size={16} />
+                                                        {deletingItems[
+                                                            `lecture-${sectionIndex}-${lectureIndex}`
+                                                        ] ? (
+                                                            <CircularProgress
+                                                                size={16}
+                                                            />
                                                         ) : (
                                                             <Delete
                                                                 fontSize="small"
@@ -477,7 +545,9 @@ export default function ManageCourseContentModal({
                                     </Box>
 
                                     <Collapse in={expandedVideos[videoKey]}>
-                                        {lecture.videoUrl && (
+                                        {isValidCloudinaryVideoUrl(
+                                            lecture.videoUrl
+                                        ) && (
                                             <video
                                                 controls
                                                 width="40%"
@@ -489,6 +559,21 @@ export default function ManageCourseContentModal({
                                                 />
                                             </video>
                                         )}
+                                        {!isValidCloudinaryVideoUrl(
+                                            lecture.videoUrl
+                                        ) &&
+                                            lecture.videoUrl && (
+                                                <Box className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                                    <Typography
+                                                        variant="caption"
+                                                        className="text-yellow-700"
+                                                    >
+                                                        ⚠️ Invalid video URL
+                                                        format. Please upload a
+                                                        new video.
+                                                    </Typography>
+                                                </Box>
+                                            )}
                                     </Collapse>
 
                                     <Box className="mt-2">
@@ -504,7 +589,11 @@ export default function ManageCourseContentModal({
                                                     lectureIndex
                                                 )
                                             }
-                                            disabled={uploadingVideos[`${sectionIndex}-${lectureIndex}`] || isSaving}
+                                            disabled={
+                                                uploadingVideos[
+                                                    `${sectionIndex}-${lectureIndex}`
+                                                ] || isSaving
+                                            }
                                         />
                                         <label
                                             htmlFor={`video-upload-${sectionIndex}-${lectureIndex}`}
@@ -513,51 +602,78 @@ export default function ManageCourseContentModal({
                                                 variant="outlined"
                                                 size="small"
                                                 component="span"
-                                                disabled={uploadingVideos[`${sectionIndex}-${lectureIndex}`] || isSaving}
+                                                disabled={
+                                                    uploadingVideos[
+                                                        `${sectionIndex}-${lectureIndex}`
+                                                    ] || isSaving
+                                                }
                                                 startIcon={
-                                                    uploadingVideos[`${sectionIndex}-${lectureIndex}`] ? (
-                                                        <CircularProgress size={16} />
+                                                    uploadingVideos[
+                                                        `${sectionIndex}-${lectureIndex}`
+                                                    ] ? (
+                                                        <CircularProgress
+                                                            size={16}
+                                                        />
                                                     ) : (
                                                         <CloudUpload fontSize="small" />
                                                     )
                                                 }
                                                 sx={{
-                                                    borderRadius: '12px',
-                                                    textTransform: 'none',
-                                                    fontWeight: 'medium',
-                                                    borderColor: '#2563eb',
-                                                    color: '#2563eb',
-                                                    '&:hover': {
-                                                        borderColor: '#1d4ed8',
-                                                        backgroundColor: 'rgba(37, 99, 235, 0.05)',
-                                                    }
+                                                    borderRadius: "12px",
+                                                    textTransform: "none",
+                                                    fontWeight: "medium",
+                                                    borderColor: "#2563eb",
+                                                    color: "#2563eb",
+                                                    "&:hover": {
+                                                        borderColor: "#1d4ed8",
+                                                        backgroundColor:
+                                                            "rgba(37, 99, 235, 0.05)",
+                                                    },
                                                 }}
                                             >
-                                                {uploadingVideos[`${sectionIndex}-${lectureIndex}`]
+                                                {uploadingVideos[
+                                                    `${sectionIndex}-${lectureIndex}`
+                                                ]
                                                     ? "Uploading..."
-                                                    : lecture.videoUrl
-                                                    ? "Replace Video"
-                                                    : "Upload Video"}
+                                                    : isValidCloudinaryVideoUrl(
+                                                          lecture.videoUrl
+                                                      ) ? "Replace Video" : "Upload Video"}
                                             </Button>
                                         </label>
-                                        
-                                        {uploadingVideos[`${sectionIndex}-${lectureIndex}`] && (
+
+                                        {uploadingVideos[
+                                            `${sectionIndex}-${lectureIndex}`
+                                        ] && (
                                             <Box sx={{ mt: 1 }}>
-                                                <LinearProgress 
-                                                    variant="determinate" 
-                                                    value={uploadProgress[`${sectionIndex}-${lectureIndex}`] || 0}
-                                                    sx={{ 
-                                                        height: 6, 
+                                                <LinearProgress
+                                                    variant="determinate"
+                                                    value={
+                                                        uploadProgress[
+                                                            `${sectionIndex}-${lectureIndex}`
+                                                        ] || 0
+                                                    }
+                                                    sx={{
+                                                        height: 6,
                                                         borderRadius: 3,
-                                                        backgroundColor: '#e5e7eb',
-                                                        '& .MuiLinearProgress-bar': {
-                                                            borderRadius: '3px',
-                                                            background: 'linear-gradient(45deg, #2563eb, #3b82f6)'
-                                                        }
+                                                        backgroundColor:
+                                                            "#e5e7eb",
+                                                        "& .MuiLinearProgress-bar":
+                                                            {
+                                                                borderRadius:
+                                                                    "3px",
+                                                                background:
+                                                                    "linear-gradient(45deg, #2563eb, #3b82f6)",
+                                                            },
                                                     }}
                                                 />
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {uploadProgress[`${sectionIndex}-${lectureIndex}`] || 0}% uploaded
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                >
+                                                    {uploadProgress[
+                                                        `${sectionIndex}-${lectureIndex}`
+                                                    ] || 0}
+                                                    % uploaded
                                                 </Typography>
                                             </Box>
                                         )}
@@ -574,12 +690,13 @@ export default function ManageCourseContentModal({
                                 disabled={isSaving}
                                 startIcon={<AddIcon />}
                                 sx={{
-                                    color: '#2563eb',
-                                    textTransform: 'none',
-                                    fontWeight: 'medium',
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(37, 99, 235, 0.05)',
-                                    }
+                                    color: "#2563eb",
+                                    textTransform: "none",
+                                    fontWeight: "medium",
+                                    "&:hover": {
+                                        backgroundColor:
+                                            "rgba(37, 99, 235, 0.05)",
+                                    },
                                 }}
                             >
                                 Add Lecture
@@ -590,43 +707,50 @@ export default function ManageCourseContentModal({
             </DialogContent>
 
             <DialogActions sx={{ p: 4, pt: 2 }}>
-                <Stack direction="row" spacing={2} width="100%" justifyContent="center">
+                <Stack
+                    direction="row"
+                    spacing={2}
+                    width="100%"
+                    justifyContent="center"
+                >
                     <Button
                         variant="outlined"
                         onClick={onClose}
                         disabled={isSaving}
                         sx={{
-                            borderRadius: '16px',
-                            textTransform: 'none',
+                            borderRadius: "16px",
+                            textTransform: "none",
                             px: 4,
                             py: 1.5,
-                            fontWeight: 'bold',
-                            borderColor: '#d1d5db',
-                            color: '#6b7280',
+                            fontWeight: "bold",
+                            borderColor: "#d1d5db",
+                            color: "#6b7280",
                             minWidth: 120,
                         }}
                     >
                         ❌ Cancel
                     </Button>
-                    
+
                     <Button
                         variant="contained"
                         onClick={handleSaveChanges}
                         disabled={isSaving}
                         sx={{
-                            background: 'linear-gradient(45deg, #10b981, #059669)',
-                            borderRadius: '16px',
-                            textTransform: 'none',
+                            background:
+                                "linear-gradient(45deg, #10b981, #059669)",
+                            borderRadius: "16px",
+                            textTransform: "none",
                             px: 4,
                             py: 1.5,
-                            fontWeight: 'bold',
+                            fontWeight: "bold",
                             minWidth: 160,
-                            '&:hover': {
-                                background: 'linear-gradient(45deg, #059669, #047857)',
-                            }
+                            "&:hover": {
+                                background:
+                                    "linear-gradient(45deg, #059669, #047857)",
+                            },
                         }}
                     >
-                        {isSaving ? 'Saving Changes...' : '💾 Save All Changes'}
+                        {isSaving ? "Saving Changes..." : "💾 Save All Changes"}
                     </Button>
                 </Stack>
             </DialogActions>
