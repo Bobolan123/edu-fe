@@ -48,13 +48,19 @@ import {
     DeleteOutlined,
 } from "@mui/icons-material";
 import { ICourse, ICourseContent } from "../../../../types/entities";
+import { IStudentsResponse } from "../../../../types/resData";
 import CourseContentTab from "./CourseContentTab";
 import EditCourseModal from "./EditCourseModal";
 import ManageCourseContentModal from "./ManageCourseContentModal";
+import ServerPagination from "../../common/ServerPagination";
 
 interface ManageDetailCourseProps {
     course: ICourse;
     courseContent: ICourseContent | undefined;
+    studentsData: IStudentsResponse | null;
+    currentPage: number;
+    baseUrl: string;
+    initialTab: number;
 }
 const student = {
     name: "Student 1",
@@ -74,8 +80,12 @@ const review = {
 export default function ManageDetailCourse({
     course,
     courseContent,
+    studentsData,
+    currentPage,
+    baseUrl,
+    initialTab,
 }: ManageDetailCourseProps) {
-    const [activeTab, setActiveTab] = useState(0);
+    const [activeTab, setActiveTab] = useState(initialTab);
     const [editCourseModalOpen, setEditCourseModalOpen] = useState(false);
     const [manageContentModalOpen, setManageContentModalOpen] = useState(false);
 
@@ -570,80 +580,113 @@ export default function ManageDetailCourse({
                                 variant="h4" 
                                 className="font-bold text-gray-800 mb-8 text-center flex items-center justify-center gap-2"
                             >
-                                👥 Enrolled Students ({course.enrollments?.length || 0})
+                                👥 Enrolled Students ({studentsData?.meta?.itemCount || 0})
                             </Typography>
 
-                            <Paper 
-                                elevation={0}
-                                className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100/50 hover:shadow-lg transition-shadow duration-200"
-                            >
-                                <Box className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                    <Box className="flex items-center gap-4">
-                                        <Avatar 
-                                            sx={{ 
-                                                width: 64, 
-                                                height: 64,
-                                                background: 'linear-gradient(45deg, #8b5cf6, #a855f7)',
-                                                border: '3px solid white',
-                                                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
-                                                fontSize: '1.5rem',
-                                                fontWeight: 'bold'
-                                            }}
+                            {studentsData?.result?.length ? (
+                                <Stack spacing={3}>
+                                    {studentsData.result.map((enrollment) => (
+                                        <Paper 
+                                            key={enrollment.enrollmentId}
+                                            elevation={0}
+                                            className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100/50 hover:shadow-lg transition-shadow duration-200"
                                         >
-                                            {student.name.charAt(0)}
-                                        </Avatar>
-                                        <Box>
-                                            <Typography
-                                                variant="h6"
-                                                className="font-bold text-gray-800 mb-1"
-                                            >
-                                                {student.name}
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                className="text-purple-600 font-medium mb-2"
-                                            >
-                                                {student.email}
-                                            </Typography>
-                                            <Chip
-                                                label={`Enrolled ${student.enrolledDaysAgo} days ago`}
-                                                size="small"
-                                                className="bg-blue-100 text-blue-700 font-medium"
-                                                sx={{ borderRadius: '12px' }}
-                                            />
-                                        </Box>
-                                    </Box>
+                                            <Box className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                                <Box className="flex items-center gap-4">
+                                                    <Avatar 
+                                                        src={enrollment.student.avatar}
+                                                        sx={{ 
+                                                            width: 64, 
+                                                            height: 64,
+                                                            background: 'linear-gradient(45deg, #8b5cf6, #a855f7)',
+                                                            border: '3px solid white',
+                                                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                                                            fontSize: '1.5rem',
+                                                            fontWeight: 'bold'
+                                                        }}
+                                                    >
+                                                        {`${enrollment.student.firstName?.charAt(0) || ''}${enrollment.student.lastName?.charAt(0) || ''}` || enrollment.student.email?.charAt(0)?.toUpperCase() || 'U'}
+                                                    </Avatar>
+                                                    <Box>
+                                                        <Typography
+                                                            variant="h6"
+                                                            className="font-bold text-gray-800 mb-1"
+                                                        >
+                                                            {`${enrollment.student.firstName || ''} ${enrollment.student.lastName || ''}`.trim() || enrollment.student.email}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="body2"
+                                                            className="text-purple-600 font-medium mb-2"
+                                                        >
+                                                            {enrollment.student.email}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={`Enrolled on ${new Date(enrollment.enrolledAt).toLocaleDateString()}`}
+                                                            size="small"
+                                                            className="bg-blue-100 text-blue-700 font-medium"
+                                                            sx={{ borderRadius: '12px' }}
+                                                        />
+                                                    </Box>
+                                                </Box>
 
-                                    <Box className="text-center md:text-right">
-                                        <Typography
-                                            variant="h5"
-                                            className="font-bold text-purple-900 mb-2"
-                                        >
-                                            {student.completionPercentage}% Complete
-                                        </Typography>
-                                        <LinearProgress
-                                            value={student.completionPercentage}
-                                            variant="determinate"
-                                            className="h-3 rounded-full mb-2 w-32"
-                                            sx={{
-                                                backgroundColor: '#e5e7eb',
-                                                '& .MuiLinearProgress-bar': {
-                                                    borderRadius: '6px',
-                                                    background: student.completionPercentage === 100 ? 
-                                                        'linear-gradient(45deg, #10b981, #059669)' :
-                                                        'linear-gradient(45deg, #8b5cf6, #a855f7)'
-                                                }
-                                            }}
-                                        />
-                                        <Typography
-                                            variant="caption"
-                                            className="text-gray-600 font-medium"
-                                        >
-                                            Progress Status
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Paper>
+                                                <Box className="text-center md:text-right">
+                                                    <Typography
+                                                        variant="h5"
+                                                        className="font-bold text-purple-900 mb-2"
+                                                    >
+                                                        {enrollment.progressPercentage}% Complete
+                                                    </Typography>
+                                                    <LinearProgress
+                                                        value={enrollment.progressPercentage}
+                                                        variant="determinate"
+                                                        className="h-3 rounded-full mb-2 w-32"
+                                                        sx={{
+                                                            backgroundColor: '#e5e7eb',
+                                                            '& .MuiLinearProgress-bar': {
+                                                                borderRadius: '6px',
+                                                                background: enrollment.progressPercentage === 100 ? 
+                                                                    'linear-gradient(45deg, #10b981, #059669)' :
+                                                                    'linear-gradient(45deg, #8b5cf6, #a855f7)'
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Typography
+                                                        variant="caption"
+                                                        className="text-gray-600 font-medium"
+                                                    >
+                                                        {enrollment.completedLectures}/{enrollment.totalLectures} lectures
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </Paper>
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Paper 
+                                    elevation={0}
+                                    className="p-8 rounded-2xl bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-100/50 text-center"
+                                >
+                                    <Typography
+                                        variant="h6"
+                                        className="text-gray-600 mb-2"
+                                    >
+                                        📚 No students enrolled yet
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        className="text-gray-500"
+                                    >
+                                        Share your course to get your first students!
+                                    </Typography>
+                                </Paper>
+                            )}
+
+                            {/* Pagination */}
+                            <ServerPagination
+                                currentPage={currentPage}
+                                totalPages={studentsData?.meta?.pageCount || 1}
+                                baseUrl={baseUrl}
+                            />
                         </CardContent>
                     </Card>
                 )}

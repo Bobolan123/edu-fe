@@ -17,3 +17,28 @@ export interface ICourseReviewsResponse {
     reviews: IModelPaginate<IReview>;
 }
 
+export interface IStudentEnrollment {
+    enrollmentId: number;
+    student: {
+        id: number;
+        firstName?: string;
+        lastName?: string;
+        email: string;
+        avatar?: string;
+    };
+    enrolledAt: string;
+    completedLectures: number;
+    totalLectures: number;
+    progressPercentage: number;
+}
+
+export interface IStudentsResponse {
+    result: IStudentEnrollment[];
+    meta: {
+        page: number;
+        take: number;
+        itemCount: number;
+        pageCount: number;
+    };
+}
+

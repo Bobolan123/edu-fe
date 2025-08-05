@@ -36,6 +36,7 @@ export default function EditCourseModal({
 }: EditCourseModalProps) {
     const router = useRouter();
     const [editedCourse, setEditedCourse] = useState<Partial<ICourse>>({
+        id:course.id,
         title: course.title,
         description: course.description,
         price: course.price,

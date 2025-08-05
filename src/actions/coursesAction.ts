@@ -252,3 +252,25 @@ export async function saveCourseContent(
     revalidateTag("course-content");
     return res;
 }
+
+export const getCourseStudents = async (
+    courseId: number,
+    page: number = 1,
+    take: number = 10
+) => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<any>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}/students`,
+        queryParams: { page, take },
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (!res?.data) {
+        throw new Error(res.message);
+    }
+    
+    return res.data;
+};
