@@ -245,7 +245,7 @@ export default function ManageCourseContentModal({
                     mb: 2,
                 }}
             >
-                <Typography variant="h5" className="font-bold">
+                <Typography component="span" className="font-bold text-xl">
                     📝 Edit Course Content
                 </Typography>
                 <IconButton

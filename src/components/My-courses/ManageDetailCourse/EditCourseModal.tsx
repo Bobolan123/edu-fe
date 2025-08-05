@@ -110,7 +110,7 @@ export default function EditCourseModal({
                     mb: 2,
                 }}
             >
-                <Typography variant="h5" className="font-bold">
+                <Typography component="span" className="font-bold text-xl">
                     🎨 Edit Course Details
                 </Typography>
                 <IconButton
