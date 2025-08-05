@@ -37,3 +37,42 @@ export async function exchangeCurrency(
     return to === "USD" ? amount / rate : amount * rate;
 }
 
+
+export function isValidCloudinaryVideoUrl(url: string | null | undefined): boolean {
+    // 1. Ensure the URL is a non-empty string
+    if (!url) {
+      return false;
+    }
+  
+    try {
+      const parsedUrl = new URL(url);
+  
+      // 2. Enforce the hostname is exactly 'res.cloudinary.com'
+      if (parsedUrl.hostname !== 'res.cloudinary.com') {
+        return false;
+      }
+  
+      // 3. Enforce HTTPS protocol, as Cloudinary resources are served securely
+      if (parsedUrl.protocol !== 'https:') {
+        return false;
+      }
+  
+      // 4. Check that the path structure contains '/video/upload/'
+      // This is characteristic of Cloudinary video URLs.
+      if (!parsedUrl.pathname.includes('/video/upload/')) {
+          return false;
+      }
+  
+      // 5. Define a list of common video extensions
+      const videoExtensions = ['.mp4', '.mov', '.webm', '.avi', '.mkv', '.ogg', '.flv'];
+      
+      // 6. Check if the URL's pathname ends with one of the video extensions
+      const pathname = parsedUrl.pathname.toLowerCase();
+      return videoExtensions.some(ext => pathname.endsWith(ext));
+  
+    } catch (error) {
+      // If new URL() fails, it's not a valid URL.
+      return false;
+    }
+  }
+  
