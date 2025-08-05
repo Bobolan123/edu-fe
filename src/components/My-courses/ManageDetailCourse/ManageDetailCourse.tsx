@@ -29,6 +29,11 @@ import {
     InputLabel,
     Select,
     MenuItem,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from "@mui/material";
 import {
     People,
@@ -53,7 +58,7 @@ import CourseContentTab from "./CourseContentTab";
 import EditCourseModal from "./EditCourseModal";
 import ManageCourseContentModal from "./ManageCourseContentModal";
 import ServerPagination from "../../common/ServerPagination";
-import { uploadThumbnail } from "@/actions/coursesAction";
+import { uploadThumbnail, deleteCourse } from "@/actions/coursesAction";
 import toastService from "@/services/toast";
 
 interface ManageDetailCourseProps {
@@ -82,6 +87,8 @@ export default function ManageDetailCourse({
     const [editCourseModalOpen, setEditCourseModalOpen] = useState(false);
     const [manageContentModalOpen, setManageContentModalOpen] = useState(false);
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     const totalLectures = courseContent?.sections.reduce(
         (acc, section) => acc + section.totalLectures,
@@ -125,6 +132,21 @@ export default function ManageDetailCourse({
             toastService.error("Failed to upload thumbnail. Please try again.");
         } finally {
             setThumbnailUploading(false);
+        }
+    };
+
+    const handleDeleteCourse = async () => {
+        try {
+            setDeleting(true);
+            await deleteCourse(course.id.toString());
+            toastService.success("Course deleted successfully");
+            // Redirect to courses page
+            router.push("/my-courses");
+        } catch (error: any) {
+            toastService.error(error.message || "Failed to delete course. Please try again.");
+        } finally {
+            setDeleting(false);
+            setDeleteDialogOpen(false);
         }
     };
 
@@ -1073,9 +1095,7 @@ export default function ManageDetailCourse({
                                         variant="contained"
                                         color="error"
                                         startIcon={<DeleteOutlined />}
-                                        onClick={() =>
-                                            console.log("Delete course logic")
-                                        }
+                                        onClick={() => setDeleteDialogOpen(true)}
                                         sx={{
                                             background:
                                                 "linear-gradient(45deg, #dc2626, #b91c1c)",
@@ -1114,6 +1134,68 @@ export default function ManageDetailCourse({
                     courseId={course.id}
                 />
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={() => setDeleteDialogOpen(false)}
+                PaperProps={{
+                    style: {
+                        borderRadius: "24px",
+                        padding: "8px",
+                    },
+                }}
+            >
+                <DialogTitle sx={{ fontWeight: "bold", color: "#dc2626", fontSize: "1.5rem" }}>
+                    ⚠️ Delete Course
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText sx={{ fontSize: "1rem", lineHeight: 1.6 }}>
+                        Are you sure you want to delete <strong>"{course.title}"</strong>?
+                        <br /><br />
+                        This action will permanently remove:
+                        <br />• All course content and materials
+                        <br />• Student enrollments and progress
+                        <br />• Reviews and ratings
+                        <br />• Revenue history
+                        <br /><br />
+                        <strong style={{ color: "#dc2626" }}>This action cannot be undone.</strong>
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={{ p: 3, gap: 2 }}>
+                    <Button
+                        onClick={() => setDeleteDialogOpen(false)}
+                        sx={{
+                            borderRadius: "16px",
+                            textTransform: "none",
+                            fontWeight: "bold",
+                            px: 4,
+                            py: 1.5,
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleDeleteCourse}
+                        variant="contained"
+                        color="error"
+                        disabled={deleting}
+                        sx={{
+                            background: "linear-gradient(45deg, #dc2626, #b91c1c)",
+                            borderRadius: "16px",
+                            textTransform: "none",
+                            fontWeight: "bold",
+                            px: 4,
+                            py: 1.5,
+                            "&:hover": {
+                                background: "linear-gradient(45deg, #b91c1c, #991b1b)",
+                            },
+                        }}
+                    >
+                        {deleting ? "Deleting..." : "Delete Forever"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
