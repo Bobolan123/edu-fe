@@ -10,6 +10,11 @@
         "label": "Currency",
         "selector_label": "Select Currency"
     },
+    "NotFound": {
+        "title": "Page Not Found",
+        "description": "Sorry, the page you're looking for doesn't exist. It might have been moved, deleted, or you entered the wrong URL.",
+        "backHome": "Back to Home"
+    },
     "MyLearning": {
         "title": "My Learning Journey ✨",
         "subtitle": "🚀 Keep exploring, keep growing! Your future self will thank you 💪",
