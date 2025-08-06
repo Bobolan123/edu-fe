@@ -422,12 +422,17 @@
         "video_not_supported": "Trình duyệt của bạn không hỗ trợ thẻ video."
     },
     "CategoriesSection": {
-        "title": "Duyệt Danh Mục",
-        "description": "Khám phá các khóa học theo từng chủ đề khác nhau"
+        "title": "Danh Mục Phổ Biến",
+        "description": "Khám phá các khóa học theo sở thích của bạn",
+        "trending": "Xu Hướng",
+        "explore": "Khám Phá →",
+        "default_description": "Khám phá các khóa học tuyệt vời trong {categoryName}"
     },
     "FeaturedCoursesSection": {
         "title": "Khóa Học Nổi Bật",
+        "description": "Các khóa học được chọn lọc bởi đội ngũ chuyên gia của chúng tôi",
         "by_instructor": "bởi {instructor}",
+        "instructor": "Giảng Viên",
         "learn_more": "Tìm Hiểu Thêm"
     },
     "LearningFeaturesSection": {

@@ -82,10 +82,10 @@ export default function FeaturedCoursesSection({
                         gap: 1,
                     }}
                 >
-                    ⭐ Featured Courses
+                    ⭐ {t('title')}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                    Hand-picked courses by our expert team
+                    {t('description')}
                 </Typography>
             </Box>
 
@@ -232,7 +232,7 @@ export default function FeaturedCoursesSection({
                                             }}
                                         >
                                             {course.instructor?.name ||
-                                                "Instructor"}
+                                                t('instructor')}
                                         </Typography>
                                     </Box>
 
@@ -332,7 +332,7 @@ export default function FeaturedCoursesSection({
                                         height: "44px",
                                     }}
                                 >
-                                    View Course
+                                    {t('learn_more')}
                                 </Button>
                             </CardContent>
                         </Card>

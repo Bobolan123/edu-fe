@@ -78,10 +78,10 @@ export default function CategoriesSection({
                                     gap: 1,
                                 }}
                             >
-                                🏷️ Popular Categories
+                                🏷️ {t('title')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary">
-                                Explore courses by your interests
+                                {t('description')}
                             </Typography>
                         </Box>
                     </Box>
@@ -198,7 +198,7 @@ export default function CategoriesSection({
                                                     </Paper>
                                                     <Chip
                                                         size="small"
-                                                        label="Trending"
+                                                        label={t('trending')}
                                                         sx={{
                                                             bgcolor:
                                                                 "success.100",
@@ -243,7 +243,7 @@ export default function CategoriesSection({
                                                             }}
                                                         >
                                                             {category.description ||
-                                                                `Discover amazing courses in ${category.name}`}
+                                                                t('default_description', { categoryName: category.name })}
                                                         </Typography>
                                                         <Typography
                                                             variant="caption"
@@ -257,7 +257,7 @@ export default function CategoriesSection({
                                                                 alignSelf: 'flex-end'
                                                             }}
                                                         >
-                                                            Explore →
+                                                            {t('explore')}
                                                         </Typography>
                                                     </Box>
                                                 </Box>

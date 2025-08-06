@@ -407,12 +407,17 @@
         "video_not_supported": "Your browser does not support the video tag."
     },
     "CategoriesSection": {
-        "title": "Browse Categories",
-        "description": "Discover courses across different subjects"
+        "title": "Popular Categories",
+        "description": "Explore courses by your interests",
+        "trending": "Trending",
+        "explore": "Explore →",
+        "default_description": "Discover amazing courses in {categoryName}"
     },
     "FeaturedCoursesSection": {
         "title": "Featured Courses",
+        "description": "Hand-picked courses by our expert team",
         "by_instructor": "by {instructor}",
+        "instructor": "Instructor",
         "learn_more": "Learn More"
     },
     "LearningFeaturesSection": {
