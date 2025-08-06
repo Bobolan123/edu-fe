@@ -10,14 +10,18 @@ import {
     Card,
     CardContent,
     CardMedia,
-    CardActions,
     Button,
     Container,
     Chip,
+    Avatar,
 } from "@mui/material";
 import {
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
+    Star,
+    Person,
+    PlayCircle,
+    ArrowRight,
 } from "@mui/icons-material";
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";
@@ -34,8 +38,9 @@ function CoursePrice({ price }: { price: number }) {
     const [convertedPrice, setConvertedPrice] = useState(price);
 
     useEffect(() => {
-        if (currency === 'USD') {
-            currencyService.convertPrice(price, 'VND', 'USD')
+        if (currency === "USD") {
+            currencyService
+                .convertPrice(price, "VND", "USD")
                 .then(setConvertedPrice)
                 .catch(() => setConvertedPrice(price));
         } else {
@@ -49,7 +54,7 @@ function CoursePrice({ price }: { price: number }) {
 export default function FeaturedCoursesSection({
     courses,
 }: IFeaturedCoursesSectionProps) {
-    const t = useTranslations('FeaturedCoursesSection');
+    const t = useTranslations("FeaturedCoursesSection");
     const courseRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: "left" | "right") => {
@@ -64,99 +69,275 @@ export default function FeaturedCoursesSection({
 
     return (
         <Container maxWidth="lg" sx={{ py: 6 }}>
-            <div className="flex justify-between items-center mb-6">
-                <Typography variant="h4" component="h2">
-                    {t('title')}
+            <Box sx={{ textAlign: "center", mb: 4 }}>
+                <Typography
+                    variant="h4"
+                    component="h2"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                    }}
+                >
+                    ⭐ Featured Courses
                 </Typography>
-                <div className="flex gap-2">
-                    <IconButton onClick={() => scroll("left")}>
-                        <ChevronLeftIcon />
-                    </IconButton>
-                    <IconButton onClick={() => scroll("right")}>
-                        <ChevronRightIcon />
-                    </IconButton>
-                </div>
-            </div>
+                <Typography variant="body1" color="text.secondary">
+                    Hand-picked courses by our expert team
+                </Typography>
+            </Box>
 
-            <Box
-                ref={courseRef}
-                className="flex overflow-x-hidden scroll-smooth gap-4 pb-4"
-                sx={{
-                    "&::-webkit-scrollbar": { display: "none" },
-                    scrollbarWidth: "none",
-                }}
-            >
-                {courses?.map((course) => (
-                    <Card
-                        key={course.id}
-                        className="min-w-[280px] flex flex-col justify-between hover:shadow-lg transition-shadow"
-                        sx={{
-                            height: 360,
-                            borderRadius: 2,
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                        }}
-                    >
-                        <Link
-                            href={`/courses/${slugify(course.title)}/?id=${course.id}`}
+            <Box sx={{ position: "relative" }}>
+                {/* Left Arrow */}
+                <IconButton
+                    onClick={() => scroll("left")}
+                    sx={{
+                        position: "absolute",
+                        left: -50,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 2,
+                        bgcolor: "white",
+                        boxShadow: 2,
+                        "&:hover": {
+                            bgcolor: "grey.100",
+                            transform: "translateY(-50%) scale(1.05)",
+                        },
+                        transition: "all 0.3s ease",
+                    }}
+                >
+                    <ChevronLeftIcon />
+                </IconButton>
+
+                {/* Right Arrow */}
+                <IconButton
+                    onClick={() => scroll("right")}
+                    sx={{
+                        position: "absolute",
+                        right: -50,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 2,
+                        bgcolor: "white",
+                        boxShadow: 2,
+                        "&:hover": {
+                            bgcolor: "grey.100",
+                            transform: "translateY(-50%) scale(1.05)",
+                        },
+                        transition: "all 0.3s ease",
+                    }}
+                >
+                    <ChevronRightIcon />
+                </IconButton>
+
+                <Box
+                    ref={courseRef}
+                    sx={{
+                        display: "flex",
+                        gap: 3,
+                        overflowX: "auto",
+                        pb: 2,
+                        scrollbarWidth: "none",
+                        "&::-webkit-scrollbar": { display: "none" },
+                    }}
+                >
+                    {courses?.map((course, index) => (
+                        <Card
+                            key={course.id}
+                            sx={{
+                                minWidth: 320,
+                                width: 320,
+                                height: 460,
+                                borderRadius: 3,
+                                transition: "all 0.3s ease",
+                                cursor: "pointer",
+                                border: "1px solid",
+                                borderColor: "divider",
+                                display: "flex",
+                                flexDirection: "column",
+                                "&:hover": {
+                                    transform: "translateY(-8px)",
+                                    boxShadow: 6,
+                                    borderColor: "primary.main",
+                                },
+                            }}
                         >
-                            <CardMedia
-                                component="img"
-                                image={
-                                    course.thumbnail_url || "/img_not_found.png"
-                                }
-                                alt={course.title}
-                                sx={{
-                                    height: 160,
-                                    objectFit: "cover",
-                                    width: "100%",
-                                }}
-                            />
-                            <CardContent className="flex-1">
-                                <Typography variant="h6" component="h3" noWrap>
-                                    {course.title}
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                >
-                                    {t('by_instructor', { instructor: course.instructor?.name })}
-                                </Typography>
-                                <Typography
-                                    variant="h6"
-                                    color="primary"
-                                    className="mt-2"
-                                >
-                                    <CoursePrice price={course.price} />
-                                </Typography>
+                                <Box sx={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */ }}>
+                                    <CardMedia
+                                        component="img"
+                                        image={
+                                            course.thumbnail_url ||
+                                            "/img_not_found.png"
+                                        }
+                                        alt={course.title}
+                                        sx={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: "cover"
+                                        }}
+                                    />
+                                </Box>
 
-                                {course.categories?.length > 0 && (
-                                    <Box className="flex flex-wrap gap-1 mt-2">
+                            <CardContent
+                                sx={{
+                                    p: 2.5,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    flexGrow: 1,
+                                }}
+                            >
+                                <Box sx={{ flexGrow: 1 }}>
+                                    <Typography
+                                        variant="h6"
+                                        component="h3"
+                                        fontWeight="bold"
+                                        sx={{
+                                            height: "3.6em",
+                                            display: "-webkit-box",
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: "vertical",
+                                            overflow: "hidden",
+                                            fontSize: "1.1rem",
+                                        }}
+                                    >
+                                        {course.title}
+                                    </Typography>
+
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            mb: 1.5,
+                                            gap: 1,
+                                            height: "28px",
+                                        }}
+                                    >
+                                        <Avatar sx={{ width: 28, height: 28 }}>
+                                            <Person sx={{ fontSize: 18 }} />
+                                        </Avatar>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            fontWeight="medium"
+                                            sx={{
+                                                fontSize: "0.9rem",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {course.instructor?.name ||
+                                                "Instructor"}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            mb: 1.5,
+                                            height: "28px",
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 1,
+                                            }}
+                                        >
+                                            <Star
+                                                sx={{
+                                                    fontSize: 18,
+                                                    color: "#ffd700",
+                                                }}
+                                            />
+                                            <Typography
+                                                variant="body2"
+                                                fontWeight="bold"
+                                                sx={{ fontSize: "0.9rem" }}
+                                            >
+                                                4.5
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ fontSize: "0.9rem" }}
+                                            >
+                                                (100)
+                                            </Typography>
+                                        </Box>
+                                        <Typography
+                                            variant="h6"
+                                            color="primary"
+                                            fontWeight="bold"
+                                            sx={{ fontSize: "1.1rem" }}
+                                        >
+                                            <CoursePrice price={course.price} />
+                                        </Typography>
+                                    </Box>
+
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            gap: 1,
+                                            mb: 1.5,
+                                            flexWrap: "wrap",
+                                            minHeight: "28px",
+                                            alignItems: "center",
+                                        }}
+                                    >
                                         {course.categories
-                                            .slice(0, 3)
+                                            ?.slice(0, 2)
                                             .map((category) => (
                                                 <Chip
                                                     key={category.id}
                                                     label={category.name}
-                                                    size="small"
+                                                    size="medium"
+                                                    variant="outlined"
                                                     sx={{
-                                                        backgroundColor:
-                                                            "#f0f0f0",
-                                                        fontWeight: 500,
+                                                        borderRadius: 2,
+                                                        fontSize: "0.8rem",
+                                                        height: "28px",
+                                                        fontWeight: "medium",
                                                     }}
                                                 />
                                             ))}
                                     </Box>
-                                )}
-                            </CardContent>
+                                </Box>
 
-                            <CardActions className="px-4 pb-4 pt-0">
-                                <Button size="small" color="primary">
-                                    {t('learn_more')}
+                                <Button
+                                    component={Link}
+                                    href={`/courses/${slugify(
+                                        course.title
+                                    )}/?id=${course.id}`}
+                                    variant="contained"
+                                    fullWidth
+                                    endIcon={
+                                        <ArrowRight sx={{ fontSize: 20 }} />
+                                    }
+                                    sx={{
+                                        borderRadius: 2,
+                                        py: 1.5,
+                                        textTransform: "none",
+                                        fontWeight: "bold",
+                                        mt: "auto",
+                                        fontSize: "1rem",
+                                        height: "44px",
+                                    }}
+                                >
+                                    View Course
                                 </Button>
-                            </CardActions>
-                        </Link>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </Box>
             </Box>
         </Container>
     );
