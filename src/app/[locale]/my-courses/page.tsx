@@ -25,8 +25,6 @@ export default async function ManageMyCoursesPage(props: {
                 search: searchParams?.filter,
                 rating: searchParams?.rating,
                 categoryIds: searchParams?.categoryIds,
-                userId: session?.user?.id,
-                excludeEnrolled: true,
             },
             nextOption: { cache: "no-cache" },
         });

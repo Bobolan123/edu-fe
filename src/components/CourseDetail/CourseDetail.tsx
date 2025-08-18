@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
     Container,
     Grid,
@@ -16,15 +17,13 @@ import {
     AccessTime as AccessTimeIcon,
     Language as LanguageIcon,
     Check as CheckIcon,
-} from "@mui/icons-material";
-import { currencyService } from "@/service/currency";
-import { useCurrency } from "@/context/CurrencyContext";
-import { ICourse, ICourseContent } from "../../../types/entities";
-import {
     PlayArrow as PlayIcon,
     AccessTime as ClockIcon,
     MenuBook as BookIcon,
 } from "@mui/icons-material";
+import { currencyService } from "@/service/currency";
+import { useCurrency } from "@/context/CurrencyContext";
+import { ICourse, ICourseContent } from "../../../types/entities";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Play } from "lucide-react";
@@ -32,6 +31,8 @@ import { addCartItem } from "@/actions/cartActions";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
+import { getVideoType } from "../../../utils/utils";
+import VideoPreviewModal from "../VideoPreviewModal/VideoPreviewModal";
 
 interface ICourseDetailProps {
     course: ICourse;
@@ -45,6 +46,7 @@ export default function CourseDetail({
     const { data } = useSession();
     const t = useTranslations('CourseDetail');
     const { currency } = useCurrency();
+    const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
     const handleAddToCart = async (courseId: number) => {
         const res = await addCartItem(courseId);
@@ -54,6 +56,8 @@ export default function CourseDetail({
             toast.error(res?.message, { autoClose: 1000 });
         }
     };
+
+    const hasValidPreviewUrl = course?.preview_url && getVideoType(course.preview_url) !== 'unknown';
 
     return (
         <div className="my-8">
@@ -312,15 +316,70 @@ export default function CourseDetail({
                                     },
                                 }}
                             >
-                                <CardMedia
-                                    component="div"
+                                <Box
                                     sx={{
+                                        position: 'relative',
                                         height: 220,
-                                        backgroundImage: `url(${course?.thumbnail_url})`,
-                                        backgroundSize: "cover",
-                                        backgroundPosition: "center",
+                                        cursor: hasValidPreviewUrl ? 'pointer' : 'default',
+                                        '&:hover .preview-overlay': hasValidPreviewUrl ? {
+                                            opacity: 1,
+                                        } : {},
                                     }}
-                                />
+                                    onClick={() => hasValidPreviewUrl && setPreviewModalOpen(true)}
+                                >
+                                    <CardMedia
+                                        component="div"
+                                        sx={{
+                                            height: '100%',
+                                            backgroundImage: `url(${course?.thumbnail_url})`,
+                                            backgroundSize: "cover",
+                                            backgroundPosition: "center",
+                                        }}
+                                    />
+                                    {hasValidPreviewUrl && (
+                                        <Box
+                                            className="preview-overlay"
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                right: 0,
+                                                bottom: 0,
+                                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                opacity: 0,
+                                                transition: 'opacity 0.3s ease',
+                                                borderRadius: '4px 4px 0 0',
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    width: 60,
+                                                    height: 60,
+                                                    borderRadius: '50%',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transition: 'transform 0.2s ease',
+                                                    '&:hover': {
+                                                        transform: 'scale(1.1)',
+                                                    },
+                                                }}
+                                            >
+                                                <PlayIcon 
+                                                    sx={{ 
+                                                        fontSize: 30, 
+                                                        color: 'primary.main',
+                                                        marginLeft: '4px',
+                                                    }} 
+                                                />
+                                            </Box>
+                                        </Box>
+                                    )}
+                                </Box>
                                 <CardContent>
                                     <Box
                                         sx={{
@@ -379,6 +438,13 @@ export default function CourseDetail({
                     </Grid>
                 </Grid>
             </Container>
+            
+            <VideoPreviewModal
+                open={previewModalOpen}
+                onClose={() => setPreviewModalOpen(false)}
+                videoUrl={course?.preview_url}
+                title={course?.title}
+            />
         </div>
     );
 }

@@ -74,5 +74,73 @@ export function isValidCloudinaryVideoUrl(url: string | null | undefined): boole
       // If new URL() fails, it's not a valid URL.
       return false;
     }
-  }
+}
+
+export function isValidYouTubeUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+    
+    try {
+        const parsedUrl = new URL(url);
+        const hostname = parsedUrl.hostname.toLowerCase();
+        
+        // Check for various YouTube domains
+        const youtubeHosts = [
+            'www.youtube.com',
+            'youtube.com',
+            'youtu.be',
+            'm.youtube.com'
+        ];
+        
+        if (!youtubeHosts.includes(hostname)) {
+            return false;
+        }
+        
+        // For youtu.be format, check if there's a video ID in the path
+        if (hostname === 'youtu.be') {
+            return parsedUrl.pathname.length > 1;
+        }
+        
+        // For regular YouTube URLs, check for video ID parameter
+        if (hostname.includes('youtube.com')) {
+            return parsedUrl.searchParams.has('v') || parsedUrl.pathname.includes('/embed/');
+        }
+        
+        return false;
+    } catch (error) {
+        return false;
+    }
+}
+
+export function getVideoType(url: string | null | undefined): 'youtube' | 'cloudinary' | 'unknown' {
+    if (isValidYouTubeUrl(url)) return 'youtube';
+    if (isValidCloudinaryVideoUrl(url)) return 'cloudinary';
+    return 'unknown';
+}
+
+export function getYouTubeEmbedUrl(url: string): string | null {
+    try {
+        const parsedUrl = new URL(url);
+        const hostname = parsedUrl.hostname.toLowerCase();
+        
+        if (hostname === 'youtu.be') {
+            const videoId = parsedUrl.pathname.slice(1);
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+        
+        if (hostname.includes('youtube.com')) {
+            const videoId = parsedUrl.searchParams.get('v');
+            if (videoId) {
+                return `https://www.youtube.com/embed/${videoId}`;
+            }
+            
+            if (parsedUrl.pathname.includes('/embed/')) {
+                return url;
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        return null;
+    }
+}
   
