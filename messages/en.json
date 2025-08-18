@@ -353,7 +353,7 @@
         "logout": "Log out"
     },
     "LocaleSwitcher": {
-        "label": "Change language",
+        "label": "Locale",
         "locale": "{locale, select, vi {Vi} en {En} other {Unknown}}"
     },
     "Signup": {

@@ -144,6 +144,7 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
             transformOrigin={{ vertical: "top", horizontal: "right" }}
             open={isMenuOpen}
             onClose={handleMenuClose}
+            disableScrollLock={true}
             PaperProps={{
                 elevation: 16,
                 sx: {

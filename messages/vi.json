@@ -302,7 +302,6 @@
         "build_fullstack_example": "Xây dựng ứng dụng fullstack với React và Node.js",
         "add_learning_point": "Thêm Điểm Học Tập",
         "total_duration": "Tổng Thời Lượng",
-        "creating": "Đang tạo...",
         "duration": "Thời Lượng (Giờ)",
         "duration_minutes": "Thời Lượng (Phút)",
         "enter_section_title": "Nhập tiêu đề phần",
@@ -368,7 +367,7 @@
         "logout": "Đăng Xuất"
     },
     "LocaleSwitcher": {
-        "label": "Thay đổi ngôn ngữ",
+        "label": "Ngôn Ngữ",
         "locale": "{locale, select, vi {Vi} en {En} other {Không xác định}}"
     },
     "Signup": {
