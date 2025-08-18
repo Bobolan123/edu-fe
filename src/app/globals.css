@@ -75,19 +75,19 @@ body {
 
 /* Fixed navbar compensation */
 .main-content-with-navbar {
-    padding-top: 90px; /* Base navbar height + small buffer */
+    padding-top: 76px; /* Exact navbar height */
 }
 
 /* Responsive navbar spacing */
 @media (max-width: 768px) {
     .main-content-with-navbar {
-        padding-top: 85px; /* Adjusted for mobile */
+        padding-top: 76px; /* Consistent with navbar height */
     }
 }
 
 @media (max-width: 480px) {
     .main-content-with-navbar {
-        padding-top: 80px; /* Adjusted for very small screens */
+        padding-top: 76px; /* Consistent with navbar height */
     }
 }
 
