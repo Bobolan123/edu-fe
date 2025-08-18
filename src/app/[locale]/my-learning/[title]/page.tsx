@@ -59,7 +59,6 @@ export default async function CourseDetailPage({
             },
         },
     });
-
     const reviewDistribution = await sendRequest<
         IBackendRes<IReviewDistribution>
     >({

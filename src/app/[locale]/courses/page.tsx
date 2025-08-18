@@ -1,6 +1,8 @@
 import Courses from "@/components/Courses/Courses";
 import { sendRequest } from "../../../../utils/api";
 import { ICategory, ICourse } from "../../../../types/entities";
+import { getSession } from "next-auth/react";
+import { auth } from "@/auth";
 
 export default async function CoursesPage(props: {
     searchParams?: {
@@ -18,6 +20,7 @@ export default async function CoursesPage(props: {
         categoryIds?: string | string[]; 
     };
 }) {
+    const session = await auth();
     const searchParams = props.searchParams || {};
     const currentPage = Number(searchParams?.page) || 1;
     const take = Number(searchParams?.take) || 5;
@@ -37,6 +40,9 @@ export default async function CoursesPage(props: {
             orderBy: searchParams?.orderBy || 'id',
             order: searchParams?.order || 'DESC',
             categoryIds: searchParams?.categoryIds,
+            userId: session?.user?.id,
+            excludeEnrolled: true,
+
         },
         nextOption: { cache: "no-cache" },
     });
