@@ -18,6 +18,7 @@ const pages = {
 
 const authPages = ["/login", "/signup"];
 const protectedPages: string[] = [];
+const adminPages = ["/admin", "/admin/*"];
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -36,7 +37,7 @@ const testPagesRegex = (pages: string[], pathname: string) => {
 
 const handleLocaleRedirect = async (req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
-  const search = req.nextUrl.search; // 👈 Preserve query params
+  const search = req.nextUrl.search; 
 
   if (locales.some((locale) => pathname.startsWith(`/${locale}`))) {
     return null;
@@ -52,14 +53,32 @@ const handleLocaleRedirect = async (req: NextRequest) => {
 const handleAuth = async (
   req: NextRequest,
   isAuthPage: boolean,
-  isProtectedPage: boolean
+  isProtectedPage: boolean,
+  isAdminPage: boolean
 ) => {
   const session = await auth();
   const isAuth = session?.user;
 
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale;
-  const search = req.nextUrl.search; // 👈 Preserve query params here too
+  const search = req.nextUrl.search; 
+
+  // Check admin access
+  // if (isAdminPage) {
+  //   if (!isAuth) {
+  //     return NextResponse.redirect(
+  //       new URL(`/${locale}${pages.auth.signin()}${search}`, req.url)
+  //     );
+  //   }
+  //   
+  //   // Check if user has admin role
+  //   // const userRole = (session?.user as any)?.role;
+  //   // if (userRole !== "admin") {
+  //   //   return NextResponse.redirect(
+  //   //     new URL(`/${locale}${pages.home.root}${search}`, req.url)
+  //   //   );
+  //   // }
+  // }
 
   if (!isAuth && isProtectedPage) {
     return NextResponse.redirect(
@@ -82,8 +101,9 @@ export default async function middleware(req: NextRequest) {
 
   const isAuthPage = testPagesRegex(authPages, req.nextUrl.pathname);
   const isProtectedPage = testPagesRegex(protectedPages, req.nextUrl.pathname);
+  const isAdminPage = testPagesRegex(adminPages, req.nextUrl.pathname);
 
-  return await handleAuth(req, isAuthPage, isProtectedPage);
+  return await handleAuth(req, isAuthPage, isProtectedPage, isAdminPage);
 }
 
 export const config = {

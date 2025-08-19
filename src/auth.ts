@@ -31,7 +31,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         email: res.data.email,
                         id: String(res.data.id),
                         name: res.data.name,
-                        access_token:res.data.access_token
+                        access_token:res.data.access_token,
+                        role: res.data.role || "user"
                     };
                 } else if (res?.statusCode === 403) {
                     throw new InvalidActive();
