@@ -1,12 +1,22 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
     Box,
     Typography,
     Paper,
+    CircularProgress,
 } from "@mui/material";
-import AdminUsersTable from "@/components/Admin/Users/AdminUsersTable";
+import AdminUsersTableServer from "@/components/Admin/Users/AdminUsersTableServer";
 
-export default function AdminUsersPage() {
+interface AdminUsersPageProps {
+    searchParams: {
+        page?: string;
+        limit?: string;
+        role?: string;
+        search?: string;
+    };
+}
+
+export default function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
     return (
         <Box>
             <Box sx={{ mb: 3 }}>
@@ -19,7 +29,13 @@ export default function AdminUsersPage() {
             </Box>
 
             <Paper sx={{ p: 3 }}>
-                <AdminUsersTable />
+                <Suspense fallback={
+                    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                        <CircularProgress />
+                    </Box>
+                }>
+                    <AdminUsersTableServer searchParams={searchParams} />
+                </Suspense>
             </Paper>
         </Box>
     );

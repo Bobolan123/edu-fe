@@ -49,6 +49,41 @@ export const getCourses = async (queryParams?: any) => {
     return res.data;
 };
 
+export const getCoursesForAdmin = async (
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    category?: string
+): Promise<IModelPaginate<ICourse>> => {
+    const access_token = await getAccessToken();
+    
+    const queryParams: any = {
+        page,
+        take: limit,
+    };
+    
+    if (search) queryParams.search = search;
+    if (category) queryParams.category = category;
+
+    const res = await sendRequest<IModelPaginate<ICourse>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses`,
+        queryParams,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            next: { tags: ["admin-courses"] },
+        },
+    });
+
+    if (res?.statusCode !== 200 || !res?.data) {
+        throw new Error(res?.message || "Failed to fetch courses");
+    }
+
+    return res;
+};
+
 export const getCoursesByCategory = async (ids: string) => {
     const res = await sendRequest<IBackendRes<ICourse[]>>({
         method: "GET",

@@ -1,15 +1,23 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
     Box,
     Typography,
-    Button,
     Paper,
+    CircularProgress,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
-import AdminCoursesTable from "@/components/Admin/Courses/AdminCoursesTable";
+import AdminCoursesTableServer from "@/components/Admin/Courses/AdminCoursesTableServer";
 import AdminCourseForm from "@/components/Admin/Courses/AdminCourseForm";
 
-export default function AdminCoursesPage() {
+interface AdminCoursesPageProps {
+    searchParams: {
+        page?: string;
+        limit?: string;
+        category?: string;
+        search?: string;
+    };
+}
+
+export default function AdminCoursesPage({ searchParams }: AdminCoursesPageProps) {
     return (
         <Box>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
@@ -25,7 +33,13 @@ export default function AdminCoursesPage() {
             </Box>
 
             <Paper sx={{ p: 3 }}>
-                <AdminCoursesTable />
+                <Suspense fallback={
+                    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                        <CircularProgress />
+                    </Box>
+                }>
+                    <AdminCoursesTableServer searchParams={searchParams} />
+                </Suspense>
             </Paper>
         </Box>
     );

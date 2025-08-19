@@ -1,12 +1,23 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
     Box,
     Typography,
     Paper,
+    CircularProgress,
 } from "@mui/material";
-import AdminOrdersTable from "@/components/Admin/Orders/AdminOrdersTable";
+import AdminOrdersTableServer from "@/components/Admin/Orders/AdminOrdersTableServer";
+import { OrderStatus } from "../../../../../types/entities";
 
-export default function AdminOrdersPage() {
+interface AdminOrdersPageProps {
+    searchParams: {
+        page?: string;
+        limit?: string;
+        status?: OrderStatus;
+        search?: string;
+    };
+}
+
+export default function AdminOrdersPage({ searchParams }: AdminOrdersPageProps) {
     return (
         <Box>
             <Box sx={{ mb: 3 }}>
@@ -19,7 +30,13 @@ export default function AdminOrdersPage() {
             </Box>
 
             <Paper sx={{ p: 3 }}>
-                <AdminOrdersTable />
+                <Suspense fallback={
+                    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                        <CircularProgress />
+                    </Box>
+                }>
+                    <AdminOrdersTableServer searchParams={searchParams} />
+                </Suspense>
             </Paper>
         </Box>
     );

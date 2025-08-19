@@ -1,12 +1,21 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
     Box,
     Typography,
     Paper,
+    CircularProgress,
 } from "@mui/material";
-import AdminCategoriesTable from "@/components/Admin/Categories/AdminCategoriesTable";
+import AdminCategoriesTableServer from "@/components/Admin/Categories/AdminCategoriesTableServer";
 
-export default function AdminCategoriesPage() {
+interface AdminCategoriesPageProps {
+    searchParams: {
+        page?: string;
+        limit?: string;
+        search?: string;
+    };
+}
+
+export default function AdminCategoriesPage({ searchParams }: AdminCategoriesPageProps) {
     return (
         <Box>
             <Box sx={{ mb: 3 }}>
@@ -19,7 +28,13 @@ export default function AdminCategoriesPage() {
             </Box>
 
             <Paper sx={{ p: 3 }}>
-                <AdminCategoriesTable />
+                <Suspense fallback={
+                    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                        <CircularProgress />
+                    </Box>
+                }>
+                    <AdminCategoriesTableServer searchParams={searchParams} />
+                </Suspense>
             </Paper>
         </Box>
     );
