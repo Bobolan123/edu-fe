@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Admin - Educational Platform',
-  description: 'Educational Platform Admin Panel',
+  title: 'Admin Login - Educational Platform',
+  description: 'Admin login for Educational Platform',
 };
 
-export default function AdminLayout({
+export default function AdminLoginLayout({
   children,
 }: {
   children: React.ReactNode;
