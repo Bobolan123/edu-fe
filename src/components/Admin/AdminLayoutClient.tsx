@@ -27,6 +27,7 @@ import {
   Paper,
   Breadcrumbs,
   Link,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -40,10 +41,13 @@ import {
   Logout,
   NavigateNext,
   Home,
+  Security,
+  AdminPanelSettings,
 } from '@mui/icons-material';
 import { signOut } from 'next-auth/react';
 
 const drawerWidth = 280;
+const collapsedDrawerWidth = 72;
 
 const adminMenuItems = [
   { title: 'Dashboard', icon: Dashboard, path: '/admin' },
@@ -53,6 +57,8 @@ const adminMenuItems = [
   { title: 'Orders', icon: ShoppingCart, path: '/admin/orders' },
   { title: 'Reviews', icon: Reviews, path: '/admin/reviews' },
   { title: 'Enrollments', icon: School, path: '/admin/enrollments' },
+  { title: 'Roles', icon: Security, path: '/admin/roles' },
+  { title: 'Permissions', icon: AdminPanelSettings, path: '/admin/permissions' },
 ];
 
 interface AdminLayoutClientProps {
@@ -61,6 +67,7 @@ interface AdminLayoutClientProps {
 
 export default function AdminLayoutClient({ children }: AdminLayoutClientProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const { data: session, status } = useSession();
   const pathname = usePathname();
@@ -77,6 +84,10 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleDesktopToggle = () => {
+    setDesktopCollapsed(!desktopCollapsed);
   };
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -112,56 +123,90 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     return breadcrumbs;
   };
 
-  const drawer = (
+  const drawer = (collapsed: boolean = false) => (
     <Box>
       <Box
         sx={{
-          p: 3,
+          p: collapsed ? 1.5 : 3,
           background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
           color: 'white',
-          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          gap: collapsed ? 0 : 1.5,
+          transition: theme.transitions.create(['padding'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
-        <Typography variant="h5" component="h1" fontWeight={700}>
-          EduPlatform
-        </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-          Admin Dashboard
-        </Typography>
+        <IconButton
+          onClick={handleDesktopToggle}
+          sx={{ 
+            color: 'white',
+            display: { xs: 'none', lg: 'flex' },
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            },
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+        
+        {!collapsed ? (
+          <Box sx={{ textAlign: 'left' }}>
+            <Typography variant="h5" component="h1" fontWeight={700}>
+              MindfulMaze Admin
+            </Typography>
+
+          </Box>
+        ) : (
+          <Typography variant="h6" component="h1" fontWeight={700} sx={{ display: 'none' }}>
+            MMA
+          </Typography>
+        )}
       </Box>
       
-      <List sx={{ px: 2, py: 1 }}>
+      <List sx={{ px: collapsed ? 1 : 2, py: 1 }}>
         {adminMenuItems.map((item) => {
           const isActive = pathname === `/${locale}${item.path}`;
           const Icon = item.icon;
           
           return (
             <ListItem key={item.title} disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton
-                onClick={() => router.push(`/${locale}${item.path}`)}
-                sx={{
-                  borderRadius: '12px',
-                  minHeight: 48,
-                  backgroundColor: isActive ? 'primary.main' : 'transparent',
-                  color: isActive ? 'white' : 'text.primary',
-                  '&:hover': {
-                    backgroundColor: isActive ? 'primary.dark' : 'grey.100',
-                  },
-                  '& .MuiListItemIcon-root': {
-                    color: isActive ? 'white' : 'text.secondary',
-                  },
-                }}
-              >
-                <ListItemIcon>
-                  <Icon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary={item.title}
-                  primaryTypographyProps={{
-                    fontWeight: isActive ? 600 : 500,
+              <Tooltip title={collapsed ? item.title : ''} placement="right">
+                <ListItemButton
+                  onClick={() => router.push(`/${locale}${item.path}`)}
+                  sx={{
+                    borderRadius: '12px',
+                    minHeight: 48,
+                    backgroundColor: isActive ? 'primary.main' : 'transparent',
+                    color: isActive ? 'white' : 'text.primary',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    px: collapsed ? 1 : 2,
+                    '&:hover': {
+                      backgroundColor: isActive ? 'primary.dark' : 'grey.100',
+                    },
+                    '& .MuiListItemIcon-root': {
+                      color: isActive ? 'white' : 'text.secondary',
+                      minWidth: collapsed ? 'unset' : 56,
+                      mr: collapsed ? 0 : 2,
+                    },
                   }}
-                />
-              </ListItemButton>
+                >
+                  <ListItemIcon>
+                    <Icon />
+                  </ListItemIcon>
+                  {!collapsed && (
+                    <ListItemText 
+                      primary={item.title}
+                      primaryTypographyProps={{
+                        fontWeight: isActive ? 600 : 500,
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </Tooltip>
             </ListItem>
           );
         })}
@@ -191,18 +236,23 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
 
   const currentPageTitle = getPageTitle(pathname.replace(`/${locale}`, ''));
   const breadcrumbs = getBreadcrumbs(pathname);
+  const currentDrawerWidth = desktopCollapsed ? collapsedDrawerWidth : drawerWidth;
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default' }}>
       <AppBar
         position="fixed"
         sx={{
-          width: { lg: `calc(100% - ${drawerWidth}px)` },
-          ml: { lg: `${drawerWidth}px` },
+          width: { lg: `calc(100% - ${currentDrawerWidth}px)` },
+          ml: { lg: `${currentDrawerWidth}px` },
           backgroundColor: 'white',
           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
           borderBottom: '1px solid',
           borderColor: 'divider',
+          transition: theme.transitions.create(['margin-left', 'width'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
         <Toolbar>
@@ -312,7 +362,7 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
 
       <Box
         component="nav"
-        sx={{ width: { lg: drawerWidth }, flexShrink: { lg: 0 } }}
+        sx={{ width: { lg: currentDrawerWidth }, flexShrink: { lg: 0 } }}
       >
         <Drawer
           variant="temporary"
@@ -329,7 +379,7 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
             },
           }}
         >
-          {drawer}
+          {drawer(false)}
         </Drawer>
         
         <Drawer
@@ -338,14 +388,18 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
             display: { xs: 'none', lg: 'block' },
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
-              width: drawerWidth,
+              width: currentDrawerWidth,
               border: 'none',
               boxShadow: '4px 0 6px -1px rgba(0, 0, 0, 0.1)',
+              transition: theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
             },
           }}
           open
         >
-          {drawer}
+          {drawer(desktopCollapsed)}
         </Drawer>
       </Box>
 
@@ -353,9 +407,13 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
         component="main"
         sx={{
           flexGrow: 1,
-          width: { lg: `calc(100% - ${drawerWidth}px)` },
+          width: { lg: `calc(100% - ${currentDrawerWidth}px)` },
           minHeight: '100vh',
           backgroundColor: 'background.default',
+          transition: theme.transitions.create(['margin-left', 'width'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
         <Toolbar />
