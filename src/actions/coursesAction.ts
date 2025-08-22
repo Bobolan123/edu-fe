@@ -130,6 +130,7 @@ export const updateCourse = async (
     }
 
     revalidateTag("courses");
+    revalidateTag("admin-courses");
     revalidateTag(`course-${id}`);
     return res.data;
 };
@@ -149,7 +150,63 @@ export const deleteCourse = async (id: string) => {
     }
 
     revalidateTag("courses");
+    revalidateTag("admin-courses");
     return res;
+};
+
+export interface IAdminCreateCoursePayload {
+    title: string;
+    description: string;
+    price: number;
+    language: string;
+    active: boolean;
+    categoryIds: number[];
+}
+
+export const adminCreateCourse = async (
+    data: IAdminCreateCoursePayload
+) => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<ICourse>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses`,
+        body: data,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (!res?.data) {
+        throw new Error(res.message);
+    }
+    
+    revalidateTag("courses");
+    revalidateTag("admin-courses");
+    return res.data;
+};
+
+export const adminUpdateCourse = async (
+    id: string,
+    data: Partial<IAdminCreateCoursePayload>
+) => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<ICourse>>({
+        method: "PATCH",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
+        body: data,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (!res?.data) {
+        throw new Error(res.message);
+    }
+
+    revalidateTag("courses");
+    revalidateTag("admin-courses");
+    revalidateTag(`course-${id}`);
+    return res.data;
 };
 
 export const uploadThumbnail = async (

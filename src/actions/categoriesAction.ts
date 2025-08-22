@@ -32,21 +32,6 @@ export const getCategories = async (
     return res;
 };
 
-export const getAllCategories = async (): Promise<ICategory[]> => {
-    const res = await sendRequest<IBackendRes<ICategory[]>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/categories/all`,
-        nextOption: {
-            next: { tags: ["categories"] },
-        },
-    });
-    
-    if (!res?.data) {
-        throw new Error(res?.message || "Failed to fetch categories");
-    }
-    return res.data;
-};
-
 export const getCategoryById = async (id: number): Promise<ICategory> => {
     const res = await sendRequest<IBackendRes<ICategory>>({
         method: "GET",
