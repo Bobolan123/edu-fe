@@ -31,7 +31,7 @@ export const sendRequest = async <T>(props: IRequest) => { //type
     if (useCredentials) options.credentials = "include";
 
     if (queryParams) {
-        url = `${url}?${queryString.stringify(queryParams)}`;
+        url = `${url}?${queryString.stringify(queryParams, { arrayFormat: 'none' })}`;
     }
     console.log("api url ",url)
     return fetch(url, options).then(res => {
@@ -74,7 +74,7 @@ export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
     }
   
     if (queryParams) {
-      url = `${url}?${queryString.stringify(queryParams)}`;
+      url = `${url}?${queryString.stringify(queryParams, { arrayFormat: 'none' })}`;
     }
   
     return fetch(url, options).then(async (res) => {

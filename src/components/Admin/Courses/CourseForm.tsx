@@ -30,6 +30,8 @@ import {
 } from '@mui/icons-material';
 import { adminCreateCourse, adminUpdateCourse } from '../../../actions/coursesAction';
 import { ICategory, ICourse } from '../../../../types/entities';
+import { useCurrency } from '@/context/CurrencyContext';
+import { currencyService } from '@/service/currency';
 
 interface CourseFormData {
   title: string;
@@ -71,6 +73,7 @@ export function CourseForm({
   onError,
 }: CourseFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { currency } = useCurrency();
   const [formData, setFormData] = useState<CourseFormData>({
     title: '',
     description: '',
@@ -81,18 +84,20 @@ export function CourseForm({
   });
   const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([]);
   const [errors, setErrors] = useState<Partial<Record<keyof CourseFormData, string>>>({});
+  const [displayPrice, setDisplayPrice] = useState(0);
 
   useEffect(() => {
     if (course && mode === 'edit') {
       setFormData({
         title: course.title || '',
         description: course.description || '',
-        price: course.price || 0,
+        price: Math.round(course.price || 0),
         language: course.language || 'en',
         active: course.active ?? true,
         categoryIds: course.categories?.map(c => c.id) || [],
       });
       setSelectedCategories(course.categories || []);
+      setDisplayPrice(Math.round(course.price || 0));
     } else {
       setFormData({
         title: '',
@@ -103,8 +108,31 @@ export function CourseForm({
         categoryIds: [],
       });
       setSelectedCategories([]);
+      setDisplayPrice(0);
     }
   }, [course, mode, open]);
+
+  // Convert price for display based on selected currency
+  useEffect(() => {
+    const convertPriceForDisplay = async () => {
+      if (formData.price > 0) {
+        if (currency === "USD") {
+          try {
+            const converted = await currencyService.convertPrice(formData.price, "VND", "USD");
+            setDisplayPrice(Math.round(converted * 100) / 100); // Round to 2 decimal places for USD
+          } catch {
+            setDisplayPrice(formData.price);
+          }
+        } else {
+          setDisplayPrice(Math.round(formData.price)); // Round VND to integer
+        }
+      } else {
+        setDisplayPrice(0);
+      }
+    };
+
+    convertPriceForDisplay();
+  }, [formData.price, currency]);
 
   const handleClose = () => {
     setFormData({
@@ -117,6 +145,7 @@ export function CourseForm({
     });
     setSelectedCategories([]);
     setErrors({});
+    setDisplayPrice(0);
     onClose();
   };
 
@@ -137,10 +166,10 @@ export function CourseForm({
       newErrors.description = 'Description too long';
     }
 
-    if (formData.price < 0) {
+    if (displayPrice < 0) {
       newErrors.price = 'Price must be positive';
-    } else if (formData.price > 9999) {
-      newErrors.price = 'Price too high';
+    } else if (displayPrice > (currency === "USD" ? 100 : 100000000)) {
+      newErrors.price = `Price must be less than ${currency === "USD" ? "$100" : "₫100,000,000"}`;
     }
 
     if (formData.categoryIds.length === 0) {
@@ -184,6 +213,24 @@ export function CourseForm({
         ...prev,
         [field]: undefined
       }));
+    }
+  };
+
+  const handlePriceChange = async (displayValue: number) => {
+    setDisplayPrice(displayValue);
+    
+    // Convert display price back to VND for storage
+    if (currency === "USD" && displayValue > 0) {
+      try {
+        const vndPrice = await currencyService.convertPrice(displayValue, "USD", "VND");
+        // Ensure the price is stored as an integer (round to nearest VND)
+        handleInputChange('price', Math.round(vndPrice));
+      } catch {
+        handleInputChange('price', Math.round(displayValue));
+      }
+    } else {
+      // Ensure VND prices are also integers
+      handleInputChange('price', Math.round(displayValue));
     }
   };
 
@@ -245,25 +292,25 @@ export function CourseForm({
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Price *"
+                  label={`Price * (${currency})`}
                   fullWidth
                   type="number"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                  value={displayPrice}
+                  onChange={(e) => handlePriceChange(parseFloat(e.target.value) || 0)}
                   inputProps={{
                     min: 0,
-                    max: 9999,
-                    step: 0.01,
+                    max: currency === "USD" ? 100 : 100000000,
+                    step: currency === "USD" ? 0.01 : 1,
                   }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <AttachMoney />
+                        {currency === "USD" ? "$" : "₫"}
                       </InputAdornment>
                     ),
                   }}
                   error={!!errors.price}
-                  helperText={errors.price}
+                  helperText={errors.price || (currency === "USD" ? "Price will be stored in VND" : "Price in Vietnamese Dong")}
                   disabled={isPending}
                 />
               </Grid>

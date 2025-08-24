@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -17,6 +17,9 @@ import {
   InputAdornment,
   Alert,
   CircularProgress,
+  Chip,
+  OutlinedInput,
+  SelectChangeEvent,
 } from '@mui/material';
 import {
   Add,
@@ -26,12 +29,15 @@ import {
   People,
   Star,
   AttachMoney,
+  Clear,
 } from '@mui/icons-material';
 import { CourseTable } from './CourseTable';
 import { CourseForm } from './CourseForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { ICategory, ICourse } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
+import { useCurrency } from '@/context/CurrencyContext';
+import { currencyService } from '@/service/currency';
 
 interface AdminCoursesPageProps {
   courses: IModelPaginate<ICourse>;
@@ -39,9 +45,28 @@ interface AdminCoursesPageProps {
   searchParams: {
     page?: string;
     search?: string;
-    category?: string;
+    categoryIds?: string | string[];
     status?: string;
   };
+}
+
+// Component to handle currency formatting for revenue
+function RevenueDisplay({ revenue }: { revenue: number }) {
+  const { currency } = useCurrency();
+  const [convertedRevenue, setConvertedRevenue] = useState(revenue);
+
+  useEffect(() => {
+    if (currency === "USD") {
+      currencyService
+        .convertPrice(revenue, "VND", "USD")
+        .then(setConvertedRevenue)
+        .catch(() => setConvertedRevenue(revenue));
+    } else {
+      setConvertedRevenue(revenue);
+    }
+  }, [revenue, currency]);
+
+  return <>{currencyService.formatPrice(convertedRevenue, currency)}</>;
 }
 
 export default function AdminCoursesPage({ 
@@ -50,8 +75,18 @@ export default function AdminCoursesPage({
   searchParams 
 }: AdminCoursesPageProps) {
   const router = useRouter();
+  const { currency } = useCurrency();
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.category || 'all');
+  const [selectedCategories, setSelectedCategories] = useState<number[]>(() => {
+    if (searchParams.categoryIds) {
+      if (Array.isArray(searchParams.categoryIds)) {
+        return searchParams.categoryIds.map(Number).filter(Boolean);
+      } else {
+        return [Number(searchParams.categoryIds)].filter(Boolean);
+      }
+    }
+    return [];
+  });
   const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -61,39 +96,79 @@ export default function AdminCoursesPage({
   const [error, setError] = useState<string | null>(null);
 
   const updateURL = (params: Record<string, string | undefined>) => {
-    const url = new URL(window.location.href);
-    Object.entries(params).forEach(([key, value]) => {
-      if (value && value !== 'all') {
-        url.searchParams.set(key, value);
-      } else {
-        url.searchParams.delete(key);
-      }
-    });
-    router.push(url.pathname + url.search);
+    const searchParams = new URLSearchParams();
+    
+    // Add search parameter
+    if (params.search && params.search !== '') {
+      searchParams.set('search', params.search);
+    }
+    
+    // Add category parameters - each category ID as separate parameter
+    if (params.category && params.category !== '') {
+      const categoryIds = params.category.split(',');
+      categoryIds.forEach(id => {
+        searchParams.append('categoryIds', id);
+      });
+    }
+    
+    // Add status parameter
+    if (params.status && params.status !== 'all') {
+      searchParams.set('status', params.status);
+    }
+    
+    // Add page parameter
+    if (params.page) {
+      searchParams.set('page', params.page);
+    }
+    
+    const queryString = searchParams.toString();
+    const newUrl = window.location.pathname + (queryString ? '?' + queryString : '');
+    router.push(newUrl);
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearchTerm(value);
-    updateURL({ search: value, category: selectedCategory, status: selectedStatus, page: '1' });
+    // Only update state, don't trigger URL change
   };
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    updateURL({ search: searchTerm, category, status: selectedStatus, page: '1' });
+  const handleCategoryChange = (categoryIds: number[]) => {
+    setSelectedCategories(categoryIds);
+    // Only update state, don't trigger URL change
   };
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
-    updateURL({ search: searchTerm, category: selectedCategory, status, page: '1' });
+    // Only update state, don't trigger URL change
   };
 
   const handlePageChange = (newPage: number) => {
     updateURL({ 
       search: searchTerm, 
-      category: selectedCategory, 
+      category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
       status: selectedStatus, 
       page: (newPage + 1).toString() 
+    });
+  };
+
+  const handleApplyFilters = () => {
+    updateURL({ 
+      search: searchTerm, 
+      category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
+      status: selectedStatus !== 'all' ? selectedStatus : undefined, 
+      page: '1'  // Reset to first page when applying filters
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategories([]);
+    setSelectedStatus('all');
+    updateURL({
+      search: undefined,
+      category: undefined,
+      status: undefined,
+      page: '1'
     });
   };
 
@@ -235,7 +310,7 @@ export default function AdminCoursesPage({
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
               <AttachMoney sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
-                ${courses.data?.result?.reduce((sum, course) => sum + (course.price * course.total_students), 0)?.toLocaleString() || '0'}
+                <RevenueDisplay revenue={courses.data?.result?.reduce((sum, course) => sum + (course.price * course.total_students), 0) || 0} />
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Total Revenue
@@ -267,15 +342,29 @@ export default function AdminCoursesPage({
             
             <Grid item xs={12} md={3}>
               <FormControl fullWidth>
-                <InputLabel>Category</InputLabel>
+                <InputLabel>Categories</InputLabel>
                 <Select
-                  value={selectedCategory}
-                  label="Category"
-                  onChange={(e) => handleCategoryChange(e.target.value as string)}
+                  multiple
+                  value={selectedCategories}
+                  label="Categories"
+                  onChange={(e: SelectChangeEvent<number[]>) => {
+                    const value = e.target.value;
+                    handleCategoryChange(typeof value === 'string' ? [] : value as number[]);
+                  }}
+                  input={<OutlinedInput label="Categories" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {(selected as number[]).map((value) => {
+                        const category = categories.find(c => c.id === value);
+                        return (
+                          <Chip key={value} label={category?.name} size="small" />
+                        );
+                      })}
+                    </Box>
+                  )}
                 >
-                  <MenuItem value="all">All Categories</MenuItem>
                   {categories.map((category) => (
-                    <MenuItem key={category.id} value={category.id.toString()}>
+                    <MenuItem key={category.id} value={category.id}>
                       {category.name}
                     </MenuItem>
                   ))}
@@ -299,14 +388,24 @@ export default function AdminCoursesPage({
             </Grid>
             
             <Grid item xs={12} md={2}>
-              <Button
-                variant="outlined"
-                startIcon={<FilterList />}
-                fullWidth
-                sx={{ height: 56 }}
-              >
-                Filters
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<FilterList />}
+                  onClick={handleApplyFilters}
+                  sx={{ flex: 1, minWidth: 0 }}
+                >
+                  Apply
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Clear />}
+                  onClick={handleClearFilters}
+                  sx={{ flex: 1, minWidth: 0 }}
+                >
+                  Clear
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </CardContent>

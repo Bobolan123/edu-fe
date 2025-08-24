@@ -26,8 +26,10 @@ import {
   School,
   Star,
 } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ICourse } from '../../../../types/entities';
+import { useCurrency } from '@/context/CurrencyContext';
+import { currencyService } from '@/service/currency';
 
 interface CourseTableProps {
   courses: ICourse[];
@@ -43,6 +45,25 @@ const statusColors = {
   true: 'success',
   false: 'error',
 } as const;
+
+// Component to handle currency formatting for course prices
+function CoursePrice({ price }: { price: number }) {
+  const { currency } = useCurrency();
+  const [convertedPrice, setConvertedPrice] = useState(price);
+
+  useEffect(() => {
+    if (currency === "USD") {
+      currencyService
+        .convertPrice(price, "VND", "USD")
+        .then(setConvertedPrice)
+        .catch(() => setConvertedPrice(price));
+    } else {
+      setConvertedPrice(price);
+    }
+  }, [price, currency]);
+
+  return <>{currencyService.formatPrice(convertedPrice, currency)}</>;
+}
 
 export function CourseTable({
   courses,
@@ -171,7 +192,7 @@ export function CourseTable({
                   
                   <TableCell align="right">
                     <Typography variant="body2" fontWeight={600}>
-                      ${course.price || 0}
+                      <CoursePrice price={course.price || 0} />
                     </Typography>
                   </TableCell>
                   

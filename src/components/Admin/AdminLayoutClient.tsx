@@ -45,6 +45,8 @@ import {
   AdminPanelSettings,
 } from '@mui/icons-material';
 import { signOut } from 'next-auth/react';
+import LocaleSwitcher from '../Navbar/LocaleSwitcher';
+import CurrencySelector from '../Navbar/CurrencySelector';
 
 const drawerWidth = 280;
 const collapsedDrawerWidth = 72;
@@ -300,6 +302,8 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <LocaleSwitcher />
+            <CurrencySelector />
             <IconButton
               onClick={handleUserMenuOpen}
               sx={{ p: 0 }}
