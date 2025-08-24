@@ -21,13 +21,13 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     const status = searchParams.status !== 'all' ? searchParams.status : undefined;
 
     const [coursesResponse, categories] = await Promise.all([
-      getCoursesForAdmin(page, limit, search, category),
+      getCoursesForAdmin(page, limit, search, category,status),
       getCategories(1, 1000)
     ]);
 
     return (
       <AdminCoursesPage 
-        initialCourses={coursesResponse} 
+        courses={coursesResponse} 
         categories={categories.data?.result || []}
         searchParams={searchParams}
       />

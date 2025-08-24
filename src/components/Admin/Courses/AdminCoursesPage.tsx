@@ -31,9 +31,10 @@ import { CourseTable } from './CourseTable';
 import { CourseForm } from './CourseForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { ICategory, ICourse } from '../../../../types/entities';
+import { toastService } from '../../../services/toast';
 
 interface AdminCoursesPageProps {
-  initialCourses: IModelPaginate<ICourse>;
+  courses: IModelPaginate<ICourse>;
   categories: ICategory[];
   searchParams: {
     page?: string;
@@ -44,12 +45,11 @@ interface AdminCoursesPageProps {
 }
 
 export default function AdminCoursesPage({ 
-  initialCourses, 
+  courses, 
   categories, 
   searchParams 
 }: AdminCoursesPageProps) {
   const router = useRouter();
-  const [courses, setCourses] = useState<IModelPaginate<ICourse>>(initialCourses);
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.category || 'all');
   const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
@@ -114,6 +114,7 @@ export default function AdminCoursesPage({
   const handleCreateSuccess = () => {
     setCreateDialogOpen(false);
     setError(null);
+    toastService.success('Course created successfully!');
     // Force a router refresh to get updated data from server component
     router.refresh();
   };
@@ -122,6 +123,7 @@ export default function AdminCoursesPage({
     setEditDialogOpen(false);
     setSelectedCourse(null);
     setError(null);
+    toastService.success('Course updated successfully!');
     // Force a router refresh to get updated data from server component
     router.refresh();
   };
@@ -130,6 +132,7 @@ export default function AdminCoursesPage({
     setDeleteDialogOpen(false);
     setSelectedCourse(null);
     setError(null);
+    toastService.success('Course deleted successfully!');
     // Force a router refresh to get updated data from server component
     router.refresh();
   };
@@ -137,6 +140,7 @@ export default function AdminCoursesPage({
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
     setLoading(false);
+    toastService.error(errorMessage);
   };
 
   if (loading) {

@@ -34,7 +34,6 @@ import {
   Checkbox,
   ListItemText,
   Alert,
-  Snackbar,
 } from '@mui/material';
 import {
   Search,
@@ -59,6 +58,7 @@ import {
   IRoleUpdatePermissionsRequest
 } from '../../../actions/rolesAction';
 import { getPermissions } from '../../../actions/permissionsAction';
+import { toastService } from '../../../services/toast';
 
 export default function AdminRolesPage() {
   const [roles, setRoles] = useState<IRole[]>([]);
@@ -79,13 +79,6 @@ export default function AdminRolesPage() {
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleDescription, setNewRoleDescription] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
-  
-  // Feedback states
-  const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success' | 'error'}>({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
 
   useEffect(() => {
     loadData();
@@ -101,15 +94,11 @@ export default function AdminRolesPage() {
       setRoles(rolesRes.data || []);
       setPermissions(permissionsRes.data || []);
     } catch (error) {
-      showSnackbar('Failed to load data', 'error');
+      toastService.error('Failed to load data');
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const showSnackbar = (message: string, severity: 'success' | 'error') => {
-    setSnackbar({ open: true, message, severity });
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,10 +138,11 @@ export default function AdminRolesPage() {
     if (selectedRole) {
       try {
         await deleteRole(selectedRole.id);
-        showSnackbar('Role deleted successfully', 'success');
+        toastService.success('Role deleted successfully!');
         loadData();
       } catch (error) {
-        showSnackbar('Failed to delete role', 'error');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete role';
+        toastService.error(errorMessage);
       }
     }
     handleMenuClose();
@@ -166,14 +156,15 @@ export default function AdminRolesPage() {
         permissions: selectedPermissions
       };
       await createRole(roleData);
-      showSnackbar('Role created successfully', 'success');
+      toastService.success('Role created successfully!');
       setCreateDialogOpen(false);
       setNewRoleName('');
       setNewRoleDescription('');
       setSelectedPermissions([]);
       loadData();
     } catch (error) {
-      showSnackbar('Failed to create role', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create role';
+      toastService.error(errorMessage);
     }
   };
 
@@ -185,11 +176,12 @@ export default function AdminRolesPage() {
           permissions: selectedPermissions
         };
         await updateRolePermissions(updateData);
-        showSnackbar('Role permissions updated successfully', 'success');
+        toastService.success('Role permissions updated successfully!');
         setEditPermissionsDialogOpen(false);
         loadData();
       } catch (error) {
-        showSnackbar('Failed to update role permissions', 'error');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to update role permissions';
+        toastService.error(errorMessage);
       }
     }
   };
@@ -621,20 +613,6 @@ export default function AdminRolesPage() {
       <EditPermissionsDialog />
       <ViewRoleDialog />
 
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }

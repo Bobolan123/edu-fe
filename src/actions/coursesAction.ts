@@ -53,7 +53,8 @@ export const getCoursesForAdmin = async (
     page: number = 1,
     limit: number = 10,
     search?: string,
-    category?: string
+    category?: string,
+    status?: string
 ): Promise<IModelPaginate<ICourse>> => {
     const access_token = await getAccessToken();
     
@@ -64,6 +65,7 @@ export const getCoursesForAdmin = async (
     
     if (search) queryParams.search = search;
     if (category) queryParams.category = category;
+    if (status) queryParams.status = status;
 
     const res = await sendRequest<IModelPaginate<ICourse>>({
         method: "GET",
