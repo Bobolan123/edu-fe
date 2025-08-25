@@ -97,7 +97,7 @@ export default function ManageDetailCourse({
 
     const handleTabChange = (_: any, newValue: number) => {
         const url = `${baseUrl}&tab=${newValue}`;
-        router.push(url);
+        router.push(url, { scroll: false });
     };
 
     const handleThumbnailClick = () => {

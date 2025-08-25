@@ -33,6 +33,7 @@ import { ICourse } from "../../../types/entities";
 import Link from "next/link";
 import { slugify } from "../../../utils/utils";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 
 interface IManageMyCoursesProps {
     courses: ICourse[] | undefined;
@@ -42,6 +43,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
     const t = useTranslations("ManageMyCourses");
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
+    const pathname = usePathname();
 
     const handleMenuClick = (
         event: React.MouseEvent<HTMLElement>,
@@ -106,28 +108,35 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                             My Courses ✨
                         </Typography>
                     </Box>
-                    <Typography variant="h6" className="text-gray-600 mb-6 font-medium">
+                    <Typography
+                        variant="h6"
+                        className="text-gray-600 mb-6 font-medium"
+                    >
                         🎓 Manage and track your created courses
                     </Typography>
-                    
-                    <Button
-                        variant="contained"
-                        startIcon={<Plus className="w-5 h-5" />}
-                        size="large"
-                        className="font-semibold px-8 py-3"
-                        sx={{
-                            background: 'linear-gradient(45deg, #2563eb, #3b82f6)',
-                            borderRadius: '16px',
-                            textTransform: 'none',
-                            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
-                            '&:hover': {
-                                background: 'linear-gradient(45deg, #1d4ed8, #2563eb)',
-                                boxShadow: '0 6px 16px rgba(37, 99, 235, 0.4)',
-                            }
-                        }}
-                    >
-                        🚀 Create New Course
-                    </Button>
+                    <Link href={`${pathname}/create`}>
+                        <Button
+                            variant="contained"
+                            startIcon={<Plus className="w-5 h-5" />}
+                            size="large"
+                            className="font-semibold px-8 py-3"
+                            sx={{
+                                background:
+                                    "linear-gradient(45deg, #2563eb, #3b82f6)",
+                                borderRadius: "16px",
+                                textTransform: "none",
+                                boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                                "&:hover": {
+                                    background:
+                                        "linear-gradient(45deg, #1d4ed8, #2563eb)",
+                                    boxShadow:
+                                        "0 6px 16px rgba(37, 99, 235, 0.4)",
+                                },
+                            }}
+                        >
+                            🚀 Create New Course
+                        </Button>
+                    </Link>
                 </Box>
 
                 {/* Search and Filters */}
@@ -139,16 +148,17 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                             size="medium"
                             className="flex-1"
                             sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: '20px',
-                                    backgroundColor: 'rgba(255,255,255,0.8)',
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(255,255,255,0.9)',
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "20px",
+                                    backgroundColor: "rgba(255,255,255,0.8)",
+                                    "&:hover": {
+                                        backgroundColor:
+                                            "rgba(255,255,255,0.9)",
                                     },
-                                    '&.Mui-focused': {
-                                        backgroundColor: 'white',
-                                    }
-                                }
+                                    "&.Mui-focused": {
+                                        backgroundColor: "white",
+                                    },
+                                },
                             }}
                             InputProps={{
                                 startAdornment: (
@@ -164,13 +174,13 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 size="medium"
                                 className="rounded-full px-6"
                                 sx={{
-                                    borderColor: '#d1d5db',
-                                    color: '#6b7280',
-                                    textTransform: 'none',
-                                    '&:hover': {
-                                        borderColor: '#9ca3af',
-                                        backgroundColor: '#f9fafb'
-                                    }
+                                    borderColor: "#d1d5db",
+                                    color: "#6b7280",
+                                    textTransform: "none",
+                                    "&:hover": {
+                                        borderColor: "#9ca3af",
+                                        backgroundColor: "#f9fafb",
+                                    },
                                 }}
                             >
                                 📚 All Categories
@@ -180,13 +190,13 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 size="medium"
                                 className="rounded-full px-6"
                                 sx={{
-                                    borderColor: '#d1d5db',
-                                    color: '#6b7280',
-                                    textTransform: 'none',
-                                    '&:hover': {
-                                        borderColor: '#9ca3af',
-                                        backgroundColor: '#f9fafb'
-                                    }
+                                    borderColor: "#d1d5db",
+                                    color: "#6b7280",
+                                    textTransform: "none",
+                                    "&:hover": {
+                                        borderColor: "#9ca3af",
+                                        backgroundColor: "#f9fafb",
+                                    },
                                 }}
                             >
                                 ⭐ Sort by Rating
@@ -198,7 +208,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                 {/* Stats */}
                 <Grid container spacing={3} className="mb-8">
                     <Grid item xs={12} sm={6} md={3}>
-                        <Paper 
+                        <Paper
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-50 border border-emerald-100/50"
                         >
@@ -228,7 +238,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                        <Paper 
+                        <Paper
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-amber-100 via-amber-50 to-orange-50 border border-amber-100/50"
                         >
@@ -258,7 +268,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                        <Paper 
+                        <Paper
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-violet-100 via-violet-50 to-purple-50 border border-violet-100/50"
                         >
@@ -288,7 +298,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                            <Paper 
+                        <Paper
                             elevation={0}
                             className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-50 border border-blue-100/50"
                         >
@@ -323,37 +333,46 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                 <Grid container spacing={3}>
                     {courses?.map((course) => (
                         <Grid item xs={12} sm={6} lg={4} key={course.id}>
-                            <Card 
+                            <Card
                                 elevation={0}
                                 className="hover:shadow-xl transition-shadow duration-200 cursor-pointer h-full rounded-[24px] border border-gray-200/60 bg-white backdrop-blur-sm group overflow-hidden"
                             >
                                 <Box className="relative">
                                     <Image
-                                        src={course.thumbnail_url || "/placeholder.svg"}
+                                        src={
+                                            course.thumbnail_url ||
+                                            "/placeholder.svg"
+                                        }
                                         alt={course.title}
                                         width={400}
                                         height={200}
                                         className="h-48 w-full object-cover"
-                                        style={{ borderRadius: '24px 24px 0 0' }}
+                                        style={{
+                                            borderRadius: "24px 24px 0 0",
+                                        }}
                                     />
-                                    
+
                                     <Box className="absolute top-4 right-4">
                                         <IconButton
                                             size="small"
-                                            onClick={(e) => handleMenuClick(e, course.id)}
+                                            onClick={(e) =>
+                                                handleMenuClick(e, course.id)
+                                            }
                                             className="bg-white/90 hover:bg-white shadow-md"
-                                            sx={{ borderRadius: '12px' }}
+                                            sx={{ borderRadius: "12px" }}
                                         >
                                             <MoreHorizontal className="w-4 h-4" />
                                         </IconButton>
                                     </Box>
                                     <Box className="absolute top-4 left-4">
                                         <Chip
-                                            label={formatCurrency(Number(course.price))}
+                                            label={formatCurrency(
+                                                Number(course.price)
+                                            )}
                                             variant="filled"
                                             size="small"
                                             className="bg-white/95 text-gray-800 font-bold shadow-md"
-                                            sx={{ borderRadius: '12px' }}
+                                            sx={{ borderRadius: "12px" }}
                                         />
                                     </Box>
                                 </Box>
@@ -372,23 +391,32 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                         >
                                             {course.description}
                                         </Typography>
-                                        
+
                                         {/* Action Buttons */}
                                         <Box className="flex gap-2 mb-5">
-                                            <Link href={`/my-courses/${slugify(course.title)}?id=${course.id}`} passHref>
+                                            <Link
+                                                href={`/my-courses/${slugify(
+                                                    course.title
+                                                )}?id=${course.id}`}
+                                                passHref
+                                            >
                                                 <Button
                                                     variant="contained"
                                                     size="medium"
                                                     className="font-semibold px-6 py-2 flex-1"
                                                     sx={{
-                                                        background: 'linear-gradient(45deg, #2563eb, #3b82f6)',
-                                                        borderRadius: '16px',
-                                                        textTransform: 'none',
-                                                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
-                                                        '&:hover': {
-                                                            background: 'linear-gradient(45deg, #1d4ed8, #2563eb)',
-                                                            boxShadow: '0 6px 16px rgba(37, 99, 235, 0.4)',
-                                                        }
+                                                        background:
+                                                            "linear-gradient(45deg, #2563eb, #3b82f6)",
+                                                        borderRadius: "16px",
+                                                        textTransform: "none",
+                                                        boxShadow:
+                                                            "0 4px 12px rgba(37, 99, 235, 0.3)",
+                                                        "&:hover": {
+                                                            background:
+                                                                "linear-gradient(45deg, #1d4ed8, #2563eb)",
+                                                            boxShadow:
+                                                                "0 6px 16px rgba(37, 99, 235, 0.4)",
+                                                        },
                                                     }}
                                                 >
                                                     🎓 Manage Course
@@ -410,58 +438,78 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                 variant="body2"
                                                 className="font-bold text-blue-700"
                                             >
-                                                {course.enrollments?.length || 0}
+                                                {course.enrollments?.length ||
+                                                    0}
                                             </Typography>
                                         </Box>
                                         <Box className="flex items-center justify-between">
                                             <Box className="flex items-center gap-1">
                                                 <Rating
-                                                    value={course.average_rating}
+                                                    value={
+                                                        course.average_rating
+                                                    }
                                                     precision={0.1}
                                                     size="small"
                                                     readOnly
                                                 />
-                                                <Typography variant="caption" className="text-gray-600 font-medium ml-1">
-                                                    {course.average_rating} ({course.total_reviews})
+                                                <Typography
+                                                    variant="caption"
+                                                    className="text-gray-600 font-medium ml-1"
+                                                >
+                                                    {course.average_rating} (
+                                                    {course.total_reviews})
                                                 </Typography>
                                             </Box>
-                                            
                                         </Box>
                                     </Box>
 
                                     {/* Categories */}
-                                    {course.categories && course.categories.length > 0 && (
-                                        <Box className="flex flex-wrap gap-2">
-                                            {course.categories.slice(0, 2).map((category) => (
-                                                <Chip
-                                                    key={category.id}
-                                                    label={`🏷️ ${category.name}`}
-                                                    variant="outlined"
-                                                    size="small"
-                                                    sx={{
-                                                        borderRadius: '12px',
-                                                        backgroundColor: '#faf5ff',
-                                                        borderColor: '#d8b4fe',
-                                                        color: '#7c3aed',
-                                                        fontWeight: 'medium'
-                                                    }}
-                                                />
-                                            ))}
-                                            {course.categories.length > 2 && (
-                                                <Chip
-                                                    label={`+${course.categories.length - 2} more`}
-                                                    variant="outlined"
-                                                    size="small"
-                                                    sx={{
-                                                        borderRadius: '12px',
-                                                        backgroundColor: '#f9fafb',
-                                                        borderColor: '#d1d5db',
-                                                        color: '#6b7280'
-                                                    }}
-                                                />
-                                            )}
-                                        </Box>
-                                    )}
+                                    {course.categories &&
+                                        course.categories.length > 0 && (
+                                            <Box className="flex flex-wrap gap-2">
+                                                {course.categories
+                                                    .slice(0, 2)
+                                                    .map((category) => (
+                                                        <Chip
+                                                            key={category.id}
+                                                            label={`🏷️ ${category.name}`}
+                                                            variant="outlined"
+                                                            size="small"
+                                                            sx={{
+                                                                borderRadius:
+                                                                    "12px",
+                                                                backgroundColor:
+                                                                    "#faf5ff",
+                                                                borderColor:
+                                                                    "#d8b4fe",
+                                                                color: "#7c3aed",
+                                                                fontWeight:
+                                                                    "medium",
+                                                            }}
+                                                        />
+                                                    ))}
+                                                {course.categories.length >
+                                                    2 && (
+                                                    <Chip
+                                                        label={`+${
+                                                            course.categories
+                                                                .length - 2
+                                                        } more`}
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{
+                                                            borderRadius:
+                                                                "12px",
+                                                            backgroundColor:
+                                                                "#f9fafb",
+                                                            borderColor:
+                                                                "#d1d5db",
+                                                            color: "#6b7280",
+                                                        }}
+                                                    />
+                                                )}
+                                            </Box>
+                                        )}
 
                                     {/* Last Updated */}
                                     <Box className="flex items-center pt-2 border-t border-gray-100">
@@ -470,7 +518,8 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                             variant="caption"
                                             className="text-gray-600 font-medium"
                                         >
-                                            📅 Updated {formatDate(course.last_updated)}
+                                            📅 Updated{" "}
+                                            {formatDate(course.last_updated)}
                                         </Typography>
                                     </Box>
                                 </CardContent>
@@ -479,42 +528,42 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                     ))}
                 </Grid>
 
-                    {/* Menu */}
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleMenuClose}
-                        anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "right",
-                        }}
-                        transformOrigin={{
-                            vertical: "top",
-                            horizontal: "right",
-                        }}
+                {/* Menu */}
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "right",
+                    }}
+                    transformOrigin={{
+                        vertical: "top",
+                        horizontal: "right",
+                    }}
+                >
+                    <MenuItem onClick={handleMenuClose}>
+                        {t("menu_edit")}
+                    </MenuItem>
+                    <MenuItem onClick={handleMenuClose}>
+                        {t("menu_analytics")}
+                    </MenuItem>
+                    <MenuItem onClick={handleMenuClose}>
+                        {t("menu_enrollments")}
+                    </MenuItem>
+                    <MenuItem onClick={handleMenuClose}>
+                        {t("menu_reviews")}
+                    </MenuItem>
+                    <MenuItem onClick={handleMenuClose}>
+                        {t("menu_settings")}
+                    </MenuItem>
+                    <MenuItem
+                        onClick={handleMenuClose}
+                        sx={{ color: "error.main" }}
                     >
-                        <MenuItem onClick={handleMenuClose}>
-                            {t("menu_edit")}
-                        </MenuItem>
-                        <MenuItem onClick={handleMenuClose}>
-                            {t("menu_analytics")}
-                        </MenuItem>
-                        <MenuItem onClick={handleMenuClose}>
-                            {t("menu_enrollments")}
-                        </MenuItem>
-                        <MenuItem onClick={handleMenuClose}>
-                            {t("menu_reviews")}
-                        </MenuItem>
-                        <MenuItem onClick={handleMenuClose}>
-                            {t("menu_settings")}
-                        </MenuItem>
-                        <MenuItem
-                            onClick={handleMenuClose}
-                            sx={{ color: "error.main" }}
-                        >
-                            {t("menu_delete")}
-                        </MenuItem>
-                    </Menu>
+                        {t("menu_delete")}
+                    </MenuItem>
+                </Menu>
             </Container>
         </Box>
     );

@@ -123,7 +123,7 @@ export default function AdminCoursesPage({
     
     const queryString = searchParams.toString();
     const newUrl = window.location.pathname + (queryString ? '?' + queryString : '');
-    router.push(newUrl);
+    router.push(newUrl, { scroll: false });
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
