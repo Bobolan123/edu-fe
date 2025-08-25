@@ -203,7 +203,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                     </Box>
                                     <Box display="flex" gap={3} alignItems="center">
                                         <Avatar
-                                            src={course?.instructor?.profile_picture || ""}
+                                            src={course?.instructor?.avatar_url || ""}
                                             sx={{ 
                                                 width: 80, 
                                                 height: 80,

@@ -16,7 +16,8 @@ export const getUsers = async (
     page: number = 1,
     limit: number = 10,
     search?: string,
-    role?: string
+    role?: string,
+    status?: string
 ): Promise<IModelPaginate<IUser>> => {
     const access_token = await getAccessToken();
     
@@ -27,6 +28,7 @@ export const getUsers = async (
     
     if (search) queryParams.search = search;
     if (role) queryParams.role = role;
+    if (status) queryParams.status = status;
 
     const res = await sendRequest<IModelPaginate<IUser>>({
         method: "GET",

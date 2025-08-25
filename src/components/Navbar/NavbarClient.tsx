@@ -174,7 +174,7 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
             <Box sx={{ px: 2, py: 2, borderBottom: `1px solid ${alpha('#000', 0.08)}` }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar
-                        src={(session?.user as any)?.avatar_url || (session?.user as any)?.profile_picture}
+                        src={(session?.user as any)?.avatar_url}
                         sx={{ width: 40, height: 40 }}
                     >
                         {(session?.user as any)?.name?.[0]?.toUpperCase()}
@@ -350,7 +350,7 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
                                             aria-haspopup="true"
                                         >
                                             <Avatar
-                                                src={(session?.user as any)?.avatar_url || (session?.user as any)?.profile_picture}
+                                                src={(session?.user as any)?.avatar_url}
                                                 sx={{ width: 36, height: 36 }}
                                             >
                                                 {(session?.user as any)?.name?.[0]?.toUpperCase() || <PersonIcon />}

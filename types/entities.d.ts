@@ -32,7 +32,6 @@ export interface IUser {
     email: string;
     password: string | null;
     date_joined: Date;
-    profile_picture: string | null;
     bio: string | null;
     has_active_subscription: boolean;
     otp: number | null;
