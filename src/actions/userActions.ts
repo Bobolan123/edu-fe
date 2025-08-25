@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { IUser } from "../../types/entities";
-import { sendRequest } from "../../utils/api";
+import { sendRequest, sendRequestFile } from "../../utils/api";
 import { getAccessToken } from "./index";
 
 export interface IUserListResponse {
@@ -159,4 +159,25 @@ export const getUserEnrollments = async (
     }
 
     return res;
+};
+
+export const createAdminUser = async (formData: FormData): Promise<IUser> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequestFile<IBackendRes<IUser>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/users/admin`,
+        body: formData,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 201 || !res?.data) {
+        throw new Error(res?.message || "Failed to create admin user");
+    }
+
+    revalidateTag("users");
+    
+    return res.data;
 };

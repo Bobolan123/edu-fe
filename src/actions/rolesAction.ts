@@ -20,7 +20,7 @@ export const getRoles = async (
     page: number = 1,
     limit: number = 10,
     search?: string
-): Promise<IModelPaginate<IRole>> => {
+): Promise<IBackendRes<IRole>> => {
     const access_token = await getAccessToken();
     
     const queryParams: any = {
@@ -30,7 +30,7 @@ export const getRoles = async (
     
     if (search) queryParams.search = search;
 
-    const res = await sendRequest<IModelPaginate<IRole>>({
+    const res = await sendRequest<IBackendRes<IRole>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/roles`,
         queryParams,

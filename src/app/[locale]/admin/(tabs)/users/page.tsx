@@ -1,6 +1,7 @@
 import AdminUsersPage from '@/components/Admin/Users/AdminUsersPage';
 import { getUsers } from '@/actions/userActions';
 import { redirect } from 'next/navigation';
+import { getRoles } from '@/actions/rolesAction';
 
 interface UsersPageProps {
   searchParams: Promise<{
@@ -22,9 +23,12 @@ export default async function UsersPage(props: UsersPageProps) {
     const status = searchParams.status !== 'all' ? searchParams.status : undefined;
     
     const usersResponse = await getUsers(page, limit, search, role, status);
+    const roles = await getRoles();
+    console.log(roles)
     return (
       <AdminUsersPage 
         users={usersResponse} 
+        roles={roles}
         searchParams={searchParams}
       />
     );

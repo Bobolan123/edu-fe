@@ -32,13 +32,14 @@ import {
 import { UserTable } from './UserTable';
 import { UserForm } from './UserForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
-import { IUser } from '../../../../types/entities';
+import { IUser, IRole } from '../../../../types/entities';
 import toastService from '../../../services/toast';
 import { useCurrency } from '@/context/CurrencyContext';
 import { currencyService } from '@/service/currency';
 
 interface AdminUsersPageProps {
   users: IModelPaginate<IUser>;
+  roles: IBackendRes<IRole>;
   searchParams: {
     page?: string;
     search?: string;
@@ -68,6 +69,7 @@ function RevenueDisplay({ revenue }: { revenue: number }) {
 
 export default function AdminUsersPage({ 
   users, 
+  roles,
   searchParams 
 }: AdminUsersPageProps) {
   const router = useRouter();
@@ -163,18 +165,20 @@ export default function AdminUsersPage({
     router.push(`/admin/users/${user.id}`);
   };
 
-  const handleCreateSuccess = () => {
+  const handleCreateSuccess = (response?: any) => {
     setCreateDialogOpen(false);
     setError(null);
-    toastService.success('User created successfully!');
+    const message = response?.message || 'User created successfully!';
+    toastService.success(message);
     router.refresh(); 
   };
 
-  const handleEditSuccess = () => {
+  const handleEditSuccess = (response?: any) => {
     setEditDialogOpen(false);
     setSelectedUser(null);
     setError(null);
-    toastService.success('User updated successfully!');
+    const message = response?.message || 'User updated successfully!';
+    toastService.success(message);
     router.refresh();
   };
 
@@ -387,6 +391,7 @@ export default function AdminUsersPage({
       <UserForm
         open={createDialogOpen}
         mode="create"
+        roles={Array.isArray(roles.data) ? roles.data : roles.data ? [roles.data] : []}
         onClose={() => setCreateDialogOpen(false)}
         onSuccess={handleCreateSuccess}
         onError={handleError}
@@ -396,6 +401,7 @@ export default function AdminUsersPage({
         open={editDialogOpen}
         mode="edit"
         user={selectedUser}
+        roles={Array.isArray(roles.data) ? roles.data : roles.data ? [roles.data] : []}
         onClose={() => {
           setEditDialogOpen(false);
           setSelectedUser(null);
