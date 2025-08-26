@@ -30,6 +30,8 @@ import {
   Star,
   AttachMoney,
   Clear,
+  Visibility,
+  VisibilityOff,
 } from '@mui/icons-material';
 import { CourseTable } from './CourseTable';
 import { CourseForm } from './CourseForm';
@@ -47,6 +49,7 @@ interface AdminCoursesPageProps {
     search?: string;
     categoryIds?: string | string[];
     status?: string;
+    includeDeleted?: string;
   };
 }
 
@@ -88,6 +91,7 @@ export default function AdminCoursesPage({
     return [];
   });
   const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
+  const [includeDeleted, setIncludeDeleted] = useState(searchParams.includeDeleted === 'true');
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -115,6 +119,11 @@ export default function AdminCoursesPage({
     // Add status parameter
     if (params.status && params.status !== 'all') {
       searchParams.set('status', params.status);
+    }
+    
+    // Add includeDeleted parameter
+    if (params.includeDeleted === 'true') {
+      searchParams.set('includeDeleted', params.includeDeleted);
     }
     
     // Add page parameter
@@ -148,6 +157,7 @@ export default function AdminCoursesPage({
       search: searchTerm, 
       category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
       status: selectedStatus, 
+      includeDeleted: includeDeleted ? 'true' : undefined,
       page: (newPage + 1).toString() 
     });
   };
@@ -156,7 +166,8 @@ export default function AdminCoursesPage({
     updateURL({ 
       search: searchTerm, 
       category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
-      status: selectedStatus !== 'all' ? selectedStatus : undefined, 
+      status: selectedStatus !== 'all' ? selectedStatus : undefined,
+      includeDeleted: includeDeleted ? 'true' : undefined,
       page: '1'  // Reset to first page when applying filters
     });
   };
@@ -165,10 +176,12 @@ export default function AdminCoursesPage({
     setSearchTerm('');
     setSelectedCategories([]);
     setSelectedStatus('all');
+    setIncludeDeleted(false);
     updateURL({
       search: undefined,
       category: undefined,
       status: undefined,
+      includeDeleted: undefined,
       page: '1'
     });
   };
@@ -379,7 +392,7 @@ export default function AdminCoursesPage({
               </FormControl>
             </Grid>
             
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
@@ -392,6 +405,19 @@ export default function AdminCoursesPage({
                   <MenuItem value="false">Inactive</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={2}>
+              <Button
+                fullWidth
+                variant={includeDeleted ? "contained" : "outlined"}
+                color={includeDeleted ? "warning" : "primary"}
+                startIcon={includeDeleted ? <Visibility /> : <VisibilityOff />}
+                onClick={() => setIncludeDeleted(!includeDeleted)}
+                sx={{ height: 56 }}
+              >
+                {includeDeleted ? 'Show All' : 'Active Only'}
+              </Button>
             </Grid>
             
             <Grid item xs={12} md={2}>

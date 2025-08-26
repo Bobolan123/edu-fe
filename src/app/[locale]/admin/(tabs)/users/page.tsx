@@ -9,6 +9,7 @@ interface UsersPageProps {
     search?: string;
     role?: string;
     status?: string;
+    includeDeleted?: string;
   }>;
 }
 
@@ -21,8 +22,9 @@ export default async function UsersPage(props: UsersPageProps) {
     const search = searchParams.search;
     const role = searchParams.role !== 'all' ? searchParams.role : undefined;
     const status = searchParams.status !== 'all' ? searchParams.status : undefined;
+    const includeDeleted = searchParams.includeDeleted === 'true';
     
-    const usersResponse = await getUsers(page, limit, search, role, status);
+    const usersResponse = await getUsers(page, limit, search, role, status, includeDeleted);
     const roles = await getRoles();
     console.log(roles)
     return (

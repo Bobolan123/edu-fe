@@ -17,7 +17,8 @@ export const getUsers = async (
     limit: number = 10,
     search?: string,
     role?: string,
-    status?: string
+    status?: string,
+    includeDeleted?: boolean
 ): Promise<IModelPaginate<IUser>> => {
     const access_token = await getAccessToken();
     
@@ -29,6 +30,7 @@ export const getUsers = async (
     if (search) queryParams.search = search;
     if (role) queryParams.role = role;
     if (status) queryParams.status = status;
+    if (includeDeleted) queryParams.includeDeleted = includeDeleted;
 
     const res = await sendRequest<IModelPaginate<IUser>>({
         method: "GET",
@@ -49,12 +51,16 @@ export const getUsers = async (
     return res;
 };
 
-export const getUserById = async (id: number): Promise<IUser> => {
+export const getUserById = async (id: number, includeDeleted?: boolean): Promise<IUser> => {
     const access_token = await getAccessToken();
+    
+    const queryParams: any = {};
+    if (includeDeleted) queryParams.includeDeleted = includeDeleted;
     
     const res = await sendRequest<IBackendRes<IUser>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/users/${id}`,
+        queryParams: Object.keys(queryParams).length > 0 ? queryParams : undefined,
         headers: {
             Authorization: `Bearer ${access_token}`,
         },

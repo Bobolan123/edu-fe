@@ -54,7 +54,8 @@ export const getCoursesForAdmin = async (
     limit: number = 10,
     search?: string,
     categoryIds?: number[],
-    status?: string
+    status?: string,
+    includeDeleted?: boolean
 ): Promise<IModelPaginate<ICourse>> => {
     const access_token = await getAccessToken();
     
@@ -68,6 +69,7 @@ export const getCoursesForAdmin = async (
         queryParams.categoryIds = categoryIds;
     }
     if (status) queryParams.status = status;
+    if (includeDeleted) queryParams.includeDeleted = includeDeleted;
 
     const res = await sendRequest<IModelPaginate<ICourse>>({
         method: "GET",
@@ -88,11 +90,14 @@ export const getCoursesForAdmin = async (
     return res;
 };
 
-export const getCoursesByCategory = async (ids: string) => {
+export const getCoursesByCategory = async (ids: string, includeDeleted?: boolean) => {
+    const queryParams: any = { ids };
+    if (includeDeleted) queryParams.includeDeleted = includeDeleted;
+    
     const res = await sendRequest<IBackendRes<ICourse[]>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/by-category`,
-        queryParams: { ids },
+        queryParams,
     });
 
     if (!res?.data) {
@@ -102,10 +107,14 @@ export const getCoursesByCategory = async (ids: string) => {
     return res.data;
 };
 
-export const getCourseById = async (id: string) => {
+export const getCourseById = async (id: string, includeDeleted?: boolean) => {
+    const queryParams: any = {};
+    if (includeDeleted) queryParams.includeDeleted = includeDeleted;
+    
     const res = await sendRequest<IBackendRes<ICourse>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
+        queryParams: Object.keys(queryParams).length > 0 ? queryParams : undefined,
     });
 
     if (!res?.data) {

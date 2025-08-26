@@ -28,6 +28,8 @@ import {
   School,
   AttachMoney,
   Clear,
+  Visibility,
+  VisibilityOff,
 } from '@mui/icons-material';
 import { UserTable } from './UserTable';
 import { UserForm } from './UserForm';
@@ -45,6 +47,7 @@ interface AdminUsersPageProps {
     search?: string;
     role?: string;
     status?: string;
+    includeDeleted?: string;
   };
 }
 
@@ -77,6 +80,7 @@ export default function AdminUsersPage({
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
   const [selectedRole, setSelectedRole] = useState(searchParams.role || 'all');
   const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
+  const [includeDeleted, setIncludeDeleted] = useState(searchParams.includeDeleted === 'true');
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -98,6 +102,10 @@ export default function AdminUsersPage({
     
     if (params.status && params.status !== 'all') {
       searchParams.set('status', params.status);
+    }
+    
+    if (params.includeDeleted === 'true') {
+      searchParams.set('includeDeleted', params.includeDeleted);
     }
     
     if (params.page) {
@@ -127,6 +135,7 @@ export default function AdminUsersPage({
       search: searchTerm, 
       role: selectedRole, 
       status: selectedStatus,
+      includeDeleted: includeDeleted ? 'true' : undefined,
       page: (newPage + 1).toString() 
     });
   };
@@ -136,6 +145,7 @@ export default function AdminUsersPage({
       search: searchTerm, 
       role: selectedRole !== 'all' ? selectedRole : undefined,
       status: selectedStatus !== 'all' ? selectedStatus : undefined,
+      includeDeleted: includeDeleted ? 'true' : undefined,
       page: '1'
     });
   };
@@ -144,10 +154,12 @@ export default function AdminUsersPage({
     setSearchTerm('');
     setSelectedRole('all');
     setSelectedStatus('all');
+    setIncludeDeleted(false);
     updateURL({
       search: undefined,
       role: undefined,
       status: undefined,
+      includeDeleted: undefined,
       page: '1'
     });
   };
@@ -344,7 +356,7 @@ export default function AdminUsersPage({
               </FormControl>
             </Grid>
             
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
@@ -357,6 +369,19 @@ export default function AdminUsersPage({
                   <MenuItem value="false">Inactive</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={2}>
+              <Button
+                fullWidth
+                variant={includeDeleted ? "contained" : "outlined"}
+                color={includeDeleted ? "warning" : "primary"}
+                startIcon={includeDeleted ? <Visibility /> : <VisibilityOff />}
+                onClick={() => setIncludeDeleted(!includeDeleted)}
+                sx={{ height: 56 }}
+              >
+                {includeDeleted ? 'Show All' : 'Active Only'}
+              </Button>
             </Grid>
             
             <Grid item xs={12} md={2}>
