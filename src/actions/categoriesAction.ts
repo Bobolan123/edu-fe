@@ -4,12 +4,14 @@ import { revalidateTag } from "next/cache";
 import { ICategory } from "../../types/entities";
 import { sendRequest } from "../../utils/api";
 import { getAccessToken } from "./index";
+import { IResFindAllCategories } from "../../types/resData";
+
 
 export const getCategories = async (
     page: number = 1,
     limit: number = 10,
     search?: string
-): Promise<IModelPaginate<ICategory>> => {
+): Promise<IModelPaginate<IResFindAllCategories>> => {
     const queryParams: any = {
         page,
         take: limit,
@@ -17,7 +19,7 @@ export const getCategories = async (
     
     if (search) queryParams.search = search;
 
-    const res = await sendRequest<IModelPaginate<ICategory>>({
+    const res = await sendRequest<IModelPaginate<IResFindAllCategories>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/categories`,
         queryParams,
@@ -52,6 +54,11 @@ export interface ICreateCategoryPayload {
     description?: string;
 }
 
+export interface IUpdateCategoryPayload {
+    name?: string;
+    description?: string;
+}
+
 export const createCategory = async (
     data: ICreateCategoryPayload
 ): Promise<ICategory> => {
@@ -76,7 +83,7 @@ export const createCategory = async (
 
 export const updateCategory = async (
     id: number,
-    data: Partial<ICategory>
+    data: IUpdateCategoryPayload
 ): Promise<ICategory> => {
     const access_token = await getAccessToken();
     

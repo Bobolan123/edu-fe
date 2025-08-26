@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Grid,
@@ -33,6 +34,8 @@ import {
   Select,
   Switch,
   FormControlLabel,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import {
   Add,
@@ -45,127 +48,88 @@ import {
   Delete,
   Close,
   ColorLens,
+
 } from '@mui/icons-material';
+import { ICategory } from '../../../../types/entities';
+import { createCategory, updateCategory, deleteCategory } from '../../../actions/categoriesAction';
+import { toastService } from '../../../services/toast';
+import { IResFindAllCategories } from '../../../../types/resData';
 
-interface CategoryType {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  icon: string;
-  coursesCount: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+
+interface AdminCategoriesPageProps {
+  categories: IModelPaginate<IResFindAllCategories>;
+  searchParams: {
+    page?: string;
+    search?: string;
+  };
 }
-
-const mockCategories: CategoryType[] = [
-  {
-    id: '1',
-    name: 'Programming',
-    description: 'Learn programming languages and software development',
-    color: '#0ea5e9',
-    icon: 'Code',
-    coursesCount: 45,
-    isActive: true,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-02-20',
-  },
-  {
-    id: '2',
-    name: 'Data Science',
-    description: 'Master data analysis, machine learning, and statistics',
-    color: '#8b5cf6',
-    icon: 'Analytics',
-    coursesCount: 28,
-    isActive: true,
-    createdAt: '2024-01-10',
-    updatedAt: '2024-02-18',
-  },
-  {
-    id: '3',
-    name: 'Design',
-    description: 'UI/UX design, graphic design, and creative skills',
-    color: '#f59e0b',
-    icon: 'Palette',
-    coursesCount: 22,
-    isActive: true,
-    createdAt: '2024-01-20',
-    updatedAt: '2024-02-15',
-  },
-  {
-    id: '4',
-    name: 'Business',
-    description: 'Business strategy, management, and entrepreneurship',
-    color: '#10b981',
-    icon: 'Business',
-    coursesCount: 31,
-    isActive: true,
-    createdAt: '2024-01-25',
-    updatedAt: '2024-02-10',
-  },
-  {
-    id: '5',
-    name: 'Marketing',
-    description: 'Digital marketing, social media, and advertising',
-    color: '#ef4444',
-    icon: 'Campaign',
-    coursesCount: 18,
-    isActive: false,
-    createdAt: '2024-02-01',
-    updatedAt: '2024-02-05',
-  },
-  {
-    id: '6',
-    name: 'Photography',
-    description: 'Professional photography and photo editing',
-    color: '#06b6d4',
-    icon: 'CameraAlt',
-    coursesCount: 12,
-    isActive: true,
-    createdAt: '2024-02-05',
-    updatedAt: '2024-02-08',
-  },
-];
 
 const categoryColors = [
   '#0ea5e9', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#84cc16', '#f97316'
 ];
 
-export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<CategoryType[]>(mockCategories);
-  const [filteredCategories, setFilteredCategories] = useState<CategoryType[]>(mockCategories);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+export default function AdminCategoriesPage({ 
+  categories, 
+  searchParams 
+}: AdminCategoriesPageProps) {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<IResFindAllCategories | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: categoryColors[0],
-    isActive: true,
   });
+
+  const updateURL = (params: Record<string, string | undefined>) => {
+    const searchParams = new URLSearchParams();
+    
+    if (params.search && params.search !== '') {
+      searchParams.set('search', params.search);
+    }
+    
+    if (params.page) {
+      searchParams.set('page', params.page);
+    }
+    
+    const queryString = searchParams.toString();
+    const newUrl = window.location.pathname + (queryString ? '?' + queryString : '');
+    router.push(newUrl, { scroll: false });
+  };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearchTerm(value);
-    
-    const filtered = categories.filter(category =>
-      category.name.toLowerCase().includes(value.toLowerCase()) ||
-      category.description.toLowerCase().includes(value.toLowerCase())
-    );
-    
-    setFilteredCategories(filtered);
-    setPage(0);
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, category: CategoryType) => {
+  const handleSearchSubmit = () => {
+    updateURL({ 
+      search: searchTerm || undefined, 
+      page: '1'
+    });
+  };
+
+  const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    updateURL({ 
+      search: searchTerm, 
+      page: (newPage + 1).toString() 
+    });
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, category: IResFindAllCategories) => {
     setMenuAnchor(event.currentTarget);
     setSelectedCategory(category);
   };
@@ -179,9 +143,7 @@ export default function AdminCategoriesPage() {
     if (selectedCategory) {
       setFormData({
         name: selectedCategory.name,
-        description: selectedCategory.description,
-        color: selectedCategory.color,
-        isActive: selectedCategory.isActive,
+        description: selectedCategory.description || '',
       });
       setEditDialogOpen(true);
     }
@@ -193,58 +155,86 @@ export default function AdminCategoriesPage() {
     handleMenuClose();
   };
 
-  const confirmDelete = () => {
-    if (selectedCategory) {
-      const updatedCategories = categories.filter(c => c.id !== selectedCategory.id);
-      setCategories(updatedCategories);
-      setFilteredCategories(updatedCategories);
+  const confirmDelete = async () => {
+    if (!selectedCategory) return;
+    
+    setLoading(true);
+    try {
+      await deleteCategory(selectedCategory.id);
+      setDeleteDialogOpen(false);
+      setSelectedCategory(null);
+      setError(null);
+      toastService.success('Category deleted successfully!');
+      router.refresh();
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to delete category';
+      setError(errorMessage);
+      toastService.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    setDeleteDialogOpen(false);
-    setSelectedCategory(null);
   };
 
-  const handleFormSubmit = () => {
-    const newCategory: CategoryType = {
-      id: Date.now().toString(),
-      name: formData.name,
-      description: formData.description,
-      color: formData.color,
-      icon: 'Category',
-      coursesCount: 0,
-      isActive: formData.isActive,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const updatedCategories = [...categories, newCategory];
-    setCategories(updatedCategories);
-    setFilteredCategories(updatedCategories);
-    setCreateDialogOpen(false);
-    setFormData({ name: '', description: '', color: categoryColors[0], isActive: true });
-  };
-
-  const handleFormUpdate = () => {
-    if (selectedCategory) {
-      const updatedCategories = categories.map(c => 
-        c.id === selectedCategory.id 
-          ? { ...c, ...formData, updatedAt: new Date().toISOString() }
-          : c
-      );
-      setCategories(updatedCategories);
-      setFilteredCategories(updatedCategories);
+  const handleFormSubmit = async () => {
+    if (!formData.name.trim()) return;
+    
+    setLoading(true);
+    try {
+      await createCategory({
+        name: formData.name,
+        description: formData.description || undefined,
+      });
+      setCreateDialogOpen(false);
+      setFormData({ name: '', description: '' });
+      setError(null);
+      toastService.success('Category created successfully!');
+      router.refresh();
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to create category';
+      setError(errorMessage);
+      toastService.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    setEditDialogOpen(false);
-    setFormData({ name: '', description: '', color: categoryColors[0], isActive: true });
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
+  const handleFormUpdate = async () => {
+    if (!selectedCategory || !formData.name.trim()) return;
+    
+    setLoading(true);
+    try {
+      await updateCategory(selectedCategory.id, {
+        name: formData.name,
+        description: formData.description || undefined,
+      });
+      setEditDialogOpen(false);
+      setSelectedCategory(null);
+      setFormData({ name: '', description: '' });
+      setError(null);
+      toastService.success('Category updated successfully!');
+      router.refresh();
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to update category';
+      setError(errorMessage);
+      toastService.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage);
+    setLoading(false);
+    toastService.error(errorMessage);
   };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const CategoryFormDialog = ({ 
     open, 
@@ -274,6 +264,7 @@ export default function AdminCategoriesPage() {
           <TextField
             label="Category Name"
             fullWidth
+            required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Enter category name"
@@ -288,41 +279,6 @@ export default function AdminCategoriesPage() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Describe this category"
           />
-          
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              Category Color
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              {categoryColors.map((color) => (
-                <Box
-                  key={color}
-                  onClick={() => setFormData({ ...formData, color })}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    backgroundColor: color,
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    border: formData.color === color ? '3px solid #334155' : '2px solid transparent',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                    },
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-          
-          <FormControlLabel
-            control={
-              <Switch
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              />
-            }
-            label="Active Category"
-          />
         </Stack>
       </DialogContent>
       
@@ -331,7 +287,7 @@ export default function AdminCategoriesPage() {
         <Button 
           variant="contained" 
           onClick={onSubmit}
-          disabled={!formData.name.trim()}
+          disabled={!formData.name.trim() || loading}
         >
           {title.includes('Create') ? 'Create Category' : 'Update Category'}
         </Button>
@@ -348,7 +304,7 @@ export default function AdminCategoriesPage() {
             Delete Category
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Are you sure you want to delete "{selectedCategory?.name}"? This will affect {selectedCategory?.coursesCount} courses.
+            Are you sure you want to delete "{selectedCategory?.name}"? This action cannot be undone.
           </Typography>
         </Box>
       </DialogContent>
@@ -357,18 +313,25 @@ export default function AdminCategoriesPage() {
         <Button onClick={() => setDeleteDialogOpen(false)} variant="outlined">
           Cancel
         </Button>
-        <Button onClick={confirmDelete} variant="contained" color="error">
+        <Button onClick={confirmDelete} variant="contained" color="error" disabled={loading}>
           Delete Category
         </Button>
       </DialogActions>
     </Dialog>
   );
 
-  const activeCategories = categories.filter(c => c.isActive).length;
-  const totalCourses = categories.reduce((sum, cat) => sum + cat.coursesCount, 0);
+  const currentCategories = categories.data?.result || [];
+  const totalCategories = categories.data?.meta?.itemCount || 0;
+  const totalCourses = currentCategories.reduce((sum, cat) => sum + (cat.courseCount || 0), 0);
 
   return (
     <Box>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+      
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -400,7 +363,7 @@ export default function AdminCategoriesPage() {
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
               <Category sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
-                {categories.length}
+                {totalCategories}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Total Categories
@@ -414,10 +377,10 @@ export default function AdminCategoriesPage() {
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
               <ColorLens sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
-                {activeCategories}
+                {currentCategories.length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Active Categories
+                Categories on Page
               </Typography>
             </CardContent>
           </Card>
@@ -442,7 +405,7 @@ export default function AdminCategoriesPage() {
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
               <Visibility sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
-                {Math.round(totalCourses / Math.max(categories.length, 1))}
+                {Math.round(totalCourses / Math.max(totalCategories, 1))}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Avg Courses/Category
@@ -462,10 +425,13 @@ export default function AdminCategoriesPage() {
                 placeholder="Search categories..."
                 value={searchTerm}
                 onChange={handleSearch}
+                onKeyPress={handleSearchKeyPress}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Search />
+                      <IconButton onClick={handleSearchSubmit} size="small">
+                        <Search />
+                      </IconButton>
                     </InputAdornment>
                   ),
                 }}
@@ -484,16 +450,11 @@ export default function AdminCategoriesPage() {
                 <TableCell>Category</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell align="center">Courses</TableCell>
-                <TableCell align="center">Status</TableCell>
-                <TableCell align="center">Created</TableCell>
-                <TableCell align="center">Updated</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCategories
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((category) => (
+              {currentCategories.map((category) => (
                 <TableRow key={category.id} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -501,7 +462,7 @@ export default function AdminCategoriesPage() {
                         sx={{
                           width: 48,
                           height: 48,
-                          backgroundColor: category.color,
+                          backgroundColor: 'primary.main',
                           color: 'white',
                         }}
                       >
@@ -511,49 +472,22 @@ export default function AdminCategoriesPage() {
                         <Typography variant="subtitle2" fontWeight={600}>
                           {category.name}
                         </Typography>
-                        <Chip
-                          size="small"
-                          sx={{
-                            backgroundColor: category.color,
-                            color: 'white',
-                            fontSize: '0.75rem',
-                          }}
-                          label={category.color}
-                        />
+                        <Typography variant="caption" color="text.secondary">
+                          ID: {category.id}
+                        </Typography>
                       </Box>
                     </Box>
                   </TableCell>
                   
                   <TableCell>
                     <Typography variant="body2" color="text.secondary">
-                      {category.description}
+                      {category.description || 'No description'}
                     </Typography>
                   </TableCell>
                   
                   <TableCell align="center">
                     <Typography variant="body2" fontWeight={600}>
-                      {category.coursesCount}
-                    </Typography>
-                  </TableCell>
-                  
-                  <TableCell align="center">
-                    <Chip
-                      label={category.isActive ? 'Active' : 'Inactive'}
-                      size="small"
-                      color={category.isActive ? 'success' : 'default'}
-                      variant="filled"
-                    />
-                  </TableCell>
-                  
-                  <TableCell align="center">
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(category.createdAt).toLocaleDateString()}
-                    </Typography>
-                  </TableCell>
-                  
-                  <TableCell align="center">
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(category.updatedAt).toLocaleDateString()}
+                      {category.courseCount || 0}
                     </Typography>
                   </TableCell>
                   
@@ -574,13 +508,13 @@ export default function AdminCategoriesPage() {
         </TableContainer>
         
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[10]}
           component="div"
-          count={filteredCategories.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+          count={totalCategories}
+          rowsPerPage={10}
+          page={parseInt(searchParams.page || '1') - 1}
+          onPageChange={(_, newPage) => handlePageChange(newPage)}
+          onRowsPerPageChange={() => {}}
         />
       </Card>
 

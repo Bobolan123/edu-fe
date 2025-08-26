@@ -55,6 +55,8 @@ export interface ICategory {
     name: string;
     description: string | null;
     courses: ICourse[];
+    created_at: Date;
+    updated_at: Date;
 }
 
 

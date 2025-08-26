@@ -1,4 +1,4 @@
-import { IReview } from "./entities";
+import { ICategory, IReview } from "./entities";
 
 export interface IReviewDistributionItem {
     stars: number; // Star rating (1–5)
@@ -37,3 +37,6 @@ export interface IStudentsResponse {
     };
 }
 
+export interface IResFindAllCategories extends ICategory {
+    courseCount:number;
+}
