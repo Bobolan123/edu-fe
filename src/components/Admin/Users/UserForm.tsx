@@ -26,7 +26,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IUser, IRole } from '../../../../types/entities';
-import { updateUser, createAdminUser } from '@/actions/userActions';
+import { updateUser, createAdminUser, updateUserAvatar } from '@/actions/userActions';
 import toastService from '@/services/toast';
 
 const createUserSchema = z.object({
@@ -42,9 +42,11 @@ const createUserSchema = z.object({
 const editUserSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
   email: z.string().email('Invalid email address'),
+  password: z.string().optional(),
   roleId: z.string().min(1, 'Role is required'),
   bio: z.string().optional(),
   isActive: z.boolean(),
+  avatar: z.any().optional(),
 });
 
 type CreateUserFormData = z.infer<typeof createUserSchema>;
@@ -105,6 +107,8 @@ export function UserForm({
         password: '',
         avatar: undefined,
       });
+      setSelectedAvatar(null);
+      setPreviewUrl(null);
     } else if (open && mode === 'create') {
       reset({
         name: '',
@@ -149,7 +153,19 @@ export function UserForm({
           bio: data.bio,
           isActive: data.isActive
         };
+        
+        // Update password if provided
+        if (data.password && data.password.trim()) {
+          (editData as any).password = data.password;
+        }
+        
         response = await updateUser(user.id, editData);
+        
+        // Update avatar if provided
+        if (selectedAvatar) {
+          await updateUserAvatar(user.id, selectedAvatar);
+        }
+        
         onSuccess(response);
       } else {
         // Create admin user with FormData for file upload
@@ -281,6 +297,27 @@ export function UserForm({
               </Grid>
             )}
 
+            {mode === 'edit' && (
+              <Grid item xs={12} md={6}>
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="New Password (Optional)"
+                      type="password"
+                      placeholder="Leave blank to keep current password"
+                      error={!!(errors as any).password}
+                      helperText={(errors as any).password?.message}
+                      disabled={loading}
+                    />
+                  )}
+                />
+              </Grid>
+            )}
+
             <Grid item xs={12} md={6}>
               <Controller
                 name="roleId"
@@ -309,20 +346,36 @@ export function UserForm({
               />
             </Grid>
 
-            {mode === 'create' && (
-              <Grid item xs={12}>
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Avatar (Optional)
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Grid item xs={12}>
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Avatar {mode === 'edit' ? '(Change Avatar)' : '(Optional)'}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {mode === 'edit' && user?.avatar_url && (
+                    <Box sx={{ mr: 2 }}>
+                      
+                      <img
+                        src={user.avatar_url}
+                        alt="Current Avatar"
+                        style={{
+                          width: 60,
+                          height: 60,
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd'
+                        }}
+                      />
+                    </Box>
+                  )}
+                  <Box>
                     <Button
                       variant="outlined"
                       component="label"
                       disabled={loading}
                       sx={{ borderRadius: '8px' }}
                     >
-                      Choose File
+                      {mode === 'edit' ? 'Change Avatar' : 'Choose File'}
                       <input
                         type="file"
                         hidden
@@ -331,29 +384,32 @@ export function UserForm({
                       />
                     </Button>
                     {selectedAvatar && (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                         {selectedAvatar.name}
                       </Typography>
                     )}
                   </Box>
-                  {previewUrl && (
-                    <Box sx={{ mt: 2 }}>
-                      <img
-                        src={previewUrl}
-                        alt="Avatar Preview"
-                        style={{
-                          width: 80,
-                          height: 80,
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          border: '1px solid #ddd'
-                        }}
-                      />
-                    </Box>
-                  )}
                 </Box>
-              </Grid>
-            )}
+                {previewUrl && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      New Avatar Preview:
+                    </Typography>
+                    <img
+                      src={previewUrl}
+                      alt="Avatar Preview"
+                      style={{
+                        width: 80,
+                        height: 80,
+                        objectFit: 'cover',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd'
+                      }}
+                    />
+                  </Box>
+                )}
+              </Box>
+            </Grid>
 
             <Grid item xs={12}>
               <Controller

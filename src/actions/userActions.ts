@@ -113,6 +113,29 @@ export const deleteUser = async (id: number): Promise<void> => {
     revalidateTag("users");
 };
 
+
+export const updateUserAvatar = async (id: number, avatar: File): Promise<void> => {
+    const access_token = await getAccessToken();
+    
+    const formData = new FormData();
+    formData.append('avatar', avatar);
+    
+    const res = await sendRequestFile<IBackendRes<void>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/users/${id}/avatar`,
+        body: formData,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 201) {
+        throw new Error(res?.message || "Failed to upload avatar");
+    }
+
+    revalidateTag("users");
+};
+
 export const suspendUser = async (id: number, suspended: boolean): Promise<IUser> => {
     const access_token = await getAccessToken();
     
