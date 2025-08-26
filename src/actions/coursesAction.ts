@@ -157,7 +157,7 @@ export const deleteCourse = async (id: string) => {
             Authorization: `Bearer ${access_token}`,
         },
     });
-
+ 
     if (res?.statusCode !== 200) {
         throw new Error(res.message);
     }

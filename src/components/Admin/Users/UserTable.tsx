@@ -23,6 +23,8 @@ import {
   Edit,
   Delete,
   Visibility,
+  Restore,
+  DeleteForever,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { IUser } from '../../../../types/entities';
@@ -30,11 +32,12 @@ import { IUser } from '../../../../types/entities';
 interface UserTableProps {
   users: IUser[];
   onEdit: (user: IUser) => void;
-  onDelete: (user: IUser) => void;
+  onDelete: (user: IUser, action?: 'delete' | 'restore' | 'force-delete') => void;
   onView: (user: IUser) => void;
   totalCount: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  includeDeleted?: boolean;
 }
 
 const roleColors = {
@@ -51,6 +54,7 @@ export function UserTable({
   totalCount,
   currentPage,
   onPageChange,
+  includeDeleted = false,
 }: UserTableProps) {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
@@ -82,7 +86,21 @@ export function UserTable({
 
   const handleDelete = () => {
     if (selectedUser) {
-      onDelete(selectedUser);
+      onDelete(selectedUser, 'delete');
+    }
+    handleMenuClose();
+  };
+
+  const handleRestore = () => {
+    if (selectedUser) {
+      onDelete(selectedUser, 'restore');
+    }
+    handleMenuClose();
+  };
+
+  const handleForceDelete = () => {
+    if (selectedUser) {
+      onDelete(selectedUser, 'force-delete');
     }
     handleMenuClose();
   };
@@ -124,7 +142,19 @@ export function UserTable({
             </TableHead>
             <TableBody>
               {users.map((user) => (
-                <TableRow key={user.id} hover>
+                <TableRow 
+                  key={user.id} 
+                  hover
+                  sx={{
+                    ...(includeDeleted && {
+                      backgroundColor: 'error.lighter',
+                      opacity: 0.7,
+                      '&:hover': {
+                        backgroundColor: 'error.light',
+                      }
+                    })
+                  }}
+                >
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar
@@ -258,19 +288,39 @@ export function UserTable({
           </Box>
         </MenuItem>
         
-        <MenuItem onClick={handleEdit}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Edit fontSize="small" />
-            Edit User
-          </Box>
-        </MenuItem>
-        
-        <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Delete fontSize="small" />
-            Delete User
-          </Box>
-        </MenuItem>
+        {!includeDeleted ? (
+          <>
+            <MenuItem onClick={handleEdit}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Edit fontSize="small" />
+                Edit User
+              </Box>
+            </MenuItem>
+            
+            <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Delete fontSize="small" />
+                Delete User
+              </Box>
+            </MenuItem>
+          </>
+        ) : (
+          <>
+            <MenuItem onClick={handleRestore} sx={{ color: 'success.main' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Restore fontSize="small" />
+                Restore User
+              </Box>
+            </MenuItem>
+            
+            <MenuItem onClick={handleForceDelete} sx={{ color: 'error.main' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <DeleteForever fontSize="small" />
+                Permanently Delete
+              </Box>
+            </MenuItem>
+          </>
+        )}
       </Menu>
     </>
   );

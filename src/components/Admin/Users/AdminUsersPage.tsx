@@ -223,11 +223,12 @@ export default function AdminUsersPage({
     );
   }
 
-  const activeUsers = users.data?.result?.filter(u => u.isActive).length || 0;
-  const totalRevenue = users.data?.result?.reduce((sum, user) => {
+  const currentUsers = users.data?.result || [];
+  const activeUsers = currentUsers.filter(u => u.isActive).length;
+  const totalRevenue = currentUsers.reduce((sum, user) => {
     return sum + (user.courses?.reduce((courseSum, course) => courseSum + (course.price * course.total_students), 0) || 0);
-  }, 0) || 0;
-  const instructors = users.data?.result?.filter(u => u.role?.name === 'instructor').length || 0;
+  }, 0);
+  const instructors = currentUsers.filter(u => u.role?.name === 'instructor').length;
 
   return (
     <Box>
@@ -241,11 +242,25 @@ export default function AdminUsersPage({
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
-              User Management
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
+                User Management
+              </Typography>
+              {includeDeleted && (
+                <Chip 
+                  label="Viewing Deleted Users" 
+                  color="error" 
+                  variant="filled"
+                  size="small"
+                  sx={{ mb: 1 }}
+                />
+              )}
+            </Box>
             <Typography variant="body1" color="text.secondary">
-              Manage and monitor all users on the platform
+              {includeDeleted 
+                ? "View and manage deleted users - restore or permanently delete them"
+                : "Manage and monitor all active users on the platform"
+              }
             </Typography>
           </Box>
           
@@ -264,14 +279,24 @@ export default function AdminUsersPage({
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ 
+            ...(includeDeleted && { 
+              backgroundColor: 'error.lighter',
+              border: '1px solid',
+              borderColor: 'error.light'
+            })
+          }}>
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
-              <People sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+              <People sx={{ 
+                fontSize: 40, 
+                color: includeDeleted ? 'error.main' : 'primary.main', 
+                mb: 1 
+              }} />
               <Typography variant="h6" fontWeight={600}>
                 {users.data?.meta?.itemCount || 0}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Total Users
+                {includeDeleted ? 'Deleted Users' : 'Active Users'}
               </Typography>
             </CardContent>
           </Card>
@@ -285,7 +310,7 @@ export default function AdminUsersPage({
                 {activeUsers}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Active Users
+                {includeDeleted ? 'Were Active' : 'Currently Active'}
               </Typography>
             </CardContent>
           </Card>
@@ -375,12 +400,12 @@ export default function AdminUsersPage({
               <Button
                 fullWidth
                 variant={includeDeleted ? "contained" : "outlined"}
-                color={includeDeleted ? "warning" : "primary"}
-                startIcon={includeDeleted ? <Visibility /> : <VisibilityOff />}
+                color={includeDeleted ? "error" : "success"}
+                startIcon={includeDeleted ? <VisibilityOff /> : <Visibility />}
                 onClick={() => setIncludeDeleted(!includeDeleted)}
                 sx={{ height: 56 }}
               >
-                {includeDeleted ? 'Show All' : 'Active Only'}
+                {includeDeleted ? 'Show Active' : 'Show Deleted'}
               </Button>
             </Grid>
             
@@ -417,6 +442,7 @@ export default function AdminUsersPage({
         totalCount={users.data?.meta?.itemCount || 0}
         currentPage={parseInt(searchParams.page || '1') - 1}
         onPageChange={handlePageChange}
+        includeDeleted={includeDeleted}
       />
 
       {/* Dialogs */}

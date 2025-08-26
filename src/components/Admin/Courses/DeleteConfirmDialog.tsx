@@ -13,8 +13,8 @@ import {
 import {
   Delete,
 } from '@mui/icons-material';
-import { ICourse } from '../../../types/entities';
 import { deleteCourse, restoreCourse, forceDeleteCourse } from '../../../actions/coursesAction';
+import { ICourse } from '../../../../types/entities';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -42,7 +42,7 @@ export function DeleteConfirmDialog({
       try {
         switch (action) {
           case 'delete':
-            await deleteCourse(course.id.toString());
+            const response = await deleteCourse(course.id.toString());
             break;
           case 'restore':
             await restoreCourse(course.id.toString());
