@@ -204,3 +204,42 @@ export const createAdminUser = async (formData: FormData): Promise<IUser> => {
     
     return res.data;
 };
+
+export const restoreUser = async (id: number): Promise<IUser> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequest<IBackendRes<IUser>>({
+        method: "PATCH",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/users/${id}/restore`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 200 || !res?.data) {
+        throw new Error(res?.message || "Failed to restore user");
+    }
+
+    revalidateTag("users");
+    revalidateTag(`user-${id}`);
+    
+    return res.data;
+};
+
+export const forceDeleteUser = async (id: number): Promise<void> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequest<IBackendRes<void>>({
+        method: "DELETE",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/users/${id}/force`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 200) {
+        throw new Error(res?.message || "Failed to permanently delete user");
+    }
+
+    revalidateTag("users");
+};

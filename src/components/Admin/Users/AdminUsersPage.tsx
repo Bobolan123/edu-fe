@@ -81,6 +81,7 @@ export default function AdminUsersPage({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<'delete' | 'restore' | 'force-delete'>('delete');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -156,8 +157,9 @@ export default function AdminUsersPage({
     setEditDialogOpen(true);
   };
 
-  const handleDelete = (user: IUser) => {
+  const handleDelete = (user: IUser, action: 'delete' | 'restore' | 'force-delete' = 'delete') => {
     setSelectedUser(user);
+    setDeleteAction(action);
     setDeleteDialogOpen(true);
   };
 
@@ -186,7 +188,12 @@ export default function AdminUsersPage({
     setDeleteDialogOpen(false);
     setSelectedUser(null);
     setError(null);
-    toastService.success('User deleted successfully!');
+    const messages = {
+      'delete': 'User deleted successfully!',
+      'restore': 'User restored successfully!',
+      'force-delete': 'User permanently deleted successfully!'
+    };
+    toastService.success(messages[deleteAction]);
     router.refresh();
   };
 
@@ -413,6 +420,7 @@ export default function AdminUsersPage({
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         user={selectedUser}
+        action={deleteAction}
         onClose={() => {
           setDeleteDialogOpen(false);
           setSelectedUser(null);

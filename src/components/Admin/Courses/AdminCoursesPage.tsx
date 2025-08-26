@@ -92,6 +92,7 @@ export default function AdminCoursesPage({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<'delete' | 'restore' | 'force-delete'>('delete');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -177,8 +178,9 @@ export default function AdminCoursesPage({
     setEditDialogOpen(true);
   };
 
-  const handleDelete = (course: ICourse) => {
+  const handleDelete = (course: ICourse, action: 'delete' | 'restore' | 'force-delete' = 'delete') => {
     setSelectedCourse(course);
+    setDeleteAction(action);
     setDeleteDialogOpen(true);
   };
 
@@ -207,7 +209,12 @@ export default function AdminCoursesPage({
     setDeleteDialogOpen(false);
     setSelectedCourse(null);
     setError(null);
-    toastService.success('Course deleted successfully!');
+    const messages = {
+      'delete': 'Course deleted successfully!',
+      'restore': 'Course restored successfully!',
+      'force-delete': 'Course permanently deleted successfully!'
+    };
+    toastService.success(messages[deleteAction]);
     // Force a router refresh to get updated data from server component
     router.refresh();
   };
@@ -448,6 +455,7 @@ export default function AdminCoursesPage({
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         course={selectedCourse}
+        action={deleteAction}
         onClose={() => {
           setDeleteDialogOpen(false);
           setSelectedCourse(null);

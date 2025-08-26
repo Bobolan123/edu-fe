@@ -14,11 +14,12 @@ import {
   Delete,
 } from '@mui/icons-material';
 import { ICourse } from '../../../types/entities';
-import { deleteCourse } from '../../../actions/coursesAction';
+import { deleteCourse, restoreCourse, forceDeleteCourse } from '../../../actions/coursesAction';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
   course: ICourse | null;
+  action: 'delete' | 'restore' | 'force-delete';
   onClose: () => void;
   onSuccess: () => void;
   onError: (error: string) => void;
@@ -27,21 +28,32 @@ interface DeleteConfirmDialogProps {
 export function DeleteConfirmDialog({
   open,
   course,
+  action,
   onClose,
   onSuccess,
   onError,
 }: DeleteConfirmDialogProps) {
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = () => {
+  const handleAction = () => {
     if (!course) return;
 
     startTransition(async () => {
       try {
-        await deleteCourse(course.id.toString());
+        switch (action) {
+          case 'delete':
+            await deleteCourse(course.id.toString());
+            break;
+          case 'restore':
+            await restoreCourse(course.id.toString());
+            break;
+          case 'force-delete':
+            await forceDeleteCourse(course.id.toString());
+            break;
+        }
         onSuccess();
       } catch (error) {
-        onError(error instanceof Error ? error.message : 'Failed to delete course');
+        onError(error instanceof Error ? error.message : `Failed to ${action.replace('-', ' ')} course`);
       }
     });
   };
@@ -58,13 +70,17 @@ export function DeleteConfirmDialog({
         <Box sx={{ mb: 2 }}>
           <Delete sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
           <Typography variant="h6" gutterBottom fontWeight={600}>
-            Delete Course
+            {action === 'delete' ? 'Delete Course' : action === 'restore' ? 'Restore Course' : 'Permanently Delete Course'}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            Are you sure you want to delete "{course?.title}"?
+            {action === 'delete' && `Are you sure you want to delete "${course?.title}"?`}
+            {action === 'restore' && `Are you sure you want to restore "${course?.title}"?`}
+            {action === 'force-delete' && `Are you sure you want to permanently delete "${course?.title}"?`}
           </Typography>
-          <Typography variant="body2" color="error.main">
-            This action cannot be undone. All course data, enrollments, and progress will be permanently removed.
+          <Typography variant="body2" color={action === 'restore' ? 'info.main' : 'error.main'}>
+            {action === 'delete' && 'The course will be soft deleted and can be restored later.'}
+            {action === 'restore' && 'The course will be restored and become active again.'}
+            {action === 'force-delete' && 'This action cannot be undone. All course data, enrollments, and progress will be permanently removed.'}
           </Typography>
         </Box>
       </DialogContent>
@@ -79,14 +95,14 @@ export function DeleteConfirmDialog({
           Cancel
         </Button>
         <Button 
-          onClick={handleDelete} 
+          onClick={handleAction} 
           variant="contained" 
-          color="error"
+          color={action === 'restore' ? 'success' : 'error'}
           disabled={isPending}
           startIcon={isPending ? <CircularProgress size={20} /> : <Delete />}
           sx={{ minWidth: 140 }}
         >
-          {isPending ? 'Deleting...' : 'Delete Course'}
+          {isPending ? (action === 'delete' ? 'Deleting...' : action === 'restore' ? 'Restoring...' : 'Permanently Deleting...') : (action === 'delete' ? 'Delete Course' : action === 'restore' ? 'Restore Course' : 'Permanently Delete')}
         </Button>
       </DialogActions>
     </Dialog>

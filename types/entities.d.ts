@@ -6,6 +6,7 @@ export interface    ICourse {
     instructor: IUser;
     date_created: Date;
     last_updated: Date;
+    deleted_at?: Date | null;
     price: number;
     average_rating: number;
     total_students: number;
@@ -32,6 +33,7 @@ export interface IUser {
     email: string;
     password: string | null;
     date_joined: Date;
+    deleted_at?: Date | null;
     bio: string | null;
     has_active_subscription: boolean;
     otp: number | null;

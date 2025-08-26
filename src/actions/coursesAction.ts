@@ -372,3 +372,44 @@ export const getCourseStudents = async (
     
     return res.data;
 };
+
+export const restoreCourse = async (id: string): Promise<ICourse> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequest<IBackendRes<ICourse>>({
+        method: "PATCH",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}/restore`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 200 || !res?.data) {
+        throw new Error(res?.message || "Failed to restore course");
+    }
+
+    revalidateTag("courses");
+    revalidateTag("admin-courses");
+    revalidateTag(`course-${id}`);
+    
+    return res.data;
+};
+
+export const forceDeleteCourse = async (id: string): Promise<void> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequest<IBackendRes<void>>({
+        method: "DELETE",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}/force`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 200) {
+        throw new Error(res?.message || "Failed to permanently delete course");
+    }
+
+    revalidateTag("courses");
+    revalidateTag("admin-courses");
+};

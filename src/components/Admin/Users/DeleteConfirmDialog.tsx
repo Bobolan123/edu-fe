@@ -15,11 +15,12 @@ import {
 } from '@mui/material';
 import { Close, Warning } from '@mui/icons-material';
 import { IUser } from '../../../../types/entities';
-import { deleteUser } from '@/actions/userActions';
+import { deleteUser, restoreUser, forceDeleteUser } from '@/actions/userActions';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
   user: IUser | null;
+  action: 'delete' | 'restore' | 'force-delete';
   onClose: () => void;
   onSuccess: () => void;
   onError: (message: string) => void;
@@ -28,6 +29,7 @@ interface DeleteConfirmDialogProps {
 export function DeleteConfirmDialog({
   open,
   user,
+  action,
   onClose,
   onSuccess,
   onError,
@@ -35,17 +37,27 @@ export function DeleteConfirmDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = async () => {
+  const handleAction = async () => {
     if (!user) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      await deleteUser(user.id);
+      switch (action) {
+        case 'delete':
+          await deleteUser(user.id);
+          break;
+        case 'restore':
+          await restoreUser(user.id);
+          break;
+        case 'force-delete':
+          await forceDeleteUser(user.id);
+          break;
+      }
       onSuccess();
     } catch (error: any) {
-      const errorMessage = error.message || 'Failed to delete user';
+      const errorMessage = error.message || `Failed to ${action.replace('-', ' ')} user`;
       setError(errorMessage);
       onError(errorMessage);
     } finally {
@@ -77,8 +89,8 @@ export function DeleteConfirmDialog({
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Warning color="error" />
-            <Typography variant="h6" component="div" fontWeight={600} color="error.main">
-              Delete User
+            <Typography variant="h6" component="div" fontWeight={600} color={action === 'restore' ? 'success.main' : 'error.main'}>
+              {action === 'delete' ? 'Delete User' : action === 'restore' ? 'Restore User' : 'Permanently Delete User'}
             </Typography>
           </Box>
           <IconButton onClick={handleClose} disabled={loading}>
@@ -95,7 +107,9 @@ export function DeleteConfirmDialog({
         )}
 
         <Typography variant="body1" sx={{ mb: 2 }}>
-          Are you sure you want to delete this user?
+          {action === 'delete' && 'Are you sure you want to delete this user?'}
+          {action === 'restore' && 'Are you sure you want to restore this user?'}
+          {action === 'force-delete' && 'Are you sure you want to permanently delete this user?'}
         </Typography>
 
         {user && (
@@ -120,10 +134,17 @@ export function DeleteConfirmDialog({
           </Box>
         )}
 
-        <Alert severity="warning" sx={{ mt: 2 }}>
+        <Alert severity={action === 'restore' ? 'info' : 'warning'} sx={{ mt: 2 }}>
           <Typography variant="body2">
-            <strong>Warning:</strong> This action cannot be undone. All user data,
-            including course enrollments and progress, will be permanently deleted.
+            {action === 'delete' && (
+              <><strong>Note:</strong> The user will be soft deleted and can be restored later.</>
+            )}
+            {action === 'restore' && (
+              <><strong>Info:</strong> The user will be restored and become active again.</>
+            )}
+            {action === 'force-delete' && (
+              <><strong>Warning:</strong> This action cannot be undone. All user data, including course enrollments and progress, will be permanently deleted.</>
+            )}
           </Typography>
         </Alert>
       </DialogContent>
@@ -137,9 +158,9 @@ export function DeleteConfirmDialog({
           Cancel
         </Button>
         <Button
-          onClick={handleDelete}
+          onClick={handleAction}
           variant="contained"
-          color="error"
+          color={action === 'restore' ? 'success' : 'error'}
           disabled={loading}
           sx={{
             borderRadius: '12px',
@@ -160,7 +181,7 @@ export function DeleteConfirmDialog({
               }}
             />
           )}
-          {loading ? '' : 'Delete User'}
+          {loading ? '' : (action === 'delete' ? 'Delete User' : action === 'restore' ? 'Restore User' : 'Permanently Delete')}
         </Button>
       </DialogActions>
     </Dialog>
