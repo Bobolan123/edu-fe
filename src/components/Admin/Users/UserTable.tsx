@@ -288,39 +288,35 @@ export function UserTable({
           </Box>
         </MenuItem>
         
-        {!includeDeleted ? (
-          <>
-            <MenuItem onClick={handleEdit}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Edit fontSize="small" />
-                Edit User
-              </Box>
-            </MenuItem>
-            
-            <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Delete fontSize="small" />
-                Delete User
-              </Box>
-            </MenuItem>
-          </>
-        ) : (
-          <>
-            <MenuItem onClick={handleRestore} sx={{ color: 'success.main' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Restore fontSize="small" />
-                Restore User
-              </Box>
-            </MenuItem>
-            
-            <MenuItem onClick={handleForceDelete} sx={{ color: 'error.main' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <DeleteForever fontSize="small" />
-                Permanently Delete
-              </Box>
-            </MenuItem>
-          </>
-        )}
+        {!includeDeleted ? [
+          <MenuItem key="edit" onClick={handleEdit}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Edit fontSize="small" />
+              Edit User
+            </Box>
+          </MenuItem>,
+          
+          <MenuItem key="delete" onClick={handleDelete} sx={{ color: 'error.main' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Delete fontSize="small" />
+              Delete User
+            </Box>
+          </MenuItem>
+        ] : [
+          <MenuItem key="restore" onClick={handleRestore} sx={{ color: 'success.main' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Restore fontSize="small" />
+              Restore User
+            </Box>
+          </MenuItem>,
+          
+          <MenuItem key="force-delete" onClick={handleForceDelete} sx={{ color: 'error.main' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <DeleteForever fontSize="small" />
+              Permanently Delete
+            </Box>
+          </MenuItem>
+        ]}
       </Menu>
     </>
   );

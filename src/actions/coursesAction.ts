@@ -382,7 +382,7 @@ export const getCourseStudents = async (
     return res.data;
 };
 
-export const restoreCourse = async (id: string): Promise<ICourse> => {
+export const restoreCourse = async (id: string): Promise<void> => {
     const access_token = await getAccessToken();
     
     const res = await sendRequest<IBackendRes<ICourse>>({
@@ -392,8 +392,7 @@ export const restoreCourse = async (id: string): Promise<ICourse> => {
             Authorization: `Bearer ${access_token}`,
         },
     });
-
-    if (res?.statusCode !== 200 || !res?.data) {
+    if (res?.statusCode !== 200 ) {
         throw new Error(res?.message || "Failed to restore course");
     }
 
@@ -401,7 +400,6 @@ export const restoreCourse = async (id: string): Promise<ICourse> => {
     revalidateTag("admin-courses");
     revalidateTag(`course-${id}`);
     
-    return res.data;
 };
 
 export const forceDeleteCourse = async (id: string): Promise<void> => {

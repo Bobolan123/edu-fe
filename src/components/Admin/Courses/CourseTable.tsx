@@ -25,6 +25,8 @@ import {
   Visibility,
   School,
   Star,
+  Restore,
+  DeleteForever,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { ICourse } from '../../../../types/entities';
@@ -34,11 +36,12 @@ import { currencyService } from '@/service/currency';
 interface CourseTableProps {
   courses: ICourse[];
   onEdit: (course: ICourse) => void;
-  onDelete: (course: ICourse) => void;
+  onDelete: (course: ICourse, action?: 'delete' | 'restore' | 'force-delete') => void;
   onView: (course: ICourse) => void;
   totalCount: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  includeDeleted?: boolean;
 }
 
 const statusColors = {
@@ -73,6 +76,7 @@ export function CourseTable({
   totalCount,
   currentPage,
   onPageChange,
+  includeDeleted = false,
 }: CourseTableProps) {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
@@ -97,7 +101,21 @@ export function CourseTable({
 
   const handleDelete = () => {
     if (selectedCourse) {
-      onDelete(selectedCourse);
+      onDelete(selectedCourse, 'delete');
+    }
+    handleMenuClose();
+  };
+
+  const handleRestore = () => {
+    if (selectedCourse) {
+      onDelete(selectedCourse, 'restore');
+    }
+    handleMenuClose();
+  };
+
+  const handleForceDelete = () => {
+    if (selectedCourse) {
+      onDelete(selectedCourse, 'force-delete');
     }
     handleMenuClose();
   };
@@ -132,7 +150,19 @@ export function CourseTable({
             </TableHead>
             <TableBody>
               {courses.map((course) => (
-                <TableRow key={course.id} hover>
+                <TableRow 
+                  key={course.id} 
+                  hover
+                  sx={{
+                    ...(includeDeleted && {
+                      backgroundColor: 'error.lighter',
+                      opacity: 0.7,
+                      '&:hover': {
+                        backgroundColor: 'error.light',
+                      }
+                    })
+                  }}
+                >
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar
@@ -159,34 +189,34 @@ export function CourseTable({
                   
                   <TableCell>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {course.categories && course.categories.length > 0 ? (
-                        <>
-                          {course.categories.slice(0, 2).map((category) => (
-                            <Chip
-                              key={category.id}
-                              label={category.name}
-                              size="small"
-                              variant="outlined"
-                              color="primary"
-                            />
-                          ))}
-                          {course.categories.length > 2 && (
-                            <Chip
-                              label={`+${course.categories.length - 2}`}
-                              size="small"
-                              variant="outlined"
-                              color="default"
-                            />
-                          )}
-                        </>
-                      ) : (
+                      {course.categories && course.categories.length > 0 ? [
+                        ...course.categories.slice(0, 2).map((category) => (
+                          <Chip
+                            key={category.id}
+                            label={category.name}
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                          />
+                        )),
+                        ...(course.categories.length > 2 ? [
+                          <Chip
+                            key="more"
+                            label={`+${course.categories.length - 2}`}
+                            size="small"
+                            variant="outlined"
+                            color="default"
+                          />
+                        ] : [])
+                      ] : [
                         <Chip
+                          key="uncategorized"
                           label="Uncategorized"
                           size="small"
                           variant="outlined"
                           color="default"
                         />
-                      )}
+                      ]}
                     </Box>
                   </TableCell>
                   
@@ -274,19 +304,35 @@ export function CourseTable({
           </Box>
         </MenuItem>
         
-        <MenuItem onClick={handleEdit}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Edit fontSize="small" />
-            Edit Course
-          </Box>
-        </MenuItem>
-        
-        <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Delete fontSize="small" />
-            Delete Course
-          </Box>
-        </MenuItem>
+        {!includeDeleted ? [
+          <MenuItem key="edit" onClick={handleEdit}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Edit fontSize="small" />
+              Edit Course
+            </Box>
+          </MenuItem>,
+          
+          <MenuItem key="delete" onClick={handleDelete} sx={{ color: 'error.main' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Delete fontSize="small" />
+              Delete Course
+            </Box>
+          </MenuItem>
+        ] : [
+          <MenuItem key="restore" onClick={handleRestore} sx={{ color: 'success.main' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Restore fontSize="small" />
+              Restore Course
+            </Box>
+          </MenuItem>,
+          
+          <MenuItem key="force-delete" onClick={handleForceDelete} sx={{ color: 'error.main' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <DeleteForever fontSize="small" />
+              Permanently Delete
+            </Box>
+          </MenuItem>
+        ]}
       </Menu>
     </>
   );

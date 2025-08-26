@@ -32,6 +32,7 @@ import {
   Clear,
   Visibility,
   VisibilityOff,
+  Delete,
 } from '@mui/icons-material';
 import { CourseTable } from './CourseTable';
 import { CourseForm } from './CourseForm';
@@ -162,6 +163,17 @@ export default function AdminCoursesPage({
     });
   };
 
+  const handleToggleDeleted = (showDeleted: boolean) => {
+    setIncludeDeleted(showDeleted);
+    updateURL({
+      search: searchTerm,
+      category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
+      status: selectedStatus !== 'all' ? selectedStatus : undefined,
+      includeDeleted: showDeleted ? 'true' : undefined,
+      page: '1'
+    });
+  };
+
   const handleApplyFilters = () => {
     updateURL({ 
       search: searchTerm, 
@@ -258,11 +270,25 @@ export default function AdminCoursesPage({
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box>
-            <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
-              Course Management
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
+                Course Management
+              </Typography>
+              {includeDeleted && (
+                <Chip 
+                  label="Viewing Deleted Courses" 
+                  color="error" 
+                  variant="filled"
+                  size="small"
+                  sx={{ mb: 1 }}
+                />
+              )}
+            </Box>
             <Typography variant="body1" color="text.secondary">
-              Manage and monitor all courses on the platform
+              {includeDeleted 
+                ? "View and manage deleted courses - restore or permanently delete them"
+                : "Manage and monitor all active courses on the platform"
+              }
             </Typography>
           </Box>
           
@@ -271,6 +297,7 @@ export default function AdminCoursesPage({
             startIcon={<Add />}
             size="large"
             onClick={() => setCreateDialogOpen(true)}
+            disabled={includeDeleted}
             sx={{ height: 48 }}
           >
             Create Course
@@ -340,9 +367,69 @@ export default function AdminCoursesPage({
         </Grid>
       </Grid>
 
+      {/* Data View Toggle */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={600}>
+                Choose Data to Display
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Switch between active courses and deleted courses (trash bin)
+              </Typography>
+            </Box>
+            <Box sx={{ 
+              display: 'flex', 
+              bgcolor: 'background.default', 
+              borderRadius: '12px',
+              border: '1px solid',
+              borderColor: 'divider',
+              p: 0.5
+            }}>
+              <Button
+                variant={!includeDeleted ? 'contained' : 'text'}
+                color={!includeDeleted ? 'success' : 'inherit'}
+                startIcon={<School />}
+                onClick={() => handleToggleDeleted(false)}
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  minWidth: 160,
+                  px: 2
+                }}
+              >
+                Active Courses
+              </Button>
+              <Button
+                variant={includeDeleted ? 'contained' : 'text'}
+                color={includeDeleted ? 'warning' : 'inherit'}
+                startIcon={<Delete />}
+                onClick={() => handleToggleDeleted(true)}
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  minWidth: 160,
+                  px: 2
+                }}
+              >
+                Trash Bin
+              </Button>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+
       {/* Filters and Search */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Search & Filter
+            </Typography>
+          </Box>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>
               <TextField
@@ -407,20 +494,7 @@ export default function AdminCoursesPage({
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} md={2}>
-              <Button
-                fullWidth
-                variant={includeDeleted ? "contained" : "outlined"}
-                color={includeDeleted ? "warning" : "primary"}
-                startIcon={includeDeleted ? <Visibility /> : <VisibilityOff />}
-                onClick={() => setIncludeDeleted(!includeDeleted)}
-                sx={{ height: 56 }}
-              >
-                {includeDeleted ? 'Show All' : 'Active Only'}
-              </Button>
-            </Grid>
-            
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={3}>
               <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
                 <Button
                   variant="contained"
@@ -453,6 +527,7 @@ export default function AdminCoursesPage({
         totalCount={courses.data?.meta.itemCount || 0}
         currentPage={parseInt(searchParams.page || '1') - 1}
         onPageChange={handlePageChange}
+        includeDeleted={includeDeleted}
       />
 
       {/* Dialogs */}

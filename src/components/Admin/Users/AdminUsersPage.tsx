@@ -23,19 +23,20 @@ import {
   Add,
   Search,
   FilterList,
+  School,
   People,
   PersonAdd,
-  School,
   AttachMoney,
   Clear,
   Visibility,
   VisibilityOff,
+  Delete,
 } from '@mui/icons-material';
 import { UserTable } from './UserTable';
 import { UserForm } from './UserForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { IUser, IRole } from '../../../../types/entities';
-import toastService from '../../../services/toast';
+import { toastService } from '../../../services/toast';
 import { useCurrency } from '@/context/CurrencyContext';
 import { currencyService } from '@/service/currency';
 
@@ -137,6 +138,17 @@ export default function AdminUsersPage({
       status: selectedStatus,
       includeDeleted: includeDeleted ? 'true' : undefined,
       page: (newPage + 1).toString() 
+    });
+  };
+
+  const handleToggleDeleted = (showDeleted: boolean) => {
+    setIncludeDeleted(showDeleted);
+    updateURL({
+      search: searchTerm,
+      role: selectedRole !== 'all' ? selectedRole : undefined,
+      status: selectedStatus !== 'all' ? selectedStatus : undefined,
+      includeDeleted: showDeleted ? 'true' : undefined,
+      page: '1'
     });
   };
 
@@ -269,6 +281,7 @@ export default function AdminUsersPage({
             startIcon={<Add />}
             size="large"
             onClick={() => setCreateDialogOpen(true)}
+            disabled={includeDeleted}
             sx={{ height: 48 }}
           >
             Create User
@@ -345,9 +358,69 @@ export default function AdminUsersPage({
         </Grid>
       </Grid>
 
+      {/* Data View Toggle */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={600}>
+                Choose Data to Display
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Switch between active users and deleted users (trash bin)
+              </Typography>
+            </Box>
+            <Box sx={{ 
+              display: 'flex', 
+              bgcolor: 'background.default', 
+              borderRadius: '12px',
+              border: '1px solid',
+              borderColor: 'divider',
+              p: 0.5
+            }}>
+              <Button
+                variant={!includeDeleted ? 'contained' : 'text'}
+                color={!includeDeleted ? 'success' : 'inherit'}
+                startIcon={<People />}
+                onClick={() => handleToggleDeleted(false)}
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  minWidth: 160,
+                  px: 2
+                }}
+              >
+                Active Users
+              </Button>
+              <Button
+                variant={includeDeleted ? 'contained' : 'text'}
+                color={includeDeleted ? 'warning' : 'inherit'}
+                startIcon={<Delete />}
+                onClick={() => handleToggleDeleted(true)}
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  minWidth: 160,
+                  px: 2
+                }}
+              >
+                Trash Bin
+              </Button>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+
       {/* Filters and Search */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Search & Filter
+            </Typography>
+          </Box>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>
               <TextField
@@ -396,20 +469,7 @@ export default function AdminUsersPage({
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} md={2}>
-              <Button
-                fullWidth
-                variant={includeDeleted ? "contained" : "outlined"}
-                color={includeDeleted ? "error" : "success"}
-                startIcon={includeDeleted ? <VisibilityOff /> : <Visibility />}
-                onClick={() => setIncludeDeleted(!includeDeleted)}
-                sx={{ height: 56 }}
-              >
-                {includeDeleted ? 'Show Active' : 'Show Deleted'}
-              </Button>
-            </Grid>
-            
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={3}>
               <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
                 <Button
                   variant="contained"

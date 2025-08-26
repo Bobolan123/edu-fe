@@ -26,7 +26,6 @@ export default async function UsersPage(props: UsersPageProps) {
     
     const usersResponse = await getUsers(page, limit, search, role, status, includeDeleted);
     const roles = await getRoles();
-    console.log(roles)
     return (
       <AdminUsersPage 
         users={usersResponse} 
