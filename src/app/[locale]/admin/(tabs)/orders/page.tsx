@@ -29,7 +29,6 @@ export default async function OrdersPage(props: OrdersPageProps) {
       status,
       paymentMethod
     );
-    
     return (
       <AdminOrdersPage 
         orders={ordersResponse} 
