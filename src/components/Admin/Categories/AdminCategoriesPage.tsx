@@ -10,30 +10,8 @@ import {
   Typography,
   Button,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Chip,
-  Avatar,
-  Menu,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
   InputAdornment,
-  Tooltip,
-  FormControl,
-  InputLabel,
-  Select,
-  Switch,
-  FormControlLabel,
+  IconButton,
   Alert,
   CircularProgress,
 } from '@mui/material';
@@ -43,16 +21,11 @@ import {
   Category,
   School,
   Visibility,
-  MoreVert,
-  Edit,
-  Delete,
-  Close,
   ColorLens,
-
 } from '@mui/icons-material';
-import { ICategory } from '../../../../types/entities';
-import { createCategory, updateCategory, deleteCategory } from '../../../actions/categoriesAction';
-import { toastService } from '../../../services/toast';
+import { CategoryTable } from './CategoryTable';
+import { CategoryForm } from './CategoryForm';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { IResFindAllCategories } from '../../../../types/resData';
 
 
@@ -64,9 +37,6 @@ interface AdminCategoriesPageProps {
   };
 }
 
-const categoryColors = [
-  '#0ea5e9', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#84cc16', '#f97316'
-];
 
 export default function AdminCategoriesPage({ 
   categories, 
@@ -74,19 +44,12 @@ export default function AdminCategoriesPage({
 }: AdminCategoriesPageProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<IResFindAllCategories | null>(null);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Form states
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
 
   const updateURL = (params: Record<string, string | undefined>) => {
     const searchParams = new URLSearchParams();
@@ -125,107 +88,35 @@ export default function AdminCategoriesPage({
   const handlePageChange = (newPage: number) => {
     updateURL({ 
       search: searchTerm, 
-      page: (newPage + 1).toString() 
+      page: newPage.toString() 
     });
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, category: IResFindAllCategories) => {
-    setMenuAnchor(event.currentTarget);
-    setSelectedCategory(category);
+  const handleCreateCategory = () => {
+    setFormMode('create');
+    setSelectedCategory(null);
+    setFormDialogOpen(true);
   };
 
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
+  const handleEditCategory = (category: IResFindAllCategories) => {
+    setFormMode('edit');
+    setSelectedCategory(category);
+    setFormDialogOpen(true);
+  };
+
+  const handleDeleteCategory = (category: IResFindAllCategories) => {
+    setSelectedCategory(category);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setFormDialogOpen(false);
     setSelectedCategory(null);
   };
 
-  const handleEdit = () => {
-    if (selectedCategory) {
-      setFormData({
-        name: selectedCategory.name,
-        description: selectedCategory.description || '',
-      });
-      setEditDialogOpen(true);
-    }
-    handleMenuClose();
-  };
-
-  const handleDelete = () => {
-    setDeleteDialogOpen(true);
-    handleMenuClose();
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedCategory) return;
-    
-    setLoading(true);
-    try {
-      await deleteCategory(selectedCategory.id);
-      setDeleteDialogOpen(false);
-      setSelectedCategory(null);
-      setError(null);
-      toastService.success('Category deleted successfully!');
-      router.refresh();
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to delete category';
-      setError(errorMessage);
-      toastService.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFormSubmit = async () => {
-    if (!formData.name.trim()) return;
-    
-    setLoading(true);
-    try {
-      await createCategory({
-        name: formData.name,
-        description: formData.description || undefined,
-      });
-      setCreateDialogOpen(false);
-      setFormData({ name: '', description: '' });
-      setError(null);
-      toastService.success('Category created successfully!');
-      router.refresh();
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to create category';
-      setError(errorMessage);
-      toastService.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFormUpdate = async () => {
-    if (!selectedCategory || !formData.name.trim()) return;
-    
-    setLoading(true);
-    try {
-      await updateCategory(selectedCategory.id, {
-        name: formData.name,
-        description: formData.description || undefined,
-      });
-      setEditDialogOpen(false);
-      setSelectedCategory(null);
-      setFormData({ name: '', description: '' });
-      setError(null);
-      toastService.success('Category updated successfully!');
-      router.refresh();
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to update category';
-      setError(errorMessage);
-      toastService.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleError = (errorMessage: string) => {
-    setError(errorMessage);
-    setLoading(false);
-    toastService.error(errorMessage);
+  const handleCloseDelete = () => {
+    setDeleteDialogOpen(false);
+    setSelectedCategory(null);
   };
 
   if (loading) {
@@ -235,90 +126,6 @@ export default function AdminCategoriesPage({
       </Box>
     );
   }
-
-  const CategoryFormDialog = ({ 
-    open, 
-    onClose, 
-    title, 
-    onSubmit 
-  }: { 
-    open: boolean; 
-    onClose: () => void; 
-    title: string; 
-    onSubmit: () => void; 
-  }) => (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h6" fontWeight={600}>
-            {title}
-          </Typography>
-          <IconButton onClick={onClose}>
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      
-      <DialogContent sx={{ pt: 2 }}>
-        <Stack spacing={3}>
-          <TextField
-            label="Category Name"
-            fullWidth
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Enter category name"
-          />
-          
-          <TextField
-            label="Description"
-            fullWidth
-            multiline
-            rows={3}
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Describe this category"
-          />
-        </Stack>
-      </DialogContent>
-      
-      <DialogActions sx={{ p: 3, pt: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          variant="contained" 
-          onClick={onSubmit}
-          disabled={!formData.name.trim() || loading}
-        >
-          {title.includes('Create') ? 'Create Category' : 'Update Category'}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
-  const DeleteConfirmDialog = () => (
-    <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-      <DialogContent sx={{ p: 3, textAlign: 'center' }}>
-        <Box sx={{ mb: 2 }}>
-          <Delete sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            Delete Category
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Are you sure you want to delete "{selectedCategory?.name}"? This action cannot be undone.
-          </Typography>
-        </Box>
-      </DialogContent>
-      
-      <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'center', gap: 1 }}>
-        <Button onClick={() => setDeleteDialogOpen(false)} variant="outlined">
-          Cancel
-        </Button>
-        <Button onClick={confirmDelete} variant="contained" color="error" disabled={loading}>
-          Delete Category
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
 
   const currentCategories = categories.data?.result || [];
   const totalCategories = categories.data?.meta?.itemCount || 0;
@@ -348,7 +155,7 @@ export default function AdminCategoriesPage({
             variant="contained"
             startIcon={<Add />}
             size="large"
-            onClick={() => setCreateDialogOpen(true)}
+            onClick={handleCreateCategory}
             sx={{ height: 48 }}
           >
             Create Category
@@ -420,144 +227,59 @@ export default function AdminCategoriesPage({
         <CardContent>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                placeholder="Search categories..."
-                value={searchTerm}
-                onChange={handleSearch}
-                onKeyPress={handleSearchKeyPress}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <IconButton onClick={handleSearchSubmit} size="small">
-                        <Search />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <TextField
+                  fullWidth
+                  placeholder="Search categories..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  onKeyPress={handleSearchKeyPress}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <IconButton onClick={handleSearchSubmit} size="small">
+                          <Search /> 
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleSearchSubmit}
+                  sx={{ minWidth: 'auto', px: 2 }}
+                >
+                  <Search /> 
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
 
       {/* Categories Table */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Category</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell align="center">Courses</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {currentCategories.map((category) => (
-                <TableRow key={category.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          backgroundColor: 'primary.main',
-                          color: 'white',
-                        }}
-                      >
-                        <Category />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={600}>
-                          {category.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          ID: {category.id}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary">
-                      {category.description || 'No description'}
-                    </Typography>
-                  </TableCell>
-                  
-                  <TableCell align="center">
-                    <Typography variant="body2" fontWeight={600}>
-                      {category.courseCount || 0}
-                    </Typography>
-                  </TableCell>
-                  
-                  <TableCell align="center">
-                    <Tooltip title="More actions">
-                      <IconButton
-                        onClick={(e) => handleMenuOpen(e, category)}
-                        size="small"
-                      >
-                        <MoreVert />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        
-        <TablePagination
-          rowsPerPageOptions={[10]}
-          component="div"
-          count={totalCategories}
-          rowsPerPage={10}
-          page={parseInt(searchParams.page || '1') - 1}
-          onPageChange={(_, newPage) => handlePageChange(newPage)}
-          onRowsPerPageChange={() => {}}
-        />
-      </Card>
-
-      {/* Action Menu */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-        PaperProps={{
-          sx: { borderRadius: '12px', minWidth: 160 },
-        }}
-      >
-        <MenuItem onClick={handleEdit}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Edit fontSize="small" />
-            Edit Category
-          </Box>
-        </MenuItem>
-        
-        <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Delete fontSize="small" />
-            Delete Category
-          </Box>
-        </MenuItem>
-      </Menu>
+      <CategoryTable
+        categories={currentCategories}
+        totalCategories={totalCategories}
+        currentPage={parseInt(searchParams.page || '1')}
+        onPageChange={handlePageChange}
+        onEdit={handleEditCategory}
+        onDelete={handleDeleteCategory}
+      />
 
       {/* Dialogs */}
-      <CategoryFormDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-        title="Create New Category"
-        onSubmit={handleFormSubmit}
+      <CategoryForm
+        open={formDialogOpen}
+        onClose={handleCloseForm}
+        category={selectedCategory}
+        mode={formMode}
       />
       
-      <CategoryFormDialog
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        title="Edit Category"
-        onSubmit={handleFormUpdate}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDelete}
+        category={selectedCategory}
       />
-      
-      <DeleteConfirmDialog />
     </Box>
   );
 }

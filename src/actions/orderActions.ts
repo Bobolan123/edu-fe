@@ -48,9 +48,19 @@ export const createOrder = async ({
 export const getOrders = async (
     page: number = 1,
     limit: number = 10,
-    status?: OrderStatus,
     search?: string,
-    userId?: number
+    status?: OrderStatus,
+    paymentMethod?: PaymentMethod,
+    minPrice?: number,
+    maxPrice?: number,
+    startDate?: string,
+    endDate?: string,
+    userId?: number,
+    userName?: string,
+    userEmail?: string,
+    transactionId?: string,
+    orderBy?: string,
+    order?: 'ASC' | 'DESC'
 ): Promise<IModelPaginate<IOrder>> => {
     const access_token = await getAccessToken();
     
@@ -59,9 +69,19 @@ export const getOrders = async (
         take: limit,
     };
     
-    if (status) queryParams.status = status;
     if (search) queryParams.search = search;
+    if (status) queryParams.status = status;
+    if (paymentMethod) queryParams.paymentMethod = paymentMethod;
+    if (minPrice !== undefined) queryParams.minPrice = minPrice;
+    if (maxPrice !== undefined) queryParams.maxPrice = maxPrice;
+    if (startDate) queryParams.startDate = startDate;
+    if (endDate) queryParams.endDate = endDate;
     if (userId) queryParams.userId = userId;
+    if (userName) queryParams.userName = userName;
+    if (userEmail) queryParams.userEmail = userEmail;
+    if (transactionId) queryParams.transactionId = transactionId;
+    if (orderBy) queryParams.orderBy = orderBy;
+    if (order) queryParams.order = order;
 
     const res = await sendRequest<IModelPaginate<IOrder>>({
         method: "GET",
@@ -75,7 +95,7 @@ export const getOrders = async (
         },
     });
 
-    if (res?.statusCode !== 200 || !res?.data) {
+    if (!res?.data) {
         throw new Error(res?.message || "Failed to fetch orders");
     }
 
@@ -126,4 +146,22 @@ export const updateOrderStatus = async (
     revalidateTag(`order-${id}`);
     
     return res.data;
+};
+
+export const deleteOrder = async (id: string): Promise<void> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequest<IBackendRes<void>>({
+        method: "DELETE",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/orders/${id}`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 200) {
+        throw new Error(res?.message || "Failed to delete order");
+    }
+    
+    revalidateTag("orders");
 };
