@@ -22,6 +22,9 @@ import {
   School,
   Visibility,
   ColorLens,
+  FilterList,
+  Clear,
+  Close,
 } from '@mui/icons-material';
 import { CategoryTable } from './CategoryTable';
 import { CategoryForm } from './CategoryForm';
@@ -81,7 +84,7 @@ export default function AdminCategoriesPage({
 
   const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      handleSearchSubmit();
+      handleApplyFilters();
     }
   };
 
@@ -117,6 +120,21 @@ export default function AdminCategoriesPage({
   const handleCloseDelete = () => {
     setDeleteDialogOpen(false);
     setSelectedCategory(null);
+  };
+
+  const handleApplyFilters = () => {
+    updateURL({ 
+      search: searchTerm, 
+      page: '1'
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    updateURL({
+      search: undefined,
+      page: '1'
+    });
   };
 
   if (loading) {
@@ -222,34 +240,49 @@ export default function AdminCategoriesPage({
         </Grid>
       </Grid>
 
-      {/* Search */}
+      {/* Filters and Search */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Search & Filter
+            </Typography>
+          </Box>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                  fullWidth
-                  placeholder="Search categories..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  onKeyPress={handleSearchKeyPress}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <IconButton onClick={handleSearchSubmit} size="small">
-                          <Search /> 
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+              <TextField
+                fullWidth
+                placeholder="Search categories..."
+                value={searchTerm}
+                onChange={handleSearch}
+                onKeyPress={handleSearchKeyPress}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} md={3}>
+              <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
                 <Button
                   variant="contained"
-                  onClick={handleSearchSubmit}
-                  sx={{ minWidth: 'auto', px: 2 }}
+                  startIcon={<Search />}
+                  onClick={handleApplyFilters}
+                  sx={{ flex: 1, minWidth: 0 }}
                 >
-                  <Search /> 
+                  Apply
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Close />}
+                  onClick={handleClearFilters}
+                  sx={{ flex: 1, minWidth: 0 }}
+                >
+                  Clear
                 </Button>
               </Box>
             </Grid>
