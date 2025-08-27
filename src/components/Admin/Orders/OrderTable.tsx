@@ -25,6 +25,7 @@ import {
   Delete,
   Person,
   AttachMoney,
+  GetApp,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { IOrder, OrderStatus, PaymentMethod } from '../../../../types/entities';
@@ -38,6 +39,7 @@ interface OrderTableProps {
   onPageChange: (newPage: number) => void;
   onView: (order: IOrder) => void;
   onDelete: (order: IOrder) => void;
+  onExport: (order: IOrder) => void;
 }
 
 const getStatusColor = (status: OrderStatus) => {
@@ -98,6 +100,7 @@ export const OrderTable = ({
   onPageChange,
   onView,
   onDelete,
+  onExport,
 }: OrderTableProps) => {
   const { currency } = useCurrency();
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
@@ -123,6 +126,13 @@ export const OrderTable = ({
   const handleDelete = () => {
     if (selectedOrder) {
       onDelete(selectedOrder);
+    }
+    handleMenuClose();
+  };
+
+  const handleExport = () => {
+    if (selectedOrder) {
+      onExport(selectedOrder);
     }
     handleMenuClose();
   };
@@ -258,6 +268,13 @@ export const OrderTable = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Visibility fontSize="small" />
             View Order
+          </Box>
+        </MenuItem>
+        
+        <MenuItem onClick={handleExport}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <GetApp fontSize="small" />
+            Export Order
           </Box>
         </MenuItem>
         

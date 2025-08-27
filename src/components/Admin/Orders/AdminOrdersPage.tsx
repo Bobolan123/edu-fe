@@ -28,12 +28,14 @@ import {
   FilterList,
   Clear,
   Close,
+  GetApp,
 } from '@mui/icons-material';
 import { OrderTable } from './OrderTable';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { IOrder, OrderStatus, PaymentMethod } from '../../../../types/entities';
 import { useCurrency } from '@/context/CurrencyContext';
 import { currencyService } from '@/service/currency';
+import { exportSingleOrder, exportAllOrders, exportOrderAsPDF } from '@/utils/orderExport';
 
 interface AdminOrdersPageProps {
   orders: IModelPaginate<IOrder>;
@@ -166,6 +168,18 @@ export default function AdminOrdersPage({
   const handleDeleteOrder = (order: IOrder) => {
     setSelectedOrder(order);
     setDeleteDialogOpen(true);
+  };
+
+  const handleExportOrder = (order: IOrder) => {
+    exportSingleOrder(order, currency);
+  };
+
+  const handleBulkExport = () => {
+    exportAllOrders(currentOrders, currency);
+  };
+
+  const handleExportOrderAsPDF = (order: IOrder) => {
+    exportOrderAsPDF(order, currency);
   };
 
   const handleCloseDelete = () => {
@@ -345,7 +359,7 @@ export default function AdminOrdersPage({
               </FormControl>
             </Grid>
             
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
               <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
                 <Button
                   variant="contained"
@@ -365,6 +379,18 @@ export default function AdminOrdersPage({
                 </Button>
               </Box>
             </Grid>
+
+            <Grid item xs={12} md={1}>
+              <Button
+                variant="outlined"
+                startIcon={<GetApp />}
+                onClick={handleBulkExport}
+                sx={{ height: 56, minWidth: 'auto', px: 2 }}
+                title="Export All Orders"
+              >
+                Export
+              </Button>
+            </Grid>
           </Grid>
         </CardContent>
       </Card>
@@ -377,6 +403,7 @@ export default function AdminOrdersPage({
         onPageChange={handlePageChange}
         onView={handleViewOrder}
         onDelete={handleDeleteOrder}
+        onExport={handleExportOrder}
       />
 
       {/* Dialogs */}

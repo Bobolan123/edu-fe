@@ -122,7 +122,7 @@ export function getYouTubeEmbedUrl(url: string): string | null {
         const parsedUrl = new URL(url);
         const hostname = parsedUrl.hostname.toLowerCase();
         
-        if (hostname === 'youtu.be') {
+        if (hostname === 'youtube') {
             const videoId = parsedUrl.pathname.slice(1);
             return `https://www.youtube.com/embed/${videoId}`;
         }
