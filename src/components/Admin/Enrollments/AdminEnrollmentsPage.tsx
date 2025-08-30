@@ -17,6 +17,10 @@ import {
   Alert,
   CircularProgress,
   Button,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider,
 } from '@mui/material';
 import {
   Search,
@@ -26,6 +30,7 @@ import {
   TrendingUp,
   FilterList,
   Clear,
+  ExpandMore,
 } from '@mui/icons-material';
 import { IEnrollment } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
@@ -101,6 +106,9 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
   // Loading states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Accordion expansion state
+  const [expandedFilters, setExpandedFilters] = useState(false);
 
   // Get data from props - API returns result array with meta
   const enrollmentsList = enrollments.result || [];
@@ -389,6 +397,7 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
             Filters & Search
           </Typography>
           
+          {/* Always Visible: Search, Sort, and Date Filters */}
           <Grid container spacing={3}>
             {/* Search and Sort Row */}
             <Grid item xs={12}>
@@ -399,6 +408,7 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
                     placeholder="Search enrollments..."
                     value={searchTerm}
                     onChange={handleSearch}
+                    size="small"
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -410,7 +420,7 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
                 </Grid>
                 
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth size="small">
                     <InputLabel>Sort By</InputLabel>
                     <Select
                       value={sortBy}
@@ -431,93 +441,7 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
               </Grid>
             </Grid>
 
-            {/* ID Filters Row */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" gutterBottom color="text.secondary">
-                Filter by IDs
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    placeholder="User ID"
-                    value={userId}
-                    onChange={handleUserIdChange}
-                    label="User ID"
-                    size="small"
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    placeholder="Course ID"
-                    value={courseId}
-                    onChange={handleCourseIdChange}
-                    label="Course ID"
-                    size="small"
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    placeholder="Instructor ID"
-                    value={instructorId}
-                    onChange={handleInstructorIdChange}
-                    label="Instructor ID"
-                    size="small"
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-
-            {/* Name/Email Filters Row */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" gutterBottom color="text.secondary">
-                Filter by Names & Email
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    placeholder="Course Name"
-                    value={courseName}
-                    onChange={handleCourseNameChange}
-                    label="Course Name"
-                    size="small"
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    placeholder="Student Name"
-                    value={studentName}
-                    onChange={handleStudentNameChange}
-                    label="Student Name"
-                    size="small"
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    type="email"
-                    placeholder="Student Email"
-                    value={studentEmail}
-                    onChange={handleStudentEmailChange}
-                    label="Student Email"
-                    size="small"
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-
-            {/* Date Filters Row */}
+            {/* Date Filters Row - Always Visible */}
             <Grid item xs={12}>
               <Typography variant="subtitle1" gutterBottom color="text.secondary">
                 Filter by Enrollment Date
@@ -552,29 +476,146 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
                 </Grid>
               </Grid>
             </Grid>
-
-            {/* Action Buttons Row */}
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<Clear />}
-                  onClick={handleClearFilters}
-                  color="secondary"
-                >
-                  Clear All
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<FilterList />}
-                  onClick={handleApplyFilters}
-                  color="primary"
-                >
-                  Apply Filters
-                </Button>
-              </Box>
-            </Grid>
           </Grid>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Collapsible Advanced Filters */}
+          <Accordion 
+            expanded={expandedFilters} 
+            onChange={(e, isExpanded) => setExpandedFilters(isExpanded)}
+            elevation={0}
+            sx={{ 
+              '&:before': { display: 'none' },
+              boxShadow: 'none',
+              bgcolor: 'transparent'
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMore />}
+              sx={{ 
+                px: 0,
+                minHeight: 'auto',
+                '& .MuiAccordionSummary-content': { 
+                  margin: '8px 0' 
+                }
+              }}
+            >
+              <Typography variant="subtitle1" color="text.secondary">
+                Advanced Filters
+              </Typography>
+            </AccordionSummary>
+            
+            <AccordionDetails sx={{ px: 0 }}>
+              <Grid container spacing={3}>
+                {/* ID Filters Row */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" gutterBottom color="text.secondary">
+                    Filter by IDs
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        placeholder="User ID"
+                        value={userId}
+                        onChange={handleUserIdChange}
+                        label="User ID"
+                        size="small"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        placeholder="Course ID"
+                        value={courseId}
+                        onChange={handleCourseIdChange}
+                        label="Course ID"
+                        size="small"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        placeholder="Instructor ID"
+                        value={instructorId}
+                        onChange={handleInstructorIdChange}
+                        label="Instructor ID"
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Name/Email Filters Row */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" gutterBottom color="text.secondary">
+                    Filter by Names & Email
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        fullWidth
+                        placeholder="Course Name"
+                        value={courseName}
+                        onChange={handleCourseNameChange}
+                        label="Course Name"
+                        size="small"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        fullWidth
+                        placeholder="Student Name"
+                        value={studentName}
+                        onChange={handleStudentNameChange}
+                        label="Student Name"
+                        size="small"
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        fullWidth
+                        type="email"
+                        placeholder="Student Email"
+                        value={studentEmail}
+                        onChange={handleStudentEmailChange}
+                        label="Student Email"
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Action Buttons Row - Always Visible */}
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<Clear />}
+              onClick={handleClearFilters}
+              color="secondary"
+            >
+              Clear All
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<FilterList />}
+              onClick={handleApplyFilters}
+              color="primary"
+            >
+              Apply Filters
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 
