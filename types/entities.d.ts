@@ -101,8 +101,16 @@ export interface IEnrollment {
     id: number;
     student: IUser;
     course: ICourse;
-    enrollment_date: Date;
+    date_enrolled: Date;
     completion_status: string;
+
+    progressData?: {
+        progressPercentage: number;
+        completedLecturesCount: number;
+        totalLecturesCount: number;
+        totalWatchTime: number;
+        lastActivity: string | null;
+    };
 }
 
 // Certification Interface
