@@ -16,6 +16,7 @@ import {
   InputAdornment,
   Alert,
   CircularProgress,
+  Button,
 } from '@mui/material';
 import {
   Search,
@@ -23,6 +24,8 @@ import {
   PlayCircle,
   CheckCircle,
   TrendingUp,
+  FilterList,
+  Clear,
 } from '@mui/icons-material';
 import { IEnrollment } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
@@ -44,8 +47,16 @@ interface AdminEnrollmentsPageProps {
   searchParams: {
     page?: string;
     search?: string;
-    status?: string;
-    sortBy?: 'newest' | 'oldest' | 'progress_high' | 'progress_low';
+    orderBy?: string;
+    order?: string;
+    userId?: string;
+    courseId?: string;
+    instructorId?: string;
+    courseName?: string;
+    studentName?: string;
+    studentEmail?: string;
+    enrolledFromDate?: string;
+    enrolledToDate?: string;
   };
 }
 
@@ -54,8 +65,34 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
   
   // Form state
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
-  const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'All Status');
-  const [sortBy, setSortBy] = useState(searchParams.sortBy || 'newest');
+  // Reconstruct sortBy from orderBy and order parameters
+  const [sortBy, setSortBy] = useState(() => {
+    const orderBy = searchParams.orderBy || 'date_enrolled';
+    const order = searchParams.order || 'DESC';
+    return `${orderBy}-${order}`;
+  });
+  
+  // Filter states
+  const [userId, setUserId] = useState(searchParams.userId || '');
+  const [courseId, setCourseId] = useState(searchParams.courseId || '');
+  const [instructorId, setInstructorId] = useState(searchParams.instructorId || '');
+  const [courseName, setCourseName] = useState(searchParams.courseName || '');
+  const [studentName, setStudentName] = useState(searchParams.studentName || '');
+  const [studentEmail, setStudentEmail] = useState(searchParams.studentEmail || '');
+  const [enrolledFromDate, setEnrolledFromDate] = useState(searchParams.enrolledFromDate || '');
+  const [enrolledToDate, setEnrolledToDate] = useState(searchParams.enrolledToDate || '');
+  
+  // Track pending changes for apply/clear functionality
+  const [pendingFilters, setPendingFilters] = useState({
+    userId,
+    courseId,
+    instructorId,
+    courseName,
+    studentName,
+    studentEmail,
+    enrolledFromDate,
+    enrolledToDate,
+  });
   
   // Dialog states
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -94,30 +131,119 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
       params.set('page', '1');
     }
     
-    router.push(`/admin/enrollments?${params.toString()}`);
+    router.push(`/admin/enrollments?${params.toString()}`, { scroll: false });
   };
 
   // Event handlers
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearchTerm(value);
-    
-    // Debounce search
-    const timeoutId = setTimeout(() => {
-      updateSearchParams({ search: value || undefined });
-    }, 500);
-    
-    return () => clearTimeout(timeoutId);
-  };
-
-  const handleStatusChange = (status: string) => {
-    setSelectedStatus(status);
-    updateSearchParams({ status: status === 'All Status' ? undefined : status });
+    // Don't auto-apply search, wait for Apply button
   };
 
   const handleSortByChange = (sortBy: string) => {
-    setSortBy(sortBy as 'newest' | 'oldest' | 'progress_high' | 'progress_low');
-    updateSearchParams({ sortBy });
+    setSortBy(sortBy);
+    // Don't auto-apply sort, wait for Apply button
+  };
+
+  // Filter handlers - update pending state only
+  const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setUserId(value);
+    setPendingFilters(prev => ({ ...prev, userId: value }));
+  };
+
+  const handleCourseIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setCourseId(value);
+    setPendingFilters(prev => ({ ...prev, courseId: value }));
+  };
+
+  const handleInstructorIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setInstructorId(value);
+    setPendingFilters(prev => ({ ...prev, instructorId: value }));
+  };
+
+  const handleCourseNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setCourseName(value);
+    setPendingFilters(prev => ({ ...prev, courseName: value }));
+  };
+
+  const handleStudentNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setStudentName(value);
+    setPendingFilters(prev => ({ ...prev, studentName: value }));
+  };
+
+  const handleStudentEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setStudentEmail(value);
+    setPendingFilters(prev => ({ ...prev, studentEmail: value }));
+  };
+
+  const handleEnrolledFromDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setEnrolledFromDate(value);
+    setPendingFilters(prev => ({ ...prev, enrolledFromDate: value }));
+  };
+
+  const handleEnrolledToDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setEnrolledToDate(value);
+    setPendingFilters(prev => ({ ...prev, enrolledToDate: value }));
+  };
+
+  // Apply and Clear handlers
+  const handleApplyFilters = () => {
+    // Parse sortBy into orderBy and order
+    const [orderBy, order] = sortBy.split('-') as [string, 'ASC' | 'DESC'];
+    
+    const filtersToApply: Record<string, string | undefined> = {};
+    
+    // Add search if provided
+    if (searchTerm) filtersToApply.search = searchTerm;
+    
+    // Add sorting parameters
+    filtersToApply.orderBy = orderBy;
+    filtersToApply.order = order;
+    
+    // Add all filter parameters
+    Object.entries(pendingFilters).forEach(([key, value]) => {
+      if (value) filtersToApply[key] = value;
+    });
+    
+    updateSearchParams(filtersToApply);
+  };
+
+  const handleClearFilters = () => {
+    // Reset all filter states
+    setUserId('');
+    setCourseId('');
+    setInstructorId('');
+    setCourseName('');
+    setStudentName('');
+    setStudentEmail('');
+    setEnrolledFromDate('');
+    setEnrolledToDate('');
+    setSearchTerm('');
+    setSortBy('date_enrolled-DESC');
+    
+    // Reset pending filters
+    setPendingFilters({
+      userId: '',
+      courseId: '',
+      instructorId: '',
+      courseName: '',
+      studentName: '',
+      studentEmail: '',
+      enrolledFromDate: '',
+      enrolledToDate: '',
+    });
+    
+    // Clear URL parameters
+    router.push('/admin/enrollments', { scroll: false });
   };
 
   const handleView = (enrollment: IEnrollment) => {
@@ -258,54 +384,195 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
       {/* Filters and Search */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                placeholder="Search enrollments..."
-                value={searchTerm}
-                onChange={handleSearch}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FilterList />
+            Filters & Search
+          </Typography>
+          
+          <Grid container spacing={3}>
+            {/* Search and Sort Row */}
+            <Grid item xs={12}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    placeholder="Search enrollments..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Sort By</InputLabel>
+                    <Select
+                      value={sortBy}
+                      label="Sort By"
+                      onChange={(e) => handleSortByChange(e.target.value as string)}
+                    >
+                      <MenuItem value="date_enrolled-DESC">Newest Enrollments</MenuItem>
+                      <MenuItem value="date_enrolled-ASC">Oldest Enrollments</MenuItem>
+                      <MenuItem value="course_title-ASC">Course Title (A-Z)</MenuItem>
+                      <MenuItem value="course_title-DESC">Course Title (Z-A)</MenuItem>
+                      <MenuItem value="student_name-ASC">Student Name (A-Z)</MenuItem>
+                      <MenuItem value="student_name-DESC">Student Name (Z-A)</MenuItem>
+                      <MenuItem value="instructor_name-ASC">Instructor Name (A-Z)</MenuItem>
+                      <MenuItem value="instructor_name-DESC">Instructor Name (Z-A)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
             </Grid>
-            
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={selectedStatus}
-                  label="Status"
-                  onChange={(e) => handleStatusChange(e.target.value as string)}
-                >
-                  <MenuItem value="All Status">All Status</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="suspended">Suspended</MenuItem>
-                  <MenuItem value="expired">Expired</MenuItem>
-                </Select>
-              </FormControl>
+
+            {/* ID Filters Row */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom color="text.secondary">
+                Filter by IDs
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    placeholder="User ID"
+                    value={userId}
+                    onChange={handleUserIdChange}
+                    label="User ID"
+                    size="small"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    placeholder="Course ID"
+                    value={courseId}
+                    onChange={handleCourseIdChange}
+                    label="Course ID"
+                    size="small"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    placeholder="Instructor ID"
+                    value={instructorId}
+                    onChange={handleInstructorIdChange}
+                    label="Instructor ID"
+                    size="small"
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Sort By</InputLabel>
-                <Select
-                  value={sortBy}
-                  label="Sort By"
-                  onChange={(e) => handleSortByChange(e.target.value as string)}
+
+            {/* Name/Email Filters Row */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom color="text.secondary">
+                Filter by Names & Email
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    placeholder="Course Name"
+                    value={courseName}
+                    onChange={handleCourseNameChange}
+                    label="Course Name"
+                    size="small"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    placeholder="Student Name"
+                    value={studentName}
+                    onChange={handleStudentNameChange}
+                    label="Student Name"
+                    size="small"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    type="email"
+                    placeholder="Student Email"
+                    value={studentEmail}
+                    onChange={handleStudentEmailChange}
+                    label="Student Email"
+                    size="small"
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {/* Date Filters Row */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom color="text.secondary">
+                Filter by Enrollment Date
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    value={enrolledFromDate}
+                    onChange={handleEnrolledFromDateChange}
+                    label="Enrolled From Date"
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    value={enrolledToDate}
+                    onChange={handleEnrolledToDateChange}
+                    label="Enrolled To Date"
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {/* Action Buttons Row */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Clear />}
+                  onClick={handleClearFilters}
+                  color="secondary"
                 >
-                  <MenuItem value="newest">Newest</MenuItem>
-                  <MenuItem value="oldest">Oldest</MenuItem>
-                  <MenuItem value="progress_high">Highest Progress</MenuItem>
-                  <MenuItem value="progress_low">Lowest Progress</MenuItem>
-                </Select>
-              </FormControl>
+                  Clear All
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<FilterList />}
+                  onClick={handleApplyFilters}
+                  color="primary"
+                >
+                  Apply Filters
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </CardContent>

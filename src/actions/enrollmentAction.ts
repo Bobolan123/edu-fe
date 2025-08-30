@@ -95,7 +95,7 @@ interface GetEnrollmentsAdminParams {
     enrolledFromDate?: string;
     enrolledToDate?: string;
     order?: 'ASC' | 'DESC';
-    orderBy?: 'date_enrolled' | 'id' | 'course_title' | 'student_name' | 'instructor_name';
+    orderBy?: string;
 }
 
 export const getAllEnrollmentsAdmin = async (params: GetEnrollmentsAdminParams = {}): Promise<{
@@ -111,29 +111,25 @@ export const getAllEnrollmentsAdmin = async (params: GetEnrollmentsAdminParams =
 }> => {
     const access_token = await getAccessToken();
     
-    const queryParams = new URLSearchParams();
-    
-    // Pagination
-    queryParams.set('page', (params.page || 1).toString());
-    queryParams.set('take', (params.take || 10).toString());
+    const queryParams: any = {
+        page: params.page || 1,
+        take: params.take || 10,
+    };
     
     // Search and filters
-    if (params.search) queryParams.set('search', params.search);
-    if (params.userId) queryParams.set('userId', params.userId.toString());
-    if (params.courseId) queryParams.set('courseId', params.courseId.toString());
-    if (params.instructorId) queryParams.set('instructorId', params.instructorId.toString());
-    if (params.courseName) queryParams.set('courseName', params.courseName);
-    if (params.studentName) queryParams.set('studentName', params.studentName);
-    if (params.studentEmail) queryParams.set('studentEmail', params.studentEmail);
-    if (params.enrolledFromDate) queryParams.set('enrolledFromDate', params.enrolledFromDate);
-    if (params.enrolledToDate) queryParams.set('enrolledToDate', params.enrolledToDate);
+    if (params.search) queryParams.search = params.search;
+    if (params.userId) queryParams.userId = params.userId;
+    if (params.courseId) queryParams.courseId = params.courseId;
+    if (params.instructorId) queryParams.instructorId = params.instructorId;
+    if (params.courseName) queryParams.courseName = params.courseName;
+    if (params.studentName) queryParams.studentName = params.studentName;
+    if (params.studentEmail) queryParams.studentEmail = params.studentEmail;
+    if (params.enrolledFromDate) queryParams.enrolledFromDate = params.enrolledFromDate;
+    if (params.enrolledToDate) queryParams.enrolledToDate = params.enrolledToDate;
     
-    // Sorting - map our frontend sortBy values to API parameters
-    const order = params.order || 'DESC';
-    let orderBy = params.orderBy || 'date_enrolled';
-    
-    queryParams.set('order', order);
-    queryParams.set('orderBy', orderBy);
+    // Sorting
+    if (params.order) queryParams.order = params.order;
+    if (params.orderBy) queryParams.orderBy = params.orderBy;
     
     const res = await sendRequest<IBackendRes<{
         result: IEnrollment[];
@@ -157,7 +153,7 @@ export const getAllEnrollmentsAdmin = async (params: GetEnrollmentsAdminParams =
         },
     });
     
-    if (!res?.data) {
+    if (res?.statusCode !== 200 || !res?.data) {
         throw new Error(res?.message || 'Failed to fetch enrollments');
     }
     
