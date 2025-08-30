@@ -60,6 +60,12 @@ export interface ICategory {
 }
 
 
+// Review Status Enum
+export enum ReviewStatus {
+    PUBLISHED = 'PUBLISHED',
+    HIDDEN = 'HIDDEN',
+}
+
 // Review Interface
 export interface IReview {
     id: number;
@@ -68,6 +74,9 @@ export interface IReview {
     rating: number;
     comment: string;
     date_reviewed: Date;
+    status: ReviewStatus;
+    upVotes: number;
+    downVotes: number;
 }
 
 // Role Interface

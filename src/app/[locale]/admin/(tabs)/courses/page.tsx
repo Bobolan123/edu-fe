@@ -35,7 +35,7 @@ export default async function CoursesPage(props : CoursesPageProps) {
     const includeDeleted = searchParams.includeDeleted === 'true';
     
     const coursesResponse = await getCoursesForAdmin(page, limit, search, categoryIds, status, includeDeleted);
-    const categories = await getCategories(1, 1000);
+    const categories = await getCategories(1, 50);
     return (
       <AdminCoursesPage 
         courses={coursesResponse} 
