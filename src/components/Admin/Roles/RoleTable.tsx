@@ -81,6 +81,8 @@ export default function RoleTable({
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Role Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell align="center">Status</TableCell>
               <TableCell align="center">Permissions</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
@@ -98,6 +100,21 @@ export default function RoleTable({
                   <Typography variant="subtitle2" fontWeight={600}>
                     {role.name}
                   </Typography>
+                </TableCell>
+                
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {role.description || 'No description'}
+                  </Typography>
+                </TableCell>
+                
+                <TableCell align="center">
+                  <Chip
+                    label={role.isActive ? 'Active' : 'Inactive'}
+                    size="small"
+                    color={role.isActive ? 'success' : 'default'}
+                    variant={role.isActive ? 'filled' : 'outlined'}
+                  />
                 </TableCell>
                 
                 <TableCell align="center">

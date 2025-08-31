@@ -19,6 +19,8 @@ import {
   ListItemText,
   Chip,
   MenuItem,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
@@ -27,7 +29,7 @@ import { IRole, IPermission } from '../../../../types/entities';
 interface RoleFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; permissions?: number[] }) => void;
+  onSubmit: (data: { name: string; description?: string; isActive?: boolean; permissions?: number[] }) => void;
   permissions: IPermission[];
   role?: IRole | null;
   mode: 'create' | 'edit' | 'editPermissions' | 'view';
@@ -44,26 +46,32 @@ export default function RoleForm({
   loading = false,
 }: RoleFormProps) {
   const [roleName, setRoleName] = useState('');
+  const [roleDescription, setRoleDescription] = useState('');
+  const [roleIsActive, setRoleIsActive] = useState(true);
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
 
   useEffect(() => {
     if (role && (mode === 'edit' || mode === 'view')) {
       setRoleName(role.name);
+      setRoleDescription(role.description || '');
+      setRoleIsActive(role.isActive ?? true);
     }
     if (role && (mode === 'editPermissions' || mode === 'view')) {
       setSelectedPermissions(role.permissions?.map(p => p.id) || []);
     }
     if (mode === 'create') {
       setRoleName('');
+      setRoleDescription('');
+      setRoleIsActive(true);
       setSelectedPermissions([]);
     }
   }, [role, mode, open]);
 
   const handleSubmit = () => {
     if (mode === 'create') {
-      onSubmit({ name: roleName, permissions: selectedPermissions });
+      onSubmit({ name: roleName, description: roleDescription, isActive: roleIsActive, permissions: selectedPermissions });
     } else if (mode === 'edit') {
-      onSubmit({ name: roleName });
+      onSubmit({ name: roleName, description: roleDescription, isActive: roleIsActive });
     } else if (mode === 'editPermissions') {
       onSubmit({ name: roleName, permissions: selectedPermissions });
     }
@@ -106,6 +114,31 @@ export default function RoleForm({
               onChange={(e) => setRoleName(e.target.value)}
               required={!isReadOnly}
               disabled={isReadOnly}
+            />
+          )}
+
+          {(mode === 'create' || mode === 'edit' || mode === 'view') && (
+            <TextField
+              fullWidth
+              label="Description"
+              value={roleDescription}
+              onChange={(e) => setRoleDescription(e.target.value)}
+              multiline
+              rows={2}
+              disabled={isReadOnly}
+            />
+          )}
+
+          {(mode === 'create' || mode === 'edit' || mode === 'view') && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={roleIsActive}
+                  onChange={(e) => setRoleIsActive(e.target.checked)}
+                  disabled={isReadOnly}
+                />
+              }
+              label="Active Status"
             />
           )}
 

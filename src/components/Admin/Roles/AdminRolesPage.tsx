@@ -92,11 +92,27 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
     setDialogMode('delete');
   };
 
-  const handleCreateRole = async (data: { name: string; permissions?: number[] }) => {
+  const handleToggleStatus = async (role: IRole) => {
+    setLoading(true);
+    try {
+      await updateRole(role.id, { isActive: !role.isActive });
+      toastService.success(`Role ${!role.isActive ? 'activated' : 'deactivated'} successfully!`);
+      router.refresh();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update role status';
+      toastService.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateRole = async (data: { name: string; description?: string; isActive?: boolean; permissions?: number[] }) => {
     setLoading(true);
     try {
       const roleData: IRoleCreateRequest = {
-        name: data.name
+        name: data.name,
+        description: data.description,
+        isActive: data.isActive ?? true
       };
       const newRole = await createRole(roleData);
       
@@ -119,13 +135,15 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
     }
   };
 
-  const handleUpdateRole = async (data: { name: string }) => {
+  const handleUpdateRole = async (data: { name: string; description?: string; isActive?: boolean }) => {
     if (!selectedRole) return;
     
     setLoading(true);
     try {
       const roleData: IRoleUpdateRequest = {
         name: data.name,
+        description: data.description,
+        isActive: data.isActive
       };
       await updateRole(selectedRole.id, roleData);
       toastService.success('Role updated successfully!');
@@ -177,7 +195,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
     }
   };
 
-  const handleFormSubmit = (data: { name: string; permissions?: number[] }) => {
+  const handleFormSubmit = (data: { name: string; description?: string; isActive?: boolean; permissions?: number[] }) => {
     switch (dialogMode) {
       case 'create':
         return handleCreateRole(data);

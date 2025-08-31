@@ -7,6 +7,8 @@ import { getAccessToken } from "./index";
 
 export interface IRoleCreateRequest {
     name: string;
+    description?: string;
+    isActive?: boolean;
 }
 
 export interface IRoleUpdatePermissionsRequest {
@@ -15,7 +17,9 @@ export interface IRoleUpdatePermissionsRequest {
 }
 
 export interface IRoleUpdateRequest {
-    name: string;
+    name?: string;
+    description?: string;
+    isActive?: boolean;
 }
 
 export const getRoles = async (): Promise<IBackendRes<IRole[]>> => {
@@ -128,7 +132,7 @@ export const updateRole = async (id: number, roleData: IRoleUpdateRequest): Prom
     const access_token = await getAccessToken();
     
     const res = await sendRequest<IBackendRes<IRole>>({
-        method: "PUT",
+        method: "PATCH",
         url: `${process.env.NEXT_PUBLIC_SERVER}/roles/${id}`,
         body: roleData,
         headers: {
