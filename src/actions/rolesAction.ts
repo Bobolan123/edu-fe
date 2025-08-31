@@ -7,33 +7,23 @@ import { getAccessToken } from "./index";
 
 export interface IRoleCreateRequest {
     name: string;
-    description?: string;
-    permissions?: number[];
 }
 
 export interface IRoleUpdatePermissionsRequest {
     roleId: number;
-    permissions: number[];
+    permissionIds: number[];
 }
 
-export const getRoles = async (
-    page: number = 1,
-    limit: number = 10,
-    search?: string
-): Promise<IBackendRes<IRole>> => {
-    const access_token = await getAccessToken();
-    
-    const queryParams: any = {
-        page,
-        take: limit,
-    };
-    
-    if (search) queryParams.search = search;
+export interface IRoleUpdateRequest {
+    name: string;
+}
 
-    const res = await sendRequest<IBackendRes<IRole>>({
+export const getRoles = async (): Promise<IBackendRes<IRole[]>> => {
+    const access_token = await getAccessToken();
+
+    const res = await sendRequest<IBackendRes<IRole[]>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/roles`,
-        queryParams,
         headers: {
             Authorization: `Bearer ${access_token}`,
         },
@@ -130,6 +120,28 @@ export const updateRolePermissions = async (
 
     revalidateTag("roles");
     revalidateTag(`role-${data.roleId}`);
+    
+    return res.data;
+};
+
+export const updateRole = async (id: number, roleData: IRoleUpdateRequest): Promise<IRole> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequest<IBackendRes<IRole>>({
+        method: "PUT",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/roles/${id}`,
+        body: roleData,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 200 || !res?.data) {
+        throw new Error(res?.message || "Failed to update role");
+    }
+
+    revalidateTag("roles");
+    revalidateTag(`role-${id}`);
     
     return res.data;
 };

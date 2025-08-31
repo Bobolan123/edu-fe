@@ -1,0 +1,203 @@
+"use client";
+
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Stack,
+  Box,
+  Typography,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  OutlinedInput,
+  Checkbox,
+  ListItemText,
+  Chip,
+  MenuItem,
+} from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import { IRole, IPermission } from '../../../../types/entities';
+
+interface RoleFormProps {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: { name: string; permissions?: number[] }) => void;
+  permissions: IPermission[];
+  role?: IRole | null;
+  mode: 'create' | 'edit' | 'editPermissions' | 'view';
+  loading?: boolean;
+}
+
+export default function RoleForm({
+  open,
+  onClose,
+  onSubmit,
+  permissions,
+  role,
+  mode,
+  loading = false,
+}: RoleFormProps) {
+  const [roleName, setRoleName] = useState('');
+  const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (role && (mode === 'edit' || mode === 'view')) {
+      setRoleName(role.name);
+    }
+    if (role && (mode === 'editPermissions' || mode === 'view')) {
+      setSelectedPermissions(role.permissions?.map(p => p.id) || []);
+    }
+    if (mode === 'create') {
+      setRoleName('');
+      setSelectedPermissions([]);
+    }
+  }, [role, mode, open]);
+
+  const handleSubmit = () => {
+    if (mode === 'create') {
+      onSubmit({ name: roleName, permissions: selectedPermissions });
+    } else if (mode === 'edit') {
+      onSubmit({ name: roleName });
+    } else if (mode === 'editPermissions') {
+      onSubmit({ name: roleName, permissions: selectedPermissions });
+    }
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case 'create': return 'Create New Role';
+      case 'edit': return 'Edit Role';
+      case 'editPermissions': return 'Edit Role Permissions';
+      case 'view': return 'Role Details';
+      default: return '';
+    }
+  };
+
+  const isReadOnly = mode === 'view';
+  const showPermissions = mode === 'create' || mode === 'editPermissions' || mode === 'view';
+  const showNameField = mode === 'create' || mode === 'edit' || mode === 'view';
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h6" fontWeight={600}>
+            {getTitle()}
+          </Typography>
+          <IconButton onClick={onClose}>
+            <Close />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+      
+      <DialogContent sx={{ pt: 2 }}>
+        <Stack spacing={3}>
+          {showNameField && (
+            <TextField
+              fullWidth
+              label="Role Name"
+              value={roleName}
+              onChange={(e) => setRoleName(e.target.value)}
+              required={!isReadOnly}
+              disabled={isReadOnly}
+            />
+          )}
+
+          {mode === 'editPermissions' && role && (
+            <Typography variant="subtitle1" gutterBottom>
+              Role: {role.name}
+            </Typography>
+          )}
+          
+          {showPermissions && (
+            <>
+              {mode === 'view' ? (
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Users Count
+                  </Typography>
+                  <Typography variant="body1" fontWeight={500}>
+                    {role?.users?.length || 0} users
+                  </Typography>
+                </Box>
+              ) : null}
+
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  Permissions ({mode === 'view' ? role?.permissions?.length || 0 : selectedPermissions.length})
+                </Typography>
+                
+                {mode === 'view' ? (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                    {role?.permissions?.map((permission) => (
+                      <Chip
+                        key={permission.id}
+                        label={permission.name}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    )) || <Typography variant="body2" color="text.secondary">No permissions assigned</Typography>}
+                  </Box>
+                ) : (
+                  <FormControl fullWidth>
+                    <InputLabel>Permissions</InputLabel>
+                    <Select
+                      multiple
+                      value={selectedPermissions}
+                      onChange={(e) => setSelectedPermissions(e.target.value as number[])}
+                      input={<OutlinedInput label="Permissions" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {(selected as number[]).map((value) => {
+                            const permission = permissions.find((p: IPermission) => p.id === value);
+                            return (
+                              <Chip key={value} label={permission?.name} size="small" />
+                            );
+                          })}
+                        </Box>
+                      )}
+                    >
+                      {permissions.map((permission: IPermission) => (
+                        <MenuItem key={permission.id} value={permission.id}>
+                          <Checkbox checked={selectedPermissions.indexOf(permission.id) > -1} />
+                          <ListItemText primary={permission.name} secondary={permission.description} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Box>
+            </>
+          )}
+        </Stack>
+      </DialogContent>
+      
+      <DialogActions sx={{ p: 3, pt: 1 }}>
+        <Button onClick={onClose}>
+          {mode === 'view' ? 'Close' : 'Cancel'}
+        </Button>
+        
+        {mode === 'view' ? (
+          <Button variant="contained" onClick={() => onSubmit({ name: roleName, permissions: selectedPermissions })}>
+            Edit Permissions
+          </Button>
+        ) : (
+          <Button 
+            variant="contained" 
+            onClick={handleSubmit}
+            disabled={loading || (!roleName.trim() && (mode === 'create' || mode === 'edit'))}
+          >
+            {loading ? 'Saving...' : mode === 'create' ? 'Create Role' : mode === 'edit' ? 'Update Role' : 'Update Permissions'}
+          </Button>
+        )}
+      </DialogActions>
+    </Dialog>
+  );
+}
