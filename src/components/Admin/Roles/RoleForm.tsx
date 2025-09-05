@@ -171,10 +171,11 @@ export default function RoleForm({
                     {role?.permissions?.map((permission) => (
                       <Chip
                         key={permission.id}
-                        label={permission.name}
+                        label={`${permission.method} ${permission.api}`}
                         size="small"
                         color="primary"
                         variant="outlined"
+                        sx={{ fontFamily: 'monospace' }}
                       />
                     )) || <Typography variant="body2" color="text.secondary">No permissions assigned</Typography>}
                   </Box>
@@ -191,7 +192,12 @@ export default function RoleForm({
                           {(selected as number[]).map((value) => {
                             const permission = permissions.find((p: IPermission) => p.id === value);
                             return (
-                              <Chip key={value} label={permission?.name} size="small" />
+                              <Chip 
+                                key={value} 
+                                label={permission ? `${permission.method} ${permission.api}` : 'Unknown'} 
+                                size="small" 
+                                sx={{ fontFamily: 'monospace' }}
+                              />
                             );
                           })}
                         </Box>
@@ -200,7 +206,20 @@ export default function RoleForm({
                       {permissions.map((permission: IPermission) => (
                         <MenuItem key={permission.id} value={permission.id}>
                           <Checkbox checked={selectedPermissions.indexOf(permission.id) > -1} />
-                          <ListItemText primary={permission.name} secondary={permission.description} />
+                          <ListItemText 
+                            primary={
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Chip label={permission.method} size="small" color="secondary" variant="outlined" sx={{ fontFamily: 'monospace' }} />
+                                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{permission.api}</Typography>
+                              </Box>
+                            }
+                            secondary={
+                              <Box sx={{ mt: 0.5 }}>
+                                <Chip label={permission.module} size="small" color="info" variant="outlined" sx={{ mr: 1 }} />
+                                <Typography variant="caption" color="text.secondary">{permission.description}</Typography>
+                              </Box>
+                            }
+                          />
                         </MenuItem>
                       ))}
                     </Select>

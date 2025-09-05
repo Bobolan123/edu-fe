@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Grid,
@@ -9,295 +10,196 @@ import {
   Typography,
   Button,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Chip,
-  Menu,
+  Select,
   MenuItem,
+  FormControl,
+  InputLabel,
   InputAdornment,
-  Tooltip,
+  Alert,
+  CircularProgress,
+  Chip,
+  OutlinedInput,
+  SelectChangeEvent,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
   Stack,
-  Alert,
-  Snackbar,
 } from '@mui/material';
 import {
-  Search,
-  MoreVert,
-  Delete,
-  Visibility,
   Add,
+  Search,
+  FilterList,
   Security,
   AdminPanelSettings,
+  Clear,
+  Api,
+  Assignment,
   Close,
 } from '@mui/icons-material';
+import { PermissionTable } from './PermissionTable';
+import { PermissionForm } from './PermissionForm';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { IPermission } from '../../../../types/entities';
-import { 
-  getPermissions, 
-  getPermissionById, 
-  createPermission, 
-  deletePermission,
-  IPermissionCreateRequest
-} from '../../../actions/permissionsAction';
+import { toastService } from '../../../services/toast';
 
-export default function AdminPermissionsPage() {
-  const [permissions, setPermissions] = useState<IPermission[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [selectedPermission, setSelectedPermission] = useState<IPermission | null>(null);
+interface AdminPermissionsPageProps {
+  permissions: IModelPaginate<IPermission>;
+  searchParams: {
+    page?: string;
+    search?: string;
+    api?: string;
+    description?: string;
+    method?: string;
+    module?: string;
+    order?: 'ASC' | 'DESC';
+    orderBy?: 'id' | 'api' | 'description' | 'method' | 'module' | 'created' | 'updated';
+    take?: string;
+  };
+}
+
+export default function AdminPermissionsPage({ 
+  permissions, 
+  searchParams 
+}: AdminPermissionsPageProps) {
+  const router = useRouter();
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
+  const [apiFilter, setApiFilter] = useState(searchParams.api || '');
+  const [descriptionFilter, setDescriptionFilter] = useState(searchParams.description || '');
+  const [methodFilter, setMethodFilter] = useState(searchParams.method || 'all');
+  const [moduleFilter, setModuleFilter] = useState(searchParams.module || 'all');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(
+    !!(searchParams.api || searchParams.description || searchParams.method || searchParams.module)
+  );
   
   // Dialog states
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedPermission, setSelectedPermission] = useState<IPermission | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  
-  // Form states
-  const [newPermissionName, setNewPermissionName] = useState('');
-  const [newPermissionDescription, setNewPermissionDescription] = useState('');
-  
-  // Feedback states
-  const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success' | 'error'}>({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // Get available modules and methods from current data
+  const availableModules = [...new Set(permissions?.data?.result?.map(p => p.module) || [])];
+  const httpMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+
+  // Update search URL with all filters
+  const updateSearchParams = (filters: {
+    search?: string;
+    api?: string;
+    description?: string;
+    method?: string;
+    module?: string;
+    page?: number;
+  }) => {
+    const params = new URLSearchParams();
+    
+    if (filters.search?.trim()) params.set('search', filters.search.trim());
+    if (filters.api?.trim()) params.set('api', filters.api.trim());
+    if (filters.description?.trim()) params.set('description', filters.description.trim());
+    if (filters.method && filters.method !== 'all') params.set('method', filters.method);
+    if (filters.module && filters.module !== 'all') params.set('module', filters.module);
+    if (filters.page && filters.page > 1) params.set('page', filters.page.toString());
+    
+    const newUrl = `/admin/permissions${params.toString() ? `?${params.toString()}` : ''}`;
+    router.push(newUrl);
+  };
+
+  // Handle search with debouncing
   useEffect(() => {
-    loadPermissions();
-  }, []);
-
-  const loadPermissions = async () => {
-    try {
-      setLoading(true);
-      const response = await getPermissions(1, 100);
-      setPermissions(response.data || []);
-    } catch (error) {
-      showSnackbar('Failed to load permissions', 'error');
-      console.error('Error loading permissions:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const showSnackbar = (message: string, severity: 'success' | 'error') => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-    setPage(0);
-  };
-
-  const filteredPermissions = permissions.filter(permission =>
-    (permission.name && permission.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (permission.description && permission.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, permission: IPermission) => {
-    setMenuAnchor(event.currentTarget);
-    setSelectedPermission(permission);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
-    setSelectedPermission(null);
-  };
-
-  const handleView = () => {
-    setViewDialogOpen(true);
-    handleMenuClose();
-  };
-
-  const handleDelete = async () => {
-    if (selectedPermission) {
-      try {
-        await deletePermission(selectedPermission.id);
-        showSnackbar('Permission deleted successfully', 'success');
-        loadPermissions();
-      } catch (error) {
-        showSnackbar('Failed to delete permission', 'error');
+    const timeoutId = setTimeout(() => {
+      if (searchTerm !== (searchParams.search || '')) {
+        updateSearchParams({
+          search: searchTerm,
+          api: apiFilter,
+          description: descriptionFilter,
+          method: methodFilter,
+          module: moduleFilter,
+          page: 1
+        });
       }
-    }
-    handleMenuClose();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // Handle filter changes
+  const handleFilterChange = () => {
+    updateSearchParams({
+      search: searchTerm,
+      api: apiFilter,
+      description: descriptionFilter,
+      method: methodFilter,
+      module: moduleFilter,
+      page: 1
+    });
   };
 
-  const handleCreatePermission = async () => {
-    try {
-      const permissionData: IPermissionCreateRequest = {
-        name: newPermissionName,
-        description: newPermissionDescription || undefined
-      };
-      await createPermission(permissionData);
-      showSnackbar('Permission created successfully', 'success');
-      setCreateDialogOpen(false);
-      setNewPermissionName('');
-      setNewPermissionDescription('');
-      loadPermissions();
-    } catch (error) {
-      showSnackbar('Failed to create permission', 'error');
-    }
+  const handlePageChange = (page: number) => {
+    updateSearchParams({
+      search: searchTerm,
+      api: apiFilter,
+      description: descriptionFilter,
+      method: methodFilter,
+      module: moduleFilter,
+      page
+    });
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
+  const handleClearAllFilters = () => {
+    setSearchTerm('');
+    setApiFilter('');
+    setDescriptionFilter('');
+    setMethodFilter('all');
+    setModuleFilter('all');
+    updateSearchParams({});
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const refreshData = () => {
+    router.refresh();
   };
 
-  const CreatePermissionDialog = () => (
-    <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h6" fontWeight={600}>
-            Create New Permission
-          </Typography>
-          <IconButton onClick={() => setCreateDialogOpen(false)}>
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      
-      <DialogContent sx={{ pt: 2 }}>
-        <Stack spacing={3}>
-          <TextField
-            fullWidth
-            label="Permission Name"
-            value={newPermissionName}
-            onChange={(e) => setNewPermissionName(e.target.value)}
-            required
-            placeholder="e.g., manage_users, create_courses"
-          />
-          
-          <TextField
-            fullWidth
-            label="Description"
-            value={newPermissionDescription}
-            onChange={(e) => setNewPermissionDescription(e.target.value)}
-            multiline
-            rows={3}
-            placeholder="Describe what this permission allows users to do"
-          />
-        </Stack>
-      </DialogContent>
-      
-      <DialogActions sx={{ p: 3, pt: 1 }}>
-        <Button onClick={() => setCreateDialogOpen(false)}>
-          Cancel
-        </Button>
-        <Button 
-          variant="contained" 
-          onClick={handleCreatePermission}
-          disabled={!newPermissionName.trim()}
-        >
-          Create Permission
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  // Dialog handlers
+  const handleCreate = () => {
+    setSelectedPermission(null);
+    setCreateDialogOpen(true);
+  };
 
-  const ViewPermissionDialog = () => (
-    <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h6" fontWeight={600}>
-            Permission Details
-          </Typography>
-          <IconButton onClick={() => setViewDialogOpen(false)}>
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      
-      {selectedPermission && (
-        <DialogContent sx={{ pt: 2 }}>
-          <Stack spacing={3}>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Permission Name
-              </Typography>
-              <Chip
-                label={selectedPermission.name}
-                color="primary"
-                variant="filled"
-                sx={{ fontFamily: 'monospace' }}
-              />
-            </Box>
-            
-            {selectedPermission.description && (
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Description
-                </Typography>
-                <Typography variant="body1">
-                  {selectedPermission.description}
-                </Typography>
-              </Box>
-            )}
-            
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Used in Roles
-              </Typography>
-              {selectedPermission.roles && selectedPermission.roles.length > 0 ? (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                  {selectedPermission.roles.map((role) => (
-                    <Chip
-                      key={role.id}
-                      label={role.name}
-                      size="small"
-                      color="secondary"
-                      variant="outlined"
-                    />
-                  ))}
-                </Box>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Not assigned to any roles
-                </Typography>
-              )}
-            </Box>
-            
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Permission ID
-              </Typography>
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                {selectedPermission.id}
-              </Typography>
-            </Box>
-          </Stack>
-        </DialogContent>
-      )}
-      
-      <DialogActions sx={{ p: 3, pt: 1 }}>
-        <Button onClick={() => setViewDialogOpen(false)}>
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  const handleEdit = (permission: IPermission) => {
+    setSelectedPermission(permission);
+    setEditDialogOpen(true);
+  };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <Typography>Loading permissions...</Typography>
-      </Box>
-    );
-  }
+  const handleView = (permission: IPermission) => {
+    setSelectedPermission(permission);
+    setViewDialogOpen(true);
+  };
+
+  const handleDelete = (permission: IPermission) => {
+    setSelectedPermission(permission);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleSuccess = (message: string) => {
+    toastService.success(message);
+    refreshData();
+  };
+
+  const handleError = (error: string) => {
+    toastService.error(error);
+  };
+
+  const currentPage = parseInt(searchParams.page || '1');
+  const totalCount = permissions?.data?.meta?.itemCount || 0;
+  const permissionList = permissions?.data?.result || [];
+
+  // Calculate stats
+  const totalAssignments = permissionList.reduce((sum, perm) => sum + (perm.roles?.length || 0), 0);
+  const unassignedCount = permissionList.filter(p => !p.roles || p.roles.length === 0).length;
 
   return (
     <Box>
@@ -314,7 +216,8 @@ export default function AdminPermissionsPage() {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => setCreateDialogOpen(true)}
+          onClick={handleCreate}
+          sx={{ borderRadius: 2 }}
         >
           Create Permission
         </Button>
@@ -322,12 +225,12 @@ export default function AdminPermissionsPage() {
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={4}>
-          <Card>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
               <Security sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
-                {permissions.length}
+                {totalCount}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Total Permissions
@@ -336,12 +239,12 @@ export default function AdminPermissionsPage() {
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={4}>
-          <Card>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
               <AdminPanelSettings sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
-                {permissions.reduce((sum, perm) => sum + (perm.roles?.length || 0), 0)}
+                {totalAssignments}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Total Assignments
@@ -350,12 +253,12 @@ export default function AdminPermissionsPage() {
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={4}>
-          <Card>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ borderRadius: 2 }}>
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
-              <Security sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
+              <Assignment sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
-                {permissions.filter(p => !p.roles || p.roles.length === 0).length}
+                {unassignedCount}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Unassigned
@@ -363,162 +266,381 @@ export default function AdminPermissionsPage() {
             </CardContent>
           </Card>
         </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ textAlign: 'center', p: 2 }}>
+              <Api sx={{ fontSize: 40, color: 'info.main', mb: 1 }} />
+              <Typography variant="h6" fontWeight={600}>
+                {[...new Set(permissionList.map(p => p.module))].length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Modules
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
 
-      {/* Search */}
-      <Card sx={{ mb: 3 }}>
+      {/* Search and Filters */}
+      <Card sx={{ mb: 3, borderRadius: 2 }}>
         <CardContent>
-          <TextField
-            fullWidth
-            placeholder="Search permissions..."
-            value={searchTerm}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <TextField
+                fullWidth
+                placeholder="Search permissions by endpoint, method, module, or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchTerm && (
+                    <InputAdornment position="end">
+                      <Button
+                        size="small"
+                        onClick={() => setSearchTerm('')}
+                        sx={{ minWidth: 'auto', p: 0.5 }}
+                      >
+                        <Clear fontSize="small" />
+                      </Button>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FilterList />}
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  size="small"
+                >
+                  {showAdvancedFilters ? 'Hide' : 'Show'} Filters
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Clear />}
+                  onClick={handleClearAllFilters}
+                  size="small"
+                  disabled={!searchTerm && !apiFilter && !descriptionFilter && methodFilter === 'all' && moduleFilter === 'all'}
+                >
+                  Clear All
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Advanced Filters */}
+          {showAdvancedFilters && (
+            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Advanced Filters
+              </Typography>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    fullWidth
+                    label="API Endpoint"
+                    value={apiFilter}
+                    onChange={(e) => setApiFilter(e.target.value)}
+                    onBlur={handleFilterChange}
+                    placeholder="/api/users"
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    fullWidth
+                    label="Description"
+                    value={descriptionFilter}
+                    onChange={(e) => setDescriptionFilter(e.target.value)}
+                    onBlur={handleFilterChange}
+                    placeholder="Filter by description"
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>HTTP Method</InputLabel>
+                    <Select
+                      value={methodFilter}
+                      label="HTTP Method"
+                      onChange={(e) => {
+                        setMethodFilter(e.target.value);
+                        setTimeout(handleFilterChange, 100);
+                      }}
+                    >
+                      <MenuItem value="all">All Methods</MenuItem>
+                      {httpMethods.map((method) => (
+                        <MenuItem key={method} value={method}>
+                          {method}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Module</InputLabel>
+                    <Select
+                      value={moduleFilter}
+                      label="Module"
+                      onChange={(e) => {
+                        setModuleFilter(e.target.value);
+                        setTimeout(handleFilterChange, 100);
+                      }}
+                    >
+                      <MenuItem value="all">All Modules</MenuItem>
+                      {availableModules.map((module) => (
+                        <MenuItem key={module} value={module}>
+                          {module}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          {/* Active Filters Display */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Chip 
+              icon={<Search />} 
+              label={`${totalCount} results`} 
+              color="primary" 
+              variant="outlined" 
+              size="small"
+            />
+            {searchTerm && (
+              <Chip 
+                label={`Search: "${searchTerm}"`} 
+                onDelete={() => setSearchTerm('')}
+                color="secondary" 
+                variant="filled" 
+                size="small"
+              />
+            )}
+            {apiFilter && (
+              <Chip 
+                label={`API: "${apiFilter}"`} 
+                onDelete={() => setApiFilter('')}
+                color="info" 
+                variant="filled" 
+                size="small"
+              />
+            )}
+            {descriptionFilter && (
+              <Chip 
+                label={`Description: "${descriptionFilter}"`} 
+                onDelete={() => setDescriptionFilter('')}
+                color="info" 
+                variant="filled" 
+                size="small"
+              />
+            )}
+            {methodFilter !== 'all' && (
+              <Chip 
+                label={`Method: ${methodFilter}`} 
+                onDelete={() => setMethodFilter('all')}
+                color="warning" 
+                variant="filled" 
+                size="small"
+              />
+            )}
+            {moduleFilter !== 'all' && (
+              <Chip 
+                label={`Module: ${moduleFilter}`} 
+                onDelete={() => setModuleFilter('all')}
+                color="success" 
+                variant="filled" 
+                size="small"
+              />
+            )}
+          </Box>
         </CardContent>
       </Card>
 
       {/* Permissions Table */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Permission Name</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell align="center">Used in Roles</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredPermissions
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((permission) => (
-                <TableRow key={permission.id} hover>
-                  <TableCell>
-                    <Chip
-                      label={permission.name}
-                      color="primary"
-                      variant="filled"
-                      sx={{ fontFamily: 'monospace' }}
-                    />
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary">
-                      {permission.description || 'No description provided'}
-                    </Typography>
-                  </TableCell>
-                  
-                  <TableCell align="center">
-                    <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0.5 }}>
-                      {permission.roles && permission.roles.length > 0 ? (
-                        permission.roles.slice(0, 3).map((role) => (
-                          <Chip
-                            key={role.id}
-                            label={role.name}
-                            size="small"
-                            color="secondary"
-                            variant="outlined"
-                          />
-                        ))
-                      ) : (
-                        <Chip
-                          label="Unassigned"
-                          size="small"
-                          color="default"
-                          variant="outlined"
-                        />
-                      )}
-                      {permission.roles && permission.roles.length > 3 && (
-                        <Chip
-                          label={`+${permission.roles.length - 3} more`}
-                          size="small"
-                          color="default"
-                          variant="outlined"
-                        />
-                      )}
-                    </Box>
-                  </TableCell>
-                  
-                  <TableCell align="center">
-                    <Tooltip title="More actions">
-                      <IconButton
-                        onClick={(e) => handleMenuOpen(e, permission)}
-                        size="small"
-                      >
-                        <MoreVert />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          component="div"
-          count={filteredPermissions.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Card>
+      <PermissionTable
+        permissions={permissionList}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onView={handleView}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
 
-      {/* Action Menu */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-        PaperProps={{
-          sx: {
-            borderRadius: '12px',
-            minWidth: 160,
-          },
+      {/* Create Permission Dialog */}
+      <PermissionForm
+        open={createDialogOpen}
+        mode="create"
+        onClose={() => setCreateDialogOpen(false)}
+        onSuccess={() => {
+          setCreateDialogOpen(false);
+          handleSuccess('Permission created successfully');
         }}
-      >
-        <MenuItem onClick={handleView}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Visibility fontSize="small" />
-            View Details
-          </Box>
-        </MenuItem>
-        
-        <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Delete fontSize="small" />
-            Delete Permission
-          </Box>
-        </MenuItem>
-      </Menu>
+        onError={handleError}
+      />
 
-      {/* Dialogs */}
-      <CreatePermissionDialog />
-      <ViewPermissionDialog />
+      {/* Edit Permission Dialog */}
+      <PermissionForm
+        open={editDialogOpen}
+        mode="edit"
+        permission={selectedPermission}
+        onClose={() => setEditDialogOpen(false)}
+        onSuccess={() => {
+          setEditDialogOpen(false);
+          handleSuccess('Permission updated successfully');
+        }}
+        onError={handleError}
+      />
 
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      {/* View Permission Dialog */}
+      {selectedPermission && (
+        <ViewPermissionDialog
+          open={viewDialogOpen}
+          permission={selectedPermission}
+          onClose={() => setViewDialogOpen(false)}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        permission={selectedPermission}
+        onClose={() => setDeleteDialogOpen(false)}
+        onSuccess={() => {
+          setDeleteDialogOpen(false);
+          handleSuccess('Permission deleted successfully');
+        }}
+        onError={handleError}
+      />
     </Box>
+  );
+}
+
+// View Permission Dialog Component
+function ViewPermissionDialog({ 
+  open, 
+  permission, 
+  onClose 
+}: { 
+  open: boolean; 
+  permission: IPermission; 
+  onClose: () => void; 
+}) {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Security color="primary" />
+            <Typography variant="h6" fontWeight={600}>
+              Permission Details
+            </Typography>
+          </Box>
+          <IconButton onClick={onClose}>
+            <Close />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+      
+      <DialogContent sx={{ pt: 2 }}>
+        <Stack spacing={3}>
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              API Endpoint & Method
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Chip
+                label={permission.method}
+                color="primary"
+                variant="filled"
+                size="small"
+                sx={{ fontFamily: 'monospace', fontWeight: 600 }}
+              />
+              <Typography variant="body1" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                {permission.api}
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Module
+            </Typography>
+            <Chip
+              label={permission.module}
+              color="info"
+              variant="outlined"
+            />
+          </Box>
+          
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Description
+            </Typography>
+            <Typography variant="body1">
+              {permission.description}
+            </Typography>
+          </Box>
+          
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Used in Roles ({permission.roles?.length || 0})
+            </Typography>
+            {permission.roles && permission.roles.length > 0 ? (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                {permission.roles.map((role) => (
+                  <Chip
+                    key={role.id}
+                    label={role.name}
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                  />
+                ))}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                Not assigned to any roles
+              </Typography>
+            )}
+          </Box>
+          
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Timestamps
+            </Typography>
+            <Stack spacing={1}>
+              <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                Created: {new Date(permission.created).toLocaleString()}
+              </Typography>
+              <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                Updated: {new Date(permission.updated).toLocaleString()}
+              </Typography>
+            </Stack>
+          </Box>
+        </Stack>
+      </DialogContent>
+      
+      <DialogActions sx={{ p: 3, pt: 1 }}>
+        <Button onClick={onClose}>
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

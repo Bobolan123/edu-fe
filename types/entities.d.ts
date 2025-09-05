@@ -92,8 +92,12 @@ export interface IRole {
 // Permission Interface
 export interface IPermission {
     id: number;
-    name: string;
-    description: string | null;
+    api: string;
+    description: string;
+    method: string;
+    module: string;
+    created: Date;
+    updated: Date;
     roles: IRole[];
 }
 

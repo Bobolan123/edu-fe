@@ -6,23 +6,60 @@ import { sendRequest } from "../../utils/api";
 import { getAccessToken } from "./index";
 
 export interface IPermissionCreateRequest {
-    name: string;
+    api: string;
+    description: string;
+    method: string;
+    module: string;
+}
+
+export interface IPermissionUpdateRequest {
+    api?: string;
     description?: string;
+    method?: string;
+    module?: string;
+}
+
+export interface GetPermissionsParams {
+    page?: number;
+    take?: number;
+    search?: string;
+    api?: string;
+    description?: string;
+    method?: string;
+    module?: string;
+    order?: 'ASC' | 'DESC';
+    orderBy?: 'id' | 'api' | 'description' | 'method' | 'module' | 'created' | 'updated';
 }
 
 export const getPermissions = async (
-    page: number = 1,
-    limit: number = 10,
-    search?: string
+    params: GetPermissionsParams = {}
 ): Promise<IModelPaginate<IPermission>> => {
     const access_token = await getAccessToken();
     
+    const {
+        page = 1,
+        take = 10,
+        search,
+        api,
+        description,
+        method,
+        module,
+        order = 'DESC',
+        orderBy = 'id'
+    } = params;
+    
     const queryParams: any = {
         page,
-        take: limit,
+        take,
+        order,
+        orderBy,
     };
     
     if (search) queryParams.search = search;
+    if (api) queryParams.api = api;
+    if (description) queryParams.description = description;
+    if (method) queryParams.method = method;
+    if (module) queryParams.module = module;
 
     const res = await sendRequest<IModelPaginate<IPermission>>({
         method: "GET",
@@ -81,6 +118,28 @@ export const createPermission = async (permissionData: IPermissionCreateRequest)
     }
 
     revalidateTag("permissions");
+    
+    return res.data;
+};
+
+export const updatePermission = async (id: number, permissionData: IPermissionUpdateRequest): Promise<IPermission> => {
+    const access_token = await getAccessToken();
+    
+    const res = await sendRequest<IBackendRes<IPermission>>({
+        method: "PUT",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/permission/${id}`,
+        body: permissionData,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (res?.statusCode !== 200 || !res?.data) {
+        throw new Error(res?.message || "Failed to update permission");
+    }
+
+    revalidateTag("permissions");
+    revalidateTag(`permission-${id}`);
     
     return res.data;
 };
