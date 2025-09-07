@@ -1,6 +1,5 @@
 import AdminRolesPage from '@/components/Admin/Roles/AdminRolesPage';
-import { getRoles } from '@/actions/rolesAction';
-import { getPermissions } from '@/actions/permissionsAction';
+import { getRoles, getPermissionsForRoles } from '@/actions/rolesAction';
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -12,6 +11,10 @@ export const metadata: Metadata = {
 interface RolesPageProps {
   searchParams: Promise<{
     search?: string;
+    permissionsPage?: string;
+    permissionsSearch?: string;
+    permissionsModule?: string;
+    permissionsMethod?: string;
   }>;
 }
 
@@ -19,10 +22,22 @@ export default async function RolesPage(props: RolesPageProps) {
   const searchParams = await props.searchParams;
   
   try {
+    const permissionsPage = parseInt(searchParams.permissionsPage || '1');
+    const permissionsTake = 100; // Load more permissions for role management
+    
     const [rolesResponse, permissionsResponse] = await Promise.all([
       getRoles(),
-      getPermissions()
+      getPermissionsForRoles({
+        page: permissionsPage,
+        take: permissionsTake,
+        search: searchParams.permissionsSearch,
+        module: searchParams.permissionsModule,
+        method: searchParams.permissionsMethod,
+        order: 'ASC',
+        orderBy: 'module'
+      })
     ]);
+    
     return (
       <AdminRolesPage 
         roles={rolesResponse} 

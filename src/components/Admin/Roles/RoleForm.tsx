@@ -58,9 +58,30 @@ export default function RoleForm({
   const [roleIsActive, setRoleIsActive] = useState(true);
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+  const [permissionsFilter, setPermissionsFilter] = useState({
+    search: '',
+    module: '',
+    method: ''
+  });
 
-  // Group permissions by module
-  const groupedPermissions = permissions.reduce((groups, permission) => {
+  // Filter permissions based on search criteria
+  const filteredPermissions = permissions.filter(permission => {
+    const searchMatch = !permissionsFilter.search || 
+      permission.api.toLowerCase().includes(permissionsFilter.search.toLowerCase()) ||
+      permission.description?.toLowerCase().includes(permissionsFilter.search.toLowerCase()) ||
+      permission.method.toLowerCase().includes(permissionsFilter.search.toLowerCase());
+    
+    const moduleMatch = !permissionsFilter.module || 
+      (permission.module || 'Other') === permissionsFilter.module;
+    
+    const methodMatch = !permissionsFilter.method || 
+      permission.method === permissionsFilter.method;
+    
+    return searchMatch && moduleMatch && methodMatch;
+  });
+
+  // Group filtered permissions by module
+  const groupedPermissions = filteredPermissions.reduce((groups, permission) => {
     const module = permission.module || 'Other';
     if (!groups[module]) {
       groups[module] = [];
@@ -68,6 +89,10 @@ export default function RoleForm({
     groups[module].push(permission);
     return groups;
   }, {} as Record<string, IPermission[]>);
+
+  // Get unique modules and methods for filters
+  const availableModules = [...new Set(permissions.map(p => p.module || 'Other'))].sort();
+  const availableMethods = [...new Set(permissions.map(p => p.method))].sort();
 
   useEffect(() => {
     if (role && (mode === 'edit' || mode === 'view')) {
@@ -296,7 +321,92 @@ export default function RoleForm({
                     color="primary" 
                     variant="outlined" 
                   />
+                  <Chip 
+                    label={`${filteredPermissions.length} of ${permissions.length} shown`} 
+                    size="small" 
+                    color="info" 
+                    variant="outlined" 
+                  />
                 </Box>
+
+                {!isReadOnly && (
+                  <Box sx={{ mb: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom fontWeight={600}>
+                      Filter Permissions
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          placeholder="Search permissions..."
+                          value={permissionsFilter.search}
+                          onChange={(e) => setPermissionsFilter(prev => ({
+                            ...prev,
+                            search: e.target.value
+                          }))}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Module</InputLabel>
+                          <Select
+                            value={permissionsFilter.module}
+                            label="Module"
+                            onChange={(e) => setPermissionsFilter(prev => ({
+                              ...prev,
+                              module: e.target.value
+                            }))}
+                          >
+                            <MenuItem value="">All Modules</MenuItem>
+                            {availableModules.map(module => (
+                              <MenuItem key={module} value={module}>{module}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Method</InputLabel>
+                          <Select
+                            value={permissionsFilter.method}
+                            label="Method"
+                            onChange={(e) => setPermissionsFilter(prev => ({
+                              ...prev,
+                              method: e.target.value
+                            }))}
+                          >
+                            <MenuItem value="">All Methods</MenuItem>
+                            {availableMethods.map(method => (
+                              <MenuItem key={method} value={method}>
+                                <Chip 
+                                  label={method} 
+                                  size="small" 
+                                  sx={{
+                                    ...getMethodColor(method),
+                                    fontFamily: 'monospace',
+                                    fontWeight: 600
+                                  }} 
+                                />
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                    {(permissionsFilter.search || permissionsFilter.module || permissionsFilter.method) && (
+                      <Box sx={{ mt: 2 }}>
+                        <Button
+                          size="small"
+                          onClick={() => setPermissionsFilter({ search: '', module: '', method: '' })}
+                          sx={{ color: 'text.secondary' }}
+                        >
+                          Clear Filters
+                        </Button>
+                      </Box>
+                    )}
+                  </Box>
+                )}
 
                 {mode === 'view' ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>

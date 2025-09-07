@@ -112,17 +112,10 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
       const roleData: IRoleCreateRequest = {
         name: data.name,
         description: data.description,
-        isActive: data.isActive ?? true
+        isActive: data.isActive ?? true,
+        permissionIds: data.permissions // Include permissions in create request
       };
-      const newRole = await createRole(roleData);
-      
-      // If permissions are selected, update role permissions after creation
-      if (data.permissions && data.permissions.length > 0) {
-        await updateRolePermissions({
-          roleId: newRole.id,
-          permissionIds: data.permissions
-        });
-      }
+      await createRole(roleData);
       
       toastService.success('Role created successfully!');
       handleCloseDialog();
@@ -135,7 +128,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
     }
   };
 
-  const handleUpdateRole = async (data: { name: string; description?: string; isActive?: boolean }) => {
+  const handleUpdateRole = async (data: { name: string; description?: string; isActive?: boolean; permissions?: number[] }) => {
     if (!selectedRole) return;
     
     setLoading(true);
@@ -143,7 +136,8 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
       const roleData: IRoleUpdateRequest = {
         name: data.name,
         description: data.description,
-        isActive: data.isActive
+        isActive: data.isActive,
+        permissionIds: data.permissions // Include permissions in update request
       };
       await updateRole(selectedRole.id, roleData);
       toastService.success('Role updated successfully!');

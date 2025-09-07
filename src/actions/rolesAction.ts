@@ -4,11 +4,13 @@ import { revalidateTag } from "next/cache";
 import { IRole, IPermission } from "../../types/entities";
 import { sendRequest } from "../utils/api";
 import { getAccessToken } from "./index";
+import { GetPermissionsParams } from "./permissionsAction";
 
 export interface IRoleCreateRequest {
     name: string;
     description?: string;
     isActive?: boolean;
+    permissionIds?: number[];
 }
 
 export interface IRoleUpdatePermissionsRequest {
@@ -20,6 +22,7 @@ export interface IRoleUpdateRequest {
     name?: string;
     description?: string;
     isActive?: boolean;
+    permissionIds?: number[];
 }
 
 export const getRoles = async (): Promise<IBackendRes<IRole[]>> => {
@@ -38,6 +41,55 @@ export const getRoles = async (): Promise<IBackendRes<IRole[]>> => {
 
     if (res?.statusCode !== 200 || !res?.data) {
         throw new Error(res?.message || "Failed to fetch roles");
+    }
+
+    return res;
+};
+
+export const getPermissionsForRoles = async (
+    params: GetPermissionsParams = {}
+): Promise<IModelPaginate<IPermission>> => {
+    const access_token = await getAccessToken();
+    
+    const {
+        page = 1,
+        take = 100, // Default higher limit for roles management
+        search,
+        api,
+        description,
+        method,
+        module,
+        order = 'ASC',
+        orderBy = 'module'
+    } = params;
+    
+    const queryParams: any = {
+        page,
+        take,
+        order,
+        orderBy,
+    };
+    
+    if (search) queryParams.search = search;
+    if (api) queryParams.api = api;
+    if (description) queryParams.description = description;
+    if (method) queryParams.method = method;
+    if (module) queryParams.module = module;
+
+    const res = await sendRequest<IModelPaginate<IPermission>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/permission`,
+        queryParams,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            next: { tags: ["permissions-for-roles", `permissions-page-${page}`] },
+        },
+    });
+
+    if (res?.statusCode !== 200 || !res?.data) {
+        throw new Error(res?.message || "Failed to fetch permissions");
     }
 
     return res;
