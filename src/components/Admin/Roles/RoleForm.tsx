@@ -516,7 +516,7 @@ export default function RoleForm({
                                 control={
                                   <Switch
                                     checked={isModuleFullySelected(module)}
-                                    indeterminate={isModulePartiallySelected(module)}
+                                    indeterminate={isModulePartiallySelected(module) ? true : undefined}
                                     onChange={(e) => {
                                       e.stopPropagation();
                                       handleMasterToggle(module);
@@ -525,12 +525,19 @@ export default function RoleForm({
                                     sx={{
                                       '& .MuiSwitch-thumb': {
                                         backgroundColor: 'white',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                                       },
                                       '& .MuiSwitch-track': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.3) !important',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.2) !important',
+                                        border: '1px solid rgba(255, 255, 255, 0.3)',
                                       },
                                       '& .Mui-checked .MuiSwitch-track': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.7) !important',
+                                        backgroundColor: 'rgba(76, 175, 80, 0.8) !important',
+                                        border: '1px solid rgba(76, 175, 80, 1)',
+                                      },
+                                      '& .Mui-checked .MuiSwitch-thumb': {
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
                                       },
                                     }}
                                   />

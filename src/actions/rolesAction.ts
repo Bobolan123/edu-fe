@@ -156,30 +156,6 @@ export const deleteRole = async (id: number): Promise<void> => {
     revalidateTag(`role-${id}`);
 };
 
-export const updateRolePermissions = async (
-    data: IRoleUpdatePermissionsRequest
-): Promise<IRole> => {
-    const access_token = await getAccessToken();
-    
-    const res = await sendRequest<IBackendRes<IRole>>({
-        method: "PUT",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/roles/permissions`,
-        body: data,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (res?.statusCode !== 200 || !res?.data) {
-        throw new Error(res?.message || "Failed to update role permissions");
-    }
-
-    revalidateTag("roles");
-    revalidateTag(`role-${data.roleId}`);
-    
-    return res.data;
-};
-
 export const updateRole = async (id: number, roleData: IRoleUpdateRequest): Promise<IRole> => {
     const access_token = await getAccessToken();
     

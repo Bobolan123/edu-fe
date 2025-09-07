@@ -39,7 +39,6 @@ export default async function PermissionsPage(props: PermissionsPageProps) {
       order: searchParams.order || 'DESC',
       orderBy: searchParams.orderBy || 'id',
     });
-    console.log(permissionsResponse)
     return (
       <AdminPermissionsPage 
         permissions={permissionsResponse}

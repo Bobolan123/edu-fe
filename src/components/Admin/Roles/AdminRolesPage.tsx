@@ -24,7 +24,6 @@ import {
   createRole, 
   deleteRole, 
   updateRole,
-  updateRolePermissions,
   IRoleCreateRequest,
   IRoleUpdateRequest,
   IRoleUpdatePermissionsRequest
@@ -160,7 +159,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
         roleId: selectedRole.id,
         permissionIds: data.permissions
       };
-      await updateRolePermissions(updateData);
+      await updateRole(selectedRole.id, updateData);
       toastService.success('Role permissions updated successfully!');
       handleCloseDialog();
       router.refresh();
