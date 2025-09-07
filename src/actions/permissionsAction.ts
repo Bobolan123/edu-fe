@@ -38,7 +38,7 @@ export const getPermissions = async (
     
     const {
         page = 1,
-        take = 10,
+        take ,
         search,
         api,
         description,

@@ -21,7 +21,7 @@ export default async function RolesPage(props: RolesPageProps) {
   try {
     const [rolesResponse, permissionsResponse] = await Promise.all([
       getRoles(),
-      getPermissions(1, 100)
+      getPermissions()
     ]);
     return (
       <AdminRolesPage 

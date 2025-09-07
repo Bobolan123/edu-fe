@@ -21,8 +21,16 @@ import {
   MenuItem,
   FormControlLabel,
   Switch,
+  Grid,
+  Card,
+  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider,
+  Paper,
 } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { Close, ExpandMore, Security, AdminPanelSettings } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { IRole, IPermission } from '../../../../types/entities';
 
@@ -49,6 +57,17 @@ export default function RoleForm({
   const [roleDescription, setRoleDescription] = useState('');
   const [roleIsActive, setRoleIsActive] = useState(true);
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+
+  // Group permissions by module
+  const groupedPermissions = permissions.reduce((groups, permission) => {
+    const module = permission.module || 'Other';
+    if (!groups[module]) {
+      groups[module] = [];
+    }
+    groups[module].push(permission);
+    return groups;
+  }, {} as Record<string, IPermission[]>);
 
   useEffect(() => {
     if (role && (mode === 'edit' || mode === 'view')) {
@@ -66,6 +85,15 @@ export default function RoleForm({
       setSelectedPermissions([]);
     }
   }, [role, mode, open]);
+
+  // Initialize all modules as expanded by default
+  useEffect(() => {
+    const initialExpanded: Record<string, boolean> = {};
+    Object.keys(groupedPermissions).forEach(module => {
+      initialExpanded[module] = true;
+    });
+    setExpandedModules(initialExpanded);
+  }, [permissions]);
 
   const handleSubmit = () => {
     if (mode === 'create') {
@@ -87,12 +115,107 @@ export default function RoleForm({
     }
   };
 
+  // HTTP method colors for visual distinction
+  const getMethodColor = (method: string): { color: string; backgroundColor: string } => {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return { color: '#2e7d32', backgroundColor: '#e8f5e9' };
+      case 'POST':
+        return { color: '#1976d2', backgroundColor: '#e3f2fd' };
+      case 'PUT':
+        return { color: '#f57c00', backgroundColor: '#fff3e0' };
+      case 'PATCH':
+        return { color: '#7b1fa2', backgroundColor: '#f3e5f5' };
+      case 'DELETE':
+        return { color: '#d32f2f', backgroundColor: '#ffebee' };
+      default:
+        return { color: '#616161', backgroundColor: '#f5f5f5' };
+    }
+  };
+
+  // Generate human-readable title from API path and method
+  const generateTitle = (permission: IPermission): string => {
+    const { method, api } = permission;
+    
+    // Extract meaningful parts from API path
+    const pathParts = api.split('/').filter(part => part && !part.startsWith(':'));
+    const resource = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2] || 'resource';
+    
+    // Generate action based on method and path
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return api.includes('/') && !api.endsWith('/') ? `View ${resource}` : `List ${resource}`;
+      case 'POST':
+        return `Create ${resource}`;
+      case 'PUT':
+        return `Update ${resource}`;
+      case 'PATCH':
+        return `Modify ${resource}`;
+      case 'DELETE':
+        return `Delete ${resource}`;
+      default:
+        return `${method} ${resource}`;
+    }
+  };
+
+  // Handle individual permission toggle
+  const handlePermissionToggle = (permissionId: number) => {
+    if (isReadOnly) return;
+    
+    const newSelection = selectedPermissions.includes(permissionId)
+      ? selectedPermissions.filter(id => id !== permissionId)
+      : [...selectedPermissions, permissionId];
+    
+    setSelectedPermissions(newSelection);
+  };
+
+  // Handle master toggle for a module
+  const handleMasterToggle = (module: string) => {
+    if (isReadOnly) return;
+    
+    const modulePermissionIds = groupedPermissions[module].map(p => p.id);
+    const allSelected = modulePermissionIds.every(id => selectedPermissions.includes(id));
+    
+    let newSelection: number[];
+    if (allSelected) {
+      // Remove all permissions from this module
+      newSelection = selectedPermissions.filter(id => !modulePermissionIds.includes(id));
+    } else {
+      // Add all permissions from this module
+      const newIds = modulePermissionIds.filter(id => !selectedPermissions.includes(id));
+      newSelection = [...selectedPermissions, ...newIds];
+    }
+    
+    setSelectedPermissions(newSelection);
+  };
+
+  // Check if all permissions in a module are selected
+  const isModuleFullySelected = (module: string): boolean => {
+    const modulePermissionIds = groupedPermissions[module].map(p => p.id);
+    return modulePermissionIds.length > 0 && modulePermissionIds.every(id => selectedPermissions.includes(id));
+  };
+
+  // Check if some (but not all) permissions in a module are selected
+  const isModulePartiallySelected = (module: string): boolean => {
+    const modulePermissionIds = groupedPermissions[module].map(p => p.id);
+    const selectedCount = modulePermissionIds.filter(id => selectedPermissions.includes(id)).length;
+    return selectedCount > 0 && selectedCount < modulePermissionIds.length;
+  };
+
+  // Handle module accordion expansion
+  const handleModuleExpansion = (module: string) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [module]: !prev[module]
+    }));
+  };
+
   const isReadOnly = mode === 'view';
   const showPermissions = mode === 'create' || mode === 'editPermissions' || mode === 'view';
   const showNameField = mode === 'create' || mode === 'edit' || mode === 'view';
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth={showPermissions ? "lg" : "sm"} fullWidth>
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography variant="h6" fontWeight={600}>
@@ -162,68 +285,277 @@ export default function RoleForm({
               ) : null}
 
               <Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Permissions ({mode === 'view' ? role?.permissions?.length || 0 : selectedPermissions.length})
-                </Typography>
-                
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                  <Security sx={{ color: 'primary.main' }} />
+                  <Typography variant="h6" fontWeight={600} color="text.primary">
+                    Permission Settings
+                  </Typography>
+                  <Chip 
+                    label={`${selectedPermissions.length} selected`} 
+                    size="small" 
+                    color="primary" 
+                    variant="outlined" 
+                  />
+                </Box>
+
                 {mode === 'view' ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                    {role?.permissions?.map((permission) => (
-                      <Chip
-                        key={permission.id}
-                        label={`${permission.method} ${permission.api}`}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                        sx={{ fontFamily: 'monospace' }}
-                      />
-                    )) || <Typography variant="body2" color="text.secondary">No permissions assigned</Typography>}
+                    {role?.permissions?.map((permission) => {
+                      const methodColors = getMethodColor(permission.method);
+                      const title = generateTitle(permission);
+                      
+                      return (
+                        <Card
+                          key={permission.id}
+                          variant="outlined"
+                          sx={{
+                            p: 1.5,
+                            minWidth: 200,
+                            borderColor: 'primary.main',
+                            backgroundColor: 'primary.50',
+                          }}
+                        >
+                          <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                            {title}
+                          </Typography>
+                          <Chip
+                            label={permission.method}
+                            size="small"
+                            sx={{
+                              ...methodColors,
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              fontFamily: 'monospace',
+                              mb: 1,
+                            }}
+                          />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'text.secondary',
+                              fontFamily: 'monospace',
+                              backgroundColor: 'grey.50',
+                              p: 0.5,
+                              borderRadius: 1,
+                              display: 'block',
+                              wordBreak: 'break-all',
+                            }}
+                          >
+                            {permission.api}
+                          </Typography>
+                        </Card>
+                      );
+                    }) || <Typography variant="body2" color="text.secondary">No permissions assigned</Typography>}
                   </Box>
                 ) : (
-                  <FormControl fullWidth>
-                    <InputLabel>Permissions</InputLabel>
-                    <Select
-                      multiple
-                      value={selectedPermissions}
-                      onChange={(e) => setSelectedPermissions(e.target.value as number[])}
-                      input={<OutlinedInput label="Permissions" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {(selected as number[]).map((value) => {
-                            const permission = permissions.find((p: IPermission) => p.id === value);
-                            return (
-                              <Chip 
-                                key={value} 
-                                label={permission ? `${permission.method} ${permission.api}` : 'Unknown'} 
-                                size="small" 
-                                sx={{ fontFamily: 'monospace' }}
+                  <Box>
+                    {Object.entries(groupedPermissions).map(([module, modulePermissions]) => (
+                      <Paper
+                        key={module}
+                        elevation={2}
+                        sx={{
+                          mb: 3,
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          '&:hover': {
+                            borderColor: 'primary.light',
+                            boxShadow: (theme) => theme.shadows[4],
+                          }
+                        }}
+                      >
+                        <Accordion
+                          expanded={expandedModules[module] || false}
+                          onChange={() => handleModuleExpansion(module)}
+                          sx={{
+                            '&:before': { display: 'none' },
+                            boxShadow: 'none',
+                            '& .MuiAccordionSummary-root': {
+                              backgroundColor: 'primary.main',
+                              color: 'white',
+                              minHeight: 64,
+                              '&:hover': {
+                                backgroundColor: 'primary.dark',
+                              },
+                              '& .MuiAccordionSummary-content': {
+                                alignItems: 'center',
+                              },
+                            },
+                          }}
+                        >
+                          <AccordionSummary expandIcon={<ExpandMore sx={{ color: 'white' }} />}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mr: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <AdminPanelSettings />
+                                <Typography variant="h6" fontWeight={600}>
+                                  {module}
+                                </Typography>
+                                <Chip
+                                  label={`${modulePermissions.length} permissions`}
+                                  size="small"
+                                  sx={{ 
+                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    color: 'white',
+                                    fontWeight: 500
+                                  }}
+                                />
+                              </Box>
+                              
+                              <FormControlLabel
+                                control={
+                                  <Switch
+                                    checked={isModuleFullySelected(module)}
+                                    indeterminate={isModulePartiallySelected(module)}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      handleMasterToggle(module);
+                                    }}
+                                    disabled={isReadOnly}
+                                    sx={{
+                                      '& .MuiSwitch-thumb': {
+                                        backgroundColor: 'white',
+                                      },
+                                      '& .MuiSwitch-track': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.3) !important',
+                                      },
+                                      '& .Mui-checked .MuiSwitch-track': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.7) !important',
+                                      },
+                                    }}
+                                  />
+                                }
+                                label={
+                                  <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 500 }}>
+                                    {isModuleFullySelected(module) ? 'All enabled' : 
+                                     isModulePartiallySelected(module) ? 'Partially enabled' : 'All disabled'}
+                                  </Typography>
+                                }
+                                onClick={(e) => e.stopPropagation()}
                               />
-                            );
-                          })}
-                        </Box>
-                      )}
-                    >
-                      {permissions.map((permission: IPermission) => (
-                        <MenuItem key={permission.id} value={permission.id}>
-                          <Checkbox checked={selectedPermissions.indexOf(permission.id) > -1} />
-                          <ListItemText 
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Chip label={permission.method} size="small" color="secondary" variant="outlined" sx={{ fontFamily: 'monospace' }} />
-                                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{permission.api}</Typography>
-                              </Box>
-                            }
-                            secondary={
-                              <Box sx={{ mt: 0.5 }}>
-                                <Chip label={permission.module} size="small" color="info" variant="outlined" sx={{ mr: 1 }} />
-                                <Typography variant="caption" color="text.secondary">{permission.description}</Typography>
-                              </Box>
-                            }
-                          />
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                            </Box>
+                          </AccordionSummary>
+                          
+                          <AccordionDetails sx={{ p: 3, backgroundColor: 'background.paper' }}>
+                            <Grid container spacing={2}>
+                              {modulePermissions.map((permission) => {
+                                const isSelected = selectedPermissions.includes(permission.id);
+                                const methodColors = getMethodColor(permission.method);
+                                const title = generateTitle(permission);
+
+                                return (
+                                  <Grid item xs={12} sm={6} md={4} key={permission.id}>
+                                    <Card
+                                      variant="outlined"
+                                      sx={{
+                                        height: '100%',
+                                        cursor: isReadOnly ? 'default' : 'pointer',
+                                        borderColor: isSelected ? 'primary.main' : 'divider',
+                                        backgroundColor: isSelected ? 'primary.50' : 'background.paper',
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': isReadOnly ? {} : {
+                                          borderColor: 'primary.main',
+                                          boxShadow: 1,
+                                          transform: 'translateY(-2px)',
+                                        },
+                                      }}
+                                      onClick={() => handlePermissionToggle(permission.id)}
+                                    >
+                                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                          <Typography 
+                                            variant="subtitle2" 
+                                            fontWeight={600} 
+                                            sx={{ 
+                                              color: 'text.primary',
+                                              lineHeight: 1.3,
+                                              flex: 1,
+                                              mr: 1
+                                            }}
+                                          >
+                                            {title}
+                                          </Typography>
+                                          <Switch
+                                            checked={isSelected}
+                                            size="small"
+                                            disabled={isReadOnly}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onChange={() => handlePermissionToggle(permission.id)}
+                                            sx={{
+                                              '& .MuiSwitch-thumb': {
+                                                boxShadow: 1,
+                                              },
+                                            }}
+                                          />
+                                        </Box>
+                                        
+                                        <Box sx={{ mb: 2 }}>
+                                          <Chip
+                                            label={permission.method}
+                                            size="small"
+                                            sx={{
+                                              ...methodColors,
+                                              fontWeight: 600,
+                                              fontSize: '0.75rem',
+                                              fontFamily: 'monospace',
+                                              mr: 1,
+                                            }}
+                                          />
+                                        </Box>
+                                        
+                                        <Typography
+                                          variant="caption"
+                                          sx={{
+                                            color: 'text.secondary',
+                                            fontFamily: 'monospace',
+                                            backgroundColor: 'grey.50',
+                                            p: 0.5,
+                                            borderRadius: 1,
+                                            display: 'block',
+                                            wordBreak: 'break-all',
+                                          }}
+                                        >
+                                          {permission.api}
+                                        </Typography>
+                                        
+                                        {permission.description && (
+                                          <>
+                                            <Divider sx={{ my: 1 }} />
+                                            <Typography 
+                                              variant="body2" 
+                                              sx={{ 
+                                                color: 'text.secondary',
+                                                fontSize: '0.8rem',
+                                                lineHeight: 1.3
+                                              }}
+                                            >
+                                              {permission.description}
+                                            </Typography>
+                                          </>
+                                        )}
+                                      </CardContent>
+                                    </Card>
+                                  </Grid>
+                                );
+                              })}
+                            </Grid>
+                          </AccordionDetails>
+                        </Accordion>
+                      </Paper>
+                    ))}
+                    
+                    {Object.keys(groupedPermissions).length === 0 && (
+                      <Box sx={{ textAlign: 'center', py: 6 }}>
+                        <Security sx={{ fontSize: 64, color: 'action.disabled', mb: 2 }} />
+                        <Typography variant="h6" color="text.secondary">
+                          No permissions available
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Contact your administrator to configure permissions.
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
                 )}
               </Box>
             </>

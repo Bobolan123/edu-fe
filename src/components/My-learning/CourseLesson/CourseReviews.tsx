@@ -196,8 +196,8 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                 <Box className="flex flex-col gap-4">
                     <Box className="flex items-center gap-3">
                         <Avatar
-                            src={review.user.avatar_url || undefined}
-                            alt={review.user.name}
+                            src={review.user?.avatar_url || undefined}
+                            alt={review.user?.name || 'User'}
                             sx={{ 
                                 width: 40, 
                                 height: 40,
@@ -206,7 +206,7 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                                 fontWeight: 600
                             }}
                         >
-                            {review.user.name.charAt(0).toUpperCase()}
+                            {review.user?.name?.charAt(0).toUpperCase() || 'U'}
                         </Avatar>
                         <Box className="flex-1">
                             <Typography 
@@ -218,7 +218,7 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                                     lineHeight: 1.2
                                 }}
                             >
-                                {review.user.name}
+                                {review.user?.name || 'Anonymous User'}
                             </Typography>
                             <Box className="flex items-center gap-2">
                                 <Rating
