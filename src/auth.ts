@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { fetchSignIn, fetchSignInGoogle } from "./auth.service";
 import { IUser } from "../types/next-auth";
-import { InvalidActive, InvalidCredentials } from "../utils/auth/auth-error";
+import { InvalidActive, InvalidCredentials } from "./utils/auth/auth-error";
 import Google from "next-auth/providers/google";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -32,7 +32,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         id: String(res.data.id),
                         name: res.data.name,
                         access_token:res.data.access_token,
-                        role: res.data.role || "user"
+                        role: res.data.role || "user",
+                        permissions: res.data.permissions || []
                     };
                 } else if (res?.statusCode === 403) {
                     throw new InvalidActive();

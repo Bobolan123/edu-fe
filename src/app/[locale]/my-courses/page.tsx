@@ -1,5 +1,5 @@
 import ManageMyCourses from "@/components/My-courses/ManageMyCourses";
-import { sendRequest } from "../../../../utils/api";
+import { sendRequest } from "../../../utils/api";
 import { ICourse } from "../../../../types/entities";
 import { auth } from "@/auth";
 

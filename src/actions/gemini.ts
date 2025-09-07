@@ -1,6 +1,6 @@
 'use server'
 
-import { sendRequest } from "../../utils/api";
+import { sendRequest } from "../utils/api";
 
 export const generateGeminiResponse = async (prompt: string) => {
     return await sendRequest<IBackendRes<string>>({

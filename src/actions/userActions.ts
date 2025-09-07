@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { IUser } from "../../types/entities";
-import { sendRequest, sendRequestFile } from "../../utils/api";
+import { sendRequest, sendRequestFile } from "../utils/api";
 import { getAccessToken } from "./index";
 
 export interface IUserListResponse {

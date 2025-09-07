@@ -1,4 +1,4 @@
-import { sendRequest } from "../../../../utils/api";
+import { sendRequest } from "../../../utils/api";
 import { ICart, ICartItem } from "../../../../types/entities";
 import { auth } from "@/auth";
 import Cart from "@/components/Cart/Cart";

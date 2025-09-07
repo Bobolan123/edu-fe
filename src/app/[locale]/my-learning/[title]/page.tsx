@@ -7,8 +7,8 @@ import {
     ILecture,
     IReview,
 } from "../../../../../types/entities";
-import { sendRequest } from "../../../../../utils/api";
-import { extractIds } from "../../../../../utils/utils";
+import { sendRequest } from "../../../../utils/api";
+import { extractIds } from "../../../../utils/utils";
 import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
 import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLearningNavbar";
 import { IReviewDistribution } from "../../../../../types/resData";

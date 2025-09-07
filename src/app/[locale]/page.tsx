@@ -4,7 +4,7 @@ import FeaturedCoursesSection from "@/components/Home/FeaturedCoursesSection";
 import LearningFeaturesSection from "@/components/Home/LearningFeaturesSection";
 import TestimonialsSection from "@/components/Home/TestimonialsSection";
 import { ICategory, ICourse } from "../../../types/entities";
-import { sendRequest } from "../../../utils/api";
+import { sendRequest } from "../../utils/api";
 import { auth } from "@/auth";
 
 export default async function HomePage() {
@@ -22,6 +22,7 @@ export default async function HomePage() {
             tags: "courses",
         },
     });
+
     const categories = await sendRequest<IModelPaginate<ICategory>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/categories`,
@@ -33,6 +34,7 @@ export default async function HomePage() {
             tags: "categories",
         },
     });
+
     return (
         <div>
             <HeroSection />

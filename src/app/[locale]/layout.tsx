@@ -13,7 +13,7 @@ import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/Navbar/Navbar";
 import ConditionalNavbar from "@/components/Navbar/ConditionalNavbar";
 import MainContentWrapper from "@/components/Layout/MainContentWrapper";
-import { getExchangeRateVND } from "../../../utils/utils";
+import { getExchangeRateVND } from "../../utils/utils";
 import { cookies, headers } from "next/headers";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 

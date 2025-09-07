@@ -20,7 +20,7 @@ import {
 } from "@mui/icons-material";
 import { ILecture, ISection } from "../../../../types/entities";
 import { useState } from "react";
-import { isValidCloudinaryVideoUrl } from "../../../../utils/utils";
+import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
 
 interface ICourseContentTabProps {
     sections: ISection[];

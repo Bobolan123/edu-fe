@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { customSignin } from "../../../utils/auth/action";
+import { customSignin } from "../../utils/auth/action";
 import { loginSchema, LoginFormData } from "@/lib/validationSchemas";
 import { LoadingButton, useLoadingState } from "@/components/common/Loading";
 import { toastService } from "@/services/toast";

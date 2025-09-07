@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { sendRequest } from "../../utils/api";
+import { sendRequest } from "../utils/api";
 import { ICart } from "../../types/entities";
 import { getAccessToken } from "./index";
 

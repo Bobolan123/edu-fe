@@ -56,7 +56,6 @@ export default async function EnrollmentsPage(props: EnrollmentsPageProps) {
       enrolledFromDate,
       enrolledToDate
     });
-    console.log(enrollmentsResponse)
     return (
       <AdminEnrollmentsPage 
         enrollments={enrollmentsResponse} 

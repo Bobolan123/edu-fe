@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { ICart, ICartItem, ICategory, ICourse } from "../../../types/entities";
-import { sendRequest } from "../../../utils/api";
+import { sendRequest } from "../../utils/api";
 import NavbarClient from "./NavbarClient";
 
 export default async function Navbar() {

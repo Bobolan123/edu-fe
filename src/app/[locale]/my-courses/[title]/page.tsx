@@ -1,10 +1,10 @@
 import ManageDetailCourse from "@/components/My-courses/ManageDetailCourse/ManageDetailCourse";
-import { sendRequest } from "../../../../../utils/api";
+import { sendRequest } from "../../../../utils/api";
 import { ICourse, ICourseContent, IReview } from "../../../../../types/entities";
 import { IStudentsResponse } from "../../../../../types/resData";
 import { getCourseStudents } from "@/actions/coursesAction";
 import { getAllReviews } from "@/actions/reviewsAction";
-import { slugify } from "../../../../../utils/utils";
+import { slugify } from "../../../../utils/utils";
 
 interface IParams {
     params: { title: string };

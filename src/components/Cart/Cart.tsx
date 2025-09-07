@@ -34,7 +34,7 @@ import { ICartItem } from "../../../types/entities";
 import { deleteCartItem } from "@/actions/cartActions";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { slugify } from "../../../utils/utils";
+import { slugify } from "../../utils/utils";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import { useCurrency } from "@/context/CurrencyContext";

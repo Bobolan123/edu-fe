@@ -31,7 +31,7 @@ import { addCartItem } from "@/actions/cartActions";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
-import { getVideoType } from "../../../utils/utils";
+import { getVideoType } from "../../utils/utils";
 import VideoPreviewModal from "../VideoPreviewModal/VideoPreviewModal";
 
 interface ICourseDetailProps {

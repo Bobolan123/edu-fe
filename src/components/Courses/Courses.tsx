@@ -33,7 +33,7 @@ import {
 import { ICategory, ICourse } from "../../../types/entities";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { slugify } from "../../../utils/utils";
+import { slugify } from "../../utils/utils";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/service/currency";
 import { useTranslations } from "next-intl";

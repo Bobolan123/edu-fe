@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import MuxPlayer from "@mux/mux-player-react";
-import { getVideoType, getYouTubeEmbedUrl } from "../../../utils/utils";
+import { getVideoType, getYouTubeEmbedUrl } from "../../utils/utils";
 
 interface VideoPreviewModalProps {
     open: boolean;

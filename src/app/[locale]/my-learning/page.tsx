@@ -1,4 +1,4 @@
-import { sendRequest } from "../../../../utils/api";
+import { sendRequest } from "../../../utils/api";
 import { ICourse } from "../../../../types/entities";
 import { auth } from "@/auth";
 import MyLearning from "@/components/My-learning/MyLearning";

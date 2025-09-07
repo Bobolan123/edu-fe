@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import Checkout from "@/components/Checkout/Checkout";
-import { sendRequest } from "../../../../utils/api";
+import { sendRequest } from "../../../utils/api";
 import { ICart, ICartItem } from "../../../../types/entities";
 
 export default async function CheckoutPage() {

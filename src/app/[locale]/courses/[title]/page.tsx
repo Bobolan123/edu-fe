@@ -4,8 +4,8 @@ import {
     ICourse,
     ICourseContent,
 } from "../../../../../types/entities";
-import { sendRequest } from "../../../../../utils/api";
-import { extractIds } from "../../../../../utils/utils";
+import { sendRequest } from "../../../../utils/api";
+import { extractIds } from "../../../../utils/utils";
 
 interface Params {
     params: { title: string };

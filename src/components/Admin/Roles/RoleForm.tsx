@@ -105,7 +105,7 @@ export default function RoleForm({
       </DialogTitle>
       
       <DialogContent sx={{ pt: 2 }}>
-        <Stack spacing={3}>
+        <Stack spacing={3} pt={1}>
           {showNameField && (
             <TextField
               fullWidth

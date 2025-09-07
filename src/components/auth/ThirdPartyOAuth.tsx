@@ -1,7 +1,7 @@
 "use client";
 
 import { Google } from "@mui/icons-material";
-import { sendRequest } from "../../../utils/api";
+import { sendRequest } from "../../utils/api";
 import { signIn } from "next-auth/react";
 
 const ThirdPartyOAuth = (props: any) => {

@@ -11,7 +11,7 @@ import StepLabel from "@mui/material/StepLabel";
 import { TextField } from "@mui/material";
 import { toast } from "react-toastify";
 import { fetchChangePassword, fetchResendOtp } from "@/auth.service";
-import { IsValidEmail } from "../../../utils/utils";
+import { IsValidEmail } from "../../utils/utils";
 import { useTranslations } from "next-intl";
 
 const style = {

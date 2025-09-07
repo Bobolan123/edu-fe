@@ -42,7 +42,7 @@ import {
     RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
-import { slugify } from "../../../utils/utils";
+import { slugify } from "../../utils/utils";
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 

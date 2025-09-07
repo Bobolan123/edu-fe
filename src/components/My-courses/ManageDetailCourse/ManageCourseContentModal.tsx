@@ -30,7 +30,7 @@ import { useEffect, useState } from "react";
 import { saveCourseContent, uploadLectureVideo } from "@/actions/coursesAction";
 import { useLoadingState } from "@/components/common/Loading";
 import { toastService } from "@/services/toast";
-import { isValidCloudinaryVideoUrl } from "../../../../utils/utils";
+import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
 
 interface ManageCourseContentModalProps {
     open: boolean;

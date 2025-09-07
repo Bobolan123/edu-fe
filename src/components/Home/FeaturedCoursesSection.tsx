@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";
-import { slugify } from "../../../utils/utils";
+import { slugify } from "../../utils/utils";
 import { useTranslations } from "next-intl";
 
 interface IFeaturedCoursesSectionProps {

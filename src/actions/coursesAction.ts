@@ -3,7 +3,7 @@
 import { revalidateTag } from "next/cache";
 import { ICourse, ISection } from "../../types/entities";
 import { IStudentsResponse } from "../../types/resData";
-import { sendRequest, sendRequestFile } from "../../utils/api";
+import { sendRequest, sendRequestFile } from "../utils/api";
 import { getAccessToken } from "./index";
 
 export interface ICreateCoursePayload {

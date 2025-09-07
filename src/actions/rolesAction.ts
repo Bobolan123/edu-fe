@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { IRole, IPermission } from "../../types/entities";
-import { sendRequest } from "../../utils/api";
+import { sendRequest } from "../utils/api";
 import { getAccessToken } from "./index";
 
 export interface IRoleCreateRequest {

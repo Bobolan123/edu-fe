@@ -10,6 +10,7 @@ interface IUser {
     role: string;
     access_token:string;
     refresh_token: string;
+    permissions: IPermission[];
 }
 declare module "next-auth/jwt" {
     interface JWT {

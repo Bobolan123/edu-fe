@@ -1,7 +1,7 @@
 "use server";
 
 import { getAccessToken, getUserId } from "./index";
-import { sendRequest } from "../../utils/api";
+import { sendRequest } from "../utils/api";
 import { IReview, ReviewStatus } from "../../types/entities";
 import { revalidateTag } from "next/cache";
 import {
