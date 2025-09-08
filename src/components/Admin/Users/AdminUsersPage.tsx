@@ -42,7 +42,7 @@ import { currencyService } from '@/service/currency';
 
 interface AdminUsersPageProps {
   users: IModelPaginate<IUser>;
-  roles: IBackendRes<IRole>;
+  roles: IBackendRes<IRole[]>;
   searchParams: {
     page?: string;
     search?: string;

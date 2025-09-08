@@ -8,9 +8,11 @@ interface ReviewsPageProps {
     page?: string;
     search?: string;
     rating?: string;
+    minRating?: string;
+    maxRating?: string;
     status?: ReviewStatus;
     minUpVotes?: string;
-    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
+    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
   }>;
 }
 
@@ -22,6 +24,8 @@ export default async function ReviewsPage(props: ReviewsPageProps) {
     const take = 10;
     const search = searchParams.search;
     const rating = searchParams.rating ? parseInt(searchParams.rating) : undefined;
+    const minRating = searchParams.minRating ? parseInt(searchParams.minRating) : undefined;
+    const maxRating = searchParams.maxRating ? parseInt(searchParams.maxRating) : undefined;
     const status = searchParams.status;
     const minUpVotes = searchParams.minUpVotes ? parseInt(searchParams.minUpVotes) : undefined;
     const sortBy = searchParams.sortBy;
@@ -31,6 +35,8 @@ export default async function ReviewsPage(props: ReviewsPageProps) {
       take,
       search,
       rating,
+      minRating,
+      maxRating,
       status,
       minUpVotes,
       sortBy

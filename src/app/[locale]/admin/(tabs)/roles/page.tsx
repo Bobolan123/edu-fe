@@ -23,7 +23,7 @@ export default async function RolesPage(props: RolesPageProps) {
   
   try {
     const permissionsPage = parseInt(searchParams.permissionsPage || '1');
-    const permissionsTake = 100; // Load more permissions for role management
+    const permissionsTake = 100; 
     
     const [rolesResponse, permissionsResponse] = await Promise.all([
       getRoles(),

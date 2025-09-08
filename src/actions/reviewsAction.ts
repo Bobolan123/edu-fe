@@ -37,7 +37,7 @@ interface GetReviewsParams {
     maxRating?: number;
     status?: ReviewStatus;
     minUpVotes?: number;
-    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
+    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
 }
 
 export const getAllReviews = async (
@@ -286,7 +286,7 @@ interface GetAllReviewsAdminParams {
     maxRating?: number;
     status?: ReviewStatus;
     minUpVotes?: number;
-    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
+    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
 }
 
 export const getAllReviewsAdmin = async (
@@ -318,6 +318,7 @@ export const getAllReviewsAdmin = async (
             next: { tags: [`admin-reviews`] },
         },
     });
+    console.log(res);
 
     if (res?.statusCode !== 200 || !res?.data) {
         throw new Error(res?.message || "Failed to get reviews");

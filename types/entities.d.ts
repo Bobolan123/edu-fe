@@ -60,12 +60,10 @@ export interface ICategory {
 }
 
 
-// Review Status Enum
 export enum ReviewStatus {
-    PUBLISHED = 'PUBLISHED',
-    HIDDEN = 'HIDDEN',
-}
-
+    PUBLISHED = 'published',
+    HIDDEN = 'hidden',
+  }
 // Review Interface
 export interface IReview {
     id: number;

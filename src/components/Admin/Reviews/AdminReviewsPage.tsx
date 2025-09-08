@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   Typography,
+  Button,
   TextField,
   Select,
   MenuItem,
@@ -16,109 +17,181 @@ import {
   InputAdornment,
   Alert,
   CircularProgress,
+  Chip,
 } from '@mui/material';
 import {
   Search,
-  Comment,
-  CheckCircle,
+  FilterList,
+  Clear,
   Star,
+  RateReview,
   ThumbUp,
+  Visibility,
 } from '@mui/icons-material';
 import { ReviewTable } from './ReviewTable';
 import { ReviewDetailsDialog } from './ReviewDetailsDialog';
 import { toastService } from '../../../services/toast';
-import { updateReview } from '@/actions/reviewsAction';
-import { IReview, ReviewStatus } from '../../../../types/entities';
-
-
+import { ICourse, IUser } from '../../../../types/entities';
+export interface IReview {
+    id: number;
+    user: IUser;
+    course: ICourse;
+    rating: number;
+    comment: string;
+    date_reviewed: Date;
+    status: ReviewStatus;
+    upVotes: number;
+    downVotes: number;
+}
+export enum ReviewStatus {
+    PUBLISHED = 'published',
+    HIDDEN = 'hidden',
+  }
 interface AdminReviewsPageProps {
   reviews: IModelPaginate<IReview>;
   searchParams: {
     page?: string;
     search?: string;
     rating?: string;
+    minRating?: string;
+    maxRating?: string;
     status?: ReviewStatus;
     minUpVotes?: string;
-    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
+    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
   };
 }
 
-export default function AdminReviewsPage({ reviews, searchParams }: AdminReviewsPageProps) {
+export default function AdminReviewsPage({ 
+  reviews, 
+  searchParams 
+}: AdminReviewsPageProps) {
   const router = useRouter();
-  
-  // Form state
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
-  const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'All Status');
-  const [selectedRating, setSelectedRating] = useState(searchParams.rating || 'All Ratings');
+  const [selectedRating, setSelectedRating] = useState(searchParams.rating || 'all');
+  const [minRating, setMinRating] = useState(searchParams.minRating || '');
+  const [maxRating, setMaxRating] = useState(searchParams.maxRating || '');
+  const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
   const [minUpVotes, setMinUpVotes] = useState(searchParams.minUpVotes || '');
-  const [sortBy, setSortBy] = useState(searchParams.sortBy || 'newest');
-  
-  // Dialog states
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [sortBy, setSortBy] = useState(searchParams.sortBy || 'NEWEST');
   const [selectedReview, setSelectedReview] = useState<IReview | null>(null);
-  
-  // Loading states
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update URL parameters
-  const updateSearchParams = (newParams: Record<string, string | undefined>) => {
-    const params = new URLSearchParams();
+  const updateURL = (params: Record<string, string | undefined>) => {
+    const urlSearchParams = new URLSearchParams();
     
-    // Keep existing params and update with new ones
-    Object.entries(searchParams).forEach(([key, value]) => {
-      if (value && !newParams.hasOwnProperty(key)) {
-        params.set(key, value.toString());
-      }
-    });
-    
-    // Add new params
-    Object.entries(newParams).forEach(([key, value]) => {
-      if (value && value !== 'All Status' && value !== 'All Ratings') {
-        params.set(key, value);
-      }
-    });
-    
-    // Reset to page 1 when filtering
-    if (Object.keys(newParams).some(key => key !== 'page')) {
-      params.set('page', '1');
+    if (params.search && params.search !== '') {
+      urlSearchParams.set('search', params.search);
     }
     
-    router.push(`/admin/reviews?${params.toString()}`);
+    if (params.rating && params.rating !== 'all') {
+      urlSearchParams.set('rating', params.rating);
+    }
+    
+    if (params.minRating && params.minRating !== '') {
+      urlSearchParams.set('minRating', params.minRating);
+    }
+
+    if (params.maxRating && params.maxRating !== '') {
+      urlSearchParams.set('maxRating', params.maxRating);
+    }
+    
+    if (params.status && params.status !== 'all') {
+      urlSearchParams.set('status', params.status);
+    }
+    
+    if (params.minUpVotes && params.minUpVotes !== '') {
+      urlSearchParams.set('minUpVotes', params.minUpVotes);
+    }
+    
+    if (params.sortBy && params.sortBy !== 'NEWEST') {
+      urlSearchParams.set('sortBy', params.sortBy);
+    }
+    
+    if (params.page) {
+      urlSearchParams.set('page', params.page);
+    }
+    
+    const queryString = urlSearchParams.toString();
+    const newUrl = window.location.pathname + (queryString ? '?' + queryString : '');
+    router.push(newUrl, { scroll: false });
   };
 
-  // Event handlers
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearchTerm(value);
-    
-    // Debounce search
-    const timeoutId = setTimeout(() => {
-      updateSearchParams({ search: value || undefined });
-    }, 500);
-    
-    return () => clearTimeout(timeoutId);
-  };
-
-  const handleStatusChange = (status: string) => {
-    setSelectedStatus(status);
-    updateSearchParams({ status: status === 'All Status' ? undefined : status });
   };
 
   const handleRatingChange = (rating: string) => {
     setSelectedRating(rating);
-    updateSearchParams({ rating: rating === 'All Ratings' ? undefined : rating });
+  };
+
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status);
+  };
+
+  const handleMinRatingChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setMinRating(value);
+  };
+
+  const handleMaxRatingChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setMaxRating(value);
   };
 
   const handleMinUpVotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setMinUpVotes(value);
-    updateSearchParams({ minUpVotes: value || undefined });
   };
 
-  const handleSortByChange = (sortBy: string) => {
-    setSortBy(sortBy as "newest" | "oldest" | "highest_rating" | "lowest_rating");
-    updateSearchParams({ sortBy });
+  const handleSortByChange = (sortValue: string) => {
+    setSortBy(sortValue as typeof sortBy);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    updateURL({ 
+      search: searchTerm,
+      rating: selectedRating,
+      minRating: minRating,
+      maxRating: maxRating,
+      status: selectedStatus,
+      minUpVotes: minUpVotes,
+      sortBy: sortBy,
+      page: (newPage + 1).toString() 
+    });
+  };
+
+  const handleApplyFilters = () => {
+    updateURL({ 
+      search: searchTerm, 
+      rating: selectedRating !== 'all' ? selectedRating : undefined,
+      minRating: minRating !== '' ? minRating : undefined,
+      maxRating: maxRating !== '' ? maxRating : undefined,
+      status: selectedStatus !== 'all' ? selectedStatus : undefined,
+      minUpVotes: minUpVotes !== '' ? minUpVotes : undefined,
+      sortBy: sortBy !== 'NEWEST' ? sortBy : undefined,
+      page: '1'
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setMinRating('');
+    setMaxRating('');
+    setSelectedStatus('all');
+    setMinUpVotes('');
+    setSortBy('NEWEST');
+    updateURL({
+      search: undefined,
+      minRating: undefined,
+      maxRating: undefined,
+      status: undefined,
+      minUpVotes: undefined,
+      sortBy: undefined,
+      page: '1'
+    });
   };
 
   const handleView = (review: IReview) => {
@@ -126,62 +199,54 @@ export default function AdminReviewsPage({ reviews, searchParams }: AdminReviews
     setDetailsDialogOpen(true);
   };
 
-  const handlePageChange = (page: number) => {
-    updateSearchParams({ page: page.toString() });
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage);
+    setLoading(false);
+    toastService.error(errorMessage);
   };
 
-  const handleUpdateStatus = async (review: IReview, status: ReviewStatus) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      await updateReview(review.id, { status });
-      toastService.success('Review status updated successfully');
-      router.refresh();
-      setDetailsDialogOpen(false);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update review status';
-      setError(errorMessage);
-      toastService.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  // Calculate stats
+  const currentReviews = reviews.data?.result || [];
   const totalReviews = reviews.data?.meta?.itemCount || 0;
-  const reviewsList = reviews.data?.result || [];
-  const publishedReviews = reviewsList.filter((r: IReview) => r.status === ReviewStatus.PUBLISHED).length;
-  const hiddenReviews = reviewsList.filter((r: IReview) => r.status === ReviewStatus.HIDDEN).length;
-  const averageRating = reviewsList.length > 0 
-    ? reviewsList.reduce((sum: number, review: IReview) => sum + review.rating, 0) / reviewsList.length 
-    : 0;
+  const averageRating = currentReviews.reduce((sum, review) => sum + review.rating, 0) / currentReviews.length || 0;
+  const publishedReviews = currentReviews.filter(r => r.status === ReviewStatus.PUBLISHED).length;
+  const hiddenReviews = currentReviews.filter(r => r.status === ReviewStatus.HIDDEN).length;
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
-          Reviews Management
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Monitor and moderate course reviews and ratings
-        </Typography>
-      </Box>
-
-      {/* Error Alert */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
+      
+      {/* Header */}
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box>
+            <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
+              Review Management
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Monitor and manage all course reviews on the platform
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
-              <Comment sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+              <RateReview sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
                 {totalReviews}
               </Typography>
@@ -195,7 +260,21 @@ export default function AdminReviewsPage({ reviews, searchParams }: AdminReviews
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
-              <CheckCircle sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
+              <Star sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
+              <Typography variant="h6" fontWeight={600}>
+                {averageRating.toFixed(1)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Average Rating
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent sx={{ textAlign: 'center', p: 2 }}>
+              <Visibility sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
                 {publishedReviews}
               </Typography>
@@ -209,7 +288,7 @@ export default function AdminReviewsPage({ reviews, searchParams }: AdminReviews
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent sx={{ textAlign: 'center', p: 2 }}>
-              <Star sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
+              <ThumbUp sx={{ fontSize: 40, color: 'info.main', mb: 1 }} />
               <Typography variant="h6" fontWeight={600}>
                 {hiddenReviews}
               </Typography>
@@ -219,32 +298,20 @@ export default function AdminReviewsPage({ reviews, searchParams }: AdminReviews
             </CardContent>
           </Card>
         </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', p: 2 }}>
-              <ThumbUp sx={{ fontSize: 40, color: 'info.main', mb: 1 }} />
-              <Typography variant="h6" fontWeight={600}>
-                {averageRating.toFixed(1)}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Average Rating
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
 
-      {/* Filters and Search */}
+      {/* Filters */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
+            {/* First Row - 3 filters */}
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 placeholder="Search reviews..."
                 value={searchTerm}
                 onChange={handleSearch}
+                size="small"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -255,96 +322,120 @@ export default function AdminReviewsPage({ reviews, searchParams }: AdminReviews
               />
             </Grid>
             
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Min Rating (1-5)"
+                type="number"
+                value={minRating}
+                onChange={handleMinRatingChange}
+                placeholder="1"
+                size="small"
+                inputProps={{ min: 1, max: 5, step: 1 }}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Max Rating (1-5)"
+                type="number"
+                value={maxRating}
+                onChange={handleMaxRatingChange}
+                placeholder="5"
+                size="small"
+                inputProps={{ min: 1, max: 5, step: 1 }}
+              />
+            </Grid>
+
+            {/* Second Row - 3 filters */}
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth size="small">
                 <InputLabel>Status</InputLabel>
                 <Select
                   value={selectedStatus}
                   label="Status"
                   onChange={(e) => handleStatusChange(e.target.value as string)}
                 >
-                  <MenuItem value="All Status">All Status</MenuItem>
+                  <MenuItem value="all">All Status</MenuItem>
                   <MenuItem value={ReviewStatus.PUBLISHED}>Published</MenuItem>
                   <MenuItem value={ReviewStatus.HIDDEN}>Hidden</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
-            
-            <Grid item xs={12} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>Rating</InputLabel>
+
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Sort By</InputLabel>
                 <Select
-                  value={selectedRating}
-                  label="Rating"
-                  onChange={(e) => handleRatingChange(e.target.value as string)}
+                  value={sortBy}
+                  label="Sort By"
+                  onChange={(e) => handleSortByChange(e.target.value as string)}
                 >
-                  <MenuItem value="All Ratings">All Ratings</MenuItem>
-                  <MenuItem value="5">5 Stars</MenuItem>
-                  <MenuItem value="4">4 Stars</MenuItem>
-                  <MenuItem value="3">3 Stars</MenuItem>
-                  <MenuItem value="2">2 Stars</MenuItem>
-                  <MenuItem value="1">1 Star</MenuItem>
+                  <MenuItem value="NEWEST">Newest First</MenuItem>
+                  <MenuItem value="OLDEST">Oldest First</MenuItem>
+                  <MenuItem value="HIGHEST_RATING">Highest Rating</MenuItem>
+                  <MenuItem value="LOWEST_RATING">Lowest Rating</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
-            
-            <Grid item xs={12} md={2}>
+
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 label="Min Up Votes"
                 type="number"
                 value={minUpVotes}
                 onChange={handleMinUpVotesChange}
-                InputProps={{
-                  inputProps: { min: 0 }
-                }}
+                placeholder="0"
+                size="small"
+                inputProps={{ min: 0 }}
               />
             </Grid>
-            
-            <Grid item xs={12} md={1}>
-              <FormControl fullWidth>
-                <InputLabel>Sort</InputLabel>
-                <Select
-                  value={sortBy}
-                  label="Sort"
-                  onChange={(e) => handleSortByChange(e.target.value as string)}
+
+            {/* Action Buttons Row */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Clear />}
+                  onClick={handleClearFilters}
+                  size="small"
                 >
-                  <MenuItem value="newest">Newest</MenuItem>
-                  <MenuItem value="oldest">Oldest</MenuItem>
-                  <MenuItem value="highest_rating">Highest Rating</MenuItem>
-                  <MenuItem value="lowest_rating">Lowest Rating</MenuItem>
-                </Select>
-              </FormControl>
+                  Clear
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<FilterList />}
+                  onClick={handleApplyFilters}
+                  size="small"
+                >
+                  Apply
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
 
-      {/* Loading State */}
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
       {/* Reviews Table */}
-      {!loading && (
-        <ReviewTable
-          reviews={reviewsList}
-          onView={handleView}
-          onUpdateStatus={handleUpdateStatus}
-          totalCount={totalReviews}
-          currentPage={parseInt(searchParams.page || '1')}
-          onPageChange={handlePageChange}
-        />
-      )}
+      <ReviewTable
+        reviews={currentReviews}
+        onView={handleView}
+        totalCount={totalReviews}
+        currentPage={parseInt(searchParams.page || '1') - 1}
+        onPageChange={handlePageChange}
+      />
 
-      {/* Details Dialog */}
+      {/* Review Details Dialog */}
       <ReviewDetailsDialog
         open={detailsDialogOpen}
         review={selectedReview}
-        onClose={() => setDetailsDialogOpen(false)}
-        onUpdateStatus={handleUpdateStatus}
+        onClose={() => {
+          setDetailsDialogOpen(false);
+          setSelectedReview(null);
+        }}
+        onError={handleError}
       />
     </Box>
   );
