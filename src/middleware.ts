@@ -11,16 +11,20 @@ const pages = {
     signin: () => "/login",
     signup: () => "/signup",
   },
+  admin: {
+    signin: () => "/admin/login",
+  },
   home: {
     root: "/",
   },
 };
 
-const authPages = ["/login", "/signup"];
+const authPages = ["/login", "/signup", "/admin/login"];
 const protectedPages: string[] = [];
 const adminPages = ["/admin", "/admin/*"];
+const adminAuthPages = ["/admin/login"];
 
-const intlMiddleware = createIntlMiddleware({
+const   intlMiddleware = createIntlMiddleware({
   locales,
   defaultLocale,
 });
@@ -63,22 +67,20 @@ const handleAuth = async (
   const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale;
   const search = req.nextUrl.search; 
 
-  // Check admin access
-  // if (isAdminPage) {
-  //   if (!isAuth) {
-  //     return NextResponse.redirect(
-  //       new URL(`/${locale}${pages.auth.signin()}${search}`, req.url)
-  //     );
-  //   }
-  //   
-  //   // Check if user has admin role
-  //   // const userRole = (session?.user as any)?.role;
-  //   // if (userRole !== "admin") {
-  //   //   return NextResponse.redirect(
-  //   //     new URL(`/${locale}${pages.home.root}${search}`, req.url)
-  //   //   );
-  //   // }
-  // }
+  if (isAdminPage) {
+    if (!isAuth) {
+      return NextResponse.redirect(
+        new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
+      );
+    }
+    
+    const userRole = (session?.user as any)?.role;
+    if (userRole !== "admin") {
+      return NextResponse.redirect(
+        new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
+      );
+    }
+  }
 
   if (!isAuth && isProtectedPage) {
     return NextResponse.redirect(
@@ -101,7 +103,8 @@ export default async function middleware(req: NextRequest) {
 
   const isAuthPage = testPagesRegex(authPages, req.nextUrl.pathname);
   const isProtectedPage = testPagesRegex(protectedPages, req.nextUrl.pathname);
-  const isAdminPage = testPagesRegex(adminPages, req.nextUrl.pathname);
+  const isAdminAuthPage = testPagesRegex(adminAuthPages, req.nextUrl.pathname);
+  const isAdminPage = testPagesRegex(adminPages, req.nextUrl.pathname) && !isAdminAuthPage;
 
   return await handleAuth(req, isAuthPage, isProtectedPage, isAdminPage);
 }

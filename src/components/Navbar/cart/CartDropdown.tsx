@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
@@ -28,10 +28,10 @@ export default function CartDropdown({ cartItems = [] }: CartDropdownProps) {
   const { currency } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Canonical price in VND
-  const totalVND = cartItems.reduce(
-    (sum, item) => sum + (item?.price || 0),
-    0
+  // Canonical price in VND - memoized to prevent infinite re-renders
+  const totalVND = useMemo(
+    () => cartItems.reduce((sum, item) => sum + (item?.price || 0), 0),
+    [cartItems]
   );
 
   // State for converted values

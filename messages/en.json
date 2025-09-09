@@ -197,7 +197,8 @@
         "price_high_low": "Price: High to Low",
         "highest_rated": "Highest Rated",
         "lowest_rated": "Lowest Rated",
-        "clear_all_filters": "Clear All Filters"
+        "clear_all_filters": "Clear All Filters",
+        "apply_filters": "Apply Filters"
     },
     "CourseDetail": {
         "students": "students",

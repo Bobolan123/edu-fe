@@ -42,11 +42,10 @@ export default async function CoursesPage(props: {
             categoryIds: searchParams?.categoryIds,
             userId: session?.user?.id,
             excludeEnrolled: true,
-
         },
         nextOption: { cache: "no-cache" },
     });
-    console.log(resCourses)
+    console.log(resCourses?.data?.result)
 
     const resCategories = await sendRequest<IModelPaginate<ICategory>>({
         method: "GET",

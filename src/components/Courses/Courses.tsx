@@ -71,10 +71,15 @@ export default function Courses(props: ICoursesProps) {
     });
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [priceRange, setPriceRange] = useState<[number, number]>([
-        0, 1000000,
+        0, 100000000,
     ]);
     const [sortBy, setSortBy] = useState<string>("id");
     const [sortOrder, setSortOrder] = useState<string>("DESC");
+
+    // Pending filters (not yet applied to URL)
+    const [pendingRatingFilter, setPendingRatingFilter] = useState<number | null>(null);
+    const [pendingSelectedCategories, setPendingSelectedCategories] = useState<string[]>([]);
+    const [pendingPriceRange, setPendingPriceRange] = useState<[number, number]>([0, 100000000]);
 
     const { currency } = useCurrency();
     const [convertedPrices, setConvertedPrices] = useState<
@@ -148,10 +153,49 @@ export default function Courses(props: ICoursesProps) {
         updateFilters({ orderBy: field, order });
     };
 
+    const applyFilters = () => {
+        setPage(1);
+        const params = new URLSearchParams();
+
+        // Apply rating filter
+        if (pendingRatingFilter !== null) {
+            params.set("minRating", pendingRatingFilter.toString());
+        }
+
+        // Apply category filters
+        pendingSelectedCategories.forEach((catName) => {
+            const cat = categories.find((c) => c.name === catName);
+            if (cat) params.append("categoryIds", String(cat.id));
+        });
+
+        // Apply price range
+        if (pendingPriceRange[0] > 0) {
+            params.set("minPrice", pendingPriceRange[0].toString());
+        }
+        if (pendingPriceRange[1] < 100000000) {
+            params.set("maxPrice", pendingPriceRange[1].toString());
+        }
+
+        // Keep current sort settings
+        params.set("orderBy", sortBy);
+        params.set("order", sortOrder);
+        params.set("page", "1");
+
+        replace(`${pathname}?${params.toString()}`);
+
+        // Update the current filter states to match pending
+        setRatingFilter(pendingRatingFilter);
+        setSelectedCategories(pendingSelectedCategories);
+        setPriceRange(pendingPriceRange);
+    };
+
     const clearAllFilters = () => {
         setRatingFilter(null);
         setSelectedCategories([]);
-        setPriceRange([0, 1000000]);
+        setPriceRange([0, 100000000]);
+        setPendingRatingFilter(null);
+        setPendingSelectedCategories([]);
+        setPendingPriceRange([0, 100000000]);
 
         setSortBy("id");
         setSortOrder("DESC");
@@ -227,18 +271,19 @@ export default function Courses(props: ICoursesProps) {
                         <Box sx={{ mb: 4 }}>
                             <Typography gutterBottom>{t("ratings")}</Typography>
                             <FormGroup>
-                                {[5, 4, 3, 2, 1].map((r) => (
+                                {[4, 3, 2, 1].map((r) => (
                                     <FormControlLabel
                                         key={r}
                                         control={
                                             <Checkbox
-                                                checked={ratingFilter === r}
-                                                onChange={() =>
-                                                    handleRatingRadioChange(r)
-                                                }
+                                                checked={pendingRatingFilter === r}
+                                                onChange={() => {
+                                                    const newRating = pendingRatingFilter === r ? null : r;
+                                                    setPendingRatingFilter(newRating);
+                                                }}
                                             />
                                         }
-                                        label={t("rating_up", { rating: r })}
+                                        label={`${r} & up`}
                                     />
                                 ))}
                             </FormGroup>
@@ -252,12 +297,15 @@ export default function Courses(props: ICoursesProps) {
                                 {t("price_range")}
                             </Typography>
                             <Slider
-                                value={priceRange}
-                                onChange={handlePriceRangeChange}
+                                value={pendingPriceRange}
+                                onChange={(event, newValue) => {
+                                    const range = newValue as [number, number];
+                                    setPendingPriceRange(range);
+                                }}
                                 valueLabelDisplay="auto"
                                 min={0}
-                                max={1000000}
-                                step={10000}
+                                max={100000000}
+                                step={100000}
                                 valueLabelFormat={(value) =>
                                     currencyService.formatPrice(value, currency)
                                 }
@@ -275,7 +323,7 @@ export default function Courses(props: ICoursesProps) {
                                     color="text.secondary"
                                 >
                                     {currencyService.formatPrice(
-                                        priceRange[0],
+                                        pendingPriceRange[0],
                                         currency
                                     )}
                                 </Typography>
@@ -284,7 +332,7 @@ export default function Courses(props: ICoursesProps) {
                                     color="text.secondary"
                                 >
                                     {currencyService.formatPrice(
-                                        priceRange[1],
+                                        pendingPriceRange[1],
                                         currency
                                     )}
                                 </Typography>
@@ -309,14 +357,15 @@ export default function Courses(props: ICoursesProps) {
                                         key={category.id}
                                         control={
                                             <Checkbox
-                                                checked={selectedCategories.includes(
+                                                checked={pendingSelectedCategories.includes(
                                                     category.name
                                                 )}
-                                                onChange={() =>
-                                                    handleCategoryChange(
-                                                        category.name
-                                                    )
-                                                }
+                                                onChange={() => {
+                                                    const newCategories = pendingSelectedCategories.includes(category.name)
+                                                        ? pendingSelectedCategories.filter((c) => c !== category.name)
+                                                        : [...pendingSelectedCategories, category.name];
+                                                    setPendingSelectedCategories(newCategories);
+                                                }}
                                             />
                                         }
                                         label={category.name}
@@ -327,8 +376,17 @@ export default function Courses(props: ICoursesProps) {
 
                         <Divider sx={{ my: 2 }} />
 
-                        {/* Clear Filters */}
-                        <Box sx={{ mb: 4 }}>
+                        {/* Apply and Clear Filters */}
+                        <Box sx={{ mb: 4, display: 'flex', gap: 2, flexDirection: 'column' }}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                startIcon={<FilterListIcon />}
+                                onClick={applyFilters}
+                                color="primary"
+                            >
+                                {t("apply_filters")}
+                            </Button>
                             <Button
                                 fullWidth
                                 variant="outlined"

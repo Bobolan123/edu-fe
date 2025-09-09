@@ -152,7 +152,7 @@ export default function CategoriesSection({
                                 >
                                     <Card
                                         component={Link}
-                                        href={`/courses?category=${category.id}`}
+                                        href={`/courses?categoryIds=${category.id}`}
                                         sx={{
                                             minWidth: 280,
                                             textDecoration: "none",

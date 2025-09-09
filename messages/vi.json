@@ -197,7 +197,8 @@
         "price_high_low": "Giá: Cao đến Thấp",
         "highest_rated": "Đánh Giá Cao Nhất",
         "lowest_rated": "Đánh Giá Thấp Nhất",
-        "clear_all_filters": "Xóa Tất Cả Bộ Lọc"
+        "clear_all_filters": "Xóa Tất Cả Bộ Lọc",
+        "apply_filters": "Áp Dụng Bộ Lọc"
     },
     "CourseDetail": {
         "students": "học viên",

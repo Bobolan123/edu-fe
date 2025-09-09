@@ -515,8 +515,7 @@ export default function RoleForm({
                               <FormControlLabel
                                 control={
                                   <Switch
-                                    checked={isModuleFullySelected(module)}
-                                    indeterminate={isModulePartiallySelected(module) ? true : undefined}
+                                    checked={isModuleFullySelected(module) || isModulePartiallySelected(module)}
                                     onChange={(e) => {
                                       e.stopPropagation();
                                       handleMasterToggle(module);
@@ -527,6 +526,17 @@ export default function RoleForm({
                                         backgroundColor: 'white',
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                                       },
+                                      // Partial state styling
+                                      ...(isModulePartiallySelected(module) && !isModuleFullySelected(module) && {
+                                        '& .MuiSwitch-track': {
+                                          backgroundColor: '#ff9800', // Orange for partial state
+                                          opacity: 0.7,
+                                        },
+                                        '& .MuiSwitch-thumb': {
+                                          backgroundColor: '#ff9800',
+                                          boxShadow: '0 2px 4px rgba(255,152,0,0.3)',
+                                        },
+                                      }),
                                       '& .MuiSwitch-track': {
                                         backgroundColor: 'rgba(255, 255, 255, 0.2) !important',
                                         border: '1px solid rgba(255, 255, 255, 0.3)',
