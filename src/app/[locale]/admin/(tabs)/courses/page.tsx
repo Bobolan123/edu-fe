@@ -10,6 +10,12 @@ interface CoursesPageProps {
     categoryIds?: string | string[];
     status?: string;
     includeDeleted?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minRating?: string;
+    maxRating?: string;
+    orderBy?: string;
+    order?: string;
   }>;
 }
 
@@ -33,8 +39,27 @@ export default async function CoursesPage(props : CoursesPageProps) {
     }
     const status = searchParams.status !== 'all' ? searchParams.status : undefined;
     const includeDeleted = searchParams.includeDeleted === 'true';
+    const minPrice = searchParams.minPrice ? parseFloat(searchParams.minPrice) : undefined;
+    const maxPrice = searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : undefined;
+    const minRating = searchParams.minRating ? parseFloat(searchParams.minRating) : undefined;
+    const maxRating = searchParams.maxRating ? parseFloat(searchParams.maxRating) : undefined;
+    const orderBy = searchParams.orderBy || undefined;
+    const order = (searchParams.order as 'ASC' | 'DESC') || undefined;
     
-    const coursesResponse = await getCoursesForAdmin(page, limit, search, categoryIds, status, includeDeleted);
+    const coursesResponse = await getCoursesForAdmin(
+      page, 
+      limit, 
+      search, 
+      categoryIds, 
+      status, 
+      includeDeleted,
+      minPrice,
+      maxPrice,
+      minRating,
+      maxRating,
+      orderBy,
+      order
+    );
     const categories = await getCategories(1, 50);
     return (
       <AdminCoursesPage 

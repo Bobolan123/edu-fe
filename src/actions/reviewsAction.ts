@@ -318,7 +318,6 @@ export const getAllReviewsAdmin = async (
             next: { tags: [`admin-reviews`] },
         },
     });
-    console.log(res);
 
     if (res?.statusCode !== 200 || !res?.data) {
         throw new Error(res?.message || "Failed to get reviews");

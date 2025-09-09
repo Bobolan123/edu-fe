@@ -81,7 +81,7 @@ export function ReviewDetailsDialog({
     
     setLoading(true);
     try {
-      await updateReview(review.id, { status: newStatus });
+      const res = await updateReview(review.id, { status: newStatus });
       toastService.success(`Review ${newStatus} successfully!`);
       router.refresh();
       onClose();

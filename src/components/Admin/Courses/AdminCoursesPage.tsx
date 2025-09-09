@@ -20,6 +20,10 @@ import {
   Chip,
   OutlinedInput,
   SelectChangeEvent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider,
 } from '@mui/material';
 import {
   Add,
@@ -33,6 +37,7 @@ import {
   Visibility,
   VisibilityOff,
   Delete,
+  ExpandMore,
 } from '@mui/icons-material';
 import { CourseTable } from './CourseTable';
 import { CourseForm } from './CourseForm';
@@ -51,6 +56,12 @@ interface AdminCoursesPageProps {
     categoryIds?: string | string[];
     status?: string;
     includeDeleted?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minRating?: string;
+    maxRating?: string;
+    orderBy?: string;
+    order?: string;
   };
 }
 
@@ -93,6 +104,21 @@ export default function AdminCoursesPage({
   });
   const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
   const [includeDeleted, setIncludeDeleted] = useState(searchParams.includeDeleted === 'true');
+  
+  // New filter states
+  const [minPrice, setMinPrice] = useState(searchParams.minPrice || '');
+  const [maxPrice, setMaxPrice] = useState(searchParams.maxPrice || '');
+  const [minRating, setMinRating] = useState(searchParams.minRating || '');
+  const [maxRating, setMaxRating] = useState(searchParams.maxRating || '');
+  const [sortBy, setSortBy] = useState(() => {
+    const orderBy = searchParams.orderBy || 'last_updated';
+    const order = searchParams.order || 'DESC';
+    return `${orderBy}-${order}`;
+  });
+  
+  // Accordion state for advanced filters
+  const [expandedFilters, setExpandedFilters] = useState(false);
+  
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -127,6 +153,30 @@ export default function AdminCoursesPage({
       searchParams.set('includeDeleted', params.includeDeleted);
     }
     
+    // Add price range parameters
+    if (params.minPrice && params.minPrice !== '') {
+      searchParams.set('minPrice', params.minPrice);
+    }
+    if (params.maxPrice && params.maxPrice !== '') {
+      searchParams.set('maxPrice', params.maxPrice);
+    }
+    
+    // Add rating range parameters
+    if (params.minRating && params.minRating !== '') {
+      searchParams.set('minRating', params.minRating);
+    }
+    if (params.maxRating && params.maxRating !== '') {
+      searchParams.set('maxRating', params.maxRating);
+    }
+    
+    // Add sorting parameters
+    if (params.orderBy) {
+      searchParams.set('orderBy', params.orderBy);
+    }
+    if (params.order) {
+      searchParams.set('order', params.order);
+    }
+    
     // Add page parameter
     if (params.page) {
       searchParams.set('page', params.page);
@@ -154,32 +204,55 @@ export default function AdminCoursesPage({
   };
 
   const handlePageChange = (newPage: number) => {
+    const [orderBy, order] = sortBy.split('-') as [string, 'ASC' | 'DESC'];
     updateURL({ 
       search: searchTerm, 
       category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
-      status: selectedStatus, 
+      status: selectedStatus !== 'all' ? selectedStatus : undefined, 
       includeDeleted: includeDeleted ? 'true' : undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      minRating: minRating || undefined,
+      maxRating: maxRating || undefined,
+      orderBy: orderBy,
+      order: order,
       page: (newPage + 1).toString() 
     });
   };
 
   const handleToggleDeleted = (showDeleted: boolean) => {
     setIncludeDeleted(showDeleted);
+    const [orderBy, order] = sortBy.split('-') as [string, 'ASC' | 'DESC'];
     updateURL({
       search: searchTerm,
       category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
       status: selectedStatus !== 'all' ? selectedStatus : undefined,
       includeDeleted: showDeleted ? 'true' : undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      minRating: minRating || undefined,
+      maxRating: maxRating || undefined,
+      orderBy: orderBy,
+      order: order,
       page: '1'
     });
   };
 
   const handleApplyFilters = () => {
+    // Parse sortBy into orderBy and order
+    const [orderBy, order] = sortBy.split('-') as [string, 'ASC' | 'DESC'];
+    
     updateURL({ 
       search: searchTerm, 
       category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
       status: selectedStatus !== 'all' ? selectedStatus : undefined,
       includeDeleted: includeDeleted ? 'true' : undefined,
+      minPrice: minPrice || undefined,
+      maxPrice: maxPrice || undefined,
+      minRating: minRating || undefined,
+      maxRating: maxRating || undefined,
+      orderBy: orderBy,
+      order: order,
       page: '1'  // Reset to first page when applying filters
     });
   };
@@ -189,11 +262,22 @@ export default function AdminCoursesPage({
     setSelectedCategories([]);
     setSelectedStatus('all');
     setIncludeDeleted(false);
+    setMinPrice('');
+    setMaxPrice('');
+    setMinRating('');
+    setMaxRating('');
+    setSortBy('last_updated-DESC');
     updateURL({
       search: undefined,
       category: undefined,
       status: undefined,
       includeDeleted: undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+      minRating: undefined,
+      maxRating: undefined,
+      orderBy: undefined,
+      order: undefined,
       page: '1'
     });
   };
@@ -425,30 +509,76 @@ export default function AdminCoursesPage({
       {/* Filters and Search */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Search & Filter
-            </Typography>
-          </Box>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                placeholder="Search courses..."
-                value={searchTerm}
-                onChange={handleSearch}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FilterList />
+            Filters & Search
+          </Typography>
+          
+          {/* Always Visible: Search, Sort, Categories and Status */}
+          <Grid container spacing={3}>
+            {/* Search and Sort Row */}
+            <Grid item xs={12}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    placeholder="Search courses..."
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    size="small"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Sort By</InputLabel>
+                    <Select
+                      value={sortBy}
+                      label="Sort By"
+                      onChange={(e) => setSortBy(e.target.value as string)}
+                    >
+                      <MenuItem value="last_updated-DESC">Recently Updated</MenuItem>
+                      <MenuItem value="last_updated-ASC">Oldest Updated</MenuItem>
+                      <MenuItem value="date_created-DESC">Newest Created</MenuItem>
+                      <MenuItem value="date_created-ASC">Oldest Created</MenuItem>
+                      <MenuItem value="title-ASC">Title (A-Z)</MenuItem>
+                      <MenuItem value="title-DESC">Title (Z-A)</MenuItem>
+                      <MenuItem value="price-ASC">Price (Low to High)</MenuItem>
+                      <MenuItem value="price-DESC">Price (High to Low)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={selectedStatus}
+                      label="Status"
+                      onChange={(e) => handleStatusChange(e.target.value as string)}
+                    >
+                      <MenuItem value="all">All Status</MenuItem>
+                      <MenuItem value="true">Active</MenuItem>
+                      <MenuItem value="false">Inactive</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
             </Grid>
-            
-            <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
+
+            {/* Categories Row - Always Visible */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom color="text.secondary">
+                Filter by Categories
+              </Typography>
+              <FormControl fullWidth size="small">
                 <InputLabel>Categories</InputLabel>
                 <Select
                   multiple
@@ -478,43 +608,138 @@ export default function AdminCoursesPage({
                 </Select>
               </FormControl>
             </Grid>
-            
-            <Grid item xs={12} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={selectedStatus}
-                  label="Status"
-                  onChange={(e) => handleStatusChange(e.target.value as string)}
-                >
-                  <MenuItem value="all">All Status</MenuItem>
-                  <MenuItem value="true">Active</MenuItem>
-                  <MenuItem value="false">Inactive</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<FilterList />}
-                  onClick={handleApplyFilters}
-                  sx={{ flex: 1, minWidth: 0 }}
-                >
-                  Apply
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<Clear />}
-                  onClick={handleClearFilters}
-                  sx={{ flex: 1, minWidth: 0 }}
-                >
-                  Clear
-                </Button>
-              </Box>
-            </Grid>
           </Grid>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Collapsible Advanced Filters */}
+          <Accordion 
+            expanded={expandedFilters} 
+            onChange={(e, isExpanded) => setExpandedFilters(isExpanded)}
+            elevation={0}
+            sx={{ 
+              '&:before': { display: 'none' },
+              boxShadow: 'none',
+              bgcolor: 'transparent'
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMore />}
+              sx={{ 
+                px: 0,
+                minHeight: 'auto',
+                '& .MuiAccordionSummary-content': { 
+                  margin: '8px 0' 
+                }
+              }}
+            >
+              <Typography variant="subtitle1" color="text.secondary">
+                Advanced Filters (Price & Rating)
+              </Typography>
+            </AccordionSummary>
+            
+            <AccordionDetails sx={{ px: 0 }}>
+              <Grid container spacing={3}>
+                {/* Price Range Row */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" gutterBottom color="text.secondary">
+                    Price Range
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        placeholder="Min Price"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        label="Min Price"
+                        size="small"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">₫</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        placeholder="Max Price"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        label="Max Price"
+                        size="small"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">₫</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Rating Range Row */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" gutterBottom color="text.secondary">
+                    Rating Range
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        placeholder="Min Rating (0-5)"
+                        value={minRating}
+                        onChange={(e) => setMinRating(e.target.value)}
+                        label="Min Rating"
+                        size="small"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">⭐</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        placeholder="Max Rating (0-5)"
+                        value={maxRating}
+                        onChange={(e) => setMaxRating(e.target.value)}
+                        label="Max Rating"
+                        size="small"
+                        inputProps={{ min: 0, max: 5, step: 0.1 }}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">⭐</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Action Buttons Row - Always Visible */}
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<Clear />}
+              onClick={handleClearFilters}
+              color="secondary"
+            >
+              Clear All
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<FilterList />}
+              onClick={handleApplyFilters}
+              color="primary"
+            >
+              Apply Filters
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 

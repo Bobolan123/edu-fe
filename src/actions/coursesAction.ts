@@ -55,7 +55,13 @@ export const getCoursesForAdmin = async (
     search?: string,
     categoryIds?: number[],
     status?: string,
-    includeDeleted?: boolean
+    includeDeleted?: boolean,
+    minPrice?: number,
+    maxPrice?: number,
+    minRating?: number,
+    maxRating?: number,
+    orderBy?: string,
+    order?: 'ASC' | 'DESC'
 ): Promise<IModelPaginate<ICourse>> => {
     const access_token = await getAccessToken();
     
@@ -70,6 +76,12 @@ export const getCoursesForAdmin = async (
     }
     if (status) queryParams.status = status;
     if (includeDeleted) queryParams.includeDeleted = includeDeleted;
+    if (minPrice !== undefined) queryParams.minPrice = minPrice;
+    if (maxPrice !== undefined) queryParams.maxPrice = maxPrice;
+    if (minRating !== undefined) queryParams.minRating = minRating;
+    if (maxRating !== undefined) queryParams.maxRating = maxRating;
+    if (orderBy) queryParams.orderBy = orderBy;
+    if (order) queryParams.order = order;
 
     const res = await sendRequest<IModelPaginate<ICourse>>({
         method: "GET",
