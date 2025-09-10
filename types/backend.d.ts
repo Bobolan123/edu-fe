@@ -45,5 +45,6 @@ declare global {
         role?: string;
         access_token: string;
         permissions: IPermission[];
+        avatar_url: string;
     }
 }

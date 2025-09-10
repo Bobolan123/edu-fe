@@ -11,6 +11,7 @@ interface IUser {
     access_token:string;
     refresh_token: string;
     permissions: IPermission[];
+    avatar_url?: string | null;
 }
 declare module "next-auth/jwt" {
     interface JWT {

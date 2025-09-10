@@ -38,7 +38,7 @@ import { slugify } from "../../utils/utils";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 import { useTranslations } from "next-intl";
 import { LoadingButton, useLoadingState } from "@/components/common/Loading";
 import { toastService } from "@/services/toast";

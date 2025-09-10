@@ -45,7 +45,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { ICategory, ICourse } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
 import { useCurrency } from '@/context/CurrencyContext';
-import { currencyService } from '@/service/currency';
+import { currencyService } from '@/services/currency';
 
 interface AdminCoursesPageProps {
   courses: IModelPaginate<ICourse>;

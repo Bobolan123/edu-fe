@@ -33,7 +33,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         name: res.data.name,
                         access_token:res.data.access_token,
                         role: res.data.role || "user",
-                        permissions: res.data.permissions || []
+                        permissions: res.data.permissions || [],
+                        avatar_url: res.data.avatar_url || ""
                     };
                 } else if (res?.statusCode === 403) {
                     throw new InvalidActive();

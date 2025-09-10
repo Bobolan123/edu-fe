@@ -35,7 +35,7 @@ import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { slugify } from "../../utils/utils";
 import { useCurrency } from "@/context/CurrencyContext";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 import { useTranslations } from "next-intl";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FilterListIcon from "@mui/icons-material/FilterList";

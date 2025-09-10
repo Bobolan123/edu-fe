@@ -30,7 +30,7 @@ import {
 import { useState, useEffect } from 'react';
 import { IOrder, OrderStatus, PaymentMethod } from '../../../../types/entities';
 import { useCurrency } from '@/context/CurrencyContext';
-import { currencyService } from '@/service/currency';
+import { currencyService } from '@/services/currency';
 
 interface OrderTableProps {
   orders: IOrder[];

@@ -31,7 +31,7 @@ import {
 import { adminCreateCourse, adminUpdateCourse } from '../../../actions/coursesAction';
 import { ICategory, ICourse } from '../../../../types/entities';
 import { useCurrency } from '@/context/CurrencyContext';
-import { currencyService } from '@/service/currency';
+import { currencyService } from '@/services/currency';
 
 interface CourseFormData {
   title: string;

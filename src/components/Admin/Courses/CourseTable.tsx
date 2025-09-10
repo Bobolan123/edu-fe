@@ -31,7 +31,7 @@ import {
 import { useState, useEffect } from 'react';
 import { ICourse } from '../../../../types/entities';
 import { useCurrency } from '@/context/CurrencyContext';
-import { currencyService } from '@/service/currency';
+import { currencyService } from '@/services/currency';
 
 interface CourseTableProps {
   courses: ICourse[];

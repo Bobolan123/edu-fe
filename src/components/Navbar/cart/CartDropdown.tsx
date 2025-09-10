@@ -8,7 +8,7 @@ import { Badge } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ICartItem } from "../../../../types/entities";
 import { useCurrency } from "@/context/CurrencyContext";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 
 interface CartDropdownProps {
   cartItems: ICartItem[];

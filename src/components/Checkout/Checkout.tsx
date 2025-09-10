@@ -23,7 +23,7 @@ import { ICartItem, PaymentMethod } from "../../../types/entities";
 import { createOrder } from "@/actions/orderActions";
 import { useSession } from "next-auth/react";
 import { useCurrency } from "@/context/CurrencyContext";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 import { useTranslations } from "next-intl";
 import { toastService } from "@/services/toast";
 import { LoadingButton, useLoadingState } from "@/components/common/Loading";

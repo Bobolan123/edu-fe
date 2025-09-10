@@ -34,7 +34,7 @@ import { OrderTable } from "./OrderTable";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { IOrder, OrderStatus, PaymentMethod } from "../../../../types/entities";
 import { useCurrency } from "@/context/CurrencyContext";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 import {
     exportSingleOrder,
     exportAllOrders,
@@ -179,14 +179,6 @@ export default function AdminOrdersPage({
         setSearchTerm(value);
     };
 
-    const handleSearchSubmit = () => {
-        updateURL({
-            search: searchTerm || undefined,
-            status: selectedStatus || undefined,
-            paymentMethod: selectedPayment || undefined,
-            page: "1",
-        });
-    };
 
     const handleSearchKeyPress = (
         event: React.KeyboardEvent<HTMLInputElement>

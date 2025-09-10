@@ -38,7 +38,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { IUser, IRole } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
 import { useCurrency } from '@/context/CurrencyContext';
-import { currencyService } from '@/service/currency';
+import { currencyService } from '@/services/currency';
 
 interface AdminUsersPageProps {
   users: IModelPaginate<IUser>;

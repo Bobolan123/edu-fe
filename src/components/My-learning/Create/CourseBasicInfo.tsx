@@ -22,7 +22,7 @@ import { useTranslations } from "next-intl";
 import { LANGUAGES } from "../../../../common/constant";
 import { CourseBasicInfoProps } from "./types";
 import { useCurrency } from "@/context/CurrencyContext";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 
 export default function CourseBasicInfo({
     course,

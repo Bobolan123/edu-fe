@@ -28,7 +28,7 @@ import {
   School as SchoolIcon,
 } from '@mui/icons-material';
 import { ICourse } from '../../../types/entities';
-import { currencyService } from '@/service/currency';
+import { currencyService } from '@/services/currency';
 import { useCurrency } from '@/context/CurrencyContext';
 
 interface CourseCardProps {

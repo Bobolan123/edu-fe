@@ -21,7 +21,7 @@ import {
     AccessTime as ClockIcon,
     MenuBook as BookIcon,
 } from "@mui/icons-material";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 import { useCurrency } from "@/context/CurrencyContext";
 import { ICourse, ICourseContent } from "../../../types/entities";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";

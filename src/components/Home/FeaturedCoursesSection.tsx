@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 import { useCurrency } from "@/context/CurrencyContext";
 import {
     Box,

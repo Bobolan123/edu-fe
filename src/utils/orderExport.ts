@@ -1,4 +1,4 @@
-import { currencyService } from "@/service/currency";
+import { currencyService } from "@/services/currency";
 import { IOrder } from "../../types/entities";
 
 // Export single order to CSV
