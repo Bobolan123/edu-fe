@@ -522,7 +522,7 @@ export default function AdminCoursesPage({
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
-                    placeholder="Search courses..."
+                    placeholder="Search courses by name, instructor, category..."
                     value={searchTerm}
                     onChange={handleSearch}
                     size="small"
@@ -739,6 +739,13 @@ export default function AdminCoursesPage({
             >
               Apply 
             </Button>
+          </Box>
+
+          {/* Results Count */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {courses.data?.meta.itemCount || 0} results
+            </Typography>
           </Box>
         </CardContent>
       </Card>

@@ -303,12 +303,17 @@ export default function AdminReviewsPage({
       {/* Filters */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Search & Filter
+            </Typography>
+          </Box>
           <Grid container spacing={2} alignItems="center">
             {/* First Row - 3 filters */}
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                placeholder="Search reviews..."
+                placeholder="Search reviews by user, course, rating, comment..."
                 value={searchTerm}
                 onChange={handleSearch}
                 size="small"
@@ -395,7 +400,7 @@ export default function AdminReviewsPage({
 
             {/* Action Buttons Row */}
             <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1, height: 32 }}>
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1, height: 40 }}>
                 <Button
                   variant="outlined"
                   startIcon={<Clear />}
@@ -415,6 +420,13 @@ export default function AdminReviewsPage({
               </Box>
             </Grid>
           </Grid>
+
+          {/* Results Count */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {totalReviews} results
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
 

@@ -252,7 +252,7 @@ export default function AdminCategoriesPage({
               <TextField
                 fullWidth
                 size="small"
-                placeholder="Search categories..."
+                placeholder="Search categories by name, description..."
                 value={searchTerm}
                 onChange={handleSearch}
                 onKeyPress={handleSearchKeyPress}
@@ -267,11 +267,11 @@ export default function AdminCategoriesPage({
             </Grid>
             
             <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', gap: 1, height: 32 }}>
+              <Box sx={{ display: 'flex', gap: 1, height: 40 }}>
                 <Button
                   size="small"
                   variant="contained"
-                  startIcon={<Search />}
+                  startIcon={<FilterList />}
                   onClick={handleApplyFilters}
                   sx={{ flex: 1, minWidth: 0 }}
                 >
@@ -289,6 +289,13 @@ export default function AdminCategoriesPage({
               </Box>
             </Grid>
           </Grid>
+
+          {/* Results Count */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {totalCategories} results
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
 

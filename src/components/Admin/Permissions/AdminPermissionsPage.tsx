@@ -286,8 +286,13 @@ export default function AdminPermissionsPage({
       {/* Search and Filters */}
       <Card sx={{ mb: 3, borderRadius: 2 }}>
         <CardContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Search & Filter
+            </Typography>
+          </Box>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -300,175 +305,97 @@ export default function AdminPermissionsPage({
                       <Search />
                     </InputAdornment>
                   ),
-                  endAdornment: searchTerm && (
-                    <InputAdornment position="end">
-                      <Button
-                        size="small"
-                        onClick={() => setSearchTerm('')}
-                        sx={{ minWidth: 'auto', p: 0.5 }}
-                      >
-                        <Clear fontSize="small" />
-                      </Button>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                  },
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<FilterList />}
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  size="small"
+
+            <Grid item xs={12} md={2}>
+              <TextField
+                fullWidth
+                size="small"
+                label="API Endpoint"
+                value={apiFilter}
+                onChange={(e) => setApiFilter(e.target.value)}
+                placeholder="/api/users"
+              />
+            </Grid>
+
+            <Grid item xs={12} md={2}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Description"
+                value={descriptionFilter}
+                onChange={(e) => setDescriptionFilter(e.target.value)}
+                placeholder="Filter by description"
+              />
+            </Grid>
+
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth size="small">
+                <InputLabel>HTTP Method</InputLabel>
+                <Select
+                  value={methodFilter}
+                  label="HTTP Method"
+                  onChange={(e) => setMethodFilter(e.target.value)}
                 >
-                  {showAdvancedFilters ? 'Hide' : 'Show'} Filters
+                  <MenuItem value="all">All Methods</MenuItem>
+                  {httpMethods.map((method) => (
+                    <MenuItem key={method} value={method}>
+                      {method}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Module</InputLabel>
+                <Select
+                  value={moduleFilter}
+                  label="Module"
+                  onChange={(e) => setModuleFilter(e.target.value)}
+                >
+                  <MenuItem value="all">All Modules</MenuItem>
+                  {availableModules.map((module) => (
+                    <MenuItem key={module} value={module}>
+                      {module}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={3}>
+              <Box sx={{ display: 'flex', gap: 1, height: 40 }}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  startIcon={<FilterList />}
+                  onClick={handleFilterChange}
+                  sx={{ flex: 1, minWidth: 0 }}
+                >
+                  Apply
                 </Button>
                 <Button
+                  size="small"
                   variant="outlined"
                   startIcon={<Clear />}
                   onClick={handleClearAllFilters}
-                  size="small"
-                  disabled={!searchTerm && !apiFilter && !descriptionFilter && methodFilter === 'all' && moduleFilter === 'all'}
+                  sx={{ flex: 1, minWidth: 0 }}
                 >
-                  Clear All
+                  Clear
                 </Button>
               </Box>
             </Grid>
           </Grid>
 
-          {/* Advanced Filters */}
-          {showAdvancedFilters && (
-            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Advanced Filters
-              </Typography>
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <TextField
-                    fullWidth
-                    label="API Endpoint"
-                    value={apiFilter}
-                    onChange={(e) => setApiFilter(e.target.value)}
-                    onBlur={handleFilterChange}
-                    placeholder="/api/users"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <TextField
-                    fullWidth
-                    label="Description"
-                    value={descriptionFilter}
-                    onChange={(e) => setDescriptionFilter(e.target.value)}
-                    onBlur={handleFilterChange}
-                    placeholder="Filter by description"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>HTTP Method</InputLabel>
-                    <Select
-                      value={methodFilter}
-                      label="HTTP Method"
-                      onChange={(e) => {
-                        setMethodFilter(e.target.value);
-                        setTimeout(handleFilterChange, 100);
-                      }}
-                    >
-                      <MenuItem value="all">All Methods</MenuItem>
-                      {httpMethods.map((method) => (
-                        <MenuItem key={method} value={method}>
-                          {method}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Module</InputLabel>
-                    <Select
-                      value={moduleFilter}
-                      label="Module"
-                      onChange={(e) => {
-                        setModuleFilter(e.target.value);
-                        setTimeout(handleFilterChange, 100);
-                      }}
-                    >
-                      <MenuItem value="all">All Modules</MenuItem>
-                      {availableModules.map((module) => (
-                        <MenuItem key={module} value={module}>
-                          {module}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-
-          {/* Active Filters Display */}
-          <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Chip 
-              icon={<Search />} 
-              label={`${totalCount} results`} 
-              color="primary" 
-              variant="outlined" 
-              size="small"
-            />
-            {searchTerm && (
-              <Chip 
-                label={`Search: "${searchTerm}"`} 
-                onDelete={() => setSearchTerm('')}
-                color="secondary" 
-                variant="filled" 
-                size="small"
-              />
-            )}
-            {apiFilter && (
-              <Chip 
-                label={`API: "${apiFilter}"`} 
-                onDelete={() => setApiFilter('')}
-                color="info" 
-                variant="filled" 
-                size="small"
-              />
-            )}
-            {descriptionFilter && (
-              <Chip 
-                label={`Description: "${descriptionFilter}"`} 
-                onDelete={() => setDescriptionFilter('')}
-                color="info" 
-                variant="filled" 
-                size="small"
-              />
-            )}
-            {methodFilter !== 'all' && (
-              <Chip 
-                label={`Method: ${methodFilter}`} 
-                onDelete={() => setMethodFilter('all')}
-                color="warning" 
-                variant="filled" 
-                size="small"
-              />
-            )}
-            {moduleFilter !== 'all' && (
-              <Chip 
-                label={`Module: ${moduleFilter}`} 
-                onDelete={() => setModuleFilter('all')}
-                color="success" 
-                variant="filled" 
-                size="small"
-              />
-            )}
+          {/* Results Count */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {totalCount} results
+            </Typography>
           </Box>
         </CardContent>
       </Card>

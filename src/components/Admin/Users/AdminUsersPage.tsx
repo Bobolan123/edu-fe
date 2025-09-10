@@ -425,7 +425,8 @@ export default function AdminUsersPage({
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                placeholder="Search users..."
+                size="small"
+                placeholder="Search users by name, email, role..."
                 value={searchTerm}
                 onChange={handleSearch}
                 InputProps={{
@@ -439,7 +440,7 @@ export default function AdminUsersPage({
             </Grid>
             
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 <InputLabel>Role</InputLabel>
                 <Select
                   value={selectedRole}
@@ -455,7 +456,7 @@ export default function AdminUsersPage({
             </Grid>
             
             <Grid item xs={12} md={2}>
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 <InputLabel>Status</InputLabel>
                 <Select
                   value={selectedStatus}
@@ -470,8 +471,9 @@ export default function AdminUsersPage({
             </Grid>
 
             <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
+              <Box sx={{ display: 'flex', gap: 1, height: 40 }}>
                 <Button
+                  size="small"
                   variant="contained"
                   startIcon={<FilterList />}
                   onClick={handleApplyFilters}
@@ -480,6 +482,7 @@ export default function AdminUsersPage({
                   Apply
                 </Button>
                 <Button
+                  size="small"
                   variant="outlined"
                   startIcon={<Clear />}
                   onClick={handleClearFilters}
@@ -490,6 +493,13 @@ export default function AdminUsersPage({
               </Box>
             </Grid>
           </Grid>
+
+          {/* Results Count */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {users.data?.meta?.itemCount || 0} results
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
 

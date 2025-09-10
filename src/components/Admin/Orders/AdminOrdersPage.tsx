@@ -438,7 +438,7 @@ export default function AdminOrdersPage({
                             <TextField
                                 fullWidth
                                 size="small"
-                                placeholder="Search orders..."
+                                placeholder="Search orders by ID, user, amount, status..."
                                 value={searchTerm}
                                 onChange={handleSearch}
                                 onKeyPress={handleSearchKeyPress}
@@ -574,7 +574,7 @@ export default function AdminOrdersPage({
                                 <Button
                                     size="small"
                                     variant="contained"
-                                    startIcon={<Search />}
+                                    startIcon={<FilterList />}
                                     onClick={handleApplyFilters}
                                     sx={{ flex: 1, minWidth: 0 }}
                                 >
@@ -602,6 +602,13 @@ export default function AdminOrdersPage({
                             </Box>
                         </Grid>
                     </Grid>
+
+                    {/* Results Count */}
+                    <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                            Showing {totalOrders} results
+                        </Typography>
+                    </Box>
                 </CardContent>
             </Card>
 

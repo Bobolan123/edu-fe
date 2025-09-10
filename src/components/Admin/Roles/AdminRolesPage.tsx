@@ -275,10 +275,15 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
       {/* Search */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Search & Filter
+            </Typography>
+          </Box>
           <TextField
             fullWidth
             size="small"
-            placeholder="Search roles..."
+            placeholder="Search roles by name, description, permissions..."
             value={searchTerm}
             onChange={handleSearch}
             InputProps={{
@@ -289,6 +294,13 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
               ),
             }}
           />
+
+          {/* Results Count */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {rolesData.length} results
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
 

@@ -394,7 +394,7 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
         <CardContent>
           <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <FilterList />
-            Filters & Search
+            Search & Filter
           </Typography>
           
           {/* Always Visible: Search, Sort, and Date Filters */}
@@ -405,7 +405,7 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    placeholder="Search enrollments..."
+                    placeholder="Search enrollments by student, course, status..."
                     value={searchTerm}
                     onChange={handleSearch}
                     size="small"
@@ -615,6 +615,13 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
             >
               Apply 
             </Button>
+          </Box>
+
+          {/* Results Count */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {totalCount} results
+            </Typography>
           </Box>
         </CardContent>
       </Card>
