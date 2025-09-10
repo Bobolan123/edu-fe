@@ -220,6 +220,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
         <Button
           variant="contained"
           startIcon={<Add />}
+          size="small"
           onClick={() => setDialogMode('create')}
         >
           Create Role
@@ -276,6 +277,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
         <CardContent>
           <TextField
             fullWidth
+            size="small"
             placeholder="Search roles..."
             value={searchTerm}
             onChange={handleSearch}

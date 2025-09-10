@@ -23,7 +23,7 @@ export default async function CheckoutPage() {
     return (
         <Checkout
             cartItems={cart?.data?.cartItems as ICartItem[]}
-            cartId={+cart.data.id}
+            cartId={String(cart.data.id)}
         />
     );
 }

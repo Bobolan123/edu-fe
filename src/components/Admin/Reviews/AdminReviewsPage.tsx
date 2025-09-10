@@ -395,7 +395,7 @@ export default function AdminReviewsPage({
 
             {/* Action Buttons Row */}
             <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1, height: 32 }}>
                 <Button
                   variant="outlined"
                   startIcon={<Clear />}

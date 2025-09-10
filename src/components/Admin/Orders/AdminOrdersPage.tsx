@@ -48,6 +48,13 @@ interface AdminOrdersPageProps {
         search?: string;
         status?: OrderStatus;
         paymentMethod?: PaymentMethod;
+        minPrice?: string;
+        maxPrice?: string;
+        startDate?: string;
+        endDate?: string;
+        userName?: string;
+        userEmail?: string;
+        transactionId?: string;
     };
 }
 
@@ -102,6 +109,13 @@ export default function AdminOrdersPage({
     const [selectedPayment, setSelectedPayment] = useState(
         searchParams.paymentMethod || ""
     );
+    const [minPrice, setMinPrice] = useState(searchParams.minPrice || "");
+    const [maxPrice, setMaxPrice] = useState(searchParams.maxPrice || "");
+    const [startDate, setStartDate] = useState(searchParams.startDate || "");
+    const [endDate, setEndDate] = useState(searchParams.endDate || "");
+    const [userName, setUserName] = useState(searchParams.userName || "");
+    const [userEmail, setUserEmail] = useState(searchParams.userEmail || "");
+    const [transactionId, setTransactionId] = useState(searchParams.transactionId || "");
     const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -124,6 +138,34 @@ export default function AdminOrdersPage({
 
         if (params.paymentMethod && params.paymentMethod !== "") {
             searchParams.set("paymentMethod", params.paymentMethod);
+        }
+
+        if (params.minPrice && params.minPrice !== "") {
+            searchParams.set("minPrice", params.minPrice);
+        }
+
+        if (params.maxPrice && params.maxPrice !== "") {
+            searchParams.set("maxPrice", params.maxPrice);
+        }
+
+        if (params.startDate && params.startDate !== "") {
+            searchParams.set("startDate", params.startDate);
+        }
+
+        if (params.endDate && params.endDate !== "") {
+            searchParams.set("endDate", params.endDate);
+        }
+
+        if (params.userName && params.userName !== "") {
+            searchParams.set("userName", params.userName);
+        }
+
+        if (params.userEmail && params.userEmail !== "") {
+            searchParams.set("userEmail", params.userEmail);
+        }
+
+        if (params.transactionId && params.transactionId !== "") {
+            searchParams.set("transactionId", params.transactionId);
         }
 
         const queryString = searchParams.toString();
@@ -215,6 +257,13 @@ export default function AdminOrdersPage({
             search: searchTerm,
             status: selectedStatus || undefined,
             paymentMethod: selectedPayment || undefined,
+            minPrice: minPrice || undefined,
+            maxPrice: maxPrice || undefined,
+            startDate: startDate || undefined,
+            endDate: endDate || undefined,
+            userName: userName || undefined,
+            userEmail: userEmail || undefined,
+            transactionId: transactionId || undefined,
             page: "1",
         });
     };
@@ -223,10 +272,24 @@ export default function AdminOrdersPage({
         setSearchTerm("");
         setSelectedStatus("");
         setSelectedPayment("");
+        setMinPrice("");
+        setMaxPrice("");
+        setStartDate("");
+        setEndDate("");
+        setUserName("");
+        setUserEmail("");
+        setTransactionId("");
         updateURL({
             search: undefined,
             status: undefined,
             paymentMethod: undefined,
+            minPrice: undefined,
+            maxPrice: undefined,
+            startDate: undefined,
+            endDate: undefined,
+            userName: undefined,
+            userEmail: undefined,
+            transactionId: undefined,
             page: "1",
         });
     };
@@ -371,9 +434,10 @@ export default function AdminOrdersPage({
                         </Typography>
                     </Box>
                     <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
                             <TextField
                                 fullWidth
+                                size="small"
                                 placeholder="Search orders..."
                                 value={searchTerm}
                                 onChange={handleSearch}
@@ -389,7 +453,37 @@ export default function AdminOrdersPage({
                         </Grid>
 
                         <Grid item xs={12} md={2}>
-                            <FormControl fullWidth>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                placeholder="Transaction ID"
+                                value={transactionId}
+                                onChange={(e) => setTransactionId(e.target.value)}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} md={2}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                placeholder="User Name"
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} md={2}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                placeholder="User Email"
+                                value={userEmail}
+                                onChange={(e) => setUserEmail(e.target.value)}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} md={2}>
+                            <FormControl fullWidth size="small">
                                 <InputLabel>Status</InputLabel>
                                 <Select
                                     value={selectedStatus}
@@ -410,8 +504,8 @@ export default function AdminOrdersPage({
                             </FormControl>
                         </Grid>
 
-                        <Grid item xs={12} md={3}>
-                            <FormControl fullWidth>
+                        <Grid item xs={12} md={2}>
+                            <FormControl fullWidth size="small">
                                 <InputLabel>Payment Method</InputLabel>
                                 <Select
                                     value={selectedPayment}
@@ -425,16 +519,60 @@ export default function AdminOrdersPage({
                                     <MenuItem value="">All Methods</MenuItem>
                                     <MenuItem value="VNPAY">VNPay</MenuItem>
                                     <MenuItem value="PAYPAL">PayPal</MenuItem>
-                                    <MenuItem value="CREDIT_CARD">
-                                        Credit Card
-                                    </MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
 
+                        <Grid item xs={12} md={2}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                type="number"
+                                placeholder="Min Price"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} md={2}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                type="number"
+                                placeholder="Max Price"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} md={2}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                type="date"
+                                label="From Date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} md={2}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                type="date"
+                                label="To Date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Grid>
+
                         <Grid item xs={12} md={3}>
-                            <Box sx={{ display: "flex", gap: 1, height: 56 }}>
+                            <Box sx={{ display: "flex", gap: 1, height: 40 }}>
                                 <Button
+                                    size="small"
                                     variant="contained"
                                     startIcon={<Search />}
                                     onClick={handleApplyFilters}
@@ -443,6 +581,7 @@ export default function AdminOrdersPage({
                                     Apply
                                 </Button>
                                 <Button
+                                    size="small"
                                     variant="outlined"
                                     startIcon={<Close />}
                                     onClick={handleClearFilters}
@@ -451,10 +590,11 @@ export default function AdminOrdersPage({
                                     Clear
                                 </Button>
                                 <Button
+                                    size="small"
                                     variant="outlined"
                                     startIcon={<GetApp />}
                                     onClick={handleBulkExport}
-                                    sx={{ height: 56, minWidth: "auto", px: 2 }}
+                                    sx={{ minWidth: "auto", px: 2 }}
                                     title="Export All Orders"
                                 >
                                     Export

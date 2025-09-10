@@ -737,7 +737,7 @@ export default function AdminCoursesPage({
               onClick={handleApplyFilters}
               color="primary"
             >
-              Apply Filters
+              Apply 
             </Button>
           </Box>
         </CardContent>

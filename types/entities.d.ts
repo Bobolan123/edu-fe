@@ -185,7 +185,30 @@ export enum OrderStatus {
 export enum PaymentMethod {
   VNPAY = 'VNPAY',
   PAYPAL = 'PAYPAL',
-  CREDIT_CARD = 'CREDIT_CARD',
+}
+
+// NEW interface required
+export interface IOrderCourse {
+  id: number;
+  price: number;
+  createdAt: string;
+  course: {
+    id: number;
+    title: string;
+    description: string;
+    thumbnail_url?: string;
+    instructor: {
+      id: number;
+      name: string;
+    };
+  };
+}
+
+// NEW interface required
+export interface IStatusHistoryItem {
+  status: OrderStatus;
+  timestamp: string;
+  reason?: string;
 }
 
 export interface IOrder {
@@ -198,4 +221,10 @@ export interface IOrder {
   user: IUser;
   createdAt: Date;
   updatedAt: Date;
+  // New required fields
+  orderCourses: IOrderCourse[];           // CRITICAL: Replaces courses[]
+  idempotencyKey?: string;                // NEW: For duplicate prevention
+  paymentInitiatedAt?: string;            // NEW: Payment start timestamp
+  paymentCompletedAt?: string;            // NEW: Payment completion timestamp
+  statusHistory?: IStatusHistoryItem[];   // NEW: Audit trail array
 }

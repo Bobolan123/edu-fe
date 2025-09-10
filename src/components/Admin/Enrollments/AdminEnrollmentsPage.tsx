@@ -613,7 +613,7 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
               onClick={handleApplyFilters}
               color="primary"
             >
-              Apply Filters
+              Apply 
             </Button>
           </Box>
         </CardContent>

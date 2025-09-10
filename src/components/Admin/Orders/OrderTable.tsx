@@ -61,8 +61,6 @@ const getPaymentMethodColor = (method: PaymentMethod) => {
       return 'primary';
     case 'PAYPAL':
       return 'secondary';
-    case 'CREDIT_CARD':
-      return 'info';
     default:
       return 'default';
   }

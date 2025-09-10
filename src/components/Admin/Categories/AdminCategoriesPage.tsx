@@ -172,9 +172,8 @@ export default function AdminCategoriesPage({
           <Button
             variant="contained"
             startIcon={<Add />}
-            size="large"
+            size="small"
             onClick={handleCreateCategory}
-            sx={{ height: 48 }}
           >
             Create Category
           </Button>
@@ -252,6 +251,7 @@ export default function AdminCategoriesPage({
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
+                size="small"
                 placeholder="Search categories..."
                 value={searchTerm}
                 onChange={handleSearch}
@@ -267,8 +267,9 @@ export default function AdminCategoriesPage({
             </Grid>
             
             <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', gap: 1, height: 56 }}>
+              <Box sx={{ display: 'flex', gap: 1, height: 32 }}>
                 <Button
+                  size="small"
                   variant="contained"
                   startIcon={<Search />}
                   onClick={handleApplyFilters}
@@ -277,6 +278,7 @@ export default function AdminCategoriesPage({
                   Apply
                 </Button>
                 <Button
+                  size="small"
                   variant="outlined"
                   startIcon={<Close />}
                   onClick={handleClearFilters}

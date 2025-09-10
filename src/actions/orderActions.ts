@@ -6,7 +6,7 @@ import { IOrder, PaymentMethod, OrderStatus } from "../../types/entities";
 import { getAccessToken, getUserId } from "./index";
 
 interface CreateOrderParams {
-    cartId: number;
+    cartId: string;
     totalPrice: number;
     paymentMethod: PaymentMethod;
 }
@@ -19,6 +19,11 @@ export const createOrder = async ({
     const access_token = await getAccessToken();
     const userId = await getUserId();
     
+    // Validate cartId
+    if (!cartId || cartId === 'undefined' || cartId === 'null') {
+        throw new Error("Invalid cartId provided");
+    }
+    
     const res = await sendRequest<
         IBackendRes<{
             paymentUrl: string;
@@ -28,7 +33,7 @@ export const createOrder = async ({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/orders`,
         body: {
-            cartId,
+            cartId: String(cartId).trim(),
             totalPrice,
             paymentMethod,
             userId,
@@ -37,6 +42,7 @@ export const createOrder = async ({
             Authorization: `Bearer ${access_token}`,
         },
     });
+    console.log(res)
 
     if (!res?.data) {
         throw new Error(res.message);

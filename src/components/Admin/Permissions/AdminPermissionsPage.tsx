@@ -216,6 +216,7 @@ export default function AdminPermissionsPage({
         <Button
           variant="contained"
           startIcon={<Add />}
+          size="small"
           onClick={handleCreate}
           sx={{ borderRadius: 2 }}
         >
@@ -289,6 +290,7 @@ export default function AdminPermissionsPage({
             <Grid item xs={12} md={8}>
               <TextField
                 fullWidth
+                size="small"
                 placeholder="Search permissions by endpoint, method, module, or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -637,7 +639,7 @@ function ViewPermissionDialog({
       </DialogContent>
       
       <DialogActions sx={{ p: 3, pt: 1 }}>
-        <Button onClick={onClose}>
+        <Button size="small" onClick={onClose}>
           Close
         </Button>
       </DialogActions>

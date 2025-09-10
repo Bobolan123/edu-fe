@@ -31,7 +31,7 @@ import ErrorBoundary from "@/components/common/ErrorBoundary";
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
-    cartId: number;
+    cartId: string;
 }
 
 function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
@@ -73,9 +73,25 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
             if (res?.paymentUrl) {
                 window.location.href = res.paymentUrl;
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Checkout error:", error);
-            toastService.error(t("checkout_error"));
+            
+            // Handle specific error messages
+            const errorMessage = error?.message || error?.toString() || "";
+            
+            if (errorMessage.includes("Already enrolled in course")) {
+                toastService.error("You are already enrolled in one or more courses");
+            } else if (errorMessage.includes("Cart not found or is empty")) {
+                toastService.error("Your cart is empty or has expired");
+            } else if (errorMessage.includes("Price mismatch detected")) {
+                toastService.error("Course prices have changed, please refresh your cart");
+            } else if (errorMessage.includes("Invalid payment signature")) {
+                toastService.error("Payment verification failed, please try again");
+            } else if (errorMessage.includes("Order cannot be processed")) {
+                toastService.error("Order is in invalid state for processing");
+            } else {
+                toastService.error(t("checkout_error"));
+            }
         }
     };
 
