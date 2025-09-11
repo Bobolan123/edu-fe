@@ -18,6 +18,7 @@ import {
     FormControlLabel,
     Divider,
     Radio,
+    RadioGroup,
     Skeleton,
     TextField,
     Slider,
@@ -270,23 +271,29 @@ export default function Courses(props: ICoursesProps) {
                         {/* Rating */}
                         <Box sx={{ mb: 4 }}>
                             <Typography gutterBottom>{t("ratings")}</Typography>
-                            <FormGroup>
-                                {[4, 3, 2, 1].map((r) => (
+                            <FormControl component="fieldset">
+                                <RadioGroup
+                                    value={pendingRatingFilter?.toString() || ""}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setPendingRatingFilter(value ? parseInt(value, 10) : null);
+                                    }}
+                                >
                                     <FormControlLabel
-                                        key={r}
-                                        control={
-                                            <Checkbox
-                                                checked={pendingRatingFilter === r}
-                                                onChange={() => {
-                                                    const newRating = pendingRatingFilter === r ? null : r;
-                                                    setPendingRatingFilter(newRating);
-                                                }}
-                                            />
-                                        }
-                                        label={`${r} & up`}
+                                        value=""
+                                        control={<Radio />}
+                                        label={t("all_ratings")}
                                     />
-                                ))}
-                            </FormGroup>
+                                    {[4, 3, 2, 1].map((r) => (
+                                        <FormControlLabel
+                                            key={r}
+                                            value={r.toString()}
+                                            control={<Radio />}
+                                            label={`${r} & up`}
+                                        />
+                                    ))}
+                                </RadioGroup>
+                            </FormControl>
                         </Box>
 
                         <Divider sx={{ my: 2 }} />

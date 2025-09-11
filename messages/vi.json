@@ -182,6 +182,7 @@
     "Courses": {
         "filters": "Bộ Lọc",
         "ratings": "Đánh Giá",
+        "all_ratings": "Tất Cả Đánh Giá",
         "categories": "Danh Mục",
         "rating_up": "{rating} & trở lên",
         "all_courses": "Tất Cả Khóa Học",
@@ -501,5 +502,28 @@
         "change_password": "Thay Đổi Mật Khẩu",
         "success_message": "Đổi mật khẩu thành công",
         "done_button": "Hoàn Thành"
+    },
+    "Profile": {
+        "profile_information": "Thông Tin Cá Nhân",
+        "edit_profile": "Chỉnh Sửa Hồ Sơ",
+        "full_name": "Họ và Tên",
+        "email": "Email",
+        "bio": "Tiểu Sử",
+        "no_bio": "Chưa có tiểu sử",
+        "security": "Bảo Mật",
+        "change_password": "Thay Đổi Mật Khẩu",
+        "current_password": "Mật Khẩu Hiện Tại",
+        "new_password": "Mật Khẩu Mới",
+        "confirm_password": "Xác Nhận Mật Khẩu",
+        "password_requirements": "Mật khẩu phải có ít nhất 8 ký tự bao gồm chữ hoa, chữ thường và số",
+        "cancel": "Hủy",
+        "member_since": "Thành viên từ {date}",
+        "account_type": "Loại Tài Khoản",
+        "google_account": "Tài Khoản Google",
+        "email_account": "Tài Khoản Email",
+        "avatar_updated_success": "Cập nhật ảnh đại diện thành công",
+        "avatar_upload_failed": "Không thể cập nhật ảnh đại diện",
+        "password_changed_success": "Thay đổi mật khẩu thành công",
+        "password_change_failed": "Không thể thay đổi mật khẩu"
     }
 }

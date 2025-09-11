@@ -182,6 +182,7 @@
     "Courses": {
         "filters": "Filters",
         "ratings": "Ratings",
+        "all_ratings": "All Ratings",
         "categories": "Categories",
         "rating_up": "{rating} & up",
         "all_courses": "All Courses",
@@ -487,5 +488,28 @@
         "change_password": "Change Password",
         "success_message": "Password changed successfully",
         "done_button": "Done"
+    },
+    "Profile": {
+        "profile_information": "Profile Information",
+        "edit_profile": "Edit Profile",
+        "full_name": "Full Name",
+        "email": "Email",
+        "bio": "Bio",
+        "no_bio": "No bio available",
+        "security": "Security",
+        "change_password": "Change Password",
+        "current_password": "Current Password",
+        "new_password": "New Password",
+        "confirm_password": "Confirm Password",
+        "password_requirements": "Password must be at least 8 characters and include uppercase, lowercase, and number",
+        "cancel": "Cancel",
+        "member_since": "Member since {date}",
+        "account_type": "Account Type",
+        "google_account": "Google Account",
+        "email_account": "Email Account",
+        "avatar_updated_success": "Profile picture updated successfully",
+        "avatar_upload_failed": "Failed to update profile picture",
+        "password_changed_success": "Password changed successfully",
+        "password_change_failed": "Failed to change password"
     }
 }

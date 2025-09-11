@@ -172,22 +172,39 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
         >
             {/* User Profile Header */}
             <Box sx={{ px: 2, py: 2, borderBottom: `1px solid ${alpha('#000', 0.08)}` }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar
-                        src={session?.user?.avatar_url || undefined}
-                        sx={{ width: 40, height: 40 }}
-                    >
-                        {session?.user?.name?.[0]?.toUpperCase()}
-                    </Avatar>
-                    <Box>
-                        <Typography variant="subtitle2" fontWeight={600}>
-                            {session?.user?.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            {session?.user?.email}
-                        </Typography>
+                <Link 
+                    href="/profile" 
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                    onClick={handleMenuClose}
+                >
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 2,
+                        cursor: 'pointer',
+                        borderRadius: 1,
+                        p: 1,
+                        mx: -1,
+                        '&:hover': {
+                            backgroundColor: alpha('#1976d2', 0.08),
+                        }
+                    }}>
+                        <Avatar
+                            src={session?.user?.avatar_url || undefined}
+                            sx={{ width: 40, height: 40 }}
+                        >
+                            {session?.user?.name?.[0]?.toUpperCase()}
+                        </Avatar>
+                        <Box>
+                            <Typography variant="subtitle2" fontWeight={600}>
+                                {session?.user?.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {session?.user?.email}
+                            </Typography>
+                        </Box>
                     </Box>
-                </Box>
+                </Link>
             </Box>
             
             <MenuItem onClick={handleMenuClose}>

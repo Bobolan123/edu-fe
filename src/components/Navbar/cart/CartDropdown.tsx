@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
-import { Badge } from "@mui/material";
+import { Badge, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ICartItem } from "../../../../types/entities";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -135,9 +135,19 @@ export default function CartDropdown({ cartItems = [] }: CartDropdownProps) {
               <span className="font-bold">{fmt(displayTotal)}</span>
             </div>
             <Link href="/cart">
-              <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors">
-                Go to cart
-              </button>
+            <Button
+                                        variant="contained"
+                                        color="primary"
+                                       
+                                        fullWidth
+                                        sx={{
+                                            mb: 1.5,
+                                            py: 1.3,
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        Go to cart
+                                    </Button>
             </Link>
           </div>
         </div>
