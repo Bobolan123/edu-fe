@@ -14,6 +14,7 @@ import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLe
 import { IReviewDistribution } from "../../../../../types/resData";
 import { auth } from "@/auth";
 import { getAllReviews } from "@/actions/reviewsAction";
+import { getCourseContent } from "@/actions/coursesAction";
 
 export type EnrollmentProgress = {
     enrollment: IEnrollment;
@@ -35,18 +36,9 @@ export default async function CourseDetailPage({
     searchParams,
 }: Params) {
     const { id } = await searchParams;
-
     const session = await auth();
 
-    const resContent = await sendRequest<IBackendRes<ICourseContent>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
-        nextOption: {
-            next: {
-                tags: [`course-content-${id}`],
-            },
-        },
-    });
+    const resContent = await getCourseContent(Number(id));
 
     const resEnrollmentProgress = await sendRequest<
         IBackendRes<EnrollmentProgress>
@@ -59,6 +51,7 @@ export default async function CourseDetailPage({
             },
         },
     });
+    
     const reviewDistribution = await sendRequest<
         IBackendRes<IReviewDistribution>
     >({
@@ -79,7 +72,7 @@ export default async function CourseDetailPage({
     const resUserReviews = await getAllReviews({
         courseId: +id,
         rating: rating ? Number(rating) : undefined,
-        sortBy: sort as 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating' | undefined
+        sortBy: sort ? (sort.toUpperCase() as 'NEWEST' | 'OLDEST' | 'HIGHEST_RATING' | 'LOWEST_RATING') : undefined
     });
 
     const resUserReview = await sendRequest<IBackendRes<IReview>>({
@@ -104,7 +97,7 @@ export default async function CourseDetailPage({
                 }
             />
             <CourseLesson
-                courseContent={resContent?.data as ICourseContent}
+                courseContent={resContent as ICourseContent}
                 course={
                     resEnrollmentProgress?.data?.enrollment?.course as ICourse
                 }

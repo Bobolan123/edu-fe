@@ -34,7 +34,7 @@ import {
 import { ICategory, ICourse } from "../../../types/entities";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { slugify } from "../../utils/utils";
+import { createSlugWithId } from "../../utils/utils";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/services/currency";
 import { useTranslations } from "next-intl";
@@ -424,9 +424,7 @@ export default function Courses(props: ICoursesProps) {
                                 !course.isPurchased && (
                                     <Grid item key={course.id} xs={12}>
                                         <Link
-                                            href={`/courses/${slugify(
-                                                course.title
-                                            )}/?id=${course.id}`}
+                                            href={`/courses/${createSlugWithId(course.title, course.id)}`}
                                             style={{ textDecoration: "none" }}
                                         >
                                             <Card

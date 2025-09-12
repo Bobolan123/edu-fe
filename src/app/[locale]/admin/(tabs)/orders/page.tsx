@@ -22,13 +22,13 @@ export default async function OrdersPage(props: OrdersPageProps) {
     const status = searchParams.status;
     const paymentMethod = searchParams.paymentMethod;
     
-    const ordersResponse = await getOrders(
+    const ordersResponse = await getOrders({
       page, 
       limit, 
       search,
       status,
       paymentMethod
-    );
+    });
     return (
       <AdminOrdersPage 
         orders={ordersResponse} 

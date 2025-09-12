@@ -1,5 +1,5 @@
 import AdminCoursesPage from '@/components/Admin/Courses/AdminCoursesPage';
-import { getCoursesForAdmin } from '@/actions/coursesAction';
+import { getCourses } from '@/actions/coursesAction';
 import { getCategories } from '@/actions/categoriesAction';
 import { redirect } from 'next/navigation';
 
@@ -46,7 +46,7 @@ export default async function CoursesPage(props : CoursesPageProps) {
     const orderBy = searchParams.orderBy || undefined;
     const order = (searchParams.order as 'ASC' | 'DESC') || undefined;
     
-    const coursesResponse = await getCoursesForAdmin(
+    const coursesResponse = await getCourses({
       page, 
       limit, 
       search, 
@@ -59,8 +59,8 @@ export default async function CoursesPage(props : CoursesPageProps) {
       maxRating,
       orderBy,
       order
-    );
-    const categories = await getCategories(1, 50);
+    });
+    const categories = await getCategories({ page: 1, limit: 50 });
     return (
       <AdminCoursesPage 
         courses={coursesResponse} 

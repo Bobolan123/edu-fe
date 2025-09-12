@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";
-import { slugify } from "../../utils/utils";
+import { createSlugWithId } from "../../utils/utils";
 import { useTranslations } from "next-intl";
 
 interface IFeaturedCoursesSectionProps {
@@ -314,9 +314,7 @@ export default function FeaturedCoursesSection({
 
                                 <Button
                                     component={Link}
-                                    href={`/courses/${slugify(
-                                        course.title
-                                    )}/?id=${course.id}`}
+                                    href={`/courses/${createSlugWithId(course.title, course.id)}`}
                                     variant="contained"
                                     fullWidth
                                     endIcon={

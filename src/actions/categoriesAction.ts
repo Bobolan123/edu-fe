@@ -7,17 +7,20 @@ import { getAccessToken } from "./index";
 import { IResFindAllCategories } from "../../types/resData";
 
 
-export const getCategories = async (
-    page: number = 1,
-    limit: number = 10,
-    search?: string
-): Promise<IModelPaginate<IResFindAllCategories>> => {
+export interface GetCategoriesParams {
+    page?: number;
+    limit?: number;
+    search?: string;
+}
+
+export const getCategories = async (params: GetCategoriesParams = {}): Promise<IModelPaginate<IResFindAllCategories>> => {
     const queryParams: any = {
-        page,
-        take: limit,
+        page: params.page || 1,
+        take: params.limit || 10,
     };
     
-    if (search) queryParams.search = search;
+    // Only add parameters that are defined
+    if (params.search) queryParams.search = params.search;
 
     const res = await sendRequest<IModelPaginate<IResFindAllCategories>>({
         method: "GET",

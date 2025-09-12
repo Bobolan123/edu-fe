@@ -1,6 +1,3 @@
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import { ThemeProvider } from "@mui/material";
-import theme from "./[locale]/theme";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 
@@ -22,11 +19,7 @@ export default function RootLayout({
                 style={{ margin: 0 }}
                 className={`${roboto.className} antialiased`}
             >
-                <AppRouterCacheProvider>
-                    <ThemeProvider theme={theme}>
-                        {children}
-                    </ThemeProvider>
-                </AppRouterCacheProvider>
+                {children}
             </body>
         </html>
     );

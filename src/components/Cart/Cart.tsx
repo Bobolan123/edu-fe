@@ -34,7 +34,7 @@ import { ICartItem } from "../../../types/entities";
 import { deleteCartItem } from "@/actions/cartActions";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { slugify } from "../../utils/utils";
+import { createSlugWithId } from "../../utils/utils";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -353,9 +353,10 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                     }}
                                 >
                                     <Link
-                                        href={`/courses/${slugify(
-                                            cartItem?.course?.title
-                                        )}?id=${cartItem?.course?.id}`}
+                                        href={`/courses/${createSlugWithId(
+                                            cartItem?.course?.title || "",
+                                            cartItem?.course?.id || 0
+                                        )}`}
                                         style={{ textDecoration: 'none', color: 'inherit' }}
                                     >
                                         <Grid container spacing={0}>

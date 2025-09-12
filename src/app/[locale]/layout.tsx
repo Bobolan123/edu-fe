@@ -43,29 +43,22 @@ export default async function LocaleLayout({
     exchangeRate = await getExchangeRateVND("USD");
 
     return (
-        <html lang={locale}>
-            <body
-                style={{ margin: 0 }}
-                className={`${roboto.className} antialiased`}
-            >
-                <NextIntlClientProvider messages={messages}>
-                    <AppRouterCacheProvider>
-                        <ThemeProvider theme={theme}>
-                            <SessionProvider>
-                                <CurrencyProvider>
-                                    <ConditionalNavbar>
-                                        <Navbar />
-                                    </ConditionalNavbar>
-                                    <MainContentWrapper>
-                                        {children}
-                                    </MainContentWrapper>
-                                    <ClientSideToastContainer />
-                                </CurrencyProvider>
-                            </SessionProvider>
-                        </ThemeProvider>
-                    </AppRouterCacheProvider>
-                </NextIntlClientProvider>
-            </body>
-        </html>
+        <NextIntlClientProvider messages={messages}>
+            <AppRouterCacheProvider>
+                <ThemeProvider theme={theme}>
+                    <SessionProvider>
+                        <CurrencyProvider>
+                            <ConditionalNavbar>
+                                <Navbar />
+                            </ConditionalNavbar>
+                            <MainContentWrapper>
+                                {children}
+                            </MainContentWrapper>
+                            <ClientSideToastContainer />
+                        </CurrencyProvider>
+                    </SessionProvider>
+                </ThemeProvider>
+            </AppRouterCacheProvider>
+        </NextIntlClientProvider>
     );
 }

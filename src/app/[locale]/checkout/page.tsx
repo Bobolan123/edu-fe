@@ -1,29 +1,18 @@
-import { auth } from "@/auth";
 import Checkout from "@/components/Checkout/Checkout";
-import { sendRequest } from "../../../utils/api";
-import { ICart, ICartItem } from "../../../../types/entities";
+import { getCart } from "@/actions/cartActions";
+import { ICartItem } from "../../../../types/entities";
 
 export default async function CheckoutPage() {
-    const session = await auth();
-    const cart = await sendRequest<IBackendRes<ICart>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/cart`,
-        headers: {
-            Authorization: `Bearer ${session?.user?.access_token}`,
-        },
-        nextOption: {
-            tags: "cart",
-        },
-    });
+    const cart = await getCart();
 
-    if (!cart?.data?.id) {
+    if (!cart?.id) {
         return <div>Cart not found or is empty.</div>;
     }
 
     return (
         <Checkout
-            cartItems={cart?.data?.cartItems as ICartItem[]}
-            cartId={String(cart.data.id)}
+            cartItems={cart?.cartItems as ICartItem[]}
+            cartId={String(cart.id)}
         />
     );
 }

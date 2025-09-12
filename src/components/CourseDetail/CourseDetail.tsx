@@ -33,10 +33,11 @@ import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
 import { getVideoType } from "../../utils/utils";
 import VideoPreviewModal from "../VideoPreviewModal/VideoPreviewModal";
+import Link from "next/link";
 
 interface ICourseDetailProps {
     course: ICourse;
-    courseContent: ICourseContent;
+    courseContent?: ICourseContent;
 }
 
 export default function CourseDetail({
@@ -44,7 +45,7 @@ export default function CourseDetail({
     courseContent,
 }: ICourseDetailProps) {
     const { data } = useSession();
-    const t = useTranslations('CourseDetail');
+    const t = useTranslations("CourseDetail");
     const { currency } = useCurrency();
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
@@ -57,7 +58,8 @@ export default function CourseDetail({
         }
     };
 
-    const hasValidPreviewUrl = course?.preview_url && getVideoType(course.preview_url) !== 'unknown';
+    const hasValidPreviewUrl =
+        course?.preview_url && getVideoType(course.preview_url) !== "unknown";
 
     return (
         <div className="my-8">
@@ -91,7 +93,7 @@ export default function CourseDetail({
                             />
                             <Typography>({course?.average_rating})</Typography>
                             <Typography color="text.secondary">
-                                {course?.total_students} {t('students')}
+                                {course?.total_students} {t("students")}
                             </Typography>
                         </Box>
 
@@ -106,17 +108,21 @@ export default function CourseDetail({
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <AccessTimeIcon sx={{ mr: 1 }} />
                                 <Typography>
-                                    {course?.sections?.reduce((total, section) => total + section.totalLectures, 0) || 0} {t('lectures')}
+                                    {course?.sections?.reduce(
+                                        (total, section) =>
+                                            total + section.totalLectures,
+                                        0
+                                    ) || 0}{" "}
+                                    {t("lectures")}
                                 </Typography>
                             </Box>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <LanguageIcon sx={{ mr: 1 }} />
-                                <Typography>{course?.language || 'English'}</Typography>
+                                <Typography>
+                                    {course?.language || "English"}
+                                </Typography>
                             </Box>
-                            <Typography>
-                                {t('last_updated')}{" "}
-                             
-                            </Typography>
+                            <Typography>{t("last_updated")} </Typography>
                         </Box>
 
                         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
@@ -136,7 +142,7 @@ export default function CourseDetail({
                             }}
                         >
                             <Typography variant="h5" gutterBottom>
-                                {t('what_learn')}
+                                {t("what_learn")}
                             </Typography>
                             <Grid container spacing={2}>
                                 {courseContent?.whatYoullLearn?.map(
@@ -157,7 +163,7 @@ export default function CourseDetail({
                         {/* Course Content */}
                         <Box sx={{ mt: 6 }}>
                             <Typography variant="h5" gutterBottom>
-                                {t('course_content')}
+                                {t("course_content")}
                             </Typography>
                             <Box
                                 sx={{
@@ -176,8 +182,8 @@ export default function CourseDetail({
                                 >
                                     <BookIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.sections?.length}{" "}
-                                        {t('sections')}
+                                        {courseContent?.sections?.length || 0}{" "}
+                                        {t("sections")}
                                     </Typography>
                                 </Box>
                                 <Box
@@ -189,7 +195,8 @@ export default function CourseDetail({
                                 >
                                     <PlayIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.totalLectures} {t('lectures')}
+                                        {courseContent?.totalLectures || 0}{" "}
+                                        {t("lectures")}
                                     </Typography>
                                 </Box>
                                 <Box
@@ -201,7 +208,8 @@ export default function CourseDetail({
                                 >
                                     <ClockIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.totalLength} {t('total_length')}
+                                        {courseContent?.totalLength || "0m"}{" "}
+                                        {t("total_length")}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -253,7 +261,8 @@ export default function CourseDetail({
                                                 className="flex items-center gap-1"
                                             >
                                                 <Play className="w-4 h-4" />
-                                                {section.totalLectures} {t('lectures')}
+                                                {section.totalLectures}{" "}
+                                                {t("lectures")}
                                             </Typography>
                                         </Box>
                                     </AccordionSummary>
@@ -295,12 +304,13 @@ export default function CourseDetail({
 
                     {/* Right Column - Sticky Card */}
                     <Grid item xs={12} md={4}>
-                        <Box 
-                            sx={{ 
-                                position: 'sticky',
-                                top:  "auto", 
+                        <Box
+                            sx={{
+                                position: "sticky",
+                                top: "auto",
                                 zIndex: 10,
-                                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                                transition:
+                                    "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                             }}
                         >
                             <Card
@@ -318,19 +328,27 @@ export default function CourseDetail({
                             >
                                 <Box
                                     sx={{
-                                        position: 'relative',
+                                        position: "relative",
                                         height: 220,
-                                        cursor: hasValidPreviewUrl ? 'pointer' : 'default',
-                                        '&:hover .preview-overlay': hasValidPreviewUrl ? {
-                                            opacity: 1,
-                                        } : {},
+                                        cursor: hasValidPreviewUrl
+                                            ? "pointer"
+                                            : "default",
+                                        "&:hover .preview-overlay":
+                                            hasValidPreviewUrl
+                                                ? {
+                                                      opacity: 1,
+                                                  }
+                                                : {},
                                     }}
-                                    onClick={() => hasValidPreviewUrl && setPreviewModalOpen(true)}
+                                    onClick={() =>
+                                        hasValidPreviewUrl &&
+                                        setPreviewModalOpen(true)
+                                    }
                                 >
                                     <CardMedia
                                         component="div"
                                         sx={{
-                                            height: '100%',
+                                            height: "100%",
                                             backgroundImage: `url(${course?.thumbnail_url})`,
                                             backgroundSize: "cover",
                                             backgroundPosition: "center",
@@ -340,41 +358,44 @@ export default function CourseDetail({
                                         <Box
                                             className="preview-overlay"
                                             sx={{
-                                                position: 'absolute',
+                                                position: "absolute",
                                                 top: 0,
                                                 left: 0,
                                                 right: 0,
                                                 bottom: 0,
-                                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
+                                                backgroundColor:
+                                                    "rgba(0, 0, 0, 0.5)",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
                                                 opacity: 0,
-                                                transition: 'opacity 0.3s ease',
-                                                borderRadius: '4px 4px 0 0',
+                                                transition: "opacity 0.3s ease",
+                                                borderRadius: "4px 4px 0 0",
                                             }}
                                         >
                                             <Box
                                                 sx={{
                                                     width: 60,
                                                     height: 60,
-                                                    borderRadius: '50%',
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    transition: 'transform 0.2s ease',
-                                                    '&:hover': {
-                                                        transform: 'scale(1.1)',
+                                                    borderRadius: "50%",
+                                                    backgroundColor:
+                                                        "rgba(255, 255, 255, 0.9)",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    transition:
+                                                        "transform 0.2s ease",
+                                                    "&:hover": {
+                                                        transform: "scale(1.1)",
                                                     },
                                                 }}
                                             >
-                                                <PlayIcon 
-                                                    sx={{ 
-                                                        fontSize: 30, 
-                                                        color: 'primary.main',
-                                                        marginLeft: '4px',
-                                                    }} 
+                                                <PlayIcon
+                                                    sx={{
+                                                        fontSize: 30,
+                                                        color: "primary.main",
+                                                        marginLeft: "4px",
+                                                    }}
                                                 />
                                             </Box>
                                         </Box>
@@ -398,7 +419,6 @@ export default function CourseDetail({
                                                 currency
                                             )}
                                         </Typography>
-                                        
                                     </Box>
 
                                     <Button
@@ -414,7 +434,7 @@ export default function CourseDetail({
                                             fontWeight: 600,
                                         }}
                                     >
-                                        {t('add_to_cart')}
+                                        {t("add_to_cart")}
                                     </Button>
                                     <Button
                                         variant="outlined"
@@ -422,7 +442,9 @@ export default function CourseDetail({
                                         fullWidth
                                         sx={{ py: 1.3, fontWeight: 600 }}
                                     >
-                                        {t('buy_now')}
+                                        <Link href={`/cart`}>
+                                            {t("buy_now")}
+                                        </Link>
                                     </Button>
                                     <Typography
                                         variant="caption"
@@ -430,7 +452,7 @@ export default function CourseDetail({
                                         sx={{ mt: 1 }}
                                         color="text.secondary"
                                     >
-                                        {t('money_back_guarantee')}
+                                        {t("money_back_guarantee")}
                                     </Typography>
                                 </CardContent>
                             </Card>
@@ -438,7 +460,7 @@ export default function CourseDetail({
                     </Grid>
                 </Grid>
             </Container>
-            
+
             <VideoPreviewModal
                 open={previewModalOpen}
                 onClose={() => setPreviewModalOpen(false)}

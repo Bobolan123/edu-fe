@@ -328,7 +328,7 @@ export default function     CourseLesson({
                     <div className="p-4">
                         {activeTab === 0 && <CourseOverview course={course} />}
 
-                        {activeTab === 1 && (
+                        {activeTab === 1 && course?.id && (
                             <CourseReviews 
                                 reviewDistribution={reviewDistribution}
                                 reviews={resUserReviews?.data?.result}

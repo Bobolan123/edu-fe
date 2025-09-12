@@ -4,38 +4,36 @@ import {
     ICourse,
     ICourseContent,
 } from "../../../../../types/entities";
-import { sendRequest } from "../../../../utils/api";
-import { extractIds } from "../../../../utils/utils";
+import { getCourseById, getCourseContent } from "@/actions/coursesAction";
+import { extractIdFromSlug } from "@/utils/utils";
+import { notFound } from "next/navigation";
 
 interface Params {
     params: { title: string };
-    searchParams: { id: string };
+    searchParams?: Record<string, string>;
 }
 
 export default async function CourseDetailPage({
     params,
     searchParams,
 }: Params) {
-    const { id } = await searchParams;
-    const resCourse = await sendRequest<IBackendRes<ICourse>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
-    });
-
-    const resContent = await sendRequest<IBackendRes<ICourseContent>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
-        nextOption: {
-            next: {
-                tags: [`course-content-${id}`],
-            },
-        },
-    });
+    const { title } = await params;
+    
+    // Extract ID from slug (e.g., "javascript-masterclass-123" -> "123")
+    const courseId = extractIdFromSlug(title);
+    
+    if (!courseId) {
+        notFound(); // Return 404 if ID cannot be extracted
+    }
+    
+    const course = await getCourseById(courseId);
+    const courseContent = await getCourseContent(Number(courseId));
+    console.log(courseContent);
 
     return (
         <CourseDetail
-            course={resCourse?.data as ICourse}
-            courseContent={resContent?.data as ICourseContent}
+            course={course}
+            courseContent={courseContent || undefined}
         />
     );
 }

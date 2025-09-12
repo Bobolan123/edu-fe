@@ -1,8 +1,8 @@
 import Courses from "@/components/Courses/Courses";
-import { sendRequest } from "../../../utils/api";
 import { ICategory, ICourse } from "../../../../types/entities";
-import { getSession } from "next-auth/react";
 import { auth } from "@/auth";
+import { getCourses } from "@/actions/coursesAction";
+import { getCategories } from "@/actions/categoriesAction";
 
 export default async function CoursesPage(props: {
     searchParams?: {
@@ -17,7 +17,7 @@ export default async function CoursesPage(props: {
         instructorSearch?: string;
         orderBy?: string;
         order?: string;
-        categoryIds?: string | string[]; 
+        categoryIds?: string | string[];
     };
 }) {
     const session = await auth();
@@ -25,32 +25,44 @@ export default async function CoursesPage(props: {
     const currentPage = Number(searchParams?.page) || 1;
     const take = Number(searchParams?.take) || 5;
 
-    const resCourses = await sendRequest<IModelPaginate<ICourse>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses`,
-        queryParams: {
-            page: currentPage,
-            take,
-            search: searchParams?.filter,
-            minRating: searchParams?.minRating || searchParams?.rating,
-            maxRating: searchParams?.maxRating,
-            minPrice: searchParams?.minPrice,
-            maxPrice: searchParams?.maxPrice,
-            instructorSearch: searchParams?.instructorSearch,
-            orderBy: searchParams?.orderBy || 'id',
-            order: searchParams?.order || 'DESC',
-            categoryIds: searchParams?.categoryIds,
-            userId: session?.user?.id,
-            excludeEnrolled: true,
-        },
-        nextOption: { cache: "no-cache" },
-    });
-    console.log(resCourses?.data?.result)
+    // Parse categoryIds if it's a string
+    let categoryIds: number[] | undefined;
+    if (searchParams?.categoryIds) {
+        if (Array.isArray(searchParams.categoryIds)) {
+            categoryIds = searchParams.categoryIds.map(Number).filter(Boolean);
+        } else {
+            categoryIds = [Number(searchParams.categoryIds)].filter(Boolean);
+        }
+        if (categoryIds.length === 0) {
+            categoryIds = undefined;
+        }
+    }
 
-    const resCategories = await sendRequest<IModelPaginate<ICategory>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/categories`,
+    const resCourses = await getCourses({
+        page: currentPage,
+        limit: take,
+        search: searchParams?.filter,
+        minRating: searchParams?.minRating
+            ? Number(searchParams.minRating)
+            : searchParams?.rating
+            ? Number(searchParams.rating)
+            : undefined,
+        maxRating: searchParams?.maxRating
+            ? Number(searchParams.maxRating)
+            : undefined,
+        minPrice: searchParams?.minPrice
+            ? Number(searchParams.minPrice)
+            : undefined,
+        maxPrice: searchParams?.maxPrice
+            ? Number(searchParams.maxPrice)
+            : undefined,
+        orderBy: searchParams?.orderBy || "id",
+        order: (searchParams?.order as "ASC" | "DESC") || "DESC",
+        categoryIds,
+        excludeEnrolled: true,
     });
+
+    const resCategories = await getCategories();
 
     return (
         <Courses

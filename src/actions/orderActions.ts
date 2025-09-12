@@ -51,43 +51,46 @@ export const createOrder = async ({
     return res?.data;
 };
 
-export const getOrders = async (
-    page: number = 1,
-    limit: number = 10,
-    search?: string,
-    status?: OrderStatus,
-    paymentMethod?: PaymentMethod,
-    minPrice?: number,
-    maxPrice?: number,
-    startDate?: string,
-    endDate?: string,
-    userId?: number,
-    userName?: string,
-    userEmail?: string,
-    transactionId?: string,
-    orderBy?: string,
-    order?: 'ASC' | 'DESC'
-): Promise<IModelPaginate<IOrder>> => {
+export interface GetOrdersParams {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: OrderStatus;
+    paymentMethod?: PaymentMethod;
+    minPrice?: number;
+    maxPrice?: number;
+    startDate?: string;
+    endDate?: string;
+    userId?: number;
+    userName?: string;
+    userEmail?: string;
+    transactionId?: string;
+    orderBy?: string;
+    order?: 'ASC' | 'DESC';
+}
+
+export const getOrders = async (params: GetOrdersParams = {}): Promise<IModelPaginate<IOrder>> => {
     const access_token = await getAccessToken();
     
     const queryParams: any = {
-        page,
-        take: limit,
+        page: params.page || 1,
+        take: params.limit || 10,
     };
     
-    if (search) queryParams.search = search;
-    if (status) queryParams.status = status;
-    if (paymentMethod) queryParams.paymentMethod = paymentMethod;
-    if (minPrice !== undefined) queryParams.minPrice = minPrice;
-    if (maxPrice !== undefined) queryParams.maxPrice = maxPrice;
-    if (startDate) queryParams.startDate = startDate;
-    if (endDate) queryParams.endDate = endDate;
-    if (userId) queryParams.userId = userId;
-    if (userName) queryParams.userName = userName;
-    if (userEmail) queryParams.userEmail = userEmail;
-    if (transactionId) queryParams.transactionId = transactionId;
-    if (orderBy) queryParams.orderBy = orderBy;
-    if (order) queryParams.order = order;
+    // Only add parameters that are defined
+    if (params.search) queryParams.search = params.search;
+    if (params.status) queryParams.status = params.status;
+    if (params.paymentMethod) queryParams.paymentMethod = params.paymentMethod;
+    if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice;
+    if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice;
+    if (params.startDate) queryParams.startDate = params.startDate;
+    if (params.endDate) queryParams.endDate = params.endDate;
+    if (params.userId) queryParams.userId = params.userId;
+    if (params.userName) queryParams.userName = params.userName;
+    if (params.userEmail) queryParams.userEmail = params.userEmail;
+    if (params.transactionId) queryParams.transactionId = params.transactionId;
+    if (params.orderBy) queryParams.orderBy = params.orderBy;
+    if (params.order) queryParams.order = params.order;
 
     const res = await sendRequest<IModelPaginate<IOrder>>({
         method: "GET",

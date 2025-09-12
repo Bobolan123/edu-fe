@@ -12,25 +12,28 @@ export interface IUserListResponse {
     limit: number;
 }
 
-export const getUsers = async (
-    page: number = 1,
-    limit: number = 10,
-    search?: string,
-    role?: string,
-    status?: string,
-    includeDeleted?: boolean
-): Promise<IModelPaginate<IUser>> => {
+export interface GetUsersParams {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    status?: string;
+    includeDeleted?: boolean;
+}
+
+export const getUsers = async (params: GetUsersParams = {}): Promise<IModelPaginate<IUser>> => {
     const access_token = await getAccessToken();
     
     const queryParams: any = {
-        page,
-        take: limit,
+        page: params.page || 1,
+        take: params.limit || 10,
     };
     
-    if (search) queryParams.search = search;
-    if (role) queryParams.role = role;
-    if (status) queryParams.status = status;
-    if (includeDeleted) queryParams.includeDeleted = includeDeleted;
+    // Only add parameters that are defined
+    if (params.search) queryParams.search = params.search;
+    if (params.role) queryParams.role = params.role;
+    if (params.status) queryParams.status = params.status;
+    if (params.includeDeleted) queryParams.includeDeleted = params.includeDeleted;
 
     const res = await sendRequest<IModelPaginate<IUser>>({
         method: "GET",

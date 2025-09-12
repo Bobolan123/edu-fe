@@ -35,53 +35,45 @@ export const createCourse = async (
     return res.data;
 };
 
-export const getCourses = async (queryParams?: any) => {
-    const res = await sendRequest<IBackendRes<ICourse[]>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses`,
-        queryParams,
-    });
 
-    if (!res?.data) {
-        throw new Error(res.message);
-    }
+export interface GetCoursesParams {
+    page?: number;
+    limit?: number;
+    search?: string;
+    categoryIds?: number[];
+    status?: string;
+    includeDeleted?: boolean;
+    minPrice?: number;
+    maxPrice?: number;
+    minRating?: number;
+    maxRating?: number;
+    orderBy?: string;
+    order?: 'ASC' | 'DESC';
+    excludeEnrolled?: boolean;
+}
 
-    return res.data;
-};
-
-export const getCoursesForAdmin = async (
-    page: number = 1,
-    limit: number = 10,
-    search?: string,
-    categoryIds?: number[],
-    status?: string,
-    includeDeleted?: boolean,
-    minPrice?: number,
-    maxPrice?: number,
-    minRating?: number,
-    maxRating?: number,
-    orderBy?: string,
-    order?: 'ASC' | 'DESC'
-): Promise<IModelPaginate<ICourse>> => {
+export const getCourses = async (params: GetCoursesParams = {}): Promise<IModelPaginate<ICourse>> => {
     const access_token = await getAccessToken();
     
     const queryParams: any = {
-        page,
-        take: limit,
+        page: params.page || 1,
+        take: params.limit || 10,
     };
     
-    if (search) queryParams.search = search;
-    if (categoryIds && categoryIds.length > 0) {
-        queryParams.categoryIds = categoryIds;
+    // Only add parameters that are defined
+    if (params.search) queryParams.search = params.search;
+    if (params.categoryIds && params.categoryIds.length > 0) {
+        queryParams.categoryIds = params.categoryIds;
     }
-    if (status) queryParams.status = status;
-    if (includeDeleted) queryParams.includeDeleted = includeDeleted;
-    if (minPrice !== undefined) queryParams.minPrice = minPrice;
-    if (maxPrice !== undefined) queryParams.maxPrice = maxPrice;
-    if (minRating !== undefined) queryParams.minRating = minRating;
-    if (maxRating !== undefined) queryParams.maxRating = maxRating;
-    if (orderBy) queryParams.orderBy = orderBy;
-    if (order) queryParams.order = order;
+    if (params.status) queryParams.status = params.status;
+    if (params.includeDeleted) queryParams.includeDeleted = params.includeDeleted;
+    if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice;
+    if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice;
+    if (params.minRating !== undefined) queryParams.minRating = params.minRating;
+    if (params.maxRating !== undefined) queryParams.maxRating = params.maxRating;
+    if (params.orderBy) queryParams.orderBy = params.orderBy;
+    if (params.order) queryParams.order = params.order;
+    if (params.excludeEnrolled) queryParams.excludeEnrolled = params.excludeEnrolled;
 
     const res = await sendRequest<IModelPaginate<ICourse>>({
         method: "GET",
@@ -283,7 +275,7 @@ export const getCourseContent = async (courseId: number) => {
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
     });
     if (!res?.data) {
-        throw new Error(res.message);
+        return null;
     }
     return res.data;
 };

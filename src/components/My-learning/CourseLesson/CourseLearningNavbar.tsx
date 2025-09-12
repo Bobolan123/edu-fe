@@ -53,7 +53,7 @@ export default function CourseLearningNavbar({ course, courseContent, enrollment
     return (
         <div className="bg-white border-b border-gray-200">
             <div className="w-full">
-                <LinearProgress variant="determinate" value={enrollmentProgress?.progressPercentage} />
+                <LinearProgress variant="determinate" value={enrollmentProgress?.progressPercentage || 0} />
             </div>
             <div className="container mx-auto px-4 py-2 flex items-center min-h-[64px]">
                     <Tooltip title="Back to Courses">

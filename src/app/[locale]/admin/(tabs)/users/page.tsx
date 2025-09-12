@@ -24,7 +24,14 @@ export default async function UsersPage(props: UsersPageProps) {
     const status = searchParams.status !== 'all' ? searchParams.status : undefined;
     const includeDeleted = searchParams.includeDeleted === 'true';
     
-    const usersResponse = await getUsers(page, limit, search, role, status, includeDeleted);
+    const usersResponse = await getUsers({ 
+      page, 
+      limit, 
+      search, 
+      role, 
+      status, 
+      includeDeleted 
+    });
     const roles = await getRoles();
     
     return (

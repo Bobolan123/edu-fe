@@ -30,3 +30,20 @@ export async function addCartItem(courseId: number) {
     revalidateTag("cart");
     return res;
 }
+
+export async function getCart() {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<ICart>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/cart`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            next: {
+                tags: ["cart"],
+            },
+        },
+    });
+    return res?.data;
+}

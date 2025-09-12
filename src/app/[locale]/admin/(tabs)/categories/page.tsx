@@ -17,7 +17,7 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
     const limit = 10;
     const search = searchParams.search;
     
-    const categoriesResponse = await getCategories(page, limit, search);
+    const categoriesResponse = await getCategories({ page, limit, search });
     
     return (
       <AdminCategoriesPage 

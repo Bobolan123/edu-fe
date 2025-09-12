@@ -14,6 +14,26 @@ export const slugify = (title: string) =>
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "");
 
+/**
+ * Extracts course ID from slug format: "course-name-123" -> "123"
+ * @param slug - The URL slug containing the ID at the end
+ * @returns The extracted ID or null if not found
+ */
+export const extractIdFromSlug = (slug: string): string | null => {
+    const match = slug.match(/-(\d+)$/);
+    return match ? match[1] : null;
+};
+
+/**
+ * Creates a slug with ID appended: "Course Name" + 123 -> "course-name-123"
+ * @param title - The course title
+ * @param id - The course ID
+ * @returns The slug with ID appended
+ */
+export const createSlugWithId = (title: string, id: number | string): string => {
+    return `${slugify(title)}-${id}`;
+};
+
 // Fetch real-time USD to VND exchange rate
 export async function getExchangeRateVND(to: string): Promise<number> {
     const res = await fetch("https://open.er-api.com/v6/latest/VND");
