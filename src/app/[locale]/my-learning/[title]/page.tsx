@@ -43,7 +43,6 @@ export default async function CourseDetailPage({
     const resEnrollmentProgress = await getEnrollmentProgress(session?.user?.id!, id);
     
     const reviewDistribution = await getReviewDistribution(Number(id));
-
     const { rating, sort } = await searchParams;
     
     const resUserReviews = await getAllReviews({

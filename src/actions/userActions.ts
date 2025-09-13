@@ -275,28 +275,6 @@ export const getCurrentUserProfile = async (): Promise<IUser> => {
     return res.data;
 };
 
-// Upload avatar following backend spec: PATCH /users/:id/avatar
-export const updateUserAvatarById = async (id: number, formData: FormData): Promise<IUser> => {
-    const access_token = await getAccessToken();
-    
-    const res = await sendRequestFile<IBackendRes<IUser>>({
-        method: "PATCH",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/users/${id}/avatar`,
-        body: formData,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (res?.statusCode !== 200 || !res?.data) {
-        throw new Error(res?.message || "Failed to upload avatar");
-    }
-
-    revalidateTag("current-user");
-    revalidateTag(`user-${id}`);
-    
-    return res.data;
-};
 
 // Change password following backend spec: PATCH /users/:id/password
 export const changeUserPassword = async (id: number, passwordData: {

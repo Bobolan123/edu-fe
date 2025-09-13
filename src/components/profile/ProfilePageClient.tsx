@@ -11,7 +11,6 @@ import {
     Button,
     Box,
     TextField,
-    Alert,
     CircularProgress,
     Divider,
     IconButton,
@@ -29,7 +28,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { IUser } from "../../../types/entities";
-import { updateUserAvatarById, changeUserPassword } from "@/actions/userActions";
+import {  changeUserPassword, updateUserAvatar } from "@/actions/userActions";
 import { 
     changePasswordSchema, 
     imageUploadSchema,
@@ -37,6 +36,7 @@ import {
     type ImageUploadFormData 
 } from "@/lib/validationSchemas";
 import { useSession } from "next-auth/react";
+import { toastService } from "@/services/toast";
 
 interface ProfilePageClientProps {
     user: IUser;
@@ -46,7 +46,6 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
     const t = useTranslations("Profile");
     const { data: session } = useSession();
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar_url);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,15 +72,11 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
         try {
             imageUploadSchema.parse({ file });
         } catch (error) {
-            setMessage({ 
-                type: "error", 
-                text: "Please select a valid image file (JPEG, PNG, WebP) under 5MB" 
-            });
+            toastService.error("Please select a valid image file (JPEG, PNG, WebP) under 5MB");
             return;
         }
 
         setLoading(true);
-        setMessage(null);
 
         try {
             // Create preview
@@ -92,9 +87,9 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
             const formData = new FormData();
             formData.append('avatar', file);
             
-            await updateUserAvatarById(user.id, formData);
+            await updateUserAvatar(user.id, file);
             
-            setMessage({ type: "success", text: t("avatar_updated_success") });
+            toastService.success(t("avatar_updated_success"));
             
             // Update session data
             if (session) {
@@ -102,10 +97,7 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
             }
         } catch (error) {
             console.error("Avatar upload error:", error);
-            setMessage({ 
-                type: "error", 
-                text: error instanceof Error ? error.message : t("avatar_upload_failed") 
-            });
+            toastService.error(error instanceof Error ? error.message : t("avatar_upload_failed"));
             // Revert preview on error
             setAvatarPreview(user.avatar_url);
         } finally {
@@ -115,7 +107,6 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
 
     const handlePasswordChange = async (data: ChangePasswordFormData) => {
         setLoading(true);
-        setMessage(null);
 
         try {
             // Call backend following spec: PATCH /users/:id/password
@@ -124,15 +115,12 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
                 newPassword: data.newPassword,
             });
 
-            setMessage({ type: "success", text: t("password_changed_success") });
+            toastService.success(t("password_changed_success"));
             setPasswordDialogOpen(false);
             passwordForm.reset();
         } catch (error) {
             console.error("Password change error:", error);
-            setMessage({ 
-                type: "error", 
-                text: error instanceof Error ? error.message : t("password_change_failed") 
-            });
+            toastService.error(error instanceof Error ? error.message : t("password_change_failed"));
         } finally {
             setLoading(false);
         }
@@ -140,16 +128,6 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
 
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
-            {message && (
-                <Alert 
-                    severity={message.type} 
-                    sx={{ mb: 3 }}
-                    onClose={() => setMessage(null)}
-                >
-                    {message.text}
-                </Alert>
-            )}
-
             <Grid container spacing={4}>
                 {/* Profile Header */}
                 <Grid item xs={12}>

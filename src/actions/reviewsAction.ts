@@ -14,9 +14,12 @@ export const getReviewDistribution = async (
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<IReviewDistribution>>({
         method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/distribution?id=${courseId}`,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/distribution`,
         headers: {
             Authorization: `Bearer ${access_token}`,
+        },
+        queryParams:{
+            id: courseId,
         },
         nextOption: {
             next: {
