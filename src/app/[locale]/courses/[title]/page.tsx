@@ -19,16 +19,14 @@ export default async function CourseDetailPage({
 }: Params) {
     const { title } = await params;
     
-    // Extract ID from slug (e.g., "javascript-masterclass-123" -> "123")
     const courseId = extractIdFromSlug(title);
     
     if (!courseId) {
-        notFound(); // Return 404 if ID cannot be extracted
+        notFound(); 
     }
     
     const course = await getCourseById(courseId);
     const courseContent = await getCourseContent(Number(courseId));
-    console.log(courseContent);
 
     return (
         <CourseDetail

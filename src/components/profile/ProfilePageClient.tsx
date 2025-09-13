@@ -28,7 +28,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { IUser } from "../../../../types/entities";
+import { IUser } from "../../../types/entities";
 import { updateUserAvatarById, changeUserPassword } from "@/actions/userActions";
 import { 
     changePasswordSchema, 

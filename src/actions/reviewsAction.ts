@@ -10,21 +10,26 @@ import {
 
 export const getReviewDistribution = async (
     courseId: number
-): Promise<IBackendRes<IReviewDistribution[]>> => {
+): Promise<IReviewDistribution | undefined> => {
     const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<IReviewDistribution[]>>({
+    const res = await sendRequest<IBackendRes<IReviewDistribution>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/distribution?id=${courseId}`,
         headers: {
             Authorization: `Bearer ${access_token}`,
         },
+        nextOption: {
+            next: {
+                tags: [`review-distribution`],
+            },
+        },
     });
 
     if (res?.statusCode !== 200 || !res?.data) {
-        throw new Error(res?.message || "Failed to get review distribution");
+        return undefined;
     }
 
-    return res;
+    return res.data;
 };
 
 interface GetReviewsParams {
@@ -324,4 +329,25 @@ export const getAllReviewsAdmin = async (
     }
 
     return res;
+};
+
+export const getUserReviewForCourse = async (
+    userId: string,
+    courseId: string
+): Promise<IReview | undefined> => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<IReview>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/user/${userId}/course/${courseId}`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            next: {
+                tags: [`user-review`],
+            },
+        },
+    });
+    
+    return res?.data;
 };

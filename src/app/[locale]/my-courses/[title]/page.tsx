@@ -1,8 +1,7 @@
 import ManageDetailCourse from "@/components/My-courses/ManageDetailCourse/ManageDetailCourse";
-import { sendRequest } from "../../../../utils/api";
 import { ICourse, ICourseContent, IReview } from "../../../../../types/entities";
 import { IStudentsResponse } from "../../../../../types/resData";
-import { getCourseStudents } from "@/actions/coursesAction";
+import { getCourseStudents, getCourseById, getCourseContent } from "@/actions/coursesAction";
 import { getAllReviews } from "@/actions/reviewsAction";
 import { slugify } from "../../../../utils/utils";
 
@@ -30,27 +29,11 @@ export default async function ManageDetailCoursePage({
         tab = '0' 
     } = await searchParams;
 
-    const resCourse = await sendRequest<IBackendRes<ICourse>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
-        nextOption: {
-            next: {
-                tags: ["courses"],
-            },
-        },
-    });
+    const resCourse = await getCourseById(id);
 
-    if (!resCourse?.data) throw new Error("No course data found");
+    if (!resCourse) throw new Error("No course data found");
 
-    const resContent = await sendRequest<IBackendRes<ICourseContent>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${id}`,
-        nextOption: {
-            next: {
-                tags: ["course-content"],
-            },
-        },
-    });
+    const resContent = await getCourseContent(Number(id));
 
     // Fetch course students data with pagination
     let studentsData: IStudentsResponse | null = null;
@@ -78,13 +61,13 @@ export default async function ManageDetailCoursePage({
 
     return (
         <ManageDetailCourse
-            course={resCourse.data}
-            courseContent={resContent.data}
+            course={resCourse}
+            courseContent={resContent}
             studentsData={studentsData}
             reviewsData={reviewsData}
             studentsCurrentPage={parseInt(studentsPage)}
             reviewsCurrentPage={parseInt(reviewsPage)}
-            baseUrl={`/my-courses/${slugify(resCourse.data.title)}?id=${id}&studentsPage=${studentsPage}&studentsTake=${studentsTake}&reviewsPage=${reviewsPage}&reviewsTake=${reviewsTake}`}
+            baseUrl={`/my-courses/${slugify(resCourse.title)}?id=${id}&studentsPage=${studentsPage}&studentsTake=${studentsTake}&reviewsPage=${reviewsPage}&reviewsTake=${reviewsTake}`}
             initialTab={parseInt(tab)}
         />
     );

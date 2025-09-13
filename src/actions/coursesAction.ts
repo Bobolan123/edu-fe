@@ -119,6 +119,11 @@ export const getCourseById = async (id: string, includeDeleted?: boolean) => {
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
         queryParams: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+        nextOption: {
+            next: {
+                tags: ["courses", `course-${id}`],
+            },
+        },
     });
 
     if (!res?.data) {
@@ -273,6 +278,11 @@ export const getCourseContent = async (courseId: number) => {
     const res = await sendRequest<IBackendRes<any>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
+        nextOption: {
+            next: {
+                tags: ["course-content", `course-content-${courseId}`],
+            },
+        },
     });
     if (!res?.data) {
         return null;

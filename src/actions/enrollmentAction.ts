@@ -6,23 +6,7 @@ import { auth } from "@/auth";
 import { getAccessToken } from ".";
 import { IEnrollment } from "../../types/entities";
 
-export const getEnrollmentWithProgress = async (
-    access_token: string,
-    enrollmentId: number
-) => {
-    const res = await sendRequest<IBackendRes<any>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/${enrollmentId}/progress`,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-    if (!res?.data) {
-        throw new Error(res.message);
-    }
 
-    return res.data;
-};
 
 export const markLectureAsCompleted = async (
     enrollmentId: string,
@@ -158,4 +142,53 @@ export const getAllEnrollmentsAdmin = async (params: GetEnrollmentsAdminParams =
     }
     
     return res.data;
+};
+
+export const getEnrollmentProgress = async (userId: string, courseId: string) => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<any>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/user/${userId}/course/${courseId}/progress`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            next: {
+                tags: [`enrollment-progress-${courseId}`],
+            },
+        },
+    });
+    return res?.data;
+};
+
+interface GetEnrolledCoursesParams {
+    search?: string;
+    page?: string;
+    take?: string;
+}
+
+export const getEnrolledCourses = async (
+    userId: string,
+    params: GetEnrolledCoursesParams = {}
+): Promise<any[]> => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IModelPaginate<any>>({
+        method: "GET",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/user/${userId}/courses`,
+        queryParams: {
+            search: params.search,
+            page: params.page,
+            take: params.take,
+        },
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            next: {
+                tags: [`enrolled-courses-${userId}`],
+            },
+        },
+    });
+    
+    return res?.data?.result || [];
 };

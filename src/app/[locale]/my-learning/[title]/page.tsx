@@ -7,14 +7,14 @@ import {
     ILecture,
     IReview,
 } from "../../../../../types/entities";
-import { sendRequest } from "../../../../utils/api";
 import { extractIds } from "../../../../utils/utils";
 import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
 import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLearningNavbar";
 import { IReviewDistribution } from "../../../../../types/resData";
 import { auth } from "@/auth";
-import { getAllReviews } from "@/actions/reviewsAction";
+import { getAllReviews, getUserReviewForCourse, getReviewDistribution } from "@/actions/reviewsAction";
 import { getCourseContent } from "@/actions/coursesAction";
+import { getEnrollmentProgress } from "@/actions/enrollmentAction";
 
 export type EnrollmentProgress = {
     enrollment: IEnrollment;
@@ -40,32 +40,9 @@ export default async function CourseDetailPage({
 
     const resContent = await getCourseContent(Number(id));
 
-    const resEnrollmentProgress = await sendRequest<
-        IBackendRes<EnrollmentProgress>
-    >({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/user/${session?.user?.id}/course/${id}/progress`,
-        nextOption: {
-            next: {
-                tags: [`enrollment-progress-${id}`],
-            },
-        },
-    });
+    const resEnrollmentProgress = await getEnrollmentProgress(session?.user?.id!, id);
     
-    const reviewDistribution = await sendRequest<
-        IBackendRes<IReviewDistribution>
-    >({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/distribution`,
-        queryParams: {
-            id,
-        },
-        nextOption: {
-            next: {
-                tags: [`review-distribution`],
-            },
-        },
-    });
+    const reviewDistribution = await getReviewDistribution(Number(id));
 
     const { rating, sort } = await searchParams;
     
@@ -75,40 +52,30 @@ export default async function CourseDetailPage({
         sortBy: sort ? (sort.toUpperCase() as 'NEWEST' | 'OLDEST' | 'HIGHEST_RATING' | 'LOWEST_RATING') : undefined
     });
 
-    const resUserReview = await sendRequest<IBackendRes<IReview>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/reviews/user/${session?.user?.id}/course/${id}`,
-        nextOption: {
-            next: {
-                tags: [`user-review`],
-            },
-        },
-    });
+    const resUserReview = await getUserReviewForCourse(session?.user?.id!, id);
 
     return (    
         <div className="min-h-screen">
             <CourseLearningNavbar
                 course={
-                    resEnrollmentProgress?.data?.enrollment?.course as ICourse
+                    resEnrollmentProgress?.enrollment?.course as ICourse
                 }
-                courseContent={resContent?.data as ICourseContent}
+                courseContent={resContent as ICourseContent}
                 enrollmentProgress={
-                    resEnrollmentProgress?.data as EnrollmentProgress
+                    resEnrollmentProgress as EnrollmentProgress
                 }
             />
             <CourseLesson
                 courseContent={resContent as ICourseContent}
                 course={
-                    resEnrollmentProgress?.data?.enrollment?.course as ICourse
+                    resEnrollmentProgress?.enrollment?.course as ICourse
                 }
                 enrollmentProgress={
-                    resEnrollmentProgress?.data as EnrollmentProgress
+                    resEnrollmentProgress as EnrollmentProgress
                 }
-                reviewDistribution={
-                    reviewDistribution?.data as IReviewDistribution
-                }
+                reviewDistribution={reviewDistribution}
                 resUserReviews={resUserReviews}
-                userReview={resUserReview?.data}
+                userReview={resUserReview}
             />
         </div>
     );

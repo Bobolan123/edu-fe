@@ -1,7 +1,7 @@
-import { sendRequest } from "../../../utils/api";
 import { ICourse } from "../../../../types/entities";
 import { auth } from "@/auth";
 import MyLearning from "@/components/My-learning/MyLearning";
+import { getEnrolledCourses } from "@/actions/enrollmentAction";
 
 
 export type EnrolledCourse = ICourse & {
@@ -23,17 +23,10 @@ export default async function MyLearningPage(props: {
   const searchParams = props.searchParams || {};
   const session = await auth();
   
-  const resEnrolledCourses = await sendRequest<IModelPaginate<EnrolledCourse>>({
-    method: "GET",
-    url: `${process.env.NEXT_PUBLIC_SERVER}/enrollments/user/${session?.user?.id}/courses`,
-    queryParams: {
-      search: searchParams?.filter,
-      page: searchParams?.page,
-      take: searchParams?.take,
-    },
-    headers: {
-      Authorization: `Bearer ${session?.user?.access_token}`,
-    },
+  const resEnrolledCourses = await getEnrolledCourses(session?.user?.id!, {
+    search: searchParams?.filter,
+    page: searchParams?.page,
+    take: searchParams?.take,
   });
-  return <MyLearning enrolledCourses={resEnrolledCourses?.data?.result || []} />;
+  return <MyLearning enrolledCourses={resEnrolledCourses} />;
 }
