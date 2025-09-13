@@ -276,17 +276,21 @@ export const getCurrentUserProfile = async (): Promise<IUser> => {
 };
 
 
-// Change password following backend spec: PATCH /users/:id/password
+// Change password following backend spec: PATCH /users/password/:id
 export const changeUserPassword = async (id: number, passwordData: {
     currentPassword: string;
     newPassword: string;
 }): Promise<void> => {
     const access_token = await getAccessToken();
     
-    const res = await sendRequest<IBackendRes<void>>({
+    const res = await sendRequest<IBackendRes<any>>({
         method: "PATCH",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/users/${id}/password`,
-        body: passwordData,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/users/password/${id}`,
+        body: {
+            id: id,
+            password: passwordData.currentPassword,
+            newPassword: passwordData.newPassword,
+        },
         headers: {
             Authorization: `Bearer ${access_token}`,
         },
@@ -296,3 +300,4 @@ export const changeUserPassword = async (id: number, passwordData: {
         throw new Error(res?.message || "Failed to change password");
     }
 };
+

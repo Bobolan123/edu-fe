@@ -28,12 +28,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { IUser } from "../../../types/entities";
-import {  changeUserPassword, updateUserAvatar } from "@/actions/userActions";
+import {  changeUserPassword, updateUserAvatar, updateUser } from "@/actions/userActions";
 import { 
     changePasswordSchema, 
     imageUploadSchema,
+    profileSchema,
     type ChangePasswordFormData,
-    type ImageUploadFormData 
+    type ImageUploadFormData,
+    type ProfileFormData
 } from "@/lib/validationSchemas";
 import { useSession } from "next-auth/react";
 import { toastService } from "@/services/toast";
@@ -47,6 +49,7 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
     const { data: session } = useSession();
     const [loading, setLoading] = useState(false);
     const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+    const [editProfileDialogOpen, setEditProfileDialogOpen] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatar_url);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +60,16 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
             currentPassword: "",
             newPassword: "",
             confirmPassword: "",
+        },
+    });
+
+    // Profile edit form
+    const profileForm = useForm<ProfileFormData>({
+        resolver: zodResolver(profileSchema),
+        defaultValues: {
+            fullname: user.name,
+            email: user.email,
+            bio: user.bio || "",
         },
     });
 
@@ -121,6 +134,32 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
         } catch (error) {
             console.error("Password change error:", error);
             toastService.error(error instanceof Error ? error.message : t("password_change_failed"));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleProfileUpdate = async (data: ProfileFormData) => {
+        setLoading(true);
+
+        try {
+            // Update profile using the existing updateUser function
+            await updateUser(user.id, {
+                name: data.fullname,
+                email: data.email,
+                bio: data.bio,
+            });
+
+            toastService.success("Profile updated successfully");
+            setEditProfileDialogOpen(false);
+            
+            // Update session data
+            if (session) {
+                await fetch("/api/auth/session?update=1");
+            }
+        } catch (error) {
+            console.error("Profile update error:", error);
+            toastService.error(error instanceof Error ? error.message : "Failed to update profile");
         } finally {
             setLoading(false);
         }
@@ -219,6 +258,7 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
                                     startIcon={<EditIcon />}
                                     variant="outlined"
                                     size="small"
+                                    onClick={() => setEditProfileDialogOpen(true)}
                                 >
                                     {t("edit_profile")}
                                 </Button>
@@ -348,6 +388,68 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
                             disabled={loading}
                         >
                             {loading ? <CircularProgress size={20} /> : t("change_password")}
+                        </Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+
+            {/* Edit Profile Dialog */}
+            <Dialog 
+                open={editProfileDialogOpen} 
+                onClose={() => setEditProfileDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>{t("edit_profile")}</DialogTitle>
+                <form onSubmit={profileForm.handleSubmit(handleProfileUpdate)}>
+                    <DialogContent>
+                        <TextField
+                            {...profileForm.register("fullname")}
+                            fullWidth
+                            label={t("full_name")}
+                            margin="normal"
+                            error={!!profileForm.formState.errors.fullname}
+                            helperText={profileForm.formState.errors.fullname?.message}
+                        />
+                        
+                        <TextField
+                            {...profileForm.register("email")}
+                            fullWidth
+                            label={t("email")}
+                            type="email"
+                            margin="normal"
+                            error={!!profileForm.formState.errors.email}
+                            helperText={profileForm.formState.errors.email?.message}
+                        />
+                        
+                        <TextField
+                            {...profileForm.register("bio")}
+                            fullWidth
+                            label={t("bio")}
+                            multiline
+                            rows={3}
+                            margin="normal"
+                            error={!!profileForm.formState.errors.bio}
+                            helperText={profileForm.formState.errors.bio?.message}
+                        />
+                    </DialogContent>
+                    
+                    <DialogActions>
+                        <Button 
+                            onClick={() => {
+                                setEditProfileDialogOpen(false);
+                                profileForm.reset();
+                            }}
+                            disabled={loading}
+                        >
+                            {t("cancel")}
+                        </Button>
+                        <Button 
+                            type="submit" 
+                            variant="contained"
+                            disabled={loading}
+                        >
+                            {loading ? <CircularProgress size={20} /> : "Save Changes"}
                         </Button>
                     </DialogActions>
                 </form>
