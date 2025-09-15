@@ -15,7 +15,6 @@ import {
   FormControl,
   InputLabel,
   InputAdornment,
-  Alert,
   CircularProgress,
   Chip,
   OutlinedInput,
@@ -125,7 +124,6 @@ export default function AdminCoursesPage({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteAction, setDeleteAction] = useState<'delete' | 'restore' | 'force-delete'>('delete');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const updateURL = (params: Record<string, string | undefined>) => {
     const searchParams = new URLSearchParams();
@@ -329,7 +327,6 @@ export default function AdminCoursesPage({
   };
 
   const handleError = (errorMessage: string) => {
-    setError(errorMessage);
     setLoading(false);
     toastService.error(errorMessage);
   };
@@ -344,12 +341,6 @@ export default function AdminCoursesPage({
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>

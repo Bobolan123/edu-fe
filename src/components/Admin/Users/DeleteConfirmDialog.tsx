@@ -35,13 +35,11 @@ export function DeleteConfirmDialog({
   onError,
 }: DeleteConfirmDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleAction = async () => {
     if (!user) return;
 
     setLoading(true);
-    setError(null);
 
     try {
       switch (action) {
@@ -58,7 +56,6 @@ export function DeleteConfirmDialog({
       onSuccess();
     } catch (error: any) {
       const errorMessage = error.message || `Failed to ${action.replace('-', ' ')} user`;
-      setError(errorMessage);
       onError(errorMessage);
     } finally {
       setLoading(false);
@@ -67,7 +64,6 @@ export function DeleteConfirmDialog({
 
   const handleClose = () => {
     if (!loading) {
-      setError(null);
       onClose();
     }
   };
@@ -100,12 +96,6 @@ export function DeleteConfirmDialog({
       </DialogTitle>
 
       <DialogContent>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
         <Typography variant="body1" sx={{ mb: 2 }}>
           {action === 'delete' && 'Are you sure you want to delete this user?'}
           {action === 'restore' && 'Are you sure you want to restore this user?'}

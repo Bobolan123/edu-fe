@@ -15,7 +15,6 @@ import {
   FormControl,
   InputLabel,
   InputAdornment,
-  Alert,
   CircularProgress,
   Chip,
 } from '@mui/material';
@@ -88,7 +87,6 @@ export default function AdminUsersPage({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteAction, setDeleteAction] = useState<'delete' | 'restore' | 'force-delete'>('delete');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const updateURL = (params: Record<string, string | undefined>) => {
     const searchParams = new URLSearchParams();
@@ -193,16 +191,14 @@ export default function AdminUsersPage({
 
   const handleCreateSuccess = (response?: any) => {
     setCreateDialogOpen(false);
-    setError(null);
     const message = response?.message || 'User created successfully!';
     toastService.success(message);
-    router.refresh(); 
+    router.refresh();
   };
 
   const handleEditSuccess = (response?: any) => {
     setEditDialogOpen(false);
     setSelectedUser(null);
-    setError(null);
     const message = response?.message || 'User updated successfully!';
     toastService.success(message);
     router.refresh();
@@ -211,7 +207,6 @@ export default function AdminUsersPage({
   const handleDeleteSuccess = () => {
     setDeleteDialogOpen(false);
     setSelectedUser(null);
-    setError(null);
     const messages = {
       'delete': 'User deleted successfully!',
       'restore': 'User restored successfully!',
@@ -222,7 +217,6 @@ export default function AdminUsersPage({
   };
 
   const handleError = (errorMessage: string) => {
-    setError(errorMessage);
     setLoading(false);
     toastService.error(errorMessage);
   };
@@ -244,12 +238,6 @@ export default function AdminUsersPage({
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>

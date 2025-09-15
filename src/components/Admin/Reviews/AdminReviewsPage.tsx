@@ -15,7 +15,6 @@ import {
   FormControl,
   InputLabel,
   InputAdornment,
-  Alert,
   CircularProgress,
   Chip,
 } from '@mui/material';
@@ -76,7 +75,6 @@ export default function AdminReviewsPage({
   const [selectedReview, setSelectedReview] = useState<IReview | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const updateURL = (params: Record<string, string | undefined>) => {
     const urlSearchParams = new URLSearchParams();
@@ -221,11 +219,6 @@ export default function AdminReviewsPage({
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
       
       {/* Header */}
       <Box sx={{ mb: 3 }}>

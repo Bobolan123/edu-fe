@@ -5,7 +5,6 @@ import {
     Button,
     CircularProgress,
     Typography,
-    Alert,
     Box,
 } from "@mui/material";
 import {
@@ -37,7 +36,6 @@ export default function VideoUpload({
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadedFile, setUploadedFile] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
     const [videoUrl, setVideoUrl] = useState<string>(existingVideoUrl || "");
 
     // Check if video is already uploaded
@@ -110,7 +108,6 @@ export default function VideoUpload({
 
             const errorMessage =
                 error instanceof Error ? error.message : "Upload failed";
-            setError(errorMessage);
             toast.error(errorMessage);
         } finally {
             setIsUploading(false);
@@ -164,11 +161,6 @@ export default function VideoUpload({
                 </Box>
             )}
 
-            {error && (
-                <Alert severity="error" sx={{ mt: 1 }}>
-                    {error}
-                </Alert>
-            )}
 
             {hasUploadedVideo && !error && (
                 <Box sx={{ mt: 1, display: "flex", alignItems: "center" }}>

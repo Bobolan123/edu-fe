@@ -16,7 +16,6 @@ import {
   Grid,
   Typography,
   IconButton,
-  Alert,
   CircularProgress,
   Switch,
   FormControlLabel,
@@ -73,7 +72,6 @@ export function UserForm({
   onError,
 }: UserFormProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -141,7 +139,6 @@ export function UserForm({
 
   const onSubmit = async (data: UserFormData) => {
     setLoading(true);
-    setError(null);
 
     try {
       let response;
@@ -174,8 +171,8 @@ export function UserForm({
         formData.append('name', data.name);
         formData.append('email', data.email);
         formData.append('password', data.password || '');
-        formData.append('roleId', data.roleId || '');
-        formData.append('isActive', data.isActive.toString());
+        formData.append('roleId', data.roleId );
+        formData.append('isActive', data.isActive ? 'true' : 'false');
         
         if (data.bio) {
           formData.append('bio', data.bio);
@@ -191,8 +188,6 @@ export function UserForm({
     } catch (error: any) {
       // Try to get message from API response first
       const errorMessage = error.message || error.error || 'An error occurred';
-      setError(errorMessage);
-      toastService.error(errorMessage);
       onError(errorMessage);
     } finally {
       setLoading(false);
@@ -201,7 +196,6 @@ export function UserForm({
 
   const handleClose = () => {
     if (!loading) {
-      setError(null);
       setSelectedAvatar(null);
       setPreviewUrl(null);
       reset();
@@ -235,12 +229,6 @@ export function UserForm({
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <Controller

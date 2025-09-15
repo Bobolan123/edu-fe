@@ -16,7 +16,6 @@ import {
     InputLabel,
     InputAdornment,
     IconButton,
-    Alert,
     CircularProgress,
 } from "@mui/material";
 import {
@@ -119,7 +118,6 @@ export default function AdminOrdersPage({
     const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const updateURL = (params: Record<string, string | undefined>) => {
         const searchParams = new URLSearchParams();
@@ -313,15 +311,6 @@ export default function AdminOrdersPage({
 
     return (
         <Box>
-            {error && (
-                <Alert
-                    severity="error"
-                    sx={{ mb: 3 }}
-                    onClose={() => setError(null)}
-                >
-                    {error}
-                </Alert>
-            )}
 
             {/* Header */}
             <Box sx={{ mb: 3 }}>

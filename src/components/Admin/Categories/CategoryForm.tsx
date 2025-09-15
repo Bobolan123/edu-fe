@@ -11,7 +11,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Alert,
   CircularProgress,
   Stack,
 } from '@mui/material';
@@ -41,7 +40,6 @@ interface CategoryFormProps {
 export const CategoryForm = ({ open, onClose, category, mode }: CategoryFormProps) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const {
     control,
@@ -72,7 +70,6 @@ export const CategoryForm = ({ open, onClose, category, mode }: CategoryFormProp
 
   const onSubmit = async (data: CategoryFormData) => {
     setLoading(true);
-    setError(null);
     
     try {
       if (mode === 'create') {
@@ -93,7 +90,6 @@ export const CategoryForm = ({ open, onClose, category, mode }: CategoryFormProp
       router.refresh();
     } catch (error: any) {
       const errorMessage = error?.message || `Failed to ${mode} category`;
-      setError(errorMessage);
       toastService.error(errorMessage);
     } finally {
       setLoading(false);
@@ -102,7 +98,6 @@ export const CategoryForm = ({ open, onClose, category, mode }: CategoryFormProp
 
   const handleClose = () => {
     reset();
-    setError(null);
     onClose();
   };
 
@@ -121,11 +116,6 @@ export const CategoryForm = ({ open, onClose, category, mode }: CategoryFormProp
       
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent sx={{ pt: 2 }}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
           
           <Stack spacing={3}>
             <Controller

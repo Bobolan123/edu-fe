@@ -14,7 +14,6 @@ import {
   FormControl,
   InputLabel,
   InputAdornment,
-  Alert,
   CircularProgress,
   Button,
   Accordion,
@@ -105,7 +104,6 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
   
   // Loading states
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
   // Accordion expansion state
   const [expandedFilters, setExpandedFilters] = useState(false);
@@ -323,12 +321,6 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
         </Typography>
       </Box>
 
-      {/* Error Alert */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>

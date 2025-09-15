@@ -12,7 +12,6 @@ import {
   TextField,
   InputAdornment,
   IconButton,
-  Alert,
   CircularProgress,
 } from '@mui/material';
 import {
@@ -52,7 +51,6 @@ export default function AdminCategoriesPage({
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const updateURL = (params: Record<string, string | undefined>) => {
     const searchParams = new URLSearchParams();
@@ -151,12 +149,6 @@ export default function AdminCategoriesPage({
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
