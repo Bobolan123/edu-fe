@@ -34,6 +34,7 @@ import {
 import { UserTable } from './UserTable';
 import { UserForm } from './UserForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import UserViewModal from './UserViewModal';
 import { IUser, IRole } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -85,6 +86,7 @@ export default function AdminUsersPage({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteAction, setDeleteAction] = useState<'delete' | 'restore' | 'force-delete'>('delete');
   const [loading, setLoading] = useState(false);
 
@@ -186,7 +188,8 @@ export default function AdminUsersPage({
   };
 
   const handleView = (user: IUser) => {
-    router.push(`/admin/users/${user.id}`);
+    setSelectedUser(user);
+    setViewModalOpen(true);
   };
 
   const handleCreateSuccess = (response?: any) => {
@@ -536,6 +539,15 @@ export default function AdminUsersPage({
         }}
         onSuccess={handleDeleteSuccess}
         onError={handleError}
+      />
+
+      <UserViewModal
+        open={viewModalOpen}
+        user={selectedUser}
+        onClose={() => {
+          setViewModalOpen(false);
+          setSelectedUser(null);
+        }}
       />
     </Box>
   );

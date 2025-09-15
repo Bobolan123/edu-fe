@@ -41,6 +41,7 @@ import {
 import { CourseTable } from './CourseTable';
 import { CourseForm } from './CourseForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import CourseViewModal from './CourseViewModal';
 import { ICategory, ICourse } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -122,6 +123,7 @@ export default function AdminCoursesPage({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteAction, setDeleteAction] = useState<'delete' | 'restore' | 'force-delete'>('delete');
   const [loading, setLoading] = useState(false);
 
@@ -292,7 +294,8 @@ export default function AdminCoursesPage({
   };
 
   const handleView = (course: ICourse) => {
-    router.push(`/admin/courses/${course.id}`);
+    setSelectedCourse(course);
+    setViewModalOpen(true);
   };
 
   const handleCreateSuccess = () => {
@@ -786,6 +789,15 @@ export default function AdminCoursesPage({
         }}
         onSuccess={handleDeleteSuccess}
         onError={handleError}
+      />
+
+      <CourseViewModal
+        open={viewModalOpen}
+        course={selectedCourse}
+        onClose={() => {
+          setViewModalOpen(false);
+          setSelectedCourse(null);
+        }}
       />
     </Box>
   );
