@@ -8,14 +8,20 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { fetchRegister } from "@/auth.service";
 import { signupSchema, SignupFormData } from "@/lib/validationSchemas";
-import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+import {
+  TextField,
+  Button,
+  CircularProgress,
+  Box,
+  Typography,
+} from "@mui/material";
 import { toastService } from "@/services/toast";
 import VerifyOtpModel from "./VerifyOTP.model";
 
 const SignupForm = () => {
     const t = useTranslations("Signup");
     const router = useRouter();
-    const { loading, withLoading } = useLoadingState();
+    const [loading, setLoading] = useState(false);
 
     const [isOpenVerify, setIsOpenVerify] = useState(false);
     const [emailModel, setEmailModel] = useState("");
@@ -23,7 +29,7 @@ const SignupForm = () => {
     const handleCloseModelOpenVerify = () => setIsOpenVerify(false);
 
     const {
-        control,
+        register,
         handleSubmit,
         formState: { errors, isSubmitting },
         getValues,
@@ -38,133 +44,121 @@ const SignupForm = () => {
     });
 
     const onSubmit = async (data: SignupFormData) => {
+        setLoading(true);
         try {
-            await withLoading(async () => {
-                const res = await fetchRegister(
-                    data.email,
-                    data.password,
-                    data.fullname
-                );
-                
-                if (res?.statusCode === 403) {
-                    toastService.error(res.message);
-                    setEmailModel(data.email);
-                    setIsOpenVerify(true);
-                } else if (res?.statusCode === 400) {
-                    toastService.error(res.message);
-                } else {
-                    toastService.success(res.message + " Please verify Email!");
-                    setEmailModel(data.email);
-                    setIsOpenVerify(true);
-                }
-            });
+            const res = await fetchRegister(
+                data.email,
+                data.password,
+                data.fullname
+            );
+
+            if (res?.statusCode === 403) {
+                toastService.error(res.message);
+                setEmailModel(data.email);
+                setIsOpenVerify(true);
+            } else if (res?.statusCode === 400) {
+                toastService.error(res.message);
+            } else {
+                toastService.success(res.message + " Please verify Email!");
+                setEmailModel(data.email);
+                setIsOpenVerify(true);
+            }
         } catch (error) {
             toastService.error("An unexpected error occurred. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div>
-            <div className="text-center">
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900">{t("welcome_title")}</h2>
-                <p className="mt-2 text-sm text-gray-600">{t("subtitle")}</p>
-            </div>
+        <Box className="max-w-md mx-auto">
+            <Box className="text-center mb-8">
+                <Typography variant="h4" component="h2" className="font-bold tracking-tight text-gray-900">
+                    {t("welcome_title")}
+                </Typography>
+                <Typography variant="body2" className="mt-2 text-gray-600">
+                    {t("subtitle")}
+                </Typography>
+            </Box>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-                <div className="space-y-4">
-                    <div>
-                        <label htmlFor="fullname" className="block text-sm font-medium text-gray-700">
-                            {t("fullname")}
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                id="fullname"
-                                type="text"
-                                autoComplete="name"
-                                required
-                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder={t("fullname_placeholder")}
-                                {...control.register("fullname")}
-                            />
-                        </div>
-                    </div>
+            <Box component="form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <TextField
+                    fullWidth
+                    id="fullname"
+                    label={t("fullname")}
+                    type="text"
+                    autoComplete="name"
+                    placeholder={t("fullname_placeholder")}
+                    error={!!errors.fullname}
+                    helperText={errors.fullname?.message}
+                    {...register("fullname")}
+                    variant="outlined"
+                />
 
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                            {t("email")}
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                id="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder={t("email_placeholder")}
-                                {...control.register("email")}
-                            />
-                        </div>
-                    </div>
-                
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                            {t("password")}
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                id="password"
-                                type="password"
-                                autoComplete="new-password"
-                                required
-                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder={t("password_placeholder")}
-                                {...control.register("password")}
-                            />
-                        </div>
-                    </div>
+                <TextField
+                    fullWidth
+                    id="email"
+                    label={t("email")}
+                    type="email"
+                    autoComplete="email"
+                    placeholder={t("email_placeholder")}
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    {...register("email")}
+                    variant="outlined"
+                />
 
-                    <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                            {t("confirm_password")}
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                id="confirmPassword"
-                                type="password"
-                                autoComplete="new-password"
-                                required
-                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder={t("confirm_password_placeholder")}
-                                {...control.register("confirmPassword")}
-                            />
-                        </div>
-                    </div>
-                </div>
+                <TextField
+                    fullWidth
+                    id="password"
+                    label={t("password")}
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder={t("password_placeholder")}
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                    {...register("password")}
+                    variant="outlined"
+                />
 
-                <div>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                        {loading ? t("creating_account") : t("signup_button")}
-                    </button>
-                </div>
+                <TextField
+                    fullWidth
+                    id="confirmPassword"
+                    label={t("confirm_password")}
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder={t("confirm_password_placeholder")}
+                    error={!!errors.confirmPassword}
+                    helperText={errors.confirmPassword?.message}
+                    {...register("confirmPassword")}
+                    variant="outlined"
+                />
 
-                <div className="text-center text-sm">
+                <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    disabled={loading}
+                    className="py-3"
+                    startIcon={loading && <CircularProgress size={20} color="inherit" />}
+                >
+                    {loading ? t("creating_account") : t("signup_button")}
+                </Button>
+
+                <Typography variant="body2" className="text-center">
                     <span className="text-gray-600">{t("login_prompt")} </span>
-                    <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+                    <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500 no-underline">
                         {t("login_button")}
                     </Link>
-                </div>
-            </form>
+                </Typography>
+            </Box>
 
             <VerifyOtpModel
                 email={emailModel}
                 handleCloseModelOpenVerify={handleCloseModelOpenVerify}
                 isOpenVerify={isOpenVerify}
             />
-        </div>
+        </Box>
     );
 };
 

@@ -40,7 +40,7 @@ import { useState, useEffect } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/services/currency";
 import { useTranslations } from "next-intl";
-import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+// Removed LoadingButton import
 import { toastService } from "@/services/toast";
 
 interface ICartProps {

@@ -17,6 +17,7 @@ import {
     Skeleton,
     Fade,
     Zoom,
+    CircularProgress,
 } from "@mui/material";
 import { Lock, Shield } from "lucide-react";
 import { ICartItem, PaymentMethod } from "../../../types/entities";
@@ -26,8 +27,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/services/currency";
 import { useTranslations } from "next-intl";
 import { toastService } from "@/services/toast";
-import { LoadingButton, useLoadingState } from "@/components/common/Loading";
-import ErrorBoundary from "@/components/common/ErrorBoundary";
+// Removed LoadingButton and ErrorBoundary imports
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
@@ -38,7 +38,7 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
     const t = useTranslations("Checkout");
     const { data: session } = useSession();
     const { currency } = useCurrency();
-    const { loading, withLoading } = useLoadingState();
+    const [loading, setLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("vnpay");
     const [totalUSD, setTotalUSD] = useState(0);
 
@@ -644,16 +644,21 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
                                         By completing your purchase, you agree to our Terms of Use.
                                     </Typography>
 
-                                    <LoadingButton
-                                        loading={loading}
-                                        loadingText="Processing..."
+                                    <Button
                                         variant="contained"
                                         fullWidth
                                         size="large"
-                                        startIcon={!loading ? <Lock size={20} /> : undefined}
-                                        onClick={() => withLoading(handleCheckout)}
-                                        disabled={!paymentMethod}
-                                        sx={{ 
+                                        disabled={loading || !paymentMethod}
+                                        startIcon={!loading ? <Lock size={20} /> : <CircularProgress size={20} color="inherit" />}
+                                        onClick={async () => {
+                                            setLoading(true);
+                                            try {
+                                                await handleCheckout();
+                                            } finally {
+                                                setLoading(false);
+                                            }
+                                        }}
+                                        sx={{
                                             mb: 2,
                                             py: 1.8,
                                             fontSize: '1.1rem',
@@ -673,8 +678,8 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
                                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                         }}
                                     >
-                                        Proceed to Payment
-                                    </LoadingButton>
+                                        {loading ? 'Processing...' : 'Proceed to Payment'}
+                                    </Button>
                                 </Card>
                             </Box>
                         </Fade>
@@ -726,16 +731,5 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
     );
 }
 
-// Wrap the component with ErrorBoundary
-export default function Checkout(props: ICheckoutProps) {
-    return (
-        <ErrorBoundary
-            onError={(error, errorInfo) => {
-                console.error('Checkout component error:', error, errorInfo);
-                toastService.error('Something went wrong with checkout. Please refresh and try again.');
-            }}
-        >
-            <CheckoutComponent {...props} />
-        </ErrorBoundary>
-    );
-}
+// Export the component directly
+export default CheckoutComponent;

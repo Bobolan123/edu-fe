@@ -38,6 +38,12 @@ export default function CartDropdown({ cartItems = [] }: CartDropdownProps) {
   const [displayTotal, setDisplayTotal] = useState<number>(totalVND);
   const [convertedMap, setConvertedMap] = useState<Record<string, number>>({});
 
+  // Create stable dependency for cartItems using their IDs and count
+  const cartItemsKey = useMemo(() =>
+    cartItems.map(item => `${item.id}-${item.price}`).join(','),
+    [cartItems]
+  );
+
   useEffect(() => {
     let active = true;
 
@@ -82,7 +88,7 @@ export default function CartDropdown({ cartItems = [] }: CartDropdownProps) {
     return () => {
       active = false;
     };
-  }, [currency, cartItems, totalVND]);
+  }, [currency, totalVND, cartItemsKey]);
 
   const fmt = (amount: number) => currencyService.formatPrice(amount, currency);
 

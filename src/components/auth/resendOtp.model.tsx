@@ -11,7 +11,7 @@ import StepLabel from "@mui/material/StepLabel";
 import { TextField, CircularProgress, alpha, Alert } from "@mui/material";
 import { fetchResendOtp, fetchVerifyOTP } from "@/auth.service";
 import { useTranslations } from 'next-intl';
-import { LoadingButton, useLoadingState } from "@/components/common/Loading";
+// Removed LoadingButton import
 import { toastService } from "@/services/toast";
 
 const style = {
@@ -43,29 +43,30 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
     const t = useTranslations('ResendOTP');
     
     // Loading states
-    const { loading: isResending, withLoading: withResendLoading } = useLoadingState();
-    const { loading: isVerifying, withLoading: withVerifyLoading } = useLoadingState();
+    const [isResending, setIsResending] = React.useState(false);
+    const [isVerifying, setIsVerifying] = React.useState(false);
 
     const handleResendOtp = async (email: string) => {
         setError("");
         
-        await withResendLoading(async () => {
-            try {
-                const res = await fetchResendOtp(email);
-                if (res?.data) {
-                    setStep(1);
-                    setUserId(res?.data?.id);
-                    toastService.success(res?.message || 'OTP sent successfully!');
-                } else {
-                    setError(res?.message || 'Failed to send OTP');
-                    toastService.error(res?.message || 'Failed to send OTP');
-                }
-            } catch (error) {
-                const errorMsg = 'Failed to resend OTP. Please try again.';
-                setError(errorMsg);
-                toastService.error(errorMsg);
+        setIsResending(true);
+        try {
+            const res = await fetchResendOtp(email);
+            if (res?.data) {
+                setStep(1);
+                setUserId(res?.data?.id);
+                toastService.success(res?.message || 'OTP sent successfully!');
+            } else {
+                setError(res?.message || 'Failed to send OTP');
+                toastService.error(res?.message || 'Failed to send OTP');
             }
-        });
+        } catch (error) {
+            const errorMsg = 'Failed to resend OTP. Please try again.';
+            setError(errorMsg);
+            toastService.error(errorMsg);
+        } finally {
+            setIsResending(false);
+        }
     };
     const handleVerify = async (id: number, otp: number) => {
         if (!otp) {
@@ -76,22 +77,23 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
         
         setError("");
         
-        await withVerifyLoading(async () => {
-            try {
-                const res = await fetchVerifyOTP(id, otp);
-                if (res?.data) {
-                    setStep(2);
-                    toastService.success(res?.message || 'Account verified successfully!');
-                } else {
-                    setError(res?.message || 'Invalid OTP code');
-                    toastService.error(res?.message || 'Invalid OTP code');
-                }
-            } catch (error) {
-                const errorMsg = 'Verification failed. Please try again.';
-                setError(errorMsg);
-                toastService.error(errorMsg);
+        setIsVerifying(true);
+        try {
+            const res = await fetchVerifyOTP(id, otp);
+            if (res?.data) {
+                setStep(2);
+                toastService.success(res?.message || 'Account verified successfully!');
+            } else {
+                setError(res?.message || 'Invalid OTP code');
+                toastService.error(res?.message || 'Invalid OTP code');
             }
-        });
+        } catch (error) {
+            const errorMsg = 'Verification failed. Please try again.';
+            setError(errorMsg);
+            toastService.error(errorMsg);
+        } finally {
+            setIsVerifying(false);
+        }
     };
     const handleDone = async () => {
         handleCloseModelResendOtp();
@@ -172,13 +174,13 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                                         },
                                     }}
                                 />
-                                <LoadingButton
-                                    loading={isResending}
-                                    loadingText="Sending OTP..."
+                                <Button
                                     variant="contained"
                                     onClick={() => handleResendOtp(email)}
                                     fullWidth
                                     size="large"
+                                    disabled={isResending}
+                                    startIcon={isResending && <CircularProgress size={20} color="inherit" />}
                                     sx={{
                                         height: 48,
                                         borderRadius: '12px',
@@ -192,8 +194,8 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                                         },
                                     }}
                                 >
-                                    {t('resend_button')}
-                                </LoadingButton>
+                                    {isResending ? 'Sending OTP...' : t('resend_button')}
+                                </Button>
                             </>
                         )}
                         {step === 1 && (
@@ -243,13 +245,13 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                                         maxLength: 6,
                                     }}
                                 />
-                                <LoadingButton
-                                    loading={isVerifying}
-                                    loadingText="Verifying..."
+                                <Button
                                     variant="contained"
                                     onClick={() => handleVerify(userId, +otp)}
                                     fullWidth
                                     size="large"
+                                    disabled={isVerifying || !otp.trim()}
+                                    startIcon={isVerifying && <CircularProgress size={20} color="inherit" />}
                                     sx={{
                                         height: 48,
                                         borderRadius: '12px',
@@ -262,10 +264,9 @@ export default function ResendOtpModel(props: IResendOtpModelProps) {
                                             boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)',
                                         },
                                     }}
-                                    disabled={!otp.trim()}
                                 >
-                                    {t('verify_button')}
-                                </LoadingButton>
+                                    {isVerifying ? 'Verifying...' : t('verify_button')}
+                                </Button>
                             </>
                         )}
                         {step === 2 && (

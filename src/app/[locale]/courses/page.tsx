@@ -5,7 +5,7 @@ import { getCourses } from "@/actions/coursesAction";
 import { getCategories } from "@/actions/categoriesAction";
 
 export default async function CoursesPage(props: {
-    searchParams?: {
+    searchParams?: Promise<{
         filter?: string;
         page?: string;
         take?: string;
@@ -18,10 +18,10 @@ export default async function CoursesPage(props: {
         orderBy?: string;
         order?: string;
         categoryIds?: string | string[];
-    };
+    }>;
 }) {
     const session = await auth();
-    const searchParams = props.searchParams || {};
+    const searchParams = (await props.searchParams) || {};
     const currentPage = Number(searchParams?.page) || 1;
     const take = Number(searchParams?.take) || 5;
 

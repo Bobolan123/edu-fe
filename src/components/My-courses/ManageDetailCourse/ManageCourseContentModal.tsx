@@ -28,7 +28,7 @@ import {
 import { ILecture, ISection } from "../../../../types/entities";
 import { useEffect, useState } from "react";
 import { saveCourseContent, uploadLectureVideo } from "@/actions/coursesAction";
-import { useLoadingState } from "@/components/common/Loading";
+// Removed useLoadingState import
 import { toastService } from "@/services/toast";
 import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
 
@@ -58,7 +58,7 @@ export default function ManageCourseContentModal({
     }>({});
 
     // Loading states
-    const { loading: isSaving, withLoading } = useLoadingState();
+    const [isSaving, setIsSaving] = useState(false);
     const [uploadingVideos, setUploadingVideos] = useState<{
         [key: string]: boolean;
     }>({});
@@ -219,24 +219,25 @@ export default function ManageCourseContentModal({
     };
 
     const handleSaveChanges = async () => {
-        await withLoading(async () => {
-            try {
-                const res = await saveCourseContent(courseId, localSections);
-                if(res.statusCode === 200) {
-                    toastService.success(res.message);
-                } else {
-                    toastService.error(res.message);
-                }
-                onClose();
-            } catch (error) {
-                console.error(error);
-                const errorMessage =
-                    error instanceof Error
-                        ? error.message
-                        : "Failed to save course content.";
-                toastService.error(errorMessage);
+        setIsSaving(true);
+        try {
+            const res = await saveCourseContent(courseId, localSections);
+            if(res.statusCode === 200) {
+                toastService.success(res.message);
+            } else {
+                toastService.error(res.message);
             }
-        });
+            onClose();
+        } catch (error) {
+            console.error(error);
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to save course content.";
+            toastService.error(errorMessage);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
