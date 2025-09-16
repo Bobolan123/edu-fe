@@ -70,8 +70,8 @@ interface ExchangeRates {
       }
 
       // Method to get payment currency based on payment method
-      getPaymentCurrency(paymentMethod: 'vnpay' | 'paypal'): string {
-        return paymentMethod === 'vnpay' ? 'VND' : 'USD';
+      getPaymentCurrency(paymentMethod: 'vnpay'): string {
+        return 'VND';
       }
       
   }

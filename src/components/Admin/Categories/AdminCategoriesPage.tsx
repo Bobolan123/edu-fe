@@ -164,7 +164,7 @@ export default function AdminCategoriesPage({
           <Button
             variant="contained"
             startIcon={<Add />}
-            size="small"
+            size="large"
             onClick={handleCreateCategory}
           >
             Create Category

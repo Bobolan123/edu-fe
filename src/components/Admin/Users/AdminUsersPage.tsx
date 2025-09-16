@@ -273,7 +273,6 @@ export default function AdminUsersPage({
             size="large"
             onClick={() => setCreateDialogOpen(true)}
             disabled={includeDeleted}
-            sx={{ height: 48 }}
           >
             Create User
           </Button>

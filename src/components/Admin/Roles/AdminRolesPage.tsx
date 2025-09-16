@@ -220,7 +220,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
         <Button
           variant="contained"
           startIcon={<Add />}
-          size="small"
+          size="large"
           onClick={() => setDialogMode('create')}
         >
           Create Role

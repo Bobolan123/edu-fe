@@ -40,34 +40,19 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
     const { currency } = useCurrency();
     const [loading, setLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("vnpay");
-    const [totalUSD, setTotalUSD] = useState(0);
-
     const totalVND =
         cartItems?.reduce((sum, item) => sum + (item?.price || 0), 0) || 0;
 
-    useEffect(() => {
-        if (currency === "USD") {
-            currencyService
-                .convertPrice(totalVND, "VND", "USD")
-                .then(setTotalUSD)
-                .catch(console.error);
-        }
-    }, [totalVND, currency]);
-
-    const getCurrentTotal = () => (currency === "VND" ? totalVND : totalUSD);
+    const getCurrentTotal = () => totalVND;
 
     const formatCurrency = (amount: number) =>
-        currencyService.formatPrice(amount, currency);
+        currencyService.formatPrice(amount, "VND");
 
     const handleCheckout = async () => {
         try {
-            // Get payment currency based on payment method
-            const paymentCurrency = currencyService.getPaymentCurrency(paymentMethod as 'vnpay' | 'paypal');
-            const paymentAmount = paymentCurrency === 'VND' ? totalVND : totalUSD;
-            
             const res = await createOrder({
                 cartId,
-                totalPrice: paymentAmount, // Send currency based on payment method
+                totalPrice: totalVND,
                 paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
             });
             if (res?.paymentUrl) {
@@ -207,119 +192,6 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
                                     }
                                     className="space-y-3"
                                 >
-                                    {/* PayPal */}
-                                    <Card
-                                        elevation={0}
-                                        sx={{
-                                            p: 2.5,
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                            border: '2px solid',
-                                            borderColor: paymentMethod === "paypal" ? 'primary.300' : 'divider',
-                                            background: paymentMethod === "paypal" 
-                                                ? 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)'
-                                                : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-                                            borderRadius: 3,
-                                            '&:hover': {
-                                                borderColor: 'primary.400',
-                                                background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 8px 25px rgba(59, 130, 246, 0.15)',
-                                            }
-                                        }}
-                                    >
-                                        <FormControlLabel
-                                            value="paypal"
-                                            control={<Radio />}
-                                            label={
-                                                <Box display="flex" alignItems="center">
-                                                    <Box
-                                                        sx={{
-                                                            width: 40,
-                                                            height: 40,
-                                                            background: 'linear-gradient(135deg, #0070ba 0%, #003087 100%)',
-                                                            borderRadius: 2,
-                                                            mr: 2,
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            boxShadow: '0 4px 12px rgba(0, 112, 186, 0.3)',
-                                                        }}
-                                                    >
-                                                        <Typography 
-                                                            variant="caption" 
-                                                            fontWeight={800}
-                                                            color="white"
-                                                        >
-                                                            PP
-                                                        </Typography>
-                                                    </Box>
-                                                    <Typography variant="body1" fontWeight={700}>
-                                                        {t("paypal")}
-                                                    </Typography>
-                                                </Box>
-                                            }
-                                            className="m-0 w-full"
-                                        />
-                                        {paymentMethod === "paypal" && (
-                                            <Fade in timeout={300}>
-                                                <Box sx={{ mt: 2, pl: 6 }}>
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        sx={{ mb: 1.5 }}
-                                                    >
-                                                        We will redirect you to PayPal's secure servers.
-                                                    </Typography>
-                                                    {currency === "VND" && (
-                                                        <Alert
-                                                            severity="warning"
-                                                            sx={{ 
-                                                                mb: 1.5,
-                                                                borderRadius: 2,
-                                                                '& .MuiAlert-message': {
-                                                                    fontWeight: 500
-                                                                }
-                                                            }}
-                                                        >
-                                                            PayPal does not support VND. Payment will be made in USD.
-                                                        </Alert>
-                                                    )}
-                                                    <Box
-                                                        sx={{
-                                                            p: 2,
-                                                            borderRadius: 2,
-                                                            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-                                                            border: '1px solid',
-                                                            borderColor: 'info.200',
-                                                        }}
-                                                    >
-                                                        <Typography
-                                                            variant="body2"
-                                                            fontWeight={600}
-                                                            color="info.800"
-                                                        >
-                                                            You will be charged{" "}
-                                                            <Typography 
-                                                                component="span" 
-                                                                variant="body2"
-                                                                fontWeight={700}
-                                                                sx={{
-                                                                    background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
-                                                                    backgroundClip: 'text',
-                                                                    WebkitBackgroundClip: 'text',
-                                                                    color: 'transparent',
-                                                                }}
-                                                            >
-                                                                {currencyService.formatPrice(totalUSD, "USD")}
-                                                            </Typography>
-                                                        </Typography>
-                                                    </Box>
-                                                </Box>
-                                            </Fade>
-                                        )}
-                                    </Card>
-
                                     {/* VNPay */}
                                     <Card
                                         elevation={0}
@@ -508,13 +380,7 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
                                                         color: 'transparent',
                                                     }}
                                                 >
-                                                    {formatCurrency(
-                                                        currency === "VND"
-                                                            ? item?.price || 0
-                                                            : totalUSD *
-                                                                  ((item?.price || 0) /
-                                                                      totalVND)
-                                                    )}
+                                                    {formatCurrency(item?.price || 0)}
                                                 </Typography>
                                             </Box>
                                         </Fade>

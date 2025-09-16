@@ -27,6 +27,7 @@ import {
   Star,
   Restore,
   DeleteForever,
+  VideoLibrary,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { ICourse } from '../../../../types/entities';
@@ -38,6 +39,7 @@ interface CourseTableProps {
   onEdit: (course: ICourse) => void;
   onDelete: (course: ICourse, action?: 'delete' | 'restore' | 'force-delete') => void;
   onView: (course: ICourse) => void;
+  onEditContent: (course: ICourse) => void;
   totalCount: number;
   currentPage: number;
   onPageChange: (page: number) => void;
@@ -73,6 +75,7 @@ export function CourseTable({
   onEdit,
   onDelete,
   onView,
+  onEditContent,
   totalCount,
   currentPage,
   onPageChange,

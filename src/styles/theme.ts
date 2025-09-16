@@ -444,21 +444,6 @@ const components = {
   },
 };
 
-// Enhanced shadows
-const shadows = [
-  'none',
-  '0 1px 2px rgba(0, 0, 0, 0.05)',
-  '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
-  '0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06)',
-  '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
-  '0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04)',
-  '0 25px 50px rgba(0, 0, 0, 0.15), 0 12px 18px rgba(0, 0, 0, 0.1)',
-  '0 35px 60px rgba(0, 0, 0, 0.2), 0 15px 25px rgba(0, 0, 0, 0.15)',
-  '0 45px 70px rgba(0, 0, 0, 0.25), 0 20px 30px rgba(0, 0, 0, 0.2)',
-  '0 50px 80px rgba(0, 0, 0, 0.3), 0 25px 35px rgba(0, 0, 0, 0.25)',
-  // Additional shadows for elevation levels 10-24
-  ...Array(15).fill('0 50px 80px rgba(0, 0, 0, 0.3), 0 25px 35px rgba(0, 0, 0, 0.25)'),
-] as const;
 
 // Enhanced spacing
 const spacing = (factor: number) => `${0.25 * factor}rem`;
@@ -473,7 +458,6 @@ export const theme = createTheme({
   palette,
   typography,
   components,
-  shadows,
   spacing,
   shape,
   breakpoints: {

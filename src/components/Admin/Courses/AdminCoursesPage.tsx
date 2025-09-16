@@ -42,6 +42,7 @@ import { CourseTable } from './CourseTable';
 import { CourseForm } from './CourseForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import CourseViewModal from './CourseViewModal';
+import CourseContentEditModal from './CourseContentEditModal';
 import { ICategory, ICourse } from '../../../../types/entities';
 import { toastService } from '../../../services/toast';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -124,6 +125,7 @@ export default function AdminCoursesPage({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [contentEditModalOpen, setContentEditModalOpen] = useState(false);
   const [deleteAction, setDeleteAction] = useState<'delete' | 'restore' | 'force-delete'>('delete');
   const [loading, setLoading] = useState(false);
 
@@ -298,9 +300,13 @@ export default function AdminCoursesPage({
     setViewModalOpen(true);
   };
 
+  const handleEditContent = (course: ICourse) => {
+    setSelectedCourse(course);
+    setContentEditModalOpen(true);
+  };
+
   const handleCreateSuccess = () => {
     setCreateDialogOpen(false);
-    setError(null);
     toastService.success('Course created successfully!');
     // Force a router refresh to get updated data from server component
     router.refresh();
@@ -309,7 +315,6 @@ export default function AdminCoursesPage({
   const handleEditSuccess = () => {
     setEditDialogOpen(false);
     setSelectedCourse(null);
-    setError(null);
     toastService.success('Course updated successfully!');
     // Force a router refresh to get updated data from server component
     router.refresh();
@@ -318,7 +323,6 @@ export default function AdminCoursesPage({
   const handleDeleteSuccess = () => {
     setDeleteDialogOpen(false);
     setSelectedCourse(null);
-    setError(null);
     const messages = {
       'delete': 'Course deleted successfully!',
       'restore': 'Course restored successfully!',
@@ -376,7 +380,6 @@ export default function AdminCoursesPage({
             size="large"
             onClick={() => setCreateDialogOpen(true)}
             disabled={includeDeleted}
-            sx={{ height: 48 }}
           >
             Create Course
           </Button>
@@ -750,6 +753,7 @@ export default function AdminCoursesPage({
         onEdit={handleEdit}
         onDelete={handleDelete}
         onView={handleView}
+        onEditContent={handleEditContent}
         totalCount={courses.data?.meta.itemCount || 0}
         currentPage={parseInt(searchParams.page || '1') - 1}
         onPageChange={handlePageChange}

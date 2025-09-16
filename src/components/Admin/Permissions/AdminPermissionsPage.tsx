@@ -215,9 +215,8 @@ export default function AdminPermissionsPage({
         <Button
           variant="contained"
           startIcon={<Add />}
-          size="small"
+          size="large"
           onClick={handleCreate}
-          sx={{ borderRadius: 2 }}
         >
           Create Permission
         </Button>

@@ -184,7 +184,6 @@ export enum OrderStatus {
 
 export enum PaymentMethod {
   VNPAY = 'VNPAY',
-  PAYPAL = 'PAYPAL',
 }
 
 // NEW interface required

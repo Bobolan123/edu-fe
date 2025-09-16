@@ -121,8 +121,6 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
         return () => window.removeEventListener('scroll', throttledHandleScroll);
     }, []);
 
-    // Remove dynamic body padding that causes flickering
-    // The layout will handle proper spacing instead
 
     const isMenuOpen = Boolean(anchorEl);
 
