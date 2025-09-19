@@ -47,7 +47,7 @@ A comprehensive admin dashboard for managing your educational platform built wit
 
 ### 🛒 Order Management
 - **Order Tracking**: Monitor all platform orders and transactions
-- **Payment Methods**: Support for VNPay, PayPal, and Credit Card
+- **Payment Methods**: Support for VNPay
 - **Status Management**: Update order status (Pending, Completed, Failed)
 - **Order Details**: View comprehensive order information
 - **Customer Information**: Access customer details for each order

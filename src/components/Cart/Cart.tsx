@@ -7,7 +7,6 @@ import {
     Clock,
     Users,
     ShoppingCart,
-    CreditCard,
     ArrowRight,
     BookOpen,
     Shield,
@@ -839,7 +838,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                     },
                                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                                 }}
-                                                startIcon={<CreditCard size={20} />}
+                                                startIcon={<ShoppingCart size={20} />}
                                                 disabled={isConvertingTotal || isConvertingPrices}
                                             >
                                                 {t('checkout')}

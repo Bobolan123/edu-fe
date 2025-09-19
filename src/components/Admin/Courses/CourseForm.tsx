@@ -40,6 +40,7 @@ interface CourseFormData {
   language: string;
   active: boolean;
   categoryIds: number[];
+  instructorId: number;
 }
 
 interface CourseFormProps {
@@ -81,6 +82,7 @@ export function CourseForm({
     language: 'en',
     active: true,
     categoryIds: [],
+    instructorId: 0,
   });
   const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([]);
   const [errors, setErrors] = useState<Partial<Record<keyof CourseFormData, string>>>({});
@@ -95,6 +97,7 @@ export function CourseForm({
         language: course.language || 'en',
         active: course.active ?? true,
         categoryIds: course.categories?.map(c => c.id) || [],
+        instructorId: course.instructor?.id || 0,
       });
       setSelectedCategories(course.categories || []);
       setDisplayPrice(Math.round(course.price || 0));
@@ -106,6 +109,7 @@ export function CourseForm({
         language: 'en',
         active: true,
         categoryIds: [],
+        instructorId: 0,
       });
       setSelectedCategories([]);
       setDisplayPrice(0);
@@ -142,6 +146,7 @@ export function CourseForm({
       language: 'en',
       active: true,
       categoryIds: [],
+      instructorId: 0,
     });
     setSelectedCategories([]);
     setErrors({});
@@ -174,6 +179,10 @@ export function CourseForm({
 
     if (formData.categoryIds.length === 0) {
       newErrors.categoryIds = 'At least one category is required';
+    }
+
+    if (!formData.instructorId || formData.instructorId <= 0) {
+      newErrors.instructorId = 'Instructor ID is required and must be a positive number';
     }
 
     setErrors(newErrors);
@@ -290,7 +299,7 @@ export function CourseForm({
             />
             
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   label={`Price * (${currency})`}
                   fullWidth
@@ -314,8 +323,8 @@ export function CourseForm({
                   disabled={isPending}
                 />
               </Grid>
-              
-              <Grid item xs={12} md={6}>
+
+              <Grid item xs={12} md={4}>
                 <FormControl fullWidth>
                   <InputLabel>Language *</InputLabel>
                   <Select
@@ -331,6 +340,22 @@ export function CourseForm({
                     ))}
                   </Select>
                 </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Instructor ID *"
+                  fullWidth
+                  type="number"
+                  value={formData.instructorId || ''}
+                  onChange={(e) => handleInputChange('instructorId', parseInt(e.target.value) || 0)}
+                  inputProps={{
+                    min: 1,
+                  }}
+                  error={!!errors.instructorId}
+                  helperText={errors.instructorId || "Enter the instructor's user ID"}
+                  disabled={isPending}
+                />
               </Grid>
             </Grid>
             

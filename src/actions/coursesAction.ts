@@ -183,6 +183,7 @@ export interface IAdminCreateCoursePayload {
     language: string;
     active: boolean;
     categoryIds: number[];
+    instructorId: number;
 }
 
 export const adminCreateCourse = async (
@@ -227,7 +228,6 @@ export const adminUpdateCourse = async (
 
     revalidateTag("courses");
     revalidateTag("admin-courses");
-    revalidateTag(`course-${id}`);
     return res.data;
 };
 
@@ -270,7 +270,7 @@ export const updateCourseContent = async (
         throw new Error(res.message);
     }
     
-    revalidateTag(`course-content-${courseId}`);
+    revalidateTag(`course-content`);
     return res.data;
 };
 
@@ -280,7 +280,7 @@ export const getCourseContent = async (courseId: number) => {
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/content/${courseId}`,
         nextOption: {
             next: {
-                tags: ["course-content", `course-content-${courseId}`],
+                tags: ["course-content"],
             },
         },
     });

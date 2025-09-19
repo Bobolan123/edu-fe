@@ -59,8 +59,6 @@ const getPaymentMethodColor = (method: PaymentMethod) => {
   switch (method) {
     case 'VNPAY':
       return 'primary';
-    case 'PAYPAL':
-      return 'secondary';
     default:
       return 'default';
   }

@@ -123,13 +123,13 @@ export const deleteUser = async (id: number): Promise<void> => {
 };
 
 
-export const updateUserAvatar = async (id: number, avatar: File): Promise<void> => {
+export const updateUserAvatar = async (id: number, avatar: File): Promise<{ avatar_url: string }> => {
     const access_token = await getAccessToken();
-    
+
     const formData = new FormData();
     formData.append('avatar', avatar);
-    
-    const res = await sendRequestFile<IBackendRes<void>>({
+
+    const res = await sendRequestFile<IBackendRes<{ avatar_url: string }>>({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/users/${id}/avatar`,
         body: formData,
@@ -138,11 +138,12 @@ export const updateUserAvatar = async (id: number, avatar: File): Promise<void> 
         },
     });
 
-    if (res?.statusCode !== 201) {
+    if (res?.statusCode !== 201 || !res?.data) {
         throw new Error(res?.message || "Failed to upload avatar");
     }
 
     revalidateTag("users");
+    return res.data;
 };
 
 export const suspendUser = async (id: number, suspended: boolean): Promise<IUser> => {

@@ -499,7 +499,6 @@ export default function AdminOrdersPage({
                                 >
                                     <MenuItem value="">All Methods</MenuItem>
                                     <MenuItem value="VNPAY">VNPay</MenuItem>
-                                    <MenuItem value="PAYPAL">PayPal</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>

@@ -46,7 +46,7 @@ interface ProfilePageClientProps {
 
 export default function ProfilePageClient({ user }: ProfilePageClientProps) {
     const t = useTranslations("Profile");
-    const { data: session } = useSession();
+    const { data: session, update } = useSession();
     const [loading, setLoading] = useState(false);
     const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
     const [editProfileDialogOpen, setEditProfileDialogOpen] = useState(false);
@@ -97,16 +97,18 @@ export default function ProfilePageClient({ user }: ProfilePageClientProps) {
             setAvatarPreview(previewUrl);
 
             // Upload to backend following spec: PATCH /users/:id/avatar
-            const formData = new FormData();
-            formData.append('avatar', file);
-            
-            await updateUserAvatar(user.id, file);
-            
+            const result = await updateUserAvatar(user.id, file);
+
             toastService.success(t("avatar_updated_success"));
-            
-            // Update session data
-            if (session) {
-                await fetch("/api/auth/session?update=1");
+
+            // Update session data with new avatar URL
+            if (session && update) {
+                await update({
+                    user: {
+                        ...session.user,
+                        avatar_url: result.avatar_url
+                    }
+                });
             }
         } catch (error) {
             console.error("Avatar upload error:", error);

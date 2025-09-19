@@ -121,7 +121,7 @@ export const courseFilterSchema = z.object({
 
 // Payment schemas
 export const checkoutSchema = z.object({
-  paymentMethod: z.enum(['VNPAY', 'PAYPAL'], {
+  paymentMethod: z.enum(['VNPAY'], {
     required_error: 'Payment method is required',
   }),
   termsAccepted: z.boolean().refine(val => val === true, {

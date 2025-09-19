@@ -274,7 +274,7 @@ export default function CourseViewModal({ open, onClose, course }: CourseViewMod
                 <Divider sx={{ mb: 2 }} />
                 <List dense>
                   {course.sections.slice(0, 5).map((section, index) => (
-                    <ListItem key={section.id}>
+                    <ListItem key={section._id}>
                       <ListItemIcon>
                         <Assignment color="action" />
                       </ListItemIcon>

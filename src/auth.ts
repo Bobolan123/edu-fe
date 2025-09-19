@@ -65,11 +65,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return true;
         },
 
-        jwt({ token, user }) {
+        jwt({ token, user, trigger, session }) {
             if (user) {
                 // User is available during sign-in
                 token.user = user as IUser;
             }
+
+            // Handle session update trigger
+            if (trigger === "update" && session?.user) {
+                // Update token with new user data
+                token.user = { ...token.user, ...session.user };
+            }
+
             return token;
         },
         session({ session, token }) {
