@@ -15,6 +15,13 @@
         "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại. Có thể nó đã được di chuyển, xóa hoặc bạn đã nhập sai URL.",
         "backHome": "Về Trang Chủ"
     },
+    "Unauthorized": {
+        "title": "Truy Cập Bị Từ Chối",
+        "description": "Bạn không có quyền truy cập vào khu vực này. Phần này chỉ dành riêng cho quản trị viên.",
+        "goHome": "Về Trang Chủ",
+        "goToLogin": "Đăng Nhập",
+        "contactAdmin": "Cần quyền truy cập? Vui lòng liên hệ với quản trị viên để được hỗ trợ."
+    },
     "MyLearning": {
         "title": "Hành Trình Học Tập Của Tôi ✨",
         "subtitle": "🚀 Tiếp tục khám phá, tiếp tục phát triển! Bản thân tương lai sẽ cảm ơn bạn 💪",

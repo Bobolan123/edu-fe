@@ -67,32 +67,32 @@ const handleAuth = async (
   const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale;
   const search = req.nextUrl.search; 
 
-  if (isAdminPage) {
-    if (!isAuth) {
-      return NextResponse.redirect(
-        new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
-      );
-    }
+  // if (isAdminPage) {
+  //   if (!isAuth) {
+  //     return NextResponse.redirect(
+  //       new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
+  //     );
+  //   }
     
-    const userRole = (session?.user as any)?.role;
-    if (userRole !== "admin") {
-      return NextResponse.redirect(
-        new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
-      );
-    }
-  }
+  //   const userRole = (session?.user as any)?.role;
+  //   if (userRole !== "admin") {
+  //     return NextResponse.redirect(
+  //       new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
+  //     );
+  //   }
+  // }
 
-  if (!isAuth && isProtectedPage) {
-    return NextResponse.redirect(
-      new URL(`/${locale}${pages.auth.signin()}${search}`, req.url)
-    );
-  }
+  // if (!isAuth && isProtectedPage) {
+  //   return NextResponse.redirect(
+  //     new URL(`/${locale}${pages.auth.signin()}${search}`, req.url)
+  //   );
+  // }
 
-  if (isAuth && isAuthPage) {
-    return NextResponse.redirect(
-      new URL(`/${locale}${pages.home.root}${search}`, req.url)
-    );
-  }
+  // if (isAuth && isAuthPage) {
+  //   return NextResponse.redirect(
+  //     new URL(`/${locale}${pages.home.root}${search}`, req.url)
+  //   );
+  // }
 
   return intlMiddleware(req);
 };
