@@ -27,7 +27,6 @@ import { z } from 'zod';
 import { IUser, IRole } from '../../../../types/entities';
 import { updateUser, createAdminUser, updateUserAvatar } from '@/actions/userActions';
 import toastService from '@/services/toast';
-
 const createUserSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
   email: z.string().email('Invalid email address'),

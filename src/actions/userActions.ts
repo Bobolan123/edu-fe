@@ -21,6 +21,15 @@ export interface GetUsersParams {
     includeDeleted?: boolean;
 }
 
+export interface UpdateUserData {
+    name?: string;
+    email?: string;
+    bio?: string;
+    roleId?: number;
+    isActive?: boolean;
+    [key: string]: any;
+}
+
 export const getUsers = async (params: GetUsersParams = {}): Promise<IModelPaginate<IUser>> => {
     const access_token = await getAccessToken();
     
@@ -81,7 +90,7 @@ export const getUserById = async (id: number, includeDeleted?: boolean): Promise
 
 export const updateUser = async (
     id: number,
-    userData: Partial<IUser>
+    userData: UpdateUserData
 ): Promise<IUser> => {
     const access_token = await getAccessToken();
     

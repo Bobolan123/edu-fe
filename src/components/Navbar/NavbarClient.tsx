@@ -135,41 +135,41 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
     const menuId = "primary-search-account-menu";
     const renderMenu = (
         <Menu
-            anchorEl={anchorEl}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            id={menuId}
-            keepMounted
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-            open={isMenuOpen}
-            onClose={handleMenuClose}
-            disableScrollLock={true}
-            PaperProps={{
-                elevation: 16,
-                sx: {
-                    mt: 1.5,
-                    borderRadius: 2,
-                    minWidth: 200,
-                    border: `1px solid ${alpha('#000', 0.1)}`,
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                    zIndex: 1300,
-                    '& .MuiMenuItem-root': {
-                        px: 2,
-                        py: 1.5,
-                        fontSize: '0.95rem',
-                        '&:hover': {
-                            backgroundColor: alpha('#1976d2', 0.08),
+                anchorEl={anchorEl}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                id={menuId}
+                keepMounted
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                open={isMenuOpen}
+                onClose={handleMenuClose}
+                disableScrollLock={true}
+                PaperProps={{
+                    elevation: 16,
+                    sx: {
+                        mt: 1.5,
+                        borderRadius: 2,
+                        minWidth: 200,
+                        border: `1px solid ${alpha('#000', 0.1)}`,
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        zIndex: 1300,
+                        '& .MuiMenuItem-root': {
+                            px: 2,
+                            py: 1.5,
+                            fontSize: '0.95rem',
+                            '&:hover': {
+                                backgroundColor: alpha('#1976d2', 0.08),
+                            },
                         },
                     },
-                },
-            }}
-            MenuListProps={{
-                sx: {
-                    py: 0,
-                }
-            }}
-        >
-            {/* User Profile Header */}
-            <Box sx={{ px: 2, py: 2, borderBottom: `1px solid ${alpha('#000', 0.08)}` }}>
+                }}
+                MenuListProps={{
+                    sx: {
+                        py: 0,
+                    }
+                }}
+            >
+                {/* User Profile Header */}
+                <Box sx={{ px: 2, py: 2, borderBottom: `1px solid ${alpha('#000', 0.08)}` }}>
                 <Link 
                     href="/profile" 
                     style={{ textDecoration: 'none', color: 'inherit' }}
@@ -205,14 +205,16 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
                 </Link>
             </Box>
             
-            <MenuItem onClick={handleMenuClose}>
-                <ListItemIcon>
-                    <SchoolIcon fontSize="small" color="primary" />
-                </ListItemIcon>
-                <Link href="/my-courses" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    {t("my_courses")}
-                </Link>
-            </MenuItem>
+            {(session?.user as any)?.role === "instructor" || (session?.user as any)?.role === "admin" && (
+                <MenuItem onClick={handleMenuClose}>
+                    <ListItemIcon>
+                        <SchoolIcon fontSize="small" color="primary" />
+                    </ListItemIcon>
+                    <Link href="/my-courses" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        {t("my_courses")}
+                    </Link>
+                </MenuItem>
+            )}
             
             <MenuItem onClick={handleMenuClose}>
                 <ListItemIcon>

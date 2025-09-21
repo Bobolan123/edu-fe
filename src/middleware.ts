@@ -23,6 +23,7 @@ const authPages = ["/login", "/signup", "/admin/login"];
 const protectedPages: string[] = [];
 const adminPages = ["/admin", "/admin/*"];
 const adminAuthPages = ["/admin/login"];
+const instructorPages = ["/my-courses", "/my-courses/*"];
 
 const   intlMiddleware = createIntlMiddleware({
   locales,
@@ -58,7 +59,8 @@ const handleAuth = async (
   req: NextRequest,
   isAuthPage: boolean,
   isProtectedPage: boolean,
-  isAdminPage: boolean
+  isAdminPage: boolean,
+  isInstructorPage: boolean
 ) => {
   const session = await auth();
   const isAuth = session?.user;
@@ -67,32 +69,47 @@ const handleAuth = async (
   const locale = cookieStore.get("NEXT_LOCALE")?.value || defaultLocale;
   const search = req.nextUrl.search; 
 
-  // if (isAdminPage) {
-  //   if (!isAuth) {
-  //     return NextResponse.redirect(
-  //       new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
-  //     );
-  //   }
-    
-  //   const userRole = (session?.user as any)?.role;
-  //   if (userRole !== "admin") {
-  //     return NextResponse.redirect(
-  //       new URL(`/${locale}${pages.admin.signin()}${search}`, req.url)
-  //     );
-  //   }
-  // }
+  if (isInstructorPage) {
+    if (!isAuth) {
+      return NextResponse.redirect(
+        new URL(`/${locale}${pages.auth.signin()}?error=auth_required`, req.url)
+      );
+    }
 
-  // if (!isAuth && isProtectedPage) {
-  //   return NextResponse.redirect(
-  //     new URL(`/${locale}${pages.auth.signin()}${search}`, req.url)
-  //   );
-  // }
+    const userRole = (session?.user as any)?.role;
+    if (userRole !== "instructor") {
+      return NextResponse.redirect(
+        new URL(`/${locale}${pages.home.root}?error=instructor_required`, req.url)
+      );
+    }
+  }
 
-  // if (isAuth && isAuthPage) {
-  //   return NextResponse.redirect(
-  //     new URL(`/${locale}${pages.home.root}${search}`, req.url)
-  //   );
-  // }
+  if (isAdminPage) {
+    if (!isAuth) {
+      return NextResponse.redirect(
+        new URL(`/${locale}${pages.admin.signin()}?error=admin_auth_required`, req.url)
+      );
+    }
+
+    const userRole = (session?.user as any)?.role;
+    if (userRole !== "admin") {
+      return NextResponse.redirect(
+        new URL(`/${locale}${pages.admin.signin()}?error=admin_required`, req.url)
+      );
+    }
+  }
+
+  if (!isAuth && isProtectedPage) {
+    return NextResponse.redirect(
+      new URL(`/${locale}${pages.auth.signin()}${search}`, req.url)
+    );
+  }
+
+  if (isAuth && isAuthPage) {
+    return NextResponse.redirect(
+      new URL(`/${locale}${pages.home.root}${search}`, req.url)
+    );
+  }
 
   return intlMiddleware(req);
 };
@@ -105,8 +122,9 @@ export default async function middleware(req: NextRequest) {
   const isProtectedPage = testPagesRegex(protectedPages, req.nextUrl.pathname);
   const isAdminAuthPage = testPagesRegex(adminAuthPages, req.nextUrl.pathname);
   const isAdminPage = testPagesRegex(adminPages, req.nextUrl.pathname) && !isAdminAuthPage;
+  const isInstructorPage = testPagesRegex(instructorPages, req.nextUrl.pathname);
 
-  return await handleAuth(req, isAuthPage, isProtectedPage, isAdminPage);
+  return await handleAuth(req, isAuthPage, isProtectedPage, isAdminPage, isInstructorPage);
 }
 
 export const config = {
