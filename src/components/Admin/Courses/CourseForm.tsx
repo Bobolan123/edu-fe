@@ -38,7 +38,7 @@ interface CourseFormData {
   description: string;
   price: number;
   language: string;
-  active: boolean;
+  isActive: boolean;
   categoryIds: number[];
   instructorId: number;
 }
@@ -80,7 +80,7 @@ export function CourseForm({
     description: '',
     price: 0,
     language: 'en',
-    active: true,
+    isActive: true,
     categoryIds: [],
     instructorId: 0,
   });
@@ -95,7 +95,7 @@ export function CourseForm({
         description: course.description || '',
         price: Math.round(course.price || 0),
         language: course.language || 'en',
-        active: course.active ?? true,
+        isActive: course.isActive ?? true,
         categoryIds: course.categories?.map(c => c.id) || [],
         instructorId: course.instructor?.id || 0,
       });
@@ -107,7 +107,7 @@ export function CourseForm({
         description: '',
         price: 0,
         language: 'en',
-        active: true,
+        isActive: true,
         categoryIds: [],
         instructorId: 0,
       });
@@ -144,7 +144,7 @@ export function CourseForm({
       description: '',
       price: 0,
       language: 'en',
-      active: true,
+      isActive: true,
       categoryIds: [],
       instructorId: 0,
     });
@@ -394,8 +394,8 @@ export function CourseForm({
             <FormControlLabel
               control={
                 <Switch
-                  checked={formData.active}
-                  onChange={(e) => handleInputChange('active', e.target.checked)}
+                  checked={formData.isActive}
+                  onChange={(e) => handleInputChange('isActive', e.target.checked)}
                   disabled={isPending}
                 />
               }

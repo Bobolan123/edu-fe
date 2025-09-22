@@ -27,7 +27,7 @@ const initialCourseState: CourseFormState = {
     preview_url: "",
     thumbnail_url: null,
     categories: [],
-    active: true,
+    isActive: true,
 };
 
 const initialContentState: ICourseContent = {
@@ -118,7 +118,7 @@ export default function CreateCoursePage({
                 language: courseData.language,
                 price: courseData.price,
                 preview_url: courseData.preview_url,
-                active: courseData.active,
+                isActive: courseData.isActive,
                 categoryIds: selectedCategoryIds,
             });
 

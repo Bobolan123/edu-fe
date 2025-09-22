@@ -44,6 +44,7 @@ import { useState, useEffect } from 'react';
 import { ICourse, ISection, ILecture } from '../../../../types/entities';
 import { saveCourseContent, uploadLectureVideo } from '@/actions/coursesAction';
 import { toastService } from '@/services/toast';
+import CaptionManagement from '../../common/courses/CaptionManagement';
 
 interface CourseContentEditModalProps {
   open: boolean;
@@ -440,11 +441,26 @@ export default function CourseContentEditModal({
                               }
                               secondary={
                                 <Box>
-                                  {lecture.videoUrl ? (
-                                    <Chip label="Video uploaded" size="small" color="success" />
-                                  ) : (
-                                    <Chip label="No video" size="small" color="default" />
+                                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
+                                    {lecture.videoUrl ? (
+                                      <Chip label="Video uploaded" size="small" color="success" />
+                                    ) : (
+                                      <Chip label="No video" size="small" color="default" />
+                                    )}
+                                  </Box>
+
+                                  {/* Caption Management */}
+                                  {lecture.videoUrl && lecture._id && (
+                                    <Box sx={{ mt: 1 }}>
+                                      <CaptionManagement
+                                        lectureId={lecture._id}
+                                        lectureTitle={lecture.title}
+                                        size="small"
+                                        showTitle={false}
+                                      />
+                                    </Box>
                                   )}
+
                                   {isUploading && (
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                                       <CircularProgress size={16} />

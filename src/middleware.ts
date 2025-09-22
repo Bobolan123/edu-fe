@@ -77,7 +77,7 @@ const handleAuth = async (
     }
 
     const userRole = (session?.user as any)?.role;
-    if (userRole !== "instructor") {
+    if (userRole !== "instructor" && userRole !== "admin") {
       return NextResponse.redirect(
         new URL(`/${locale}${pages.home.root}?error=instructor_required`, req.url)
       );

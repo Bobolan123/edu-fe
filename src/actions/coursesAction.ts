@@ -12,7 +12,7 @@ export interface ICreateCoursePayload {
     language: string;
     price: number;
     preview_url: string;
-    active: boolean;
+    isActive: boolean;
     categoryIds: number[];
 }
 
@@ -181,7 +181,7 @@ export interface IAdminCreateCoursePayload {
     description: string;
     price: number;
     language: string;
-    active: boolean;
+    isActive: boolean;
     categoryIds: number[];
     instructorId: number;
 }

@@ -31,6 +31,7 @@ import { saveCourseContent, uploadLectureVideo } from "@/actions/coursesAction";
 // Removed useLoadingState import
 import { toastService } from "@/services/toast";
 import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
+import CaptionManagement from "../../common/courses/CaptionManagement";
 
 interface ManageCourseContentModalProps {
     open: boolean;
@@ -686,6 +687,18 @@ export default function ManageCourseContentModal({
                                                     ] || 0}
                                                     % uploaded
                                                 </Typography>
+                                            </Box>
+                                        )}
+
+                                        {/* Caption Management */}
+                                        {isValidCloudinaryVideoUrl(lecture.videoUrl) && lecture._id && (
+                                            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                                                <CaptionManagement
+                                                    lectureId={lecture._id}
+                                                    lectureTitle={lecture.title}
+                                                    size="small"
+                                                    showTitle={true}
+                                                />
                                             </Box>
                                         )}
                                     </Box>

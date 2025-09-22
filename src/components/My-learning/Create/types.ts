@@ -9,7 +9,7 @@ export interface CourseFormState {
     preview_url: string;
     thumbnail_url: string | null;
     categories: string[];
-    active: boolean;
+    isActive: boolean;
 }
 
 export interface CourseBasicInfoProps {

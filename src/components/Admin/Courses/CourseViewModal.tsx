@@ -115,8 +115,8 @@ export default function CourseViewModal({ open, onClose, course }: CourseViewMod
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                   <Chip
-                    label={course.active ? 'Active' : 'Inactive'}
-                    color={course.active ? 'success' : 'error'}
+                    label={course.isActive ? 'Active' : 'Inactive'}
+                    color={course.isActive ? 'success' : 'error'}
                     size="small"
                   />
                   {course.deleted_at && (

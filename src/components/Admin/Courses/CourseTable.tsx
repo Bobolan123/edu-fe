@@ -249,9 +249,9 @@ export function CourseTable({
                   
                   <TableCell align="center">
                     <Chip
-                      label={course.active ? 'Active' : 'Inactive'}
+                      label={course.isActive ? 'Active' : 'Inactive'}
                       size="small"
-                      color={statusColors[course.active ? 'true' : 'false']}
+                      color={statusColors[course.isActive ? 'true' : 'false']}
                       variant="filled"
                     />
                   </TableCell>

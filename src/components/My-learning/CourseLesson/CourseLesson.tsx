@@ -58,7 +58,7 @@ import {
     Fullscreen,
     Speed,
 } from "@mui/icons-material";
-import { Bot } from "lucide-react";
+import { Bot, Subtitles, X } from "lucide-react";
 import { ICourse, ICourseContent, IEnrollment, ILecture, IReview } from "../../../../types/entities";
 import CourseOverview from "./Overview";
 import CourseReviews from "./CourseReviews";
@@ -106,6 +106,9 @@ export default function     CourseLesson({
     const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(
         null
     );
+    const [captionsEnabled, setCaptionsEnabled] = useState(false);
+    const [captionUrl, setCaptionUrl] = useState<string | null>(null);
+    const [captionsAvailable, setCaptionsAvailable] = useState(false);
 
     const muxPlayerRef = useRef<any>(null);
 
@@ -115,6 +118,30 @@ export default function     CourseLesson({
         return enrollmentProgress.lectureProgress.some(
             progressLecture => progressLecture.lectureId === lectureId
         );
+    };
+
+    // Function to fetch caption status and URL
+    const fetchCaptions = async (lectureId: string) => {
+        try {
+            // Check caption status
+            const statusResponse = await fetch(`/api/courses/lecture/${lectureId}/captions/status`);
+            if (statusResponse.ok) {
+                const statusData = await statusResponse.json();
+                setCaptionsAvailable(statusData.available);
+
+                // If captions are available, fetch the SRT URL
+                if (statusData.available) {
+                    const captionsResponse = await fetch(`/api/courses/lecture/${lectureId}/captions?format=srt`);
+                    if (captionsResponse.ok) {
+                        const captionsData = await captionsResponse.json();
+                        setCaptionUrl(captionsData.captionUrl);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch captions:', error);
+            setCaptionsAvailable(false);
+        }
     };
 
     // Function to handle lecture completion toggle
@@ -160,6 +187,11 @@ export default function     CourseLesson({
                 videoUrl: firstLecture.videoUrl,
                 lectureId: firstLecture._id || "",
             });
+
+            // Fetch captions for the first lecture
+            if (firstLecture._id) {
+                fetchCaptions(firstLecture._id);
+            }
         }
     }, [firstLecture]);
 
@@ -197,6 +229,11 @@ export default function     CourseLesson({
                     videoUrl: lecture.videoUrl,
                     lectureId: lecture._id || "",
                 });
+
+                // Fetch captions for the new lecture
+                if (lecture._id) {
+                    fetchCaptions(lecture._id);
+                }
             }, 100);
         },
         [loadingTimeout]
@@ -233,14 +270,39 @@ export default function     CourseLesson({
                         className="relative bg-black w-full"
                         style={{ height: "calc(130vh * 0.5)" }}
                     >
-                        {/* Video Title Overlay */}
-                        <Box className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2">
-                            <Typography
-                                variant="h6"
-                                className="text-white font-semibold"
-                            >
-                                {currentLecture?.title || "Loading..."}
-                            </Typography>
+                        {/* Video Title and Caption Controls Overlay */}
+                        <Box className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
+                            <Box className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2">
+                                <Typography
+                                    variant="h6"
+                                    className="text-white font-semibold"
+                                >
+                                    {currentLecture?.title || "Loading..."}
+                                </Typography>
+                            </Box>
+
+                            {/* Caption Controls */}
+                            <Box className="flex gap-2">
+                                {captionsAvailable && captionUrl && (
+                                    <Tooltip title={captionsEnabled ? "Hide Captions" : "Show Captions"}>
+                                        <IconButton
+                                            onClick={() => setCaptionsEnabled(!captionsEnabled)}
+                                            className="bg-black/60 backdrop-blur-sm text-white hover:bg-black/80"
+                                            size="small"
+                                        >
+                                            {captionsEnabled ? <X size={20} /> : <Subtitles size={20} />}
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+
+                                {!captionsAvailable && (
+                                    <Box className="bg-black/60 backdrop-blur-sm rounded px-3 py-1">
+                                        <Typography variant="caption" className="text-white opacity-75">
+                                            No Captions
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Box>
                         </Box>
 
                         {/* Loading Overlay */}
@@ -298,7 +360,18 @@ export default function     CourseLesson({
                                     disablePictureInPicture={false}
                                     crossOrigin="anonymous"
                                     targetLiveWindow={10}
-                                />
+                                >
+                                    {/* Add caption track if available and enabled */}
+                                    {captionsEnabled && captionUrl && (
+                                        <track
+                                            kind="subtitles"
+                                            src={captionUrl}
+                                            srcLang="en"
+                                            label="English"
+                                            default
+                                        />
+                                    )}
+                                </MuxPlayer>
                             )
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-black">

@@ -20,7 +20,7 @@ export interface    ICourse {
     thumbnail_url: string | null;
     total_reviews: number;
     preview_url?: string,
-    active?:boolean,
+    isActive?:boolean,
     //Display all courses
     isPurchased?:boolean
 }
