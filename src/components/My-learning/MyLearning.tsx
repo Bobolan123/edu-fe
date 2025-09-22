@@ -28,18 +28,11 @@ import {
 } from "@mui/material";
 import {
     Star,
-    Clock,
-    Calendar,
-    BookOpen,
     PlayCircle,
-    TrendingUp,
-    Award,
-    Users,
     Search,
-    Filter,
-    SortAsc,
-    ArrowRight,
     RotateCcw,
+    BookOpen,
+    TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { slugify } from "../../utils/utils";
@@ -128,71 +121,67 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
         <Box className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 py-4">
             <Container maxWidth="xl">
                 {/* Header */}
-                <Box className="mb-8 text-center">
-                    <Box className="inline-flex items-center gap-3 mb-4">
-                        <Box className="p-3 rounded-full bg-gradient-to-r from-pink-600 to-pink-600 shadow-lg">
-                            <BookOpen className="h-8 w-8 text-white" />
-                        </Box>  
-                        <Typography
-                            variant="h2"
-                            className="bg-gradient-to-r from-pink-600 to-pink-600 bg-clip-text text-transparent"
-                        >
-                            {t("title")}
-                        </Typography>
-                    </Box>
-                    <Typography variant="h6" className="text-gray-600 mb-6 font-medium">
+                <Box className="mb-6 text-center">
+                    <Typography
+                        variant="h3"
+                        className="font-bold text-gray-900 mb-3"
+                    >
+                        {t("title")}
+                    </Typography>
+                    <Typography variant="body1" className="text-gray-600 mb-6 max-w-2xl mx-auto">
                         {t("subtitle")}
                     </Typography>
 
                     {/* Search and Filters */}
-                    <Paper 
+                    <Paper
                         elevation={0}
-                        className="p-6 mb-6 bg-white/70 backdrop-blur-sm rounded-3xl border border-white/50 shadow-xl"
+                        className="p-4 mb-6 bg-white rounded-2xl border border-gray-200 shadow-sm"
                     >
-                        <Stack 
-                            direction={{ xs: "column", md: "row" }} 
-                            spacing={3} 
-                            className="mb-4"
+                        <Stack
+                            direction={{ xs: "column", md: "row" }}
+                            spacing={2}
                         >
                             <TextField
                                 placeholder={t("search_placeholder")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 variant="outlined"
-                                size="medium"
+                                size="small"
                                 className="flex-1"
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
-                                        borderRadius: '20px',
-                                        backgroundColor: 'rgba(255,255,255,0.8)',
+                                        borderRadius: '12px',
+                                        backgroundColor: '#f9fafb',
+                                        border: '1px solid #e5e7eb',
                                         '&:hover': {
-                                            backgroundColor: 'rgba(255,255,255,0.9)',
+                                            backgroundColor: '#f3f4f6',
                                         },
                                         '&.Mui-focused': {
                                             backgroundColor: 'white',
+                                            borderColor: '#6366f1',
                                         }
                                     }
                                 }}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Search className="h-5 w-5 text-purple-400" />
+                                            <Search className="h-4 w-4 text-gray-400" />
                                         </InputAdornment>
                                     ),
                                 }}
                             />
-                            
-                            <FormControl size="medium" className="min-w-[160px]">
-                                <InputLabel className="text-purple-600">{t("filter_label")}</InputLabel>
+
+                            <FormControl size="small" className="min-w-[140px]">
+                                <InputLabel>{t("filter_label")}</InputLabel>
                                 <Select
                                     value={filterBy}
                                     onChange={(e) => setFilterBy(e.target.value)}
                                     label={t("filter_label")}
                                     sx={{
-                                        borderRadius: '20px',
-                                        backgroundColor: 'rgba(255,255,255,0.8)',
+                                        borderRadius: '12px',
+                                        backgroundColor: '#f9fafb',
                                         '&:hover': {
-                                            backgroundColor: 'rgba(255,255,255,0.9)',
+                                            backgroundColor: '#f3f4f6',
                                         }
                                     }}
                                 >
@@ -203,17 +192,17 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                 </Select>
                             </FormControl>
 
-                            <FormControl size="medium" className="min-w-[160px]">
-                                <InputLabel className="text-pink-600">{t("sort_label")}</InputLabel>
+                            <FormControl size="small" className="min-w-[140px]">
+                                <InputLabel>{t("sort_label")}</InputLabel>
                                 <Select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
                                     label={t("sort_label")}
                                     sx={{
-                                        borderRadius: '20px',
-                                        backgroundColor: 'rgba(255,255,255,0.8)',
+                                        borderRadius: '12px',
+                                        backgroundColor: '#f9fafb',
                                         '&:hover': {
-                                            backgroundColor: 'rgba(255,255,255,0.9)',
+                                            backgroundColor: '#f3f4f6',
                                         }
                                     }}
                                 >
@@ -224,108 +213,66 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                 </Select>
                             </FormControl>
                         </Stack>
-
-                        {/* Results count */}
-                        <Box className="text-center">
-                            <Chip 
-                                label={t("showing_results", { filtered: filteredAndSortedCourses.length, total: totalCourses })}
-                                className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 font-medium"
-                                variant="filled"
-                            />
-                        </Box>
                     </Paper>
                 </Box>
 
                 {/* Stats */}
-                <Grid container spacing={3} className="mb-8">
+                <Grid container spacing={3} className="mb-6">
                     <Grid item xs={12} sm={4}>
-                        <Paper 
+                        <Paper
                             elevation={0}
-                            className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-50 border border-emerald-100/50 "
+                            className="p-4 text-center rounded-xl bg-white border border-gray-200 hover:shadow-sm transition-shadow duration-200"
                         >
-                            <Box className="text-center">
-                                <Box className="inline-flex p-2 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 shadow-md mb-2">
-                                    <BookOpen className="h-6 w-6 text-white" />
-                                </Box>
-                                <Typography
-                                    variant="body2"
-                                    className="font-bold text-emerald-800 mb-1 tracking-wide text-sm"
-                                >
-                                    {t("stats.total_courses")}
-                                </Typography>
-                                <Typography
-                                    variant="h4"
-                                    className="font-black text-emerald-900 mb-1"
-                                >
-                                    {totalCourses}
-                                </Typography>
-                                <Typography
-                                    variant="caption"
-                                    className="text-emerald-600 font-medium"
-                                >
-                                    {t("stats.total_subtitle")}
-                                </Typography>
-                            </Box>
+                            <Typography
+                                variant="h3"
+                                className="font-bold text-gray-900 mb-1"
+                            >
+                                {totalCourses}
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                className="text-gray-600 font-medium"
+                            >
+                                {t("stats.total_courses")}
+                            </Typography>
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Paper 
+                        <Paper
                             elevation={0}
-                            className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-amber-100 via-amber-50 to-orange-50 border border-amber-100/50"
+                            className="p-4 text-center rounded-xl bg-white border border-gray-200 hover:shadow-sm transition-shadow duration-200"
                         >
-                            <Box className="text-center">
-                                <Box className="inline-flex p-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 shadow-md mb-2">
-                                    <Clock className="h-6 w-6 text-white" />
-                                </Box>
-                                <Typography
-                                    variant="body2"
-                                    className="font-bold text-amber-800 mb-1 tracking-wide text-sm"
-                                >
-                                    {t("stats.in_progress")}
-                                </Typography>
-                                <Typography
-                                    variant="h4"
-                                    className="font-black text-amber-900 mb-1"
-                                >
-                                    {inProgressCourses}
-                                </Typography>
-                                <Typography
-                                    variant="caption"
-                                    className="text-amber-600 font-medium"
-                                >
-                                    {t("stats.in_progress_subtitle")}
-                                </Typography>
-                            </Box>
+                            <Typography
+                                variant="h3"
+                                className="font-bold text-blue-600 mb-1"
+                            >
+                                {inProgressCourses}
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                className="text-gray-600 font-medium"
+                            >
+                                {t("stats.in_progress")}
+                            </Typography>
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Paper 
+                        <Paper
                             elevation={0}
-                            className="p-4 hover:shadow-lg transition-shadow duration-200 rounded-2xl bg-gradient-to-br from-violet-100 via-violet-50 to-purple-50 border border-violet-100/50"
+                            className="p-4 text-center rounded-xl bg-white border border-gray-200 hover:shadow-sm transition-shadow duration-200"
                         >
-                            <Box className="text-center">
-                                <Box className="inline-flex p-2 rounded-full bg-gradient-to-r from-violet-400 to-purple-400 shadow-md mb-2">
-                                    <Award className="h-6 w-6 text-white" />
-                                </Box>
-                                <Typography
-                                    variant="body2"
-                                    className="font-bold text-violet-800 mb-1 tracking-wide text-sm"
-                                >
-                                    {t("stats.completed")}
-                                </Typography>
-                                <Typography
-                                    variant="h4"
-                                    className="font-black text-violet-900 mb-1"
-                                >
-                                    {completedCourses}
-                                </Typography>
-                                <Typography
-                                    variant="caption"
-                                    className="text-violet-600 font-medium"
-                                >
-                                    {completedCourses > 0 ? t("stats.completed_subtitle") : t("stats.completed_subtitle_empty")}
-                                </Typography>
-                            </Box>
+                            <Typography
+                                variant="h3"
+                                className="font-bold text-green-600 mb-1"
+                            >
+                                {completedCourses}
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                className="text-gray-600 font-medium"
+                            >
+                                {t("stats.completed")}
+                            </Typography>
                         </Paper>
                     </Grid>
                 </Grid>
@@ -338,100 +285,73 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                         );
 
                         return (
-                            <Grid item xs={12} sm={6} lg={4} key={course.id}>
-                                <Grow in={true} timeout={300}>
-                                    <Link href={`/my-learning/${slugify(course.title)}?id=${course.id}`}>
-                                        <Card 
-                                            elevation={0}
-                                            className="hover:shadow-lg transition-shadow duration-200 cursor-pointer h-full rounded-3xl border-2 border-white/60 bg-white/95 backdrop-blur-sm group overflow-hidden "
-                                        >
+                            <Grid item xs={12} sm={6} md={4} key={course.id}>
+                                <Link href={`/my-learning/${slugify(course.title)}?id=${course.id}`}>
+                                    <Card
+                                        elevation={0}
+                                        className="hover:shadow-md transition-all duration-200 cursor-pointer h-full rounded-2xl border border-gray-200 bg-white group overflow-hidden hover:border-blue-300"
+                                    >
                                         <Box className="relative">
                                             <CardMedia
                                                 component="img"
-                                                height="200"
+                                                height="160"
                                                 image={
                                                     course.thumbnail_url ||
-                                                    `/placeholder.svg?height=200&width=400&text=${encodeURIComponent(
+                                                    `/placeholder.svg?height=160&width=320&text=${encodeURIComponent(
                                                         course.title
                                                     )}`
                                                 }
                                                 alt={course.title}
-                                                className="h-48 object-cover"
+                                                className="h-40 object-cover"
                                             />
-                                            
-                                            <Box className="absolute top-4 right-4">
+
+                                            <Box className="absolute top-3 right-3">
                                                 <Chip
                                                     label={progressStatus.text}
                                                     size="small"
-                                                    className="font-semibold shadow-md"
+                                                    className="text-xs font-medium"
                                                     sx={{
-                                                        backgroundColor: progressStatus.text === "Completed" ? '#10b981' : 
-                                                                          progressStatus.text === "In Progress" ? '#f59e0b' : 
-                                                                          progressStatus.text === "Almost Done" ? '#f97316' : '#6b7280',
+                                                        backgroundColor: course.progress === 100 ? '#10b981' :
+                                                                          course.progress > 0 ? '#3b82f6' : '#6b7280',
                                                         color: 'white',
-                                                        borderRadius: '12px'
+                                                        borderRadius: '8px',
+                                                        height: '24px'
                                                     }}
                                                 />
                                             </Box>
-                                            {course.price > 0 && (
-                                                <Box className="absolute top-4 left-4 ">
-                                                    <Chip
-                                                        label={formatPrice(course.price, t)}
-                                                        variant="filled"
-                                                        size="small"
-                                                        className="bg-white/95 text-gray-800 font-bold shadow-md"
-                                                        sx={{ borderRadius: '12px' }}
-                                                    />
-                                                </Box>
-                                            )}
                                         </Box>
 
-                                        <CardContent className="flex-1 space-y-4 p-6 ">
+                                        <CardContent className="p-4 space-y-3">
                                             <Box>
                                                 <Typography
                                                     variant="h6"
-                                                    className="line-clamp-2 mb-3 font-bold text-gray-800"
+                                                    className="line-clamp-2 mb-2 font-semibold text-gray-900 leading-snug"
                                                 >
                                                     {course.title}
                                                 </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    className="text-gray-600 line-clamp-2 mb-4 leading-relaxed"
-                                                >
-                                                    {course.description}
-                                                </Typography>
-                                                
-                                                {/* Quick Action Buttons */}
-                                                <Stack direction="row" spacing={2} className="mb-4">
-                                                    <Button
-                                                        size="small"
-                                                        variant="contained"
-                                                        startIcon={<PlayCircle className="h-4 w-4" />}
-                                                        className="rounded-full font-semibold px-4"
-                                                        sx={{
-                                                            background: 'linear-gradient(45deg, #2563eb, #3b82f6)',
-                                                            '&:hover': {
-                                                                background: 'linear-gradient(45deg, #1d4ed8, #2563eb)',
-                                                            }
-                                                        }}
-                                                    >
-                                                        {course.progress === 0 ? t("buttons.start_learning") : t("buttons.continue")}
-                                                    </Button>
-                                                </Stack>
-                                            </Box>
 
-                                            {/* Progress */}
-                                            <Box className="space-y-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
-                                                <Box className="flex justify-between items-center">
+                                                {course.instructor && (
                                                     <Typography
                                                         variant="body2"
-                                                        className="text-gray-700 font-medium flex items-center gap-1"
+                                                        className="text-gray-600 mb-3"
+                                                    >
+                                                        {course.instructor.name}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+
+                                            {/* Progress Bar */}
+                                            <Box className="space-y-2">
+                                                <Box className="flex justify-between items-center">
+                                                    <Typography
+                                                        variant="caption"
+                                                        className="text-gray-600 font-medium"
                                                     >
                                                         {t("progress_label")}
                                                     </Typography>
                                                     <Typography
-                                                        variant="body2"
-                                                        className="font-bold text-blue-700"
+                                                        variant="caption"
+                                                        className="font-semibold text-gray-900"
                                                     >
                                                         {course.progress}%
                                                     </Typography>
@@ -439,113 +359,53 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                 <LinearProgress
                                                     variant="determinate"
                                                     value={course.progress}
-                                                    className="h-3 rounded-full"
+                                                    className="h-2 rounded-full"
                                                     sx={{
-                                                        backgroundColor: '#e5e7eb',
+                                                        backgroundColor: '#f3f4f6',
                                                         '& .MuiLinearProgress-bar': {
-                                                            borderRadius: '6px',
-                                                            background: course.progress === 100 ? 
-                                                                'linear-gradient(45deg, #10b981, #059669)' :
-                                                                'linear-gradient(45deg, #2563eb, #3b82f6)'
+                                                            borderRadius: '4px',
+                                                            backgroundColor: course.progress === 100 ? '#10b981' : '#3b82f6'
                                                         }
                                                     }}
                                                 />
-                                                {course.lectureProgress > 0 && (
-                                                    <Typography
-                                                        variant="caption"
-                                                        className="text-gray-600 font-medium flex items-center gap-1"
-                                                    >
-                                                        {course.lectureProgress === 1 ? t("lectures_completed", { count: course.lectureProgress }) : t("lectures_completed_plural", { count: course.lectureProgress })}
-                                                    </Typography>
-                                                )}
                                             </Box>
 
-                                            {/* Instructor & Rating Row */}
-                                            <Box className="flex items-center justify-between">
-                                                {course.instructor && (
-                                                    <Box className="flex items-center space-x-2">
-                                                        <Avatar
-                                                            src={course.instructor.avatar_url || undefined}
-                                                            className="w-8 h-8 border-2 border-white shadow-sm"
-                                                            sx={{ 
-                                                                background: 'linear-gradient(45deg, #8b5cf6, #a855f7)',
-                                                                color: 'white',
-                                                                fontSize: '0.875rem',
-                                                                fontWeight: 'bold'
-                                                            }}
-                                                        >
-                                                            {course.instructor.name.charAt(0).toUpperCase()}
-                                                        </Avatar>
-                                                        <Typography
-                                                            variant="body2"
-                                                            className="text-gray-700 font-medium"
-                                                        >
-                                                            {t("instructor_prefix")} {course.instructor.name}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-
-                                                {course.average_rating > 0 && (
+                                            {/* Rating and Action Row */}
+                                            <Box className="flex items-center justify-between pt-2">
+                                                {course.average_rating > 0 ? (
                                                     <Box className="flex items-center space-x-1">
-                                                        <Box className="flex items-center">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <Star
-                                                                    key={i}
-                                                                    className={`h-4 w-4 ${
-                                                                        i < Math.floor(course.average_rating)
-                                                                            ? "text-yellow-500 fill-current"
-                                                                            : "text-gray-300"
-                                                                    }`}
-                                                                />
-                                                            ))}
-                                                        </Box>
+                                                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
                                                         <Typography
                                                             variant="caption"
-                                                            className="text-gray-600 font-medium ml-1"
+                                                            className="text-gray-600 font-medium"
                                                         >
-                                                            {course.average_rating} ({course.total_reviews})
+                                                            {course.average_rating.toFixed(1)}
                                                         </Typography>
                                                     </Box>
+                                                ) : (
+                                                    <Box />
                                                 )}
-                                            </Box>
 
-                                            {/* Categories */}
-                                            {course.categories.length > 0 && (
-                                                <Box className="flex flex-wrap gap-2">
-                                                    {course.categories.slice(0, 2).map((category) => (
-                                                        <Chip
-                                                            key={category.id}
-                                                            label={`${t("category_prefix")} ${category.name}`}
-                                                            variant="outlined"
-                                                            size="small"
-                                                            className="rounded-full border-purple-200 text-purple-700 bg-purple-50 font-medium"
-                                                        />
-                                                    ))}
-                                                    {course.categories.length > 2 && (
-                                                        <Chip
-                                                            label={`+${course.categories.length - 2} more`}
-                                                            variant="outlined"
-                                                            size="small"
-                                                            className="rounded-full border-gray-200 text-gray-600 bg-gray-50"
-                                                        />
-                                                    )}
-                                                </Box>
-                                            )}
-
-                                            {/* Enrollment Date */}
-                                            <Box className="flex items-center pt-2 border-t border-gray-100">
-                                                <Calendar className="h-4 w-4 mr-2 text-purple-400" />
-                                                <Typography
-                                                    variant="caption"
-                                                    className="text-gray-600 font-medium"
+                                                <Button
+                                                    size="small"
+                                                    variant="contained"
+                                                    startIcon={<PlayCircle className="h-4 w-4" />}
+                                                    className="rounded-full text-xs px-3 py-1"
+                                                    sx={{
+                                                        backgroundColor: '#3b82f6',
+                                                        '&:hover': {
+                                                            backgroundColor: '#2563eb',
+                                                        },
+                                                        textTransform: 'none',
+                                                        fontSize: '0.75rem'
+                                                    }}
                                                 >
-                                                    {t("enrolled_on", { date: formatDate(course.dateEnrolled.toString()) })}
-                                                </Typography>
+                                                    {course.progress === 0 ? t("buttons.start_learning") : t("buttons.continue")}
+                                                </Button>
                                             </Box>
                                         </CardContent>
-                                        </Card>
-                                    </Link>
-                                </Grow>
+                                    </Card>
+                                </Link>
                             </Grid>
                         );
                     })}
@@ -590,7 +450,7 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
 
                 {enrolledCourses.length === 0 && (
                     <Box className="text-center py-16">
-                        <Box className="p-8 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 w-32 h-32 mx-auto mb-8 flex items-center justify-center">
+                        <Box className="p-8 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 w-32 h-32 mx-auto mb-8 flex items-center first-letter:justify-center">
                             <BookOpen className="h-16 w-16 text-purple-500" />
                         </Box>
                         <Typography
