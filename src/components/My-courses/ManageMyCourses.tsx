@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import {
     BookOpen,
@@ -11,6 +11,7 @@ import {
     Star,
     Clock,
     DollarSign,
+    RotateCcw,
 } from "lucide-react";
 import {
     Card,
@@ -28,6 +29,10 @@ import {
     Box,
     Rating,
     Paper,
+    FormControl,
+    InputLabel,
+    Select,
+    Stack,
 } from "@mui/material";
 import { ICourse } from "../../../types/entities";
 import Link from "next/link";
@@ -44,6 +49,9 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
     const pathname = usePathname();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterBy, setFilterBy] = useState("all");
+    const [sortBy, setSortBy] = useState("recent");
 
     const handleMenuClick = (
         event: React.MouseEvent<HTMLElement>,
@@ -92,6 +100,60 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
             maximumFractionDigits: 0,
         }).format(amount);
 
+    const filteredAndSortedCourses = useMemo(() => {
+        if (!courses) return [];
+
+        let filtered = courses.filter((course) => {
+            const matchesSearch =
+                course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                course.description
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                course.instructor?.name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase());
+
+            const matchesFilter = (() => {
+                switch (filterBy) {
+                    case "free":
+                        return course.price === 0;
+                    case "paid":
+                        return course.price > 0;
+                    case "high-rated":
+                        return course.average_rating >= 4.0;
+                    case "popular":
+                        return (course.enrollments?.length || 0) >= 10;
+                    default:
+                        return true;
+                }
+            })();
+
+            return matchesSearch && matchesFilter;
+        });
+
+        return filtered.sort((a, b) => {
+            switch (sortBy) {
+                case "alphabetical":
+                    return a.title.localeCompare(b.title);
+                case "rating":
+                    return (b.average_rating || 0) - (a.average_rating || 0);
+                case "students":
+                    return (
+                        (b.enrollments?.length || 0) -
+                        (a.enrollments?.length || 0)
+                    );
+                case "price":
+                    return Number(b.price || 0) - Number(a.price || 0);
+                case "recent":
+                default:
+                    return (
+                        new Date(b.date_created || 0).getTime() -
+                        new Date(a.date_created || 0).getTime()
+                    );
+            }
+        });
+    }, [courses, searchTerm, filterBy, sortBy]);
+
     return (
         <Box className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 py-4">
             <Container maxWidth="xl">
@@ -105,8 +167,8 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                     </Typography>
                     <Typography
                         variant="body1"
-                        align="center"
                         className="text-gray-600 mb-6 max-w-2xl mx-auto"
+                        sx={{ margin: "0 auto" }}
                     >
                         {t("subtitle")}
                     </Typography>
@@ -117,11 +179,11 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                             size="large"
                             className="font-semibold px-8 py-3 rounded-full"
                             sx={{
-                                backgroundColor: '#3b82f6',
-                                '&:hover': {
-                                    backgroundColor: '#2563eb',
+                                backgroundColor: "#3b82f6",
+                                "&:hover": {
+                                    backgroundColor: "#2563eb",
                                 },
-                                textTransform: 'none'
+                                textTransform: "none",
                             }}
                         >
                             {t("create_new")}
@@ -146,7 +208,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 variant="body2"
                                 className="text-gray-600 font-medium"
                             >
-{t("total_courses")}
+                                {t("total_courses")}
                             </Typography>
                         </Paper>
                     </Grid>
@@ -165,7 +227,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 variant="body2"
                                 className="text-gray-600 font-medium"
                             >
-{t("total_students")}
+                                {t("total_students")}
                             </Typography>
                         </Paper>
                     </Grid>
@@ -184,7 +246,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 variant="body2"
                                 className="text-gray-600 font-medium"
                             >
-{t("total_revenue")}
+                                {t("total_revenue")}
                             </Typography>
                         </Paper>
                     </Grid>
@@ -203,7 +265,7 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 variant="body2"
                                 className="text-gray-600 font-medium"
                             >
-{t("avg_rating")}
+                                {t("avg_rating")}
                             </Typography>
                         </Paper>
                     </Grid>
@@ -214,25 +276,27 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                     elevation={0}
                     className="p-4 mb-6 bg-white rounded-2xl border border-gray-200 shadow-sm"
                 >
-                    <Box className="flex flex-col sm:flex-row gap-4">
+                    <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                         <TextField
                             placeholder={t("search_placeholder")}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             variant="outlined"
                             size="small"
                             className="flex-1"
                             sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: '12px',
-                                    backgroundColor: '#f9fafb',
-                                    border: '1px solid #e5e7eb',
-                                    '&:hover': {
-                                        backgroundColor: '#f3f4f6',
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "12px",
+                                    backgroundColor: "#f9fafb",
+                                    border: "1px solid #e5e7eb",
+                                    "&:hover": {
+                                        backgroundColor: "#f3f4f6",
                                     },
-                                    '&.Mui-focused': {
-                                        backgroundColor: 'white',
-                                        borderColor: '#6366f1',
-                                    }
-                                }
+                                    "&.Mui-focused": {
+                                        backgroundColor: "white",
+                                        borderColor: "#6366f1",
+                                    },
+                                },
                             }}
                             InputProps={{
                                 startAdornment: (
@@ -242,47 +306,76 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 ),
                             }}
                         />
-                        <Box className="flex gap-2">
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                className="rounded-xl px-4"
-                                sx={{
-                                    borderColor: "#e5e7eb",
-                                    color: "#6b7280",
-                                    textTransform: "none",
-                                    "&:hover": {
-                                        borderColor: "#d1d5db",
-                                        backgroundColor: "#f9fafb",
-                                    },
-                                }}
-                            >
-                                {t("all_categories")}
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                className="rounded-xl px-4"
-                                sx={{
-                                    borderColor: "#e5e7eb",
-                                    color: "#6b7280",
-                                    textTransform: "none",
-                                    "&:hover": {
-                                        borderColor: "#d1d5db",
-                                        backgroundColor: "#f9fafb",
-                                    },
-                                }}
-                            >
-                                {t("sort_by_rating")}
-                            </Button>
-                        </Box>
-                    </Box>
-                </Paper>
 
+                        <FormControl size="small" className="min-w-[140px]">
+                            <InputLabel>{t("filter_label")}</InputLabel>
+                            <Select
+                                value={filterBy}
+                                onChange={(e) => setFilterBy(e.target.value)}
+                                label={t("filter_label")}
+                                sx={{
+                                    borderRadius: "12px",
+                                    backgroundColor: "#f9fafb",
+                                    "&:hover": {
+                                        backgroundColor: "#f3f4f6",
+                                    },
+                                }}
+                            >
+                                <MenuItem value="all">
+                                    {t("filters.all")}
+                                </MenuItem>
+                                <MenuItem value="free">
+                                    {t("filters.free")}
+                                </MenuItem>
+                                <MenuItem value="paid">
+                                    {t("filters.paid")}
+                                </MenuItem>
+                                <MenuItem value="high-rated">
+                                    {t("filters.high_rated")}
+                                </MenuItem>
+                                <MenuItem value="popular">
+                                    {t("filters.popular")}
+                                </MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        <FormControl size="small" className="min-w-[140px]">
+                            <InputLabel>{t("sort_label")}</InputLabel>
+                            <Select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                label={t("sort_label")}
+                                sx={{
+                                    borderRadius: "12px",
+                                    backgroundColor: "#f9fafb",
+                                    "&:hover": {
+                                        backgroundColor: "#f3f4f6",
+                                    },
+                                }}
+                            >
+                                <MenuItem value="recent">
+                                    {t("sort_options.recent")}
+                                </MenuItem>
+                                <MenuItem value="alphabetical">
+                                    {t("sort_options.alphabetical")}
+                                </MenuItem>
+                                <MenuItem value="rating">
+                                    {t("sort_options.rating")}
+                                </MenuItem>
+                                <MenuItem value="students">
+                                    {t("sort_options.students")}
+                                </MenuItem>
+                                <MenuItem value="price">
+                                    {t("sort_options.price")}
+                                </MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Stack>
+                </Paper>
 
                 {/* Courses List */}
                 <Grid container spacing={3}>
-                    {courses?.map((course) => (
+                    {filteredAndSortedCourses?.map((course) => (
                         <Grid item xs={12} sm={6} md={3} key={course.id}>
                             <Card
                                 elevation={0}
@@ -314,14 +407,16 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                     </Box>
                                     <Box className="absolute top-3 left-3">
                                         <Chip
-                                            label={formatCurrency(Number(course.price))}
+                                            label={formatCurrency(
+                                                Number(course.price)
+                                            )}
                                             size="small"
                                             className="text-xs font-medium"
                                             sx={{
-                                                backgroundColor: 'white',
-                                                color: '#374151',
-                                                borderRadius: '8px',
-                                                height: '24px'
+                                                backgroundColor: "white",
+                                                color: "#374151",
+                                                borderRadius: "8px",
+                                                height: "24px",
                                             }}
                                         />
                                     </Box>
@@ -356,7 +451,8 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                 variant="caption"
                                                 className="font-semibold text-gray-900"
                                             >
-                                                {course.enrollments?.length || 0}
+                                                {course.enrollments?.length ||
+                                                    0}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -370,7 +466,9 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                     variant="caption"
                                                     className="text-gray-600 font-medium"
                                                 >
-                                                    {course.average_rating.toFixed(1)}
+                                                    {course.average_rating.toFixed(
+                                                        1
+                                                    )}
                                                 </Typography>
                                             </Box>
                                         ) : (
@@ -387,12 +485,13 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                                 variant="contained"
                                                 className="rounded-full text-xs px-3 py-1"
                                                 sx={{
-                                                    backgroundColor: '#3b82f6',
-                                                    '&:hover': {
-                                                        backgroundColor: '#2563eb',
+                                                    backgroundColor: "#3b82f6",
+                                                    "&:hover": {
+                                                        backgroundColor:
+                                                            "#2563eb",
                                                     },
-                                                    textTransform: 'none',
-                                                    fontSize: '0.75rem'
+                                                    textTransform: "none",
+                                                    fontSize: "0.75rem",
                                                 }}
                                             >
                                                 {t("manage_course")}
@@ -404,6 +503,88 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                         </Grid>
                     ))}
                 </Grid>
+
+                {/* Empty State */}
+                {filteredAndSortedCourses.length === 0 &&
+                    courses &&
+                    courses.length > 0 && (
+                        <Box className="text-center py-16">
+                            <Box className="p-6 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                                <Search className="h-12 w-12 text-purple-400" />
+                            </Box>
+                            <Typography
+                                variant="h4"
+                                className="font-bold text-gray-800 mb-3"
+                            >
+                                {t("empty_state.no_results_title")}
+                            </Typography>
+                            <Typography
+                                variant="h6"
+                                className="text-gray-600 mb-6 max-w-md mx-auto"
+                            >
+                                {t("empty_state.no_results_subtitle")}
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                onClick={() => {
+                                    setSearchTerm("");
+                                    setFilterBy("all");
+                                    setSortBy("recent");
+                                }}
+                                className="rounded-full px-8 py-3 font-bold"
+                                sx={{
+                                    background:
+                                        "linear-gradient(45deg, #8b5cf6, #a855f7)",
+                                    "&:hover": {
+                                        background:
+                                            "linear-gradient(45deg, #7c3aed, #9333ea)",
+                                    },
+                                }}
+                                startIcon={<RotateCcw className="h-5 w-5" />}
+                            >
+                                {t("buttons.clear_filters")}
+                            </Button>
+                        </Box>
+                    )}
+
+                {(!courses || courses.length === 0) && (
+                    <Box className="text-center py-16">
+                        <Box className="p-8 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 w-32 h-32 mx-auto mb-8 flex items-center justify-center">
+                            <BookOpen className="h-16 w-16 text-purple-500" />
+                        </Box>
+                        <Typography
+                            variant="h3"
+                            className="font-bold text-gray-800 mb-4"
+                        >
+                            {t("empty_state.no_courses_title")}
+                        </Typography>
+                        <Typography
+                            variant="h6"
+                            className="text-gray-600 mb-8 max-w-lg mx-auto leading-relaxed"
+                        >
+                            {t("empty_state.no_courses_subtitle")}
+                        </Typography>
+                        <Link href={`${pathname}/create`}>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                className="rounded-full px-10 py-4 font-bold text-lg"
+                                sx={{
+                                    background:
+                                        "linear-gradient(45deg, #8b5cf6, #a855f7)",
+                                    "&:hover": {
+                                        background:
+                                            "linear-gradient(45deg, #7c3aed, #9333ea)",
+                                    },
+                                }}
+                                startIcon={<Plus className="h-6 w-6" />}
+                            >
+                                {t("buttons.create_first_course")}
+                            </Button>
+                        </Link>
+                    </Box>
+                )}
 
                 {/* Menu */}
                 <Menu

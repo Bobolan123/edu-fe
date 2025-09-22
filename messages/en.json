@@ -137,6 +137,8 @@
         "subtitle": "🎯 Manage and track your course portfolio",
         "create_new": "🚀 Create New Course",
         "search_placeholder": "🔍 Search your amazing courses...",
+        "filter_label": "✨ Filter",
+        "sort_label": "📊 Sort",
         "all_categories": "📚 All Categories",
         "sort_by_rating": "⭐ Sort by Rating",
         "total_courses": "📚 Total Courses",
@@ -154,7 +156,31 @@
         "menu_enrollments": "👥 Manage Enrollments",
         "menu_reviews": "⭐ View Reviews",
         "menu_settings": "⚙️ Course Settings",
-        "menu_delete": "🗑️ Delete Course"
+        "menu_delete": "🗑️ Delete Course",
+        "filters": {
+            "all": "🎯 All Courses",
+            "free": "🆓 Free Courses",
+            "paid": "💰 Paid Courses",
+            "high_rated": "⭐ High Rated (4.0+)",
+            "popular": "🔥 Popular (10+ Students)"
+        },
+        "sort_options": {
+            "recent": "⏰ Recently Created",
+            "alphabetical": "🔤 A-Z",
+            "rating": "⭐ Rating",
+            "students": "👥 Students",
+            "price": "💰 Price"
+        },
+        "buttons": {
+            "clear_filters": "🧹 Clear All Filters",
+            "create_first_course": "🚀 Create Your First Course"
+        },
+        "empty_state": {
+            "no_results_title": "🔍 No courses found",
+            "no_results_subtitle": "Hmm, we couldn't find any courses matching your search. Let's try something else! ✨",
+            "no_courses_title": "🌟 Ready to create your first course?",
+            "no_courses_subtitle": "Start sharing your knowledge and expertise with the world. Create engaging courses and reach students globally! 🚀"
+        }
     },
     "ManageDetailCourse": {
         "total_students": "Total Students",

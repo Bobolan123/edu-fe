@@ -20,7 +20,7 @@ export default async function MyLearningPage(props: {
     categoryIds?: string | string[];
   };
 }) {
-  const searchParams = props.searchParams || {};
+  const searchParams = await props.searchParams || {};
   const session = await auth();
   
   const resEnrolledCourses = await getEnrolledCourses(session?.user?.id!, {

@@ -133,28 +133,54 @@
         "checkout_error": "Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại."
     },
     "ManageMyCourses": {
-        "title": "Khóa Học Của Tôi",
-        "subtitle": "Quản lý và theo dõi danh mục khóa học của bạn",
-        "create_new": "Tạo Khóa Học Mới",
-        "search_placeholder": "Tìm kiếm khóa học...",
-        "all_categories": "Tất Cả Danh Mục",
-        "sort_by_rating": "Sắp xếp theo Đánh giá",
-        "total_courses": "Tổng Khóa Học",
-        "total_students": "Tổng Học Viên",
-        "total_revenue": "Tổng Doanh Thu",
-        "avg_rating": "Đánh Giá Trung Bình",
+        "title": "✨ Khóa Học Của Tôi",
+        "subtitle": "🎯 Quản lý và theo dõi danh mục khóa học của bạn",
+        "create_new": "🚀 Tạo Khóa Học Mới",
+        "search_placeholder": "🔍 Tìm kiếm khóa học tuyệt vời của bạn...",
+        "filter_label": "✨ Bộ Lọc",
+        "sort_label": "📊 Sắp Xếp",
+        "all_categories": "📚 Tất Cả Danh Mục",
+        "sort_by_rating": "⭐ Sắp xếp theo Đánh giá",
+        "total_courses": "📚 Tổng Khóa Học",
+        "total_students": "👥 Tổng Học Viên",
+        "total_revenue": "💰 Tổng Doanh Thu",
+        "avg_rating": "⭐ Đánh Giá Trung Bình",
         "across_all_courses": "Trên tất cả khóa học",
         "for_stat": "Cho {stat}",
         "students": "học viên",
-        "updated": "Cập nhật",
-        "manage_course": "Quản Lý Khóa Học",
-        "analytics": "Phân Tích",
-        "menu_edit": "Chỉnh Sửa Khóa Học",
-        "menu_analytics": "Xem Phân Tích",
-        "menu_enrollments": "Quản Lý Đăng Ký",
-        "menu_reviews": "Xem Đánh Giá",
-        "menu_settings": "Cài Đặt Khóa Học",
-        "menu_delete": "Xóa Khóa Học"
+        "updated": "📅 Cập nhật",
+        "manage_course": "🎓 Quản Lý Khóa Học",
+        "analytics": "📊 Phân Tích",
+        "menu_edit": "✏️ Chỉnh Sửa Khóa Học",
+        "menu_analytics": "📈 Xem Phân Tích",
+        "menu_enrollments": "👥 Quản Lý Đăng Ký",
+        "menu_reviews": "⭐ Xem Đánh Giá",
+        "menu_settings": "⚙️ Cài Đặt Khóa Học",
+        "menu_delete": "🗑️ Xóa Khóa Học",
+        "filters": {
+            "all": "🎯 Tất Cả Khóa Học",
+            "free": "🆓 Khóa Học Miễn Phí",
+            "paid": "💰 Khóa Học Trả Phí",
+            "high_rated": "⭐ Đánh Giá Cao (4.0+)",
+            "popular": "🔥 Phổ Biến (10+ Học Viên)"
+        },
+        "sort_options": {
+            "recent": "⏰ Mới Tạo Gần Đây",
+            "alphabetical": "🔤 A-Z",
+            "rating": "⭐ Đánh Giá",
+            "students": "👥 Học Viên",
+            "price": "💰 Giá"
+        },
+        "buttons": {
+            "clear_filters": "🧹 Xóa Tất Cả Bộ Lọc",
+            "create_first_course": "🚀 Tạo Khóa Học Đầu Tiên"
+        },
+        "empty_state": {
+            "no_results_title": "🔍 Không tìm thấy khóa học",
+            "no_results_subtitle": "Hmm, chúng tôi không thể tìm thấy khóa học nào phù hợp với tìm kiếm của bạn. Hãy thử cái khác! ✨",
+            "no_courses_title": "🌟 Sẵn sàng tạo khóa học đầu tiên?",
+            "no_courses_subtitle": "Bắt đầu chia sẻ kiến thức và chuyên môn của bạn với thế giới. Tạo ra những khóa học hấp dẫn và tiếp cận học viên toàn cầu! 🚀"
+        }
     },
     "ManageDetailCourse": {
         "total_students": "Tổng Học Viên",
