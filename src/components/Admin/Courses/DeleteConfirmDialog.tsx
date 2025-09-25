@@ -21,7 +21,7 @@ interface DeleteConfirmDialogProps {
   course: ICourse | null;
   action: 'delete' | 'restore' | 'force-delete';
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (message?: string) => void;
   onError: (error: string) => void;
 }
 
@@ -40,18 +40,19 @@ export function DeleteConfirmDialog({
 
     startTransition(async () => {
       try {
+        let response;
         switch (action) {
           case 'delete':
-            const response = await deleteCourse(course.id.toString());
+            response = await deleteCourse(course.id.toString());
             break;
           case 'restore':
-            await restoreCourse(course.id.toString());
+            response = await restoreCourse(course.id.toString());
             break;
           case 'force-delete':
-            await forceDeleteCourse(course.id.toString());
+            response = await forceDeleteCourse(course.id.toString());
             break;
         }
-        onSuccess();
+        onSuccess(response?.message);
       } catch (error) {
         onError(error instanceof Error ? error.message : `Failed to ${action.replace('-', ' ')} course`);
       }

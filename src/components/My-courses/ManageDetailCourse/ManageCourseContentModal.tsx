@@ -25,9 +25,9 @@ import {
     CloudUpload,
     Add as AddIcon,
 } from "@mui/icons-material";
-import { ILecture, ISection } from "../../../../types/entities";
+import { ICourseSection, ICourseLecture, ISection, ILecture } from "../../../../types/entities";
 import { useEffect, useState } from "react";
-import { saveCourseContent, uploadLectureVideo } from "@/actions/coursesAction";
+import { saveCourseContent, uploadVideoToLecture } from "@/actions/coursesAction";
 // Removed useLoadingState import
 import { toastService } from "@/services/toast";
 import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
@@ -36,7 +36,7 @@ import CaptionManagement from "../../common/courses/CaptionManagement";
 interface ManageCourseContentModalProps {
     open: boolean;
     onClose: () => void;
-    sections: ISection[];
+    sections: ICourseSection[];
     courseId: number;
 }
 
@@ -46,7 +46,7 @@ export default function ManageCourseContentModal({
     sections,
     courseId,
 }: ManageCourseContentModalProps) {
-    const [localSections, setLocalSections] = useState<ISection[]>(sections);
+    const [localSections, setLocalSections] = useState<ICourseSection[]>(sections);
     const [editingSectionIndex, setEditingSectionIndex] = useState<
         number | null
     >(null);
@@ -82,10 +82,10 @@ export default function ManageCourseContentModal({
     };
 
     const handleAddSection = () => {
-        const newSection: ISection = {
-            _id: "",
+        const newSection: ICourseSection = {
+            id: `temp-${Date.now()}`,
             title: `New Section ${localSections.length + 1}`,
-            totalLectures: 0,
+            orderIndex: localSections.length,
             lectures: [],
         };
         setLocalSections([...localSections, newSection]);
@@ -114,11 +114,16 @@ export default function ManageCourseContentModal({
     const handleAddLecture = (sectionIndex: number) => {
         const updated = [...localSections];
         updated[sectionIndex].lectures.push({
+            id: `temp-${Date.now()}`,
             title: `New Lecture ${updated[sectionIndex].lectures.length + 1}`,
-            videoUrl: "",
-            _id: "",
+            contentType: 'video' as const,
+            orderIndex: updated[sectionIndex].lectures.length,
+            content: {
+                videoUrl: "",
+                cloudinaryPublicId: "",
+                quality: []
+            }
         });
-        updated[sectionIndex].totalLectures += 1;
         setLocalSections(updated);
     };
 
@@ -133,7 +138,6 @@ export default function ManageCourseContentModal({
             await new Promise((resolve) => setTimeout(resolve, 300));
             const updated = [...localSections];
             updated[sectionIndex].lectures.splice(lectureIndex, 1);
-            updated[sectionIndex].totalLectures -= 1;
             setLocalSections(updated);
             toastService.success("Lecture deleted successfully");
         } catch (error) {
@@ -159,11 +163,13 @@ export default function ManageCourseContentModal({
     const handleLectureFieldChange = (
         sectionIndex: number,
         lectureIndex: number,
-        field: keyof ILecture,
+        field: keyof ICourseLecture,
         value: string
     ) => {
         const updated = [...localSections];
-        updated[sectionIndex].lectures[lectureIndex][field] = value;
+        if (field === 'title') {
+            updated[sectionIndex].lectures[lectureIndex].title = value;
+        }
         setLocalSections(updated);
     };
 
@@ -181,11 +187,6 @@ export default function ManageCourseContentModal({
 
         const section = localSections[sectionIndex];
         const lecture = section.lectures[lectureIndex];
-        
-        const formData = new FormData();
-        formData.append("lecture", file);
-        formData.append("sectionId", section._id);
-        formData.append("lectureId", lecture._id);
 
         try {
             const progressInterval = setInterval(() => {
@@ -195,12 +196,8 @@ export default function ManageCourseContentModal({
                 }));
             }, 200);
 
-           const res = await uploadLectureVideo(courseId, formData);
-           if(res.statusCode === 201) {
-            toastService.success(res.message);
-           } else {
-            toastService.error(res.message);
-           }
+           const res = await uploadVideoToLecture(courseId, section.id, lecture.id, file);
+           toastService.success("Video uploaded successfully");
            
             clearInterval(progressInterval);
             setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
@@ -401,7 +398,7 @@ export default function ManageCourseContentModal({
                             color="text.secondary"
                             className="mb-3"
                         >
-                            {section.totalLectures} lectures
+                            {section.lectures.length} lectures
                         </Typography>
 
                         {section.lectures.map((lecture, lectureIndex) => {
@@ -557,8 +554,8 @@ export default function ManageCourseContentModal({
                                     </Box>
 
                                     <Collapse in={expandedVideos[videoKey]}>
-                                        {isValidCloudinaryVideoUrl(
-                                            lecture.videoUrl
+                                        {lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(
+                                            lecture.content.videoUrl
                                         ) && (
                                             <video
                                                 controls
@@ -566,15 +563,15 @@ export default function ManageCourseContentModal({
                                                 className="rounded-xl mt-2 border border-purple-200"
                                             >
                                                 <source
-                                                    src={lecture.videoUrl}
+                                                    src={lecture.content.videoUrl}
                                                     type="video/mp4"
                                                 />
                                             </video>
                                         )}
-                                        {!isValidCloudinaryVideoUrl(
-                                            lecture.videoUrl
+                                        {lecture.content && 'videoUrl' in lecture.content && !isValidCloudinaryVideoUrl(
+                                            lecture.content.videoUrl
                                         ) &&
-                                            lecture.videoUrl && (
+                                            lecture.content.videoUrl && (
                                                 <Box className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
                                                     <Typography
                                                         variant="caption"
@@ -647,9 +644,9 @@ export default function ManageCourseContentModal({
                                                     `${sectionIndex}-${lectureIndex}`
                                                 ]
                                                     ? "Uploading..."
-                                                    : isValidCloudinaryVideoUrl(
-                                                          lecture.videoUrl
-                                                      ) ? "Replace Video" : "Upload Video"}
+                                                    : (lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(
+                                                          lecture.content.videoUrl
+                                                      )) ? "Replace Video" : "Upload Video"}
                                             </Button>
                                         </label>
 
@@ -691,10 +688,10 @@ export default function ManageCourseContentModal({
                                         )}
 
                                         {/* Caption Management */}
-                                        {isValidCloudinaryVideoUrl(lecture.videoUrl) && lecture._id && (
+                                        {lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(lecture.content.videoUrl) && lecture.id && (
                                             <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
                                                 <CaptionManagement
-                                                    lectureId={lecture._id}
+                                                    lectureId={lecture.id}
                                                     lectureTitle={lecture.title}
                                                     size="small"
                                                     showTitle={true}

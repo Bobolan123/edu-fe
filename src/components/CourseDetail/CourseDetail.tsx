@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import { currencyService } from "@/services/currency";
 import { useCurrency } from "@/context/CurrencyContext";
-import { ICourse, ICourseContent } from "../../../types/entities";
+import { ICourse, ICourseContent, ICourseSection, ICourseLecture } from "../../../types/entities";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Play } from "lucide-react";
@@ -108,9 +108,9 @@ export default function CourseDetail({
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <AccessTimeIcon sx={{ mr: 1 }} />
                                 <Typography>
-                                    {course?.sections?.reduce(
+                                    {courseContent?.sections?.reduce(
                                         (total, section) =>
-                                            total + section.totalLectures,
+                                            total + section.lectures?.length,
                                         0
                                     ) || 0}{" "}
                                     {t("lectures")}
@@ -119,7 +119,7 @@ export default function CourseDetail({
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <LanguageIcon sx={{ mr: 1 }} />
                                 <Typography>
-                                    {course?.language || "English"}
+                                    {courseContent?.metadata?.language || course?.language || "English"}
                                 </Typography>
                             </Box>
                             <Typography>{t("last_updated")} </Typography>
@@ -145,7 +145,7 @@ export default function CourseDetail({
                                 {t("what_learn")}
                             </Typography>
                             <Grid container spacing={2}>
-                                {courseContent?.whatYoullLearn?.map(
+                                {courseContent?.metadata?.whatYoullLearn?.map(
                                     (point, index) => (
                                         <Grid item xs={12} md={6} key={index}>
                                             <Box
@@ -195,7 +195,11 @@ export default function CourseDetail({
                                 >
                                     <PlayIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.totalLectures || 0}{" "}
+                                        {courseContent?.sections?.reduce(
+                                            (total, section) =>
+                                                total + section.lectures?.length,
+                                            0
+                                        ) || 0}{" "}
                                         {t("lectures")}
                                     </Typography>
                                 </Box>
@@ -208,7 +212,17 @@ export default function CourseDetail({
                                 >
                                     <ClockIcon fontSize="small" />
                                     <Typography>
-                                        {courseContent?.totalLength || "0m"}{" "}
+                                        {Math.floor(
+                                            (courseContent?.sections?.reduce(
+                                                (total, section) =>
+                                                    total + section.lectures?.reduce(
+                                                        (lectureTotal, lecture) =>
+                                                            lectureTotal + (lecture.durationSeconds || 0),
+                                                        0
+                                                    ),
+                                                0
+                                            ) || 0) / 60
+                                        )}m{" "}
                                         {t("total_length")}
                                     </Typography>
                                 </Box>
@@ -261,13 +275,13 @@ export default function CourseDetail({
                                                 className="flex items-center gap-1"
                                             >
                                                 <Play className="w-4 h-4" />
-                                                {section.totalLectures}{" "}
+                                                {section.lectures?.length || 0}{" "}
                                                 {t("lectures")}
                                             </Typography>
                                         </Box>
                                     </AccordionSummary>
                                     <AccordionDetails>
-                                        {section.lectures?.map((sub, idx) => (
+                                        {section.lectures?.map((lecture, idx) => (
                                             <Box
                                                 key={idx}
                                                 sx={{
@@ -291,9 +305,15 @@ export default function CourseDetail({
                                                 >
                                                     <PlayIcon fontSize="small" />
                                                     <Typography>
-                                                        {sub.title}
+                                                        {lecture.title}
                                                     </Typography>
                                                 </Box>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    {Math.floor((lecture.durationSeconds || 0) / 60)}m
+                                                </Typography>
                                             </Box>
                                         ))}
                                     </AccordionDetails>

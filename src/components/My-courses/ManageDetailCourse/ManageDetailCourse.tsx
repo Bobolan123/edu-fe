@@ -92,7 +92,7 @@ export default function ManageDetailCourse({
     const [deleting, setDeleting] = useState(false);
 
     const totalLectures = courseContent?.sections.reduce(
-        (acc, section) => acc + section.totalLectures,
+        (acc, section) => acc + (section.lectures?.length || 0),
         0
     );
 
@@ -139,8 +139,8 @@ export default function ManageDetailCourse({
     const handleDeleteCourse = async () => {
         try {
             setDeleting(true);
-            await deleteCourse(course.id.toString());
-            toastService.success("Course deleted successfully");
+            const response = await deleteCourse(course.id.toString());
+            toastService.success(response.message || "Course deleted successfully");
             // Redirect to courses page
             router.push("/my-courses");
         } catch (error: any) {

@@ -102,6 +102,13 @@ export function CourseTable({
     handleMenuClose();
   };
 
+  const handleEditContent = () => {
+    if (selectedCourse) {
+      onEditContent(selectedCourse);
+    }
+    handleMenuClose();
+  };
+
   const handleDelete = () => {
     if (selectedCourse) {
       onDelete(selectedCourse, 'delete');
@@ -314,7 +321,14 @@ export function CourseTable({
               Edit Course
             </Box>
           </MenuItem>,
-          
+
+          <MenuItem key="edit-content" onClick={handleEditContent}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <VideoLibrary fontSize="small" />
+              Edit Content
+            </Box>
+          </MenuItem>,
+
           <MenuItem key="delete" onClick={handleDelete} sx={{ color: 'error.main' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Delete fontSize="small" />

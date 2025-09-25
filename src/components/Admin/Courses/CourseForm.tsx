@@ -28,7 +28,7 @@ import {
   Close,
   AttachMoney,
 } from '@mui/icons-material';
-import { adminCreateCourse, adminUpdateCourse } from '../../../actions/coursesAction';
+import { createCourse, updateCourse } from '../../../actions/coursesAction';
 import { ICategory, ICourse } from '../../../../types/entities';
 import { useCurrency } from '@/context/CurrencyContext';
 import { currencyService } from '@/services/currency';
@@ -199,9 +199,24 @@ export function CourseForm({
     startTransition(async () => {
       try {
         if (mode === 'create') {
-          await adminCreateCourse(formData);
+          await createCourse({
+            title: formData.title,
+            description: formData.description,
+            language: formData.language,
+            price: formData.price,
+            isActive: formData.isActive,
+            categoryIds: formData.categoryIds,
+            instructorId: formData.instructorId,
+          });
         } else if (course) {
-          await adminUpdateCourse(course.id.toString(), formData);
+          await updateCourse(course.id.toString(), {
+            title: formData.title,
+            description: formData.description,
+            language: formData.language,
+            price: formData.price,
+            isActive: formData.isActive,
+            categories: selectedCategories,
+          });
         }
         onSuccess();
         handleClose();

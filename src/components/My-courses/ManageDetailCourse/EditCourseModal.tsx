@@ -60,8 +60,8 @@ export default function EditCourseModal({
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await updateCourse(course.id.toString(), editedCourse);
-            toast.success('Course updated successfully!');
+            const response = await updateCourse(course.id.toString(), editedCourse);
+            toast.success(response.message || 'Course updated successfully!');
             onClose();
             router.refresh();
         } catch (error) {

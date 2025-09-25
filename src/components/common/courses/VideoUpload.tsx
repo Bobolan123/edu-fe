@@ -12,17 +12,15 @@ import {
     VideoFile as VideoFileIcon,
     CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
-import { uploadLecture } from "@/actions/coursesAction";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
-
 interface VideoUploadProps {
     disabled?: boolean;
     label?: string;
     maxSizeMB?: number;
     existingVideoUrl?: string;
-    // Add a way to get the video URL out when needed
     onVideoChange?: (videoUrl: string) => void;
+    onVideoFileChange?: (videoFile: File | null) => void;
 }
 
 export default function VideoUpload({
@@ -30,16 +28,15 @@ export default function VideoUpload({
     label = "Upload Video",
     maxSizeMB = 100,
     existingVideoUrl,
-    onVideoChange
+    onVideoChange,
+    onVideoFileChange
 }: VideoUploadProps) {
     const { data: session } = useSession();
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [videoUrl, setVideoUrl] = useState<string>(existingVideoUrl || "");
 
-    // Check if video is already uploaded
-    const hasUploadedVideo = videoUrl || uploadedFile;
+    // Check if video is selected or already uploaded
+    const hasSelectedVideo = selectedFile || videoUrl;
 
     // Initialize videoUrl from existingVideoUrl
     useEffect(() => {
@@ -48,19 +45,18 @@ export default function VideoUpload({
         }
     }, [existingVideoUrl, videoUrl]);
 
-    const handleFileSelect = async (
+    const handleFileSelect = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         const file = event.target.files?.[0];
-        if (!file) return;
-
-        // Reset previous state
-        setError(null);
-        setUploadedFile(null);
+        if (!file) {
+            setSelectedFile(null);
+            onVideoFileChange?.(null);
+            return;
+        }
 
         // Validate file type
         if (!file.type.startsWith("video/")) {
-            setError("Please select a video file");
             toast.error("Please select a video file");
             return;
         }
@@ -70,50 +66,17 @@ export default function VideoUpload({
             const fileSizeMB = file.size / (1024 * 1024);
             if (fileSizeMB > maxSizeMB) {
                 const errorMsg = `File size must be less than ${maxSizeMB}MB`;
-                setError(errorMsg);
                 toast.error(errorMsg);
                 return;
             }
         }
 
-        await uploadVideo(file);
+        // Store the file for later upload
+        setSelectedFile(file);
+        onVideoFileChange?.(file);
+        toast.success("Video file selected successfully");
     };
 
-    const uploadVideo = async (file: File) => {
-        setIsUploading(true);
-        setUploadProgress(0);
-
-        try {
-            // Check if user is authenticated
-            if (!session?.user?.access_token) {
-                throw new Error("Please log in to upload videos");
-            }
-
-
-            const uploadedVideoUrl = await uploadLecture(
-                file
-            );
-
-            if (!uploadedVideoUrl) {
-                throw new Error("No video URL returned from upload");
-            }
-            // Update internal state
-            setUploadedFile(file.name);
-            setVideoUrl(uploadedVideoUrl);
-            onVideoChange?.(uploadedVideoUrl);
-            
-            toast.success("Video uploaded successfully");
-        } catch (error) {
-            console.error("Video upload error:", error);
-
-            const errorMessage =
-                error instanceof Error ? error.message : "Upload failed";
-            toast.error(errorMessage);
-        } finally {
-            setIsUploading(false);
-            setUploadProgress(0);
-        }
-    };
 
     return (
         <Box>
@@ -121,52 +84,33 @@ export default function VideoUpload({
                 variant="outlined"
                 component="label"
                 startIcon={
-                    isUploading ? (
-                        <CircularProgress size={20} />
-                    ) : hasUploadedVideo ? (
+                    hasSelectedVideo ? (
                         <CheckCircleIcon color="success" />
                     ) : (
                         <CloudUploadIcon />
                     )
                 }
-                disabled={disabled || isUploading}
+                disabled={disabled}
                 fullWidth
-                color={hasUploadedVideo ? "success" : "primary"}
+                color={hasSelectedVideo ? "success" : "primary"}
             >
-                {isUploading
-                    ? `Uploading... ${Math.round(uploadProgress)}%`
-                    : hasUploadedVideo
-                    ? `Video Uploaded: ${uploadedFile || "Existing Video"}`
+                {hasSelectedVideo
+                    ? `Video Selected: ${selectedFile?.name || "Existing Video"}`
                     : label}
                 <input
                     type="file"
                     hidden
                     accept="video/*"
                     onChange={handleFileSelect}
-                    disabled={disabled || isUploading}
+                    disabled={disabled}
                 />
             </Button>
 
-            {isUploading && (
-                <Box sx={{ mt: 1 }}>
-                    <CircularProgress
-                        variant="determinate"
-                        value={uploadProgress}
-                        size={20}
-                        sx={{ mr: 1 }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                        {Math.round(uploadProgress)}% uploaded
-                    </Typography>
-                </Box>
-            )}
-
-
-            {hasUploadedVideo && !error && (
+            {hasSelectedVideo && (
                 <Box sx={{ mt: 1, display: "flex", alignItems: "center" }}>
                     <VideoFileIcon color="success" sx={{ mr: 1 }} />
                     <Typography variant="body2" color="success.main">
-                        Video uploaded successfully
+                        {selectedFile ? "Video file ready for upload" : "Video already uploaded"}
                     </Typography>
                 </Box>
             )}

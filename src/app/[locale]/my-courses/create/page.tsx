@@ -1,4 +1,4 @@
-import CreateCoursePage from "@/components/My-learning/Create/CreateCourse";
+import CreateCoursePage from "@/components/My-courses/Create/CreateCourse";
 import { getCategories } from "@/actions/categoriesAction";
 
 export default async function CreateACoursePage() {

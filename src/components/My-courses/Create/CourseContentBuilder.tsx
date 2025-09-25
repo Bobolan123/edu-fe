@@ -13,7 +13,6 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    Alert,
 } from "@mui/material";
 import {
     Add as AddIcon,
@@ -21,9 +20,10 @@ import {
     ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { ISection, ILecture } from "../../../../types/entities";
+import { ICourseSection, ICourseLecture } from "../../../../types/entities";
 import VideoUpload from "@/components/common/courses/VideoUpload";
 import { CourseContentBuilderProps } from "./types";
+import toastService from "@/services/toast";
 
 export default function CourseContentBuilder({
     courseId,
@@ -31,14 +31,16 @@ export default function CourseContentBuilder({
     onContentChange,
     onSubmit,
     isSubmitting,
-    submitMessage,
 }: CourseContentBuilderProps) {
     const t = useTranslations("CreateCourse");
 
     const addLearningPoint = () => {
         const updatedContent = {
             ...content,
-            whatYoullLearn: [...content.whatYoullLearn, ""],
+            metadata: {
+                ...content.metadata,
+                whatYoullLearn: [...(content.metadata.whatYoullLearn || []), ""],
+            }
         };
         onContentChange(updatedContent);
     };
@@ -46,7 +48,10 @@ export default function CourseContentBuilder({
     const removeLearningPoint = (index: number) => {
         const updatedContent = {
             ...content,
-            whatYoullLearn: content.whatYoullLearn.filter((_, i) => i !== index),
+            metadata: {
+                ...content.metadata,
+                whatYoullLearn: (content.metadata.whatYoullLearn || []).filter((_, i) => i !== index),
+            }
         };
         onContentChange(updatedContent);
     };
@@ -54,9 +59,12 @@ export default function CourseContentBuilder({
     const updateLearningPoint = (index: number, value: string) => {
         const updatedContent = {
             ...content,
-            whatYoullLearn: content.whatYoullLearn.map((item, i) =>
-                i === index ? value : item
-            ),
+            metadata: {
+                ...content.metadata,
+                whatYoullLearn: (content.metadata.whatYoullLearn || []).map((item, i) =>
+                    i === index ? value : item
+                ),
+            }
         };
         onContentChange(updatedContent);
     };
@@ -67,11 +75,21 @@ export default function CourseContentBuilder({
             sections: [
                 ...content.sections,
                 {
-                    _id: "",
+                    id: `temp-${Date.now()}`,
                     title: "",
-                    totalLectures: 1,
+                    orderIndex: content.sections.length,
                     lectures: [
-                        { _id: "", title: "", videoUrl: "" },
+                        {
+                            id: `temp-lecture-${Date.now()}`,
+                            title: "",
+                            contentType: 'video' as const,
+                            orderIndex: 0,
+                            content: {
+                                videoUrl: "",
+                                cloudinaryPublicId: "",
+                                quality: []
+                            }
+                        },
                     ],
                 },
             ],
@@ -89,7 +107,7 @@ export default function CourseContentBuilder({
 
     const updateSection = (
         sectionIndex: number,
-        field: keyof ISection,
+        field: keyof ICourseSection,
         value: string
     ) => {
         const updatedContent = {
@@ -111,12 +129,17 @@ export default function CourseContentBuilder({
                           lectures: [
                               ...section.lectures,
                               {
-                                  _id: "",
+                                  id: `temp-lecture-${Date.now()}-${section.lectures.length}`,
                                   title: "",
-                                  videoUrl: "",
+                                  contentType: 'video' as const,
+                                  orderIndex: section.lectures.length,
+                                  content: {
+                                      videoUrl: "",
+                                      cloudinaryPublicId: "",
+                                      quality: []
+                                  }
                               },
                           ],
-                          totalLectures: section.lectures.length + 1,
                       }
                     : section
             ),
@@ -134,10 +157,6 @@ export default function CourseContentBuilder({
                           lectures: section.lectures.filter(
                               (_, j) => j !== lectureIndex
                           ),
-                          totalLectures: Math.max(
-                              0,
-                              section.lectures.length - 1
-                          ),
                       }
                     : section
             ),
@@ -148,7 +167,7 @@ export default function CourseContentBuilder({
     const updateLecture = (
         sectionIndex: number,
         lectureIndex: number,
-        field: keyof ILecture,
+        field: keyof ICourseLecture,
         value: string | number
     ) => {
         const updatedContent = {
@@ -169,21 +188,27 @@ export default function CourseContentBuilder({
         onContentChange(updatedContent);
     };
 
-    const countUploadedVideos = () => {
+    const countSelectedVideos = () => {
         return content.sections.reduce(
             (total, section) =>
                 total +
-                section.lectures.filter((lecture) => lecture.videoUrl).length,
+                section.lectures.filter((lecture) =>
+                    (lecture.videoFile) || (lecture.content && 'videoUrl' in lecture.content && lecture.content.videoUrl)
+                ).length,
             0
         );
     };
 
-    const validateVideosUploaded = () => {
+    const validateVideosSelected = () => {
         const missingVideos: string[] = [];
 
         content.sections.forEach((section, sectionIndex) => {
             section.lectures.forEach((lecture, lectureIndex) => {
-                if (!lecture.videoUrl || lecture.videoUrl.trim() === "") {
+                const hasVideoFile = lecture.videoFile;
+                const hasExistingVideo = lecture.content && 'videoUrl' in lecture.content &&
+                                        lecture.content.videoUrl && lecture.content.videoUrl.trim() !== "";
+
+                if (!hasVideoFile && !hasExistingVideo) {
                     missingVideos.push(
                         `Section ${sectionIndex + 1}, Lecture ${
                             lectureIndex + 1
@@ -198,19 +223,15 @@ export default function CourseContentBuilder({
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        
-        const missingVideos = validateVideosUploaded();
+
+        const missingVideos = validateVideosSelected();
         if (missingVideos.length > 0) {
+           toastService.error(`Please select video files for the following lectures:\n${missingVideos.join('\n')}`);
             return;
         }
 
         const contentToSave = {
             ...content,
-            courseId,
-            totalLectures: content.sections.reduce(
-                (total, section) => total + section.lectures.length,
-                0
-            ),
         };
 
         await onSubmit(contentToSave);
@@ -242,7 +263,7 @@ export default function CourseContentBuilder({
                         />
                         <CardContent>
                             <div className="space-y-3">
-                                {content.whatYoullLearn.map((point, index) => (
+                                {(content.metadata.whatYoullLearn || []).map((point, index) => (
                                     <div
                                         key={index}
                                         className="flex items-center gap-2"
@@ -268,7 +289,7 @@ export default function CourseContentBuilder({
                                                 removeLearningPoint(index)
                                             }
                                             disabled={
-                                                content.whatYoullLearn.length <= 1
+                                                (content.metadata.whatYoullLearn || []).length <= 1
                                             }
                                             color="error"
                                         >
@@ -304,7 +325,7 @@ export default function CourseContentBuilder({
                                     variant="body2"
                                     color="text.secondary"
                                 >
-                                    Uploaded Videos: {countUploadedVideos()}
+                                    Selected Videos: {countSelectedVideos()}
                                 </Typography>
                             }
                         />
@@ -434,19 +455,34 @@ export default function CourseContentBuilder({
 
                                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                                     <VideoUpload
-                                                                        label="Upload Video"
+                                                                        label="Select Video File"
                                                                         existingVideoUrl={
-                                                                            lecture.videoUrl
+                                                                            lecture.content && 'videoUrl' in lecture.content
+                                                                                ? lecture.content.videoUrl
+                                                                                : ""
                                                                         }
-                                                                        onVideoChange={(
-                                                                            videoUrl
+                                                                        onVideoFileChange={(
+                                                                            videoFile
                                                                         ) => {
-                                                                            updateLecture(
-                                                                                sectionIndex,
-                                                                                lectureIndex,
-                                                                                "videoUrl",
-                                                                                videoUrl
-                                                                            );
+                                                                            const updatedContent = {
+                                                                                ...content,
+                                                                                sections: content.sections.map((section, i) =>
+                                                                                    i === sectionIndex
+                                                                                        ? {
+                                                                                              ...section,
+                                                                                              lectures: section.lectures.map((lect, j) =>
+                                                                                                  j === lectureIndex
+                                                                                                      ? {
+                                                                                                          ...lect,
+                                                                                                          videoFile
+                                                                                                      }
+                                                                                                      : lect
+                                                                                              )
+                                                                                          }
+                                                                                        : section
+                                                                                ),
+                                                                            };
+                                                                            onContentChange(updatedContent);
                                                                         }}
                                                                     />
                                                                 </div>
@@ -482,7 +518,7 @@ export default function CourseContentBuilder({
                         </CardContent>
                     </Card>
 
-                    {countUploadedVideos() > 0 && (
+                    {countSelectedVideos() > 0 && (
                         <Card className="shadow-lg">
                             <CardHeader
                                 title={
@@ -491,7 +527,7 @@ export default function CourseContentBuilder({
                                         component="h2"
                                         className="font-semibold"
                                     >
-                                        Upload Summary
+                                        Video Selection Summary
                                     </Typography>
                                 }
                             />
@@ -499,7 +535,9 @@ export default function CourseContentBuilder({
                                 <div className="space-y-2">
                                     {content.sections.map((section, sectionIndex) =>
                                         section.lectures.map((lecture, lectureIndex) => {
-                                            if (!lecture.videoUrl) return null;
+                                            const hasVideoFile = lecture.videoFile;
+                                            const hasExistingVideo = lecture.content && 'videoUrl' in lecture.content && lecture.content.videoUrl;
+                                            if (!hasVideoFile && !hasExistingVideo) return null;
                                             return (
                                                 <div
                                                     key={`${sectionIndex}-${lectureIndex}`}
@@ -512,6 +550,7 @@ export default function CourseContentBuilder({
                                                         Section {sectionIndex + 1} -
                                                         Lecture {lectureIndex + 1}:{" "}
                                                         {lecture.title || "Untitled"}
+                                                        {hasVideoFile ? " (New File)" : " (Existing)"}
                                                     </Typography>
                                                 </div>
                                             );
@@ -533,11 +572,6 @@ export default function CourseContentBuilder({
                         </Button>
                     </div>
 
-                    {submitMessage && (
-                        <Alert severity={submitMessage.type} className="mt-4">
-                            {submitMessage.text}
-                        </Alert>
-                    )}
                 </form>
             </div>
         </div>

@@ -42,9 +42,9 @@ import {
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { ICourse, ISection, ILecture } from '../../../../types/entities';
-import { saveCourseContent, uploadLectureVideo } from '@/actions/coursesAction';
 import { toastService } from '@/services/toast';
 import CaptionManagement from '../../common/courses/CaptionManagement';
+import { saveCourseContent, uploadVideoToLecture } from '@/actions/coursesAction';
 
 interface CourseContentEditModalProps {
   open: boolean;
@@ -96,7 +96,30 @@ export default function CourseContentEditModal({
 
     setSaving(true);
     try {
-      const result = await saveCourseContent(course.id, sections);
+      // Transform ISection[] to ICourseSection[]
+      const courseSections = sections.map((section, index) => ({
+        id: section._id,
+        title: section.title,
+        description: '',
+        orderIndex: index,
+        lectures: section.lectures.map((lecture, lectureIndex) => ({
+          id: lecture._id,
+          title: lecture.title,
+          description: '',
+          contentType: 'video' as const,
+          orderIndex: lectureIndex,
+          durationSeconds: 0,
+          isPreview: false,
+          content: {
+            videoUrl: lecture.videoUrl || '',
+            thumbnailUrl: '',
+            cloudinaryPublicId: '',
+            quality: []
+          }
+        }))
+      }));
+
+      const result = await saveCourseContent(course.id, courseSections);
       if (result.statusCode === 200) {
         toastService.success('Course content updated successfully!');
         onSuccess?.();
@@ -218,15 +241,19 @@ export default function CourseContentEditModal({
     setUploadProgress(prev => ({ ...prev, [lectureKey]: 0 }));
 
     try {
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('video', file);
+      const section = sections[sectionIndex];
+      const lecture = section.lectures[lectureIndex];
 
-      const result = await uploadLectureVideo(course.id, formData);
+      const result = await uploadVideoToLecture(
+        course.id,
+        section._id,
+        lecture._id,
+        file
+      );
 
-      if (result.data?.videoUrl) {
+      if (result?.url) {
         const newSections = [...sections];
-        newSections[sectionIndex].lectures[lectureIndex].videoUrl = result.data.videoUrl;
+        newSections[sectionIndex].lectures[lectureIndex].videoUrl = result.url;
         setSections(newSections);
         toastService.success('Video uploaded successfully!');
       } else {

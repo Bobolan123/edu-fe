@@ -135,28 +135,95 @@ export interface ISubscription {
     status: string;
 }
 
+// Course Section Interface - matches new API structure
+export interface ICourseSection {
+    id: string;
+    title: string;
+    description?: string;
+    orderIndex: number;
+    lectures: ICourseLecture[];
+}
+
+// Course Lecture Interface - matches new API structure
+export interface ICourseLecture {
+    id: string;
+    title: string;
+    description?: string;
+    contentType: 'video' | 'quiz';
+    durationSeconds?: number;
+    orderIndex: number;
+    isPreview?: boolean;
+    content: VideoContent | QuizContent;
+    videoFile?: File | null; // For video uploads during creation
+}
+
+// Video Quality Interface
+export interface IVideoQuality {
+    resolution: string;
+    url: string;
+}
+
+// Course Content Interface - new structure
+export interface ICourseContent {
+    sections: ICourseSection[];
+    metadata: {
+        language?: string;
+        level?: string;
+        whatYoullLearn?: string[];
+    };
+}
+
+
+// Caption Response Interface
+export interface ICaptionResponse {
+    url: string;
+    format: string;
+}
+
+// Progress Update Interface
+export interface IProgressUpdate {
+    lectureId: string;
+    watchTimeSeconds: number;
+    isCompleted: boolean;
+    submissionData?: any;
+}
+
+// Progress Response Interface
+export interface IProgressResponse {
+    id: string;
+    watchTimeSeconds: number;
+    isCompleted: boolean;
+    completedAt?: Date;
+}
+
+// Student Progress Interface
+export interface IStudentProgress {
+    enrollmentId: string;
+    student: {
+        id: number;
+        name: string;
+        email: string;
+        avatar_url?: string;
+    };
+    enrolledAt: Date;
+    completedLectures: number;
+    totalLectures: number;
+    progressPercentage: number;
+}
+
+// Legacy interfaces for backward compatibility
 export interface ILecture {
-    _id:string;
-    lectureId?:string;
+    _id: string;
+    lectureId?: string;
     title: string;
     videoUrl: string;
 }
 
 export interface ISection {
-    _id:string;
+    _id: string;
     title: string;
     totalLectures: number;
     lectures: ILecture[];
-}
-
-export interface ICourseContent {
-    courseId: number;
-    sections: ISection[];
-    totalLength: number;
-    totalLectures: number;
-    whatYoullLearn: string[];
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 
 export interface ICart {
@@ -226,4 +293,134 @@ export interface IOrder {
   paymentInitiatedAt?: string;            // NEW: Payment start timestamp
   paymentCompletedAt?: string;            // NEW: Payment completion timestamp
   statusHistory?: IStatusHistoryItem[];   // NEW: Audit trail array
+}
+
+// ============ COURSE CONTENT DTOs ============
+
+// Video Content Interface
+export interface VideoContent {
+    videoUrl: string;
+    thumbnailUrl?: string;
+    cloudinaryPublicId: string;
+    quality: IVideoQuality[];
+}
+
+// Quiz Content Interface
+export interface QuizContent {
+    questions: QuizQuestion[];
+    passingScore: number;
+    timeLimit?: number;
+    allowMultipleAttempts: boolean;
+}
+
+// Quiz Question Interface
+export interface QuizQuestion {
+    id: string;
+    type: 'multiple_choice' | 'true_false' | 'fill_blank';
+    question: string;
+    options?: string[];
+    correctAnswer: string | number;
+    explanation?: string;
+    points: number;
+}
+
+// Course Content Update DTO
+export interface UpsertCourseContentDto {
+    language?: string;
+    level?: string;
+    whatYoullLearn?: string[];
+}
+
+// Section DTOs
+export interface CreateSectionDto {
+    title: string;
+    description?: string;
+    orderIndex?: number;
+}
+
+export interface UpdateSectionDto {
+    title?: string;
+    description?: string;
+    orderIndex?: number;
+}
+
+// Lecture DTOs
+export interface CreateLectureDto {
+    title: string;
+    description?: string;
+    contentType: 'video' | 'quiz';
+    orderIndex?: number;
+    durationSeconds?: number;
+    isPreview?: boolean;
+    content: VideoContent | QuizContent;
+}
+
+export interface UpdateLectureDto {
+    title?: string;
+    description?: string;
+    contentType?: 'video' | 'quiz';
+    orderIndex?: number;
+    durationSeconds?: number;
+    isPreview?: boolean;
+    content?: VideoContent | QuizContent;
+}
+
+// ============ CAPTION MANAGEMENT INTERFACES ============
+
+// Caption Status Enum
+export enum CaptionStatus {
+    PENDING = 'PENDING',
+    COMPLETED = 'COMPLETED',
+    FAILED = 'FAILED'
+}
+
+// Caption Format Enum
+export enum CaptionFormat {
+    SRT = 'SRT'
+}
+
+// Caption Source Enum
+export enum CaptionSource {
+    AUTO_GENERATED = 'AUTO_GENERATED',
+    INSTRUCTOR_UPLOADED = 'INSTRUCTOR_UPLOADED'
+}
+
+// Caption DTOs
+export interface CreateCaptionDto {
+    lectureId: string;
+    courseId: number;
+    videoPublicId: string;
+    language?: string;
+}
+
+export interface CaptionCueDto {
+    start: number;
+    end: number;
+    text: string;
+}
+
+export interface UpdateCaptionDto {
+    status?: CaptionStatus;
+    cues?: CaptionCueDto[];
+    processingError?: string;
+}
+
+
+// Lecture Caption Schema
+export interface ILectureCaption {
+    lectureId: string;
+    courseId: number;
+    videoPublicId: string;
+    language: string;
+    status: CaptionStatus;
+    source: CaptionSource;
+    cues: CaptionCueDto[];
+    files: Record<string, string>;
+    processingError?: string;
+    transcriptionJobId?: string;
+    accuracy?: number;
+    reviewedBy?: string;
+    reviewedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

@@ -803,6 +803,20 @@ export default function AdminCoursesPage({
           setSelectedCourse(null);
         }}
       />
+
+      <CourseContentEditModal
+        open={contentEditModalOpen}
+        course={selectedCourse}
+        onClose={() => {
+          setContentEditModalOpen(false);
+          setSelectedCourse(null);
+        }}
+        onSuccess={() => {
+          setContentEditModalOpen(false);
+          setSelectedCourse(null);
+          toastService.success('Course content updated successfully!');
+        }}
+      />
     </Box>
   );
 }

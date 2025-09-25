@@ -18,12 +18,12 @@ import {
     VideoLibrary,
     Edit,
 } from "@mui/icons-material";
-import { ILecture, ISection } from "../../../../types/entities";
+import { ICourseContent, ICourseSection, ICourseLecture } from "../../../../types/entities";
 import { useState } from "react";
 import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
 
 interface ICourseContentTabProps {
-    sections: ISection[];
+    sections: ICourseSection[];
     onEditContent?: () => void;
 }
 
@@ -41,7 +41,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
     };
 
     const totalLectures = sections.reduce(
-        (acc, section) => acc + section.totalLectures,
+        (acc, section) => acc + (section.lectures?.length || 0),
         0
     );
 
@@ -138,10 +138,18 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                 >
                                     📖 {section.title}
                                 </Typography>
+                                {section.description && (
+                                    <Typography
+                                        variant="body2"
+                                        className="text-gray-600 mb-2"
+                                    >
+                                        {section.description}
+                                    </Typography>
+                                )}
                                 
                                 <Box className="flex items-center gap-4">
                                     <Chip
-                                        label={`${section.totalLectures} lectures`}
+                                        label={`${section.lectures?.length || 0} lectures`}
                                         size="small"
                                         className="bg-purple-100 text-purple-700 font-medium"
                                         sx={{ borderRadius: '12px' }}
@@ -156,9 +164,12 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                             </Box>
 
                             <Box className="space-y-3">
-                                {section.lectures.map((lecture, lectureIndex) => {
+                                {section.lectures?.map((lecture, lectureIndex) => {
                                     const videoKey = `${sectionIndex}-${lectureIndex}`;
-                                    const hasVideo = isValidCloudinaryVideoUrl(lecture.videoUrl);
+                                    const hasVideo = lecture.content &&
+                                        typeof lecture.content === 'object' &&
+                                        'videoUrl' in lecture.content &&
+                                        isValidCloudinaryVideoUrl(lecture.content.videoUrl);
 
                                     return (
                                         <Box
@@ -176,14 +187,31 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                             className="font-medium text-gray-800 mb-1"
                                                         >
                                                             {lecture.title}
+                                                            {lecture.isPreview && ' (Preview)'}
                                                         </Typography>
+                                                        {lecture.description && (
+                                                            <Typography
+                                                                variant="caption"
+                                                                className="text-gray-600 block mb-1"
+                                                            >
+                                                                {lecture.description}
+                                                            </Typography>
+                                                        )}
                                                         <Box className="flex items-center gap-2">
                                                             <Chip
-                                                                label={`Lecture ${lectureIndex + 1}`}
+                                                                label={`${lecture.contentType} ${lectureIndex + 1}`}
                                                                 size="small"
                                                                 variant="outlined"
                                                                 className="text-xs border-gray-300 text-gray-600"
                                                             />
+                                                            {lecture.durationSeconds && (
+                                                                <Chip
+                                                                    label={`${Math.floor(lecture.durationSeconds / 60)}m`}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    className="text-xs border-gray-300 text-gray-600"
+                                                                />
+                                                            )}
                                                             {hasVideo ? (
                                                                 <Chip
                                                                     label="Video available"
@@ -218,15 +246,19 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                             {hasVideo && (
                                                 <Collapse in={expandedVideos[videoKey]}>
                                                     <Box className="mt-4 pt-4 border-t border-purple-100">
-                                                        <video
-                                                            controls
-                                                            className="rounded-xl w-full max-w-md border border-purple-200 shadow-sm"
-                                                        >
-                                                            <source
-                                                                src={lecture.videoUrl}
-                                                                type="video/mp4"
-                                                            />
-                                                        </video>
+                                                        {lecture.content &&
+                                                         typeof lecture.content === 'object' &&
+                                                         'videoUrl' in lecture.content && (
+                                                            <video
+                                                                controls
+                                                                className="rounded-xl w-full max-w-md border border-purple-200 shadow-sm"
+                                                            >
+                                                                <source
+                                                                    src={lecture.content.videoUrl}
+                                                                    type="video/mp4"
+                                                                />
+                                                            </video>
+                                                        )}
                                                     </Box>
                                                 </Collapse>
                                             )}

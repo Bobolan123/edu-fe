@@ -4,12 +4,12 @@ import { SelectChangeEvent } from "@mui/material";
 export interface CourseFormState {
     title: string;
     description: string;
-    language: string;
     price: number;
     preview_url: string;
     thumbnail_url: string | null;
     categories: string[];
     isActive: boolean;
+    language: string;
 }
 
 export interface CourseBasicInfoProps {
@@ -22,7 +22,6 @@ export interface CourseBasicInfoProps {
     onThumbnailUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
     onSubmit: (courseData: CourseFormState, thumbnailFile: File | null) => Promise<number>;
     isSubmitting: boolean;
-    submitMessage: { type: "success" | "error"; text: string } | null;
 }
 
 export interface CourseContentBuilderProps {
@@ -31,7 +30,6 @@ export interface CourseContentBuilderProps {
     onContentChange: (content: ICourseContent) => void;
     onSubmit: (content: ICourseContent) => Promise<void>;
     isSubmitting: boolean;
-    submitMessage: { type: "success" | "error"; text: string } | null;
 }
 
 export interface CreateCourseStepProps {

@@ -15,7 +15,6 @@ import {
     Select,
     TextField,
     Typography,
-    Alert,
 } from "@mui/material";
 import { CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
@@ -24,7 +23,7 @@ import { CourseBasicInfoProps } from "./types";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/services/currency";
 
-export default function CourseBasicInfo({
+export default function     CourseBasicInfo({
     course,
     categories,
     thumbnailFile,
@@ -34,7 +33,6 @@ export default function CourseBasicInfo({
     onThumbnailUpload,
     onSubmit,
     isSubmitting,
-    submitMessage,
 }: CourseBasicInfoProps) {
     const t = useTranslations("CreateCourse");
 
@@ -118,10 +116,6 @@ export default function CourseBasicInfo({
                                             Number.parseFloat(e.target.value) || 0
                                         )
                                     }
-                                    inputProps={{
-                                        min: 0,
-                                        step: currency === "VND" ? 1000 : 0.01,
-                                    }}
                                     helperText={
                                         currency === "VND"
                                             ? `VND - ${currencyService.formatPrice(course.price, currency)}`
@@ -222,11 +216,6 @@ export default function CourseBasicInfo({
                         </Button>
                     </div>
 
-                    {submitMessage && (
-                        <Alert severity={submitMessage.type} className="mt-4">
-                            {submitMessage.text}
-                        </Alert>
-                    )}
                 </form>
             </div>
         </div>
