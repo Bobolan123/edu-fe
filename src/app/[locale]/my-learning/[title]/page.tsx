@@ -4,7 +4,7 @@ import {
     ICourse,
     ICourseContent,
     IEnrollment,
-    ILecture,
+    ICourseLecture,
     IReview,
 } from "../../../../../types/entities";
 import { extractIds } from "../../../../utils/utils";
@@ -13,12 +13,12 @@ import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLe
 import { IReviewDistribution } from "../../../../../types/resData";
 import { auth } from "@/auth";
 import { getAllReviews, getUserReviewForCourse, getReviewDistribution } from "@/actions/reviewsAction";
-import { getCourseContent } from "@/actions/coursesAction";
+import { getCourseContent } from "@/actions/courseContentAction";
 import { getEnrollmentProgress } from "@/actions/enrollmentAction";
 
 export type EnrollmentProgress = {
     enrollment: IEnrollment;
-    lectureProgress: ILecture[];
+    lectureProgress: ICourseLecture[];
     progressPercentage: number;
 };
 

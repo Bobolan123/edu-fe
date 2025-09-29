@@ -40,7 +40,7 @@ import {
     createCourseSection,
     createCourseLecture,
     uploadVideoToLecture,
-} from "@/actions/coursesAction";
+} from "@/actions/courseContentAction";
 import { ICourseContent, ICourseSection, ICourseLecture } from "../../../types/entities";
 
 interface CourseContentManagerProps {

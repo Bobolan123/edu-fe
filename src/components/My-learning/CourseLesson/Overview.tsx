@@ -28,7 +28,7 @@ import { ICourse } from "../../../../types/entities";
 
 const formatLectureCount = (course?: ICourse) => {
     if (!course?.sections) return "0 lectures";
-    const totalLectures = course.sections.reduce((total, section) => total + section.totalLectures, 0);
+    const totalLectures = course.sections.reduce((total, section) => total + section.lectures.length, 0);
     return `${totalLectures} lecture${totalLectures !== 1 ? "s" : ""}`;
 };
 

@@ -59,14 +59,14 @@ import {
     Speed,
 } from "@mui/icons-material";
 import { Bot, Subtitles, X } from "lucide-react";
-import { ICourse, ICourseContent, IEnrollment, ILecture, IReview } from "../../../../types/entities";
+import { ICourse, ICourseContent, IEnrollment, ICourseLecture, IReview } from "../../../../types/entities";
 import CourseOverview from "./Overview";
 import CourseReviews from "./CourseReviews";
 import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
 
 import { useSession } from "next-auth/react";
-import { updateCourseContent } from "@/actions/coursesAction";
+import { updateCourseContent } from "@/actions/courseContentAction";
 import { markLectureAsCompleted } from "@/actions/enrollmentAction";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -116,7 +116,7 @@ export default function     CourseLesson({
     const isLectureCompleted = (lectureId: string): boolean => {
         if (!enrollmentProgress?.lectureProgress) return false;
         return enrollmentProgress.lectureProgress.some(
-            progressLecture => progressLecture.lectureId === lectureId
+            progressLecture => progressLecture.id === lectureId
         );
     };
 
@@ -170,9 +170,10 @@ export default function     CourseLesson({
     };
 
     // Initialize with first lecture
-    const videoUrl =
-        courseContent?.sections?.[0]?.lectures?.[0]?.videoUrl ?? "";
     const firstLecture = courseContent?.sections?.[0]?.lectures?.[0];
+    const videoUrl = firstLecture?.content && 'videoUrl' in firstLecture.content
+        ? firstLecture.content.videoUrl
+        : "";
 
     const [curVideoUrl, setCurVideoUrl] = useState(videoUrl);
 
@@ -182,15 +183,19 @@ export default function     CourseLesson({
 
         // Initialize current lecture after mount
         if (firstLecture) {
+            const lectureVideoUrl = firstLecture.content && 'videoUrl' in firstLecture.content
+                ? firstLecture.content.videoUrl
+                : "";
+
             setCurrentLecture({
                 title: firstLecture.title,
-                videoUrl: firstLecture.videoUrl,
-                lectureId: firstLecture._id || "",
+                videoUrl: lectureVideoUrl,
+                lectureId: firstLecture.id || "",
             });
 
             // Fetch captions for the first lecture
-            if (firstLecture._id) {
-                fetchCaptions(firstLecture._id);
+            if (firstLecture.id) {
+                fetchCaptions(firstLecture.id);
             }
         }
     }, [firstLecture]);
@@ -223,16 +228,20 @@ export default function     CourseLesson({
 
             // Add delay to ensure state updates
             setTimeout(() => {
-                setCurVideoUrl(lecture.videoUrl);
+                const lectureVideoUrl = lecture.content && 'videoUrl' in lecture.content
+                    ? lecture.content.videoUrl
+                    : "";
+
+                setCurVideoUrl(lectureVideoUrl);
                 setCurrentLecture({
                     title: lecture.title,
-                    videoUrl: lecture.videoUrl,
-                    lectureId: lecture._id || "",
+                    videoUrl: lectureVideoUrl,
+                    lectureId: lecture.id || "",
                 });
 
                 // Fetch captions for the new lecture
-                if (lecture._id) {
-                    fetchCaptions(lecture._id);
+                if (lecture.id) {
+                    fetchCaptions(lecture.id);
                 }
             }, 100);
         },
@@ -430,13 +439,13 @@ export default function     CourseLesson({
                     <div className="flex-1 overflow-auto">
                         {courseContent?.sections?.map((section) => (
                             <Accordion
-                                key={section._id}
-                                expanded={expandedSection === section._id}
+                                key={section.id}
+                                expanded={expandedSection === section.id}
                                 onChange={() =>
                                     setExpandedSection(
-                                        expandedSection === section._id
+                                        expandedSection === section.id
                                             ? false
-                                            : section._id
+                                            : section.id
                                     )
                                 }
                                 className="shadow-none border-b"
@@ -463,27 +472,27 @@ export default function     CourseLesson({
                                 <AccordionDetails className="px-4">
                                     {section.lectures?.map((lecture, index) => (
                                         <div
-                                            key={lecture?._id}
+                                            key={lecture?.id}
                                             className={`flex items-center py-3 px-3 rounded-lg transition-all duration-200 group ${
                                                 currentLecture?.lectureId ===
-                                                lecture?._id
+                                                lecture?.id
                                                     ? "bg-blue-50 border-l-4 border-blue-500"
                                                     : "hover:bg-gray-100"
                                             }`}
                                         >
                                             {/* Checkbox for lecture completion */}
                                             <Checkbox
-                                                checked={isLectureCompleted(lecture?._id || "")}
+                                                checked={isLectureCompleted(lecture?.id || "")}
                                                 onChange={(e) => {
                                                     e.stopPropagation();
-                                                    if (lecture?._id) {
-                                                        handleLectureToggle(lecture._id);
+                                                    if (lecture?.id) {
+                                                        handleLectureToggle(lecture.id);
                                                     }
                                                 }}
                                                 size="small"
                                                 className="mr-2"
                                                 sx={{
-                                                    color: isLectureCompleted(lecture?._id || "")
+                                                    color: isLectureCompleted(lecture?.id || "")
                                                         ? "#10b981"
                                                         : "#6b7280",
                                                     "&.Mui-checked": {
@@ -502,7 +511,7 @@ export default function     CourseLesson({
                                                 {/* Play/Current Indicator */}
                                                 <Box className="flex-shrink-0">
                                                     {currentLecture?.lectureId ===
-                                                    lecture?._id ? (
+                                                    lecture?.id ? (
                                                         <Box className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
                                                             <PlayArrow
                                                                 className="text-white"
@@ -526,7 +535,7 @@ export default function     CourseLesson({
                                                         variant="body2"
                                                         className={`font-medium line-clamp-2 ${
                                                             currentLecture?.lectureId ===
-                                                            lecture?._id
+                                                            lecture?.id
                                                                 ? "text-blue-700"
                                                                 : "text-gray-800 group-hover:text-blue-600"
                                                         }`}
@@ -544,7 +553,7 @@ export default function     CourseLesson({
                                                 {/* Status indicators */}
                                                 <Box className="flex-shrink-0 flex items-center gap-1">
                                                     {currentLecture?.lectureId ===
-                                                        lecture?._id && (
+                                                        lecture?.id && (
                                                         <Chip
                                                             label="Playing"
                                                             size="small"
@@ -557,7 +566,7 @@ export default function     CourseLesson({
                                                             }}
                                                         />
                                                     )}
-                                                    {isLectureCompleted(lecture?._id || "") && (
+                                                    {isLectureCompleted(lecture?.id || "") && (
                                                         <Chip
                                                             label="Completed"
                                                             size="small"

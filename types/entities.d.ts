@@ -11,7 +11,7 @@ export interface    ICourse {
     average_rating: number;
     total_students: number;
     language:string;
-    sections: ISection[];
+    sections: ICourseSection[];
     enrollments: IEnrollment[];
     quizzes: IQuiz[];
     reviews: IReview[];
@@ -211,20 +211,6 @@ export interface IStudentProgress {
     progressPercentage: number;
 }
 
-// Legacy interfaces for backward compatibility
-export interface ILecture {
-    _id: string;
-    lectureId?: string;
-    title: string;
-    videoUrl: string;
-}
-
-export interface ISection {
-    _id: string;
-    title: string;
-    totalLectures: number;
-    lectures: ILecture[];
-}
 
 export interface ICart {
     id: string;

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ICourse, ICourseContent, IEnrollment, ILecture } from "../../../../types/entities";
+import { ICourse, ICourseContent, IEnrollment, ICourseLecture } from "../../../../types/entities";
 import { Typography, Box, IconButton, Tooltip, LinearProgress, CircularProgress, CircularProgressProps } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, Share as ShareIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { useState } from "react";

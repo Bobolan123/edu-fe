@@ -13,15 +13,23 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Chip,
 } from "@mui/material";
 import {
     Add as AddIcon,
     Delete as DeleteIcon,
     ExpandMore as ExpandMoreIcon,
+    VideoLibrary as VideoIcon,
+    Quiz as QuizIcon,
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { ICourseSection, ICourseLecture } from "../../../../types/entities";
+import { ICourseSection, ICourseLecture, QuizContent } from "../../../../types/entities";
 import VideoUpload from "@/components/common/courses/VideoUpload";
+import QuizBuilder from "./QuizBuilder";
 import { CourseContentBuilderProps } from "./types";
 import toastService from "@/services/toast";
 
@@ -119,7 +127,20 @@ export default function CourseContentBuilder({
         onContentChange(updatedContent);
     };
 
-    const addLecture = (sectionIndex: number) => {
+    const addLecture = (sectionIndex: number, contentType: 'video' | 'quiz' = 'video') => {
+        const defaultContent = contentType === 'video'
+            ? {
+                videoUrl: "",
+                cloudinaryPublicId: "",
+                quality: []
+              }
+            : {
+                questions: [],
+                passingScore: 70,
+                timeLimit: undefined,
+                allowMultipleAttempts: true
+              };
+
         const updatedContent = {
             ...content,
             sections: content.sections.map((section, i) =>
@@ -131,13 +152,11 @@ export default function CourseContentBuilder({
                               {
                                   id: `temp-lecture-${Date.now()}-${section.lectures.length}`,
                                   title: "",
-                                  contentType: 'video' as const,
+                                  contentType: contentType,
                                   orderIndex: section.lectures.length,
-                                  content: {
-                                      videoUrl: "",
-                                      cloudinaryPublicId: "",
-                                      quality: []
-                                  }
+                                  durationSeconds: 0,
+                                  isPreview: false,
+                                  content: defaultContent
                               },
                           ],
                       }
@@ -188,45 +207,140 @@ export default function CourseContentBuilder({
         onContentChange(updatedContent);
     };
 
-    const countSelectedVideos = () => {
+    const updateLectureContentType = (
+        sectionIndex: number,
+        lectureIndex: number,
+        newContentType: 'video' | 'quiz'
+    ) => {
+        const defaultContent = newContentType === 'video'
+            ? {
+                videoUrl: "",
+                cloudinaryPublicId: "",
+                quality: []
+              }
+            : {
+                questions: [],
+                passingScore: 70,
+                timeLimit: undefined,
+                allowMultipleAttempts: true
+              };
+
+        const updatedContent = {
+            ...content,
+            sections: content.sections.map((section, i) =>
+                i === sectionIndex
+                    ? {
+                          ...section,
+                          lectures: section.lectures.map((lecture, j) =>
+                              j === lectureIndex
+                                  ? {
+                                      ...lecture,
+                                      contentType: newContentType,
+                                      content: defaultContent,
+                                      videoFile: undefined // Clear video file if switching to quiz
+                                    }
+                                  : lecture
+                          ),
+                      }
+                    : section
+            ),
+        };
+        onContentChange(updatedContent);
+    };
+
+    const updateQuizContent = (
+        sectionIndex: number,
+        lectureIndex: number,
+        quizContent: QuizContent
+    ) => {
+        const updatedContent = {
+            ...content,
+            sections: content.sections.map((section, i) =>
+                i === sectionIndex
+                    ? {
+                          ...section,
+                          lectures: section.lectures.map((lecture, j) =>
+                              j === lectureIndex
+                                  ? { ...lecture, content: quizContent }
+                                  : lecture
+                          ),
+                      }
+                    : section
+            ),
+        };
+        onContentChange(updatedContent);
+    };
+
+    const countCompletedLectures = () => {
         return content.sections.reduce(
             (total, section) =>
                 total +
-                section.lectures.filter((lecture) =>
-                    (lecture.videoFile) || (lecture.content && 'videoUrl' in lecture.content && lecture.content.videoUrl)
-                ).length,
+                section.lectures.filter((lecture) => {
+                    if (lecture.contentType === 'video') {
+                        return (lecture.videoFile) || (lecture.content && 'videoUrl' in lecture.content && lecture.content.videoUrl);
+                    } else if (lecture.contentType === 'quiz') {
+                        return lecture.content && 'questions' in lecture.content && lecture.content.questions.length > 0;
+                    }
+                    return false;
+                }).length,
             0
         );
     };
 
-    const validateVideosSelected = () => {
-        const missingVideos: string[] = [];
+    const validateLectureContent = () => {
+        const missingContent: string[] = [];
 
         content.sections.forEach((section, sectionIndex) => {
             section.lectures.forEach((lecture, lectureIndex) => {
-                const hasVideoFile = lecture.videoFile;
-                const hasExistingVideo = lecture.content && 'videoUrl' in lecture.content &&
-                                        lecture.content.videoUrl && lecture.content.videoUrl.trim() !== "";
+                if (lecture.contentType === 'video') {
+                    const hasVideoFile = lecture.videoFile;
+                    const hasExistingVideo = lecture.content && 'videoUrl' in lecture.content &&
+                                            lecture.content.videoUrl && lecture.content.videoUrl.trim() !== "";
 
-                if (!hasVideoFile && !hasExistingVideo) {
-                    missingVideos.push(
-                        `Section ${sectionIndex + 1}, Lecture ${
-                            lectureIndex + 1
-                        }`
-                    );
+                    if (!hasVideoFile && !hasExistingVideo) {
+                        missingContent.push(
+                            `Section ${sectionIndex + 1}, Lecture ${lectureIndex + 1}: Missing video content`
+                        );
+                    }
+                } else if (lecture.contentType === 'quiz') {
+                    if (!lecture.content || !('questions' in lecture.content) || lecture.content.questions.length === 0) {
+                        missingContent.push(
+                            `Section ${sectionIndex + 1}, Lecture ${lectureIndex + 1}: Missing quiz questions`
+                        );
+                    } else {
+                        // Validate quiz questions
+                        const quiz = lecture.content as QuizContent;
+                        quiz.questions.forEach((question, qIndex) => {
+                            if (!question.question.trim()) {
+                                missingContent.push(
+                                    `Section ${sectionIndex + 1}, Lecture ${lectureIndex + 1}, Question ${qIndex + 1}: Missing question text`
+                                );
+                            }
+                            if (question.type === 'multiple_choice' && (!question.options || question.options.some(opt => !opt.trim()))) {
+                                missingContent.push(
+                                    `Section ${sectionIndex + 1}, Lecture ${lectureIndex + 1}, Question ${qIndex + 1}: Missing or empty answer options`
+                                );
+                            }
+                            if (question.type === 'fill_blank' && !question.correctAnswer) {
+                                missingContent.push(
+                                    `Section ${sectionIndex + 1}, Lecture ${lectureIndex + 1}, Question ${qIndex + 1}: Missing correct answer`
+                                );
+                            }
+                        });
+                    }
                 }
             });
         });
 
-        return missingVideos;
+        return missingContent;
     };
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        const missingVideos = validateVideosSelected();
-        if (missingVideos.length > 0) {
-           toastService.error(`Please select video files for the following lectures:\n${missingVideos.join('\n')}`);
+        const missingContent = validateLectureContent();
+        if (missingContent.length > 0) {
+           toastService.error(`Please complete the following:\n${missingContent.join('\n')}`);
             return;
         }
 
@@ -325,7 +439,7 @@ export default function CourseContentBuilder({
                                     variant="body2"
                                     color="text.secondary"
                                 >
-                                    Selected Videos: {countSelectedVideos()}
+                                    Completed Lectures: {countCompletedLectures()} / {content.sections.reduce((total, section) => total + section.lectures.length, 0)}
                                 </Typography>
                             }
                         />
@@ -407,6 +521,7 @@ export default function CourseContentBuilder({
                                                             className="p-4"
                                                         >
                                                             <div className="space-y-3">
+                                                                {/* Lecture Header */}
                                                                 <div className="flex items-center gap-2">
                                                                     <TextField
                                                                         fullWidth
@@ -434,6 +549,12 @@ export default function CourseContentBuilder({
                                                                             "enter_lecture_title"
                                                                         )}
                                                                     />
+                                                                    <Chip
+                                                                        icon={lecture.contentType === 'video' ? <VideoIcon /> : <QuizIcon />}
+                                                                        label={lecture.contentType === 'video' ? 'Video' : 'Quiz'}
+                                                                        color={lecture.contentType === 'video' ? 'primary' : 'secondary'}
+                                                                        variant="outlined"
+                                                                    />
                                                                     <IconButton
                                                                         onClick={() =>
                                                                             removeLecture(
@@ -453,7 +574,37 @@ export default function CourseContentBuilder({
                                                                     </IconButton>
                                                                 </div>
 
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                {/* Content Type Selector */}
+                                                                <FormControl size="small" sx={{ minWidth: 160 }}>
+                                                                    <InputLabel>Content Type</InputLabel>
+                                                                    <Select
+                                                                        value={lecture.contentType}
+                                                                        label="Content Type"
+                                                                        onChange={(e) =>
+                                                                            updateLectureContentType(
+                                                                                sectionIndex,
+                                                                                lectureIndex,
+                                                                                e.target.value as 'video' | 'quiz'
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <MenuItem value="video">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <VideoIcon />
+                                                                                Video Lecture
+                                                                            </div>
+                                                                        </MenuItem>
+                                                                        <MenuItem value="quiz">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <QuizIcon />
+                                                                                Quiz
+                                                                            </div>
+                                                                        </MenuItem>
+                                                                    </Select>
+                                                                </FormControl>
+
+                                                                {/* Conditional Content */}
+                                                                {lecture.contentType === 'video' ? (
                                                                     <VideoUpload
                                                                         label="Select Video File"
                                                                         existingVideoUrl={
@@ -485,22 +636,46 @@ export default function CourseContentBuilder({
                                                                             onContentChange(updatedContent);
                                                                         }}
                                                                     />
-                                                                </div>
+                                                                ) : (
+                                                                    <QuizBuilder
+                                                                        quizContent={lecture.content as QuizContent}
+                                                                        onQuizChange={(quiz) =>
+                                                                            updateQuizContent(
+                                                                                sectionIndex,
+                                                                                lectureIndex,
+                                                                                quiz
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                )}
                                                             </div>
                                                         </Card>
                                                     )
                                                 )}
 
-                                                <Button
-                                                    startIcon={<AddIcon />}
-                                                    onClick={() =>
-                                                        addLecture(sectionIndex)
-                                                    }
-                                                    variant="outlined"
-                                                    size="small"
-                                                >
-                                                    {t("add_lecture")}
-                                                </Button>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        startIcon={<VideoIcon />}
+                                                        onClick={() =>
+                                                            addLecture(sectionIndex, 'video')
+                                                        }
+                                                        variant="outlined"
+                                                        size="small"
+                                                    >
+                                                        Add Video Lecture
+                                                    </Button>
+                                                    <Button
+                                                        startIcon={<QuizIcon />}
+                                                        onClick={() =>
+                                                            addLecture(sectionIndex, 'quiz')
+                                                        }
+                                                        variant="outlined"
+                                                        size="small"
+                                                        color="secondary"
+                                                    >
+                                                        Add Quiz
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </AccordionDetails>
                                     </Accordion>
@@ -518,7 +693,7 @@ export default function CourseContentBuilder({
                         </CardContent>
                     </Card>
 
-                    {countSelectedVideos() > 0 && (
+                    {countCompletedLectures() > 0 && (
                         <Card className="shadow-lg">
                             <CardHeader
                                 title={
@@ -527,7 +702,7 @@ export default function CourseContentBuilder({
                                         component="h2"
                                         className="font-semibold"
                                     >
-                                        Video Selection Summary
+                                        Course Content Summary
                                     </Typography>
                                 }
                             />
@@ -535,23 +710,40 @@ export default function CourseContentBuilder({
                                 <div className="space-y-2">
                                     {content.sections.map((section, sectionIndex) =>
                                         section.lectures.map((lecture, lectureIndex) => {
-                                            const hasVideoFile = lecture.videoFile;
-                                            const hasExistingVideo = lecture.content && 'videoUrl' in lecture.content && lecture.content.videoUrl;
-                                            if (!hasVideoFile && !hasExistingVideo) return null;
+                                            const isCompleted = (() => {
+                                                if (lecture.contentType === 'video') {
+                                                    return lecture.videoFile || (lecture.content && 'videoUrl' in lecture.content && lecture.content.videoUrl);
+                                                } else if (lecture.contentType === 'quiz') {
+                                                    return lecture.content && 'questions' in lecture.content && lecture.content.questions.length > 0;
+                                                }
+                                                return false;
+                                            })();
+
+                                            if (!isCompleted) return null;
+
                                             return (
                                                 <div
                                                     key={`${sectionIndex}-${lectureIndex}`}
-                                                    className="flex items-center justify-between p-2 bg-green-50 rounded"
+                                                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg"
                                                 >
-                                                    <Typography
-                                                        variant="body2"
-                                                        className="font-medium"
-                                                    >
-                                                        Section {sectionIndex + 1} -
-                                                        Lecture {lectureIndex + 1}:{" "}
-                                                        {lecture.title || "Untitled"}
-                                                        {hasVideoFile ? " (New File)" : " (Existing)"}
-                                                    </Typography>
+                                                    <div className="flex items-center gap-3">
+                                                        {lecture.contentType === 'video' ? (
+                                                            <VideoIcon color="primary" />
+                                                        ) : (
+                                                            <QuizIcon color="secondary" />
+                                                        )}
+                                                        <Typography
+                                                            variant="body2"
+                                                            className="font-medium"
+                                                        >
+                                                            Section {sectionIndex + 1} - Lecture {lectureIndex + 1}: {lecture.title || "Untitled"}
+                                                        </Typography>
+                                                    </div>
+                                                    <Chip
+                                                        label={lecture.contentType === 'video' ? 'Video Ready' : `Quiz (${(lecture.content as QuizContent).questions.length} questions)`}
+                                                        color={lecture.contentType === 'video' ? 'primary' : 'secondary'}
+                                                        size="small"
+                                                    />
                                                 </div>
                                             );
                                         })

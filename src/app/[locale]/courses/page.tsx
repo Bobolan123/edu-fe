@@ -61,7 +61,6 @@ export default async function CoursesPage(props: {
         categoryIds,
         excludeEnrolled: true,
     });
-    console.log(resCourses.data?.result)
 
     const resCategories = await getCategories();
 

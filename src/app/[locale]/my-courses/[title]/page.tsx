@@ -1,7 +1,8 @@
 import ManageDetailCourse from "@/components/My-courses/ManageDetailCourse/ManageDetailCourse";
 import { ICourse, ICourseContent, IReview } from "../../../../../types/entities";
 import { IStudentsResponse } from "../../../../../types/resData";
-import { getCourseStudents, getCourseById, getCourseContent } from "@/actions/coursesAction";
+import { getCourseStudents, getCourseById } from "@/actions/coursesAction";
+import { getCourseContent } from "@/actions/courseContentAction";
 import { getAllReviews } from "@/actions/reviewsAction";
 import { slugify } from "../../../../utils/utils";
 
@@ -62,7 +63,7 @@ export default async function ManageDetailCoursePage({
     return (
         <ManageDetailCourse
             course={resCourse}
-            courseContent={resContent}
+            courseContent={resContent || undefined}
             studentsData={studentsData}
             reviewsData={reviewsData}
             studentsCurrentPage={parseInt(studentsPage)}

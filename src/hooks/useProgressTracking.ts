@@ -1,5 +1,5 @@
 import { useCallback, useRef, useTransition } from 'react';
-import { updateLectureProgress } from '@/actions/coursesAction';
+import { updateLectureProgress } from '@/actions/courseContentAction';
 
 interface UseProgressTrackingProps {
     enrollmentId: string;
@@ -26,8 +26,7 @@ export const useProgressTracking = ({
     ) => {
         startTransition(async () => {
             try {
-                await updateLectureProgress(enrollmentId, {
-                    lectureId,
+                await updateLectureProgress(enrollmentId, lectureId, {
                     watchTimeSeconds: Math.floor(watchTime),
                     isCompleted: completed,
                     submissionData,

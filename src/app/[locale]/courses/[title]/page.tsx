@@ -4,7 +4,8 @@ import {
     ICourse,
     ICourseContent,
 } from "../../../../../types/entities";
-import { getCourseById, getCourseContent } from "@/actions/coursesAction";
+import { getCourseById } from "@/actions/coursesAction";
+import { getCourseContent } from "@/actions/courseContentAction";
 import { extractIdFromSlug } from "@/utils/utils";
 import { notFound } from "next/navigation";
 

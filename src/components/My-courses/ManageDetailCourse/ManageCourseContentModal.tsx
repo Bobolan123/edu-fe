@@ -25,9 +25,9 @@ import {
     CloudUpload,
     Add as AddIcon,
 } from "@mui/icons-material";
-import { ICourseSection, ICourseLecture, ISection, ILecture } from "../../../../types/entities";
+import { ICourseSection, ICourseLecture } from "../../../../types/entities";
 import { useEffect, useState } from "react";
-import { saveCourseContent, uploadVideoToLecture } from "@/actions/coursesAction";
+import { uploadVideoToLecture, saveCourseContent } from "@/actions/courseContentAction";
 // Removed useLoadingState import
 import { toastService } from "@/services/toast";
 import { isValidCloudinaryVideoUrl } from "../../../utils/utils";

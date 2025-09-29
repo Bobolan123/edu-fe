@@ -257,7 +257,7 @@ export default function CourseViewModal({ open, onClose, course }: CourseViewMod
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom>
                 Description
-              </Typography>
+              </Typography>f
               <Divider sx={{ mb: 2 }} />
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
                 {course.description}
@@ -274,7 +274,7 @@ export default function CourseViewModal({ open, onClose, course }: CourseViewMod
                 <Divider sx={{ mb: 2 }} />
                 <List dense>
                   {course.sections.slice(0, 5).map((section, index) => (
-                    <ListItem key={section._id}>
+                    <ListItem key={section.id}>
                       <ListItemIcon>
                         <Assignment color="action" />
                       </ListItemIcon>

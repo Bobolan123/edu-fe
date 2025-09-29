@@ -6,11 +6,13 @@ import { type SelectChangeEvent } from "@mui/material";
 import { ICategory, ICourseContent } from "../../../../types/entities";
 import {
     createCourse,
+    uploadThumbnail,
+} from "@/actions/coursesAction";
+import {
     createCourseSection,
     createCourseLecture,
-    uploadThumbnail,
     uploadVideoToLecture,
-} from "@/actions/coursesAction";
+} from "@/actions/courseContentAction";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useCurrency } from "../../../context/CurrencyContext";

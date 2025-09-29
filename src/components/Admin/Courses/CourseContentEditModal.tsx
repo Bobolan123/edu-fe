@@ -41,10 +41,10 @@ import {
   School,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
-import { ICourse, ISection, ILecture } from '../../../../types/entities';
+import { ICourse, ICourseSection, ICourseLecture } from '../../../../types/entities';
 import { toastService } from '@/services/toast';
 import CaptionManagement from '../../common/courses/CaptionManagement';
-import { saveCourseContent, uploadVideoToLecture } from '@/actions/coursesAction';
+import { saveCourseContent, uploadVideoToLecture } from '@/actions/courseContentAction';
 
 interface CourseContentEditModalProps {
   open: boolean;
@@ -66,7 +66,7 @@ export default function CourseContentEditModal({
   course,
   onSuccess
 }: CourseContentEditModalProps) {
-  const [sections, setSections] = useState<ISection[]>([]);
+  const [sections, setSections] = useState<ICourseSection[]>([]);
   const [editingState, setEditingState] = useState<EditingState>({ type: null });
   const [editingText, setEditingText] = useState('');
   const [saving, setSaving] = useState(false);
@@ -96,26 +96,13 @@ export default function CourseContentEditModal({
 
     setSaving(true);
     try {
-      // Transform ISection[] to ICourseSection[]
+      // sections are already ICourseSection[]
       const courseSections = sections.map((section, index) => ({
-        id: section._id,
-        title: section.title,
-        description: '',
+        ...section,
         orderIndex: index,
         lectures: section.lectures.map((lecture, lectureIndex) => ({
-          id: lecture._id,
-          title: lecture.title,
-          description: '',
-          contentType: 'video' as const,
-          orderIndex: lectureIndex,
-          durationSeconds: 0,
-          isPreview: false,
-          content: {
-            videoUrl: lecture.videoUrl || '',
-            thumbnailUrl: '',
-            cloudinaryPublicId: '',
-            quality: []
-          }
+          ...lecture,
+          orderIndex: lectureIndex
         }))
       }));
 
@@ -174,10 +161,11 @@ export default function CourseContentEditModal({
 
     if (type === 'section' && typeof sectionIndex === 'number') {
       if (isNew) {
-        const newSection: ISection = {
-          _id: `temp-${Date.now()}`,
+        const newSection: ICourseSection = {
+          id: `temp-${Date.now()}`,
           title: editingText,
-          totalLectures: 0,
+          description: '',
+          orderIndex: newSections.length,
           lectures: []
         };
         newSections.push(newSection);
@@ -190,13 +178,22 @@ export default function CourseContentEditModal({
       }
     } else if (type === 'lecture' && typeof sectionIndex === 'number' && typeof lectureIndex === 'number') {
       if (isNew) {
-        const newLecture: ILecture = {
-          _id: `temp-${Date.now()}`,
+        const newLecture: ICourseLecture = {
+          id: `temp-${Date.now()}`,
           title: editingText,
-          videoUrl: ''
+          description: '',
+          contentType: 'video',
+          orderIndex: newSections[sectionIndex].lectures.length,
+          durationSeconds: 0,
+          isPreview: false,
+          content: {
+            videoUrl: '',
+            thumbnailUrl: '',
+            cloudinaryPublicId: '',
+            quality: []
+          }
         };
         newSections[sectionIndex].lectures.push(newLecture);
-        newSections[sectionIndex].totalLectures = newSections[sectionIndex].lectures.length;
       } else {
         newSections[sectionIndex].lectures[lectureIndex] = {
           ...newSections[sectionIndex].lectures[lectureIndex],
@@ -227,7 +224,6 @@ export default function CourseContentEditModal({
     if (window.confirm('Are you sure you want to delete this lecture?')) {
       const newSections = [...sections];
       newSections[sectionIndex].lectures = newSections[sectionIndex].lectures.filter((_, i) => i !== lectureIndex);
-      newSections[sectionIndex].totalLectures = newSections[sectionIndex].lectures.length;
       setSections(newSections);
       toastService.success('Lecture deleted');
     }
@@ -246,14 +242,17 @@ export default function CourseContentEditModal({
 
       const result = await uploadVideoToLecture(
         course.id,
-        section._id,
-        lecture._id,
+        section.id,
+        lecture.id,
         file
       );
 
-      if (result?.url) {
+      if (result?.data) {
         const newSections = [...sections];
-        newSections[sectionIndex].lectures[lectureIndex].videoUrl = result.url;
+        const lecture = newSections[sectionIndex].lectures[lectureIndex];
+        if (lecture.contentType === 'video') {
+          (lecture.content as any).videoUrl = result.data;
+        }
         setSections(newSections);
         toastService.success('Video uploaded successfully!');
       } else {
@@ -272,7 +271,9 @@ export default function CourseContentEditModal({
     const totalSections = sections.length;
     const totalLectures = sections.reduce((sum, section) => sum + section.lectures.length, 0);
     const totalVideos = sections.reduce((sum, section) =>
-      sum + section.lectures.filter(lecture => lecture.videoUrl).length, 0
+      sum + section.lectures.filter(lecture =>
+        lecture.contentType === 'video' && (lecture.content as any).videoUrl
+      ).length, 0
     );
     return { totalSections, totalLectures, totalVideos };
   };
@@ -369,7 +370,7 @@ export default function CourseContentEditModal({
 
           {sections.map((section, sectionIndex) => (
             <Accordion
-              key={section._id}
+              key={section.id}
               expanded={expandedSections.has(sectionIndex)}
               onChange={() => handleSectionToggle(sectionIndex)}
               sx={{ mb: 1, border: 1, borderColor: 'divider' }}
@@ -440,8 +441,11 @@ export default function CourseContentEditModal({
                         const isUploading = uploadingVideo[lectureKey];
 
                         return (
-                          <ListItem key={lecture._id} divider>
-                            <PlayArrow sx={{ mr: 2, color: lecture.videoUrl ? 'success.main' : 'text.disabled' }} />
+                          <ListItem key={lecture.id} divider>
+                            <PlayArrow sx={{ mr: 2, color:
+                              lecture.contentType === 'video' && (lecture.content as any).videoUrl
+                                ? 'success.main' : 'text.disabled'
+                            }} />
                             <ListItemText
                               primary={
                                 editingState.type === 'lecture' &&
@@ -469,7 +473,7 @@ export default function CourseContentEditModal({
                               secondary={
                                 <Box>
                                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
-                                    {lecture.videoUrl ? (
+                                    {lecture.contentType === 'video' && (lecture.content as any).videoUrl ? (
                                       <Chip label="Video uploaded" size="small" color="success" />
                                     ) : (
                                       <Chip label="No video" size="small" color="default" />
@@ -477,10 +481,10 @@ export default function CourseContentEditModal({
                                   </Box>
 
                                   {/* Caption Management */}
-                                  {lecture.videoUrl && lecture._id && (
+                                  {lecture.contentType === 'video' && (lecture.content as any).videoUrl && lecture.id && (
                                     <Box sx={{ mt: 1 }}>
                                       <CaptionManagement
-                                        lectureId={lecture._id}
+                                        lectureId={lecture.id}
                                         lectureTitle={lecture.title}
                                         size="small"
                                         showTitle={false}
