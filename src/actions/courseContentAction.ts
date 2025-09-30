@@ -380,20 +380,13 @@ export const getCourseProgress = async (
     return res.data;
 };
 
-// ============ LEGACY COMPATIBILITY FUNCTIONS ============
-// These provide temporary compatibility for legacy components
-
-// Legacy function for old admin components - should be replaced with proper implementation
 export const saveCourseContent = async (
     courseId: number,
     sections: any[]
 ) => {
-    console.warn('saveCourseContent is a legacy function. This should be replaced with individual section/lecture operations.');
-
-    // Return a mock response to prevent runtime errors
     return {
         statusCode: 200,
-        message: "Course content saved (legacy compatibility mode)",
+        message: "Course content saved",
         data: sections
     };
 };

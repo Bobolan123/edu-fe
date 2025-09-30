@@ -96,7 +96,6 @@ export default function CourseContentEditModal({
 
     setSaving(true);
     try {
-      // sections are already ICourseSection[]
       const courseSections = sections.map((section, index) => ({
         ...section,
         orderIndex: index,

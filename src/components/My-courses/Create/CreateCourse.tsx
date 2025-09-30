@@ -49,12 +49,11 @@ const initialContentState: ICourseContent = {
                     durationSeconds: 0,
                     isPreview: true,
                     content: {
-                        videoUrl: "", // Will be populated after upload
+                        videoUrl: "",
                         thumbnailUrl: "",
                         cloudinaryPublicId: "",
                         quality: [],
                     },
-                    // Separate video file for upload
                     videoFile: null,
                 },
             ],
@@ -249,7 +248,7 @@ export default function CreateCoursePage({
                         // Add content based on lecture type
                         if (lecture.contentType === "video") {
                             lecturePayload.content = {
-                                videoUrl: "", // Will be populated after upload
+                                videoUrl: "",
                                 thumbnailUrl: "",
                                 cloudinaryPublicId: "",
                                 quality: [],

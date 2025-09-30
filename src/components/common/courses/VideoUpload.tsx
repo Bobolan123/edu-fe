@@ -38,7 +38,6 @@ export default function VideoUpload({
     // Check if video is selected or already uploaded
     const hasSelectedVideo = selectedFile || videoUrl;
 
-    // Initialize videoUrl from existingVideoUrl
     useEffect(() => {
         if (existingVideoUrl && !videoUrl) {
             setVideoUrl(existingVideoUrl);

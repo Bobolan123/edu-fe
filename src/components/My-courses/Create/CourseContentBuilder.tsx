@@ -237,7 +237,7 @@ export default function CourseContentBuilder({
                                       ...lecture,
                                       contentType: newContentType,
                                       content: defaultContent,
-                                      videoFile: undefined // Clear video file if switching to quiz
+                                      videoFile: undefined
                                     }
                                   : lecture
                           ),
