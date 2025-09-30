@@ -9,16 +9,21 @@ export default async function ManageMyCoursesPage(props: {
         take?: string;
         rating?: string;
         categoryIds?: string | string[];
+        tab?: string;
+        includeDeleted?: string;
     };
 }) {
     const searchParams = await props.searchParams || {};
     const session = await auth();
 
-    const categoryIds = Array.isArray(searchParams?.categoryIds) 
+    const categoryIds = Array.isArray(searchParams?.categoryIds)
         ? searchParams.categoryIds.map(Number)
-        : searchParams?.categoryIds 
+        : searchParams?.categoryIds
             ? [Number(searchParams.categoryIds)]
             : undefined;
+
+    const currentTab = searchParams?.tab || 'active';
+    const includeDeleted = currentTab === 'deleted' || searchParams?.includeDeleted === 'true';
 
     const coursesData = await getCourses({
         search: searchParams?.filter,
@@ -27,7 +32,13 @@ export default async function ManageMyCoursesPage(props: {
         page: searchParams?.page ? Number(searchParams.page) : undefined,
         limit: searchParams?.take ? Number(searchParams.take) : undefined,
         instructorId: session?.user?.id ? Number(session?.user?.id) : undefined,
+        includeDeleted,
     });
 
-    return <ManageMyCourses courses={coursesData?.data?.result} />;
+    console.log()
+    return <ManageMyCourses
+        courses={coursesData?.data?.result}
+        currentTab={currentTab}
+        searchParams={searchParams}
+    />;
 }

@@ -215,14 +215,17 @@ export const getCourseStudents = async (
     return res.data;
 };
 
-export const restoreCourse = async (id: string) => {
+export const restoreCourse = async (courseId: number): Promise<IBackendRes<any>> => {
     const access_token = await getAccessToken();
 
-    const res = await sendRequest<IBackendRes<ICourse>>({
+    const res = await sendRequest<IBackendRes<any>>({
         method: "PATCH",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}/restore`,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}/restore`,
         headers: {
             Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            tags: ["courses"],
         },
     });
     if (res?.statusCode !== 200 ) {
@@ -231,19 +234,22 @@ export const restoreCourse = async (id: string) => {
 
     revalidateTag("courses");
     revalidateTag("admin-courses");
-    revalidateTag(`course-${id}`);
+    revalidateTag(`course-${courseId}`);
 
     return res;
 };
 
-export const forceDeleteCourse = async (id: string) => {
+export const forceDeleteCourse = async (courseId: number): Promise<IBackendRes<any>> => {
     const access_token = await getAccessToken();
 
-    const res = await sendRequest<IBackendRes<void>>({
+    const res = await sendRequest<IBackendRes<any>>({
         method: "DELETE",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}/force`,
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}/force`,
         headers: {
             Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            tags: ["courses"],
         },
     });
 
@@ -316,6 +322,28 @@ export const searchCourses = async (params: GetCoursesParams & {
 
     return res;
 };
+
+export const softDeleteCourse = async (courseId: number): Promise<IBackendRes<any>> => {
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<any>>({
+        method: "DELETE",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${courseId}`,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        nextOption: {
+            tags: ["courses"],
+        },
+    });
+
+    if (res?.statusCode !== 200) {
+        throw new Error(res?.message || "Failed to delete course");
+    }
+
+    revalidateTag("courses");
+    return res;
+};
+
 
 
 

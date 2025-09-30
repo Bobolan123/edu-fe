@@ -24,6 +24,7 @@ import {
     Save as SaveIcon,
     CloudUpload,
     Add as AddIcon,
+    Quiz as QuizIcon,
 } from "@mui/icons-material";
 import { ICourseSection, ICourseLecture } from "../../../../types/entities";
 import { useEffect, useState } from "react";
@@ -111,19 +112,26 @@ export default function ManageCourseContentModal({
         }
     };
 
-    const handleAddLecture = (sectionIndex: number) => {
+    const handleAddLecture = (sectionIndex: number, contentType: 'video' | 'quiz' = 'video') => {
         const updated = [...localSections];
-        updated[sectionIndex].lectures.push({
+        const newLecture: ICourseLecture = {
             id: `temp-${Date.now()}`,
-            title: `New Lecture ${updated[sectionIndex].lectures.length + 1}`,
-            contentType: 'video' as const,
+            title: contentType === 'quiz'
+                ? `New Quiz ${updated[sectionIndex].lectures.filter(l => l.contentType === 'quiz').length + 1}`
+                : `New Lecture ${updated[sectionIndex].lectures.filter(l => l.contentType === 'video').length + 1}`,
+            contentType: contentType,
             orderIndex: updated[sectionIndex].lectures.length,
-            content: {
-                videoUrl: "",
-                cloudinaryPublicId: "",
-                quality: []
-            }
-        });
+            content: contentType === 'video'
+                ? {
+                    videoUrl: "",
+                    cloudinaryPublicId: "",
+                    quality: []
+                  }
+                : {
+                    questions: []
+                  }
+        };
+        updated[sectionIndex].lectures.push(newLecture);
         setLocalSections(updated);
     };
 
@@ -413,10 +421,17 @@ export default function ManageCourseContentModal({
                                     className="flex flex-col bg-blue-50/50 rounded-xl p-3 mb-2 border border-blue-100"
                                 >
                                     <Box className="flex items-center gap-2 w-full">
-                                        <PlayArrow
-                                            fontSize="small"
-                                            sx={{ color: "#2563eb" }}
-                                        />
+                                        {lecture.contentType === 'quiz' ? (
+                                            <QuizIcon
+                                                fontSize="small"
+                                                sx={{ color: "#7c3aed" }}
+                                            />
+                                        ) : (
+                                            <PlayArrow
+                                                fontSize="small"
+                                                sx={{ color: "#2563eb" }}
+                                            />
+                                        )}
                                         {isEditing ? (
                                             <>
                                                 <TextField
@@ -554,37 +569,57 @@ export default function ManageCourseContentModal({
                                     </Box>
 
                                     <Collapse in={expandedVideos[videoKey]}>
-                                        {lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(
-                                            lecture.content.videoUrl
-                                        ) && (
-                                            <video
-                                                controls
-                                                width="40%"
-                                                className="rounded-xl mt-2 border border-purple-200"
-                                            >
-                                                <source
-                                                    src={lecture.content.videoUrl}
-                                                    type="video/mp4"
-                                                />
-                                            </video>
-                                        )}
-                                        {lecture.content && 'videoUrl' in lecture.content && !isValidCloudinaryVideoUrl(
-                                            lecture.content.videoUrl
-                                        ) &&
-                                            lecture.content.videoUrl && (
-                                                <Box className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
-                                                    <Typography
-                                                        variant="caption"
-                                                        className="text-yellow-700"
+                                        {lecture.contentType === 'quiz' ? (
+                                            <Box className="mt-2 p-3 bg-purple-50 border border-purple-200 rounded-xl">
+                                                <Typography
+                                                    variant="caption"
+                                                    className="text-purple-700 font-medium"
+                                                >
+                                                    📝 Quiz Content - {lecture.content && 'questions' in lecture.content ? lecture.content.questions?.length || 0 : 0} questions
+                                                </Typography>
+                                                <Typography
+                                                    variant="caption"
+                                                    className="text-purple-600 block mt-1"
+                                                >
+                                                    Quiz questions are managed separately in the learning interface.
+                                                </Typography>
+                                            </Box>
+                                        ) : (
+                                            <>
+                                                {lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(
+                                                    lecture.content.videoUrl
+                                                ) && (
+                                                    <video
+                                                        controls
+                                                        width="40%"
+                                                        className="rounded-xl mt-2 border border-purple-200"
                                                     >
-                                                        ⚠️ Invalid video URL
-                                                        format. Please upload a
-                                                        new video.
-                                                    </Typography>
-                                                </Box>
-                                            )}
+                                                        <source
+                                                            src={lecture.content.videoUrl}
+                                                            type="video/mp4"
+                                                        />
+                                                    </video>
+                                                )}
+                                                {lecture.content && 'videoUrl' in lecture.content && !isValidCloudinaryVideoUrl(
+                                                    lecture.content.videoUrl
+                                                ) &&
+                                                    lecture.content.videoUrl && (
+                                                        <Box className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                                            <Typography
+                                                                variant="caption"
+                                                                className="text-yellow-700"
+                                                            >
+                                                                ⚠️ Invalid video URL
+                                                                format. Please upload a
+                                                                new video.
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+                                            </>
+                                        )}
                                     </Collapse>
 
+                                    {lecture.contentType === 'video' && (
                                     <Box className="mt-2">
                                         <input
                                             type="file"
@@ -699,17 +734,18 @@ export default function ManageCourseContentModal({
                                             </Box>
                                         )}
                                     </Box>
+                                    )}
                                 </Box>
                             );
                         })}
 
-                        <Box className="text-center mt-3">
+                        <Box className="flex justify-center gap-2 mt-3">
                             <Button
                                 variant="text"
                                 size="small"
-                                onClick={() => handleAddLecture(sectionIndex)}
+                                onClick={() => handleAddLecture(sectionIndex, 'video')}
                                 disabled={isSaving}
-                                startIcon={<AddIcon />}
+                                startIcon={<PlayArrow />}
                                 sx={{
                                     color: "#2563eb",
                                     textTransform: "none",
@@ -720,7 +756,25 @@ export default function ManageCourseContentModal({
                                     },
                                 }}
                             >
-                                Add Lecture
+                                Add Video Lecture
+                            </Button>
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={() => handleAddLecture(sectionIndex, 'quiz')}
+                                disabled={isSaving}
+                                startIcon={<QuizIcon />}
+                                sx={{
+                                    color: "#7c3aed",
+                                    textTransform: "none",
+                                    fontWeight: "medium",
+                                    "&:hover": {
+                                        backgroundColor:
+                                            "rgba(124, 58, 237, 0.05)",
+                                    },
+                                }}
+                            >
+                                Add Quiz
                             </Button>
                         </Box>
                     </Box>

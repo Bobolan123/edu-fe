@@ -91,6 +91,8 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
             try {
                 const newPrices: Record<number, number> = {};
                 for (const item of cartItems) {
+                    if (!item.course?.id) continue;
+
                     const converted = await currencyService.convertPrice(
                         item.price || 0,
                         "VND",
@@ -656,7 +658,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                                  </Typography>
                                                              </Box>
                                                              <Box>
-                                                                 {isConvertingPrices && !convertedPrices[cartItem.course.id] ? (
+                                                                 {isConvertingPrices && !convertedPrices[cartItem.course?.id] ? (
                                                                      <Skeleton 
                                                                          variant="text" 
                                                                          width={120} 
@@ -686,7 +688,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                                              {currencyService.formatPrice(
                                                                                  convertedPrices[
                                                                                      cartItem.course
-                                                                                         .id
+                                                                                         ?.id
                                                                                  ] || 0,
                                                                                  currency
                                                                              )}

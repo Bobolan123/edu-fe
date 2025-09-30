@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Container,
     Grid,
@@ -20,6 +20,7 @@ import {
     PlayArrow as PlayIcon,
     AccessTime as ClockIcon,
     MenuBook as BookIcon,
+    Quiz as QuizIcon,
 } from "@mui/icons-material";
 import { currencyService } from "@/services/currency";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -48,6 +49,34 @@ export default function CourseDetail({
     const t = useTranslations("CourseDetail");
     const { currency } = useCurrency();
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const [convertedPrice, setConvertedPrice] = useState<number>(0);
+    const [isConverting, setIsConverting] = useState(false);
+
+    useEffect(() => {
+        async function convertCoursePrice() {
+            if (!course?.price) {
+                setConvertedPrice(0);
+                return;
+            }
+
+            setIsConverting(true);
+            try {
+                const converted = await currencyService.convertPrice(
+                    Number(course.price),
+                    "VND",
+                    currency
+                );
+                setConvertedPrice(converted);
+            } catch (error) {
+                console.error("Failed to convert price:", error);
+                setConvertedPrice(Number(course.price));
+            } finally {
+                setIsConverting(false);
+            }
+        }
+
+        convertCoursePrice();
+    }, [currency, course?.price]);
 
     const handleAddToCart = async (courseId: number) => {
         const res = await addCartItem(courseId);
@@ -217,7 +246,9 @@ export default function CourseDetail({
                                                 (total, section) =>
                                                     total + section.lectures?.reduce(
                                                         (lectureTotal, lecture) =>
-                                                            lectureTotal + (lecture.durationSeconds || 0),
+                                                            lecture.contentType === 'quiz'
+                                                                ? lectureTotal
+                                                                : lectureTotal + (lecture.durationSeconds || 0),
                                                         0
                                                     ),
                                                 0
@@ -303,17 +334,23 @@ export default function CourseDetail({
                                                         gap: 1,
                                                     }}
                                                 >
-                                                    <PlayIcon fontSize="small" />
+                                                    {lecture.contentType === 'quiz' ? (
+                                                        <QuizIcon fontSize="small" />
+                                                    ) : (
+                                                        <PlayIcon fontSize="small" />
+                                                    )}
                                                     <Typography>
                                                         {lecture.title}
                                                     </Typography>
                                                 </Box>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    {Math.floor((lecture.durationSeconds || 0) / 60)}m
-                                                </Typography>
+                                                {lecture.contentType !== 'quiz' && (
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        {Math.floor((lecture.durationSeconds || 0) / 60)}m
+                                                    </Typography>
+                                                )}
                                             </Box>
                                         ))}
                                     </AccordionDetails>
@@ -441,7 +478,7 @@ export default function CourseDetail({
                                             fontWeight={600}
                                         >
                                             {currencyService.formatPrice(
-                                                Number(course?.price || 0),
+                                                convertedPrice,
                                                 currency
                                             )}
                                         </Typography>

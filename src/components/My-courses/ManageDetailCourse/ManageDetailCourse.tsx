@@ -61,6 +61,8 @@ import ManageCourseContentModal from "./ManageCourseContentModal";
 import ServerPagination from "../../common/ServerPagination";
 import { uploadThumbnail, deleteCourse } from "@/actions/coursesAction";
 import toastService from "@/services/toast";
+import { useCurrency } from "@/context/CurrencyContext";
+import { currencyService } from "@/services/currency";
 
 interface ManageDetailCourseProps {
     course: ICourse;
@@ -84,6 +86,7 @@ export default function ManageDetailCourse({
     initialTab,
 }: ManageDetailCourseProps) {
     const router = useRouter();
+    const { currency } = useCurrency();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [editCourseModalOpen, setEditCourseModalOpen] = useState(false);
     const [manageContentModalOpen, setManageContentModalOpen] = useState(false);
@@ -210,9 +213,10 @@ export default function ManageDetailCourse({
 
                             <Box className="absolute top-6 right-6">
                                 <Chip
-                                    label={`₫${course.price.toLocaleString(
-                                        "vi-VN"
-                                    )}`}
+                                    label={currencyService.formatPrice(
+                                        Number(course.price || 0),
+                                        currency
+                                    )}
                                     className="bg-white/95 text-gray-800 font-bold shadow-lg"
                                     sx={{
                                         borderRadius: "16px",
@@ -353,11 +357,10 @@ export default function ManageDetailCourse({
                                     variant="h3"
                                     className="font-black text-violet-900 mb-2"
                                 >
-                                    ₫
-                                    {(
-                                        course.enrollments?.length *
-                                            course.price || 0
-                                    ).toLocaleString("vi-VN")}
+                                    {currencyService.formatPrice(
+                                        (course.enrollments?.length || 0) * Number(course.price || 0),
+                                        currency
+                                    )}
                                 </Typography>
                                 <Typography
                                     variant="caption"
@@ -619,9 +622,9 @@ export default function ManageDetailCourse({
                                             variant="h4"
                                             className="font-black text-amber-900"
                                         >
-                                            ₫
-                                            {course?.price.toLocaleString(
-                                                "vi-VN"
+                                            {currencyService.formatPrice(
+                                                Number(course.price || 0),
+                                                currency
                                             )}
                                         </Typography>
                                         <Typography

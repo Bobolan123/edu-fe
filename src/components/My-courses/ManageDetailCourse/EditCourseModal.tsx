@@ -166,9 +166,12 @@ export default function EditCourseModal({
                     <TextField
                         fullWidth
                         label="Price (VND)"
-                        type="number"
-                        value={editedCourse.price || 0}
-                        onChange={(e) => setEditedCourse(prev => ({ ...prev, price: Number(e.target.value) }))}
+                        type="text"
+                        value={editedCourse.price?.toLocaleString('vi-VN') || '0'}
+                        onChange={(e) => {
+                            const numericValue = e.target.value.replace(/\D/g, '');
+                            setEditedCourse(prev => ({ ...prev, price: Number(numericValue) }));
+                        }}
                         variant="outlined"
                         sx={{
                             '& .MuiOutlinedInput-root': {
