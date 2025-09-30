@@ -335,12 +335,16 @@ export default function MyLearning({ enrolledCourses }: MyLearningProps) {
                                                 height="160"
                                                 image={
                                                     course.thumbnail_url ||
-                                                    `/placeholder.svg?height=160&width=320&text=${encodeURIComponent(
-                                                        course.title
-                                                    )}`
+                                                    "/img_not_found.png"
                                                 }
                                                 alt={course.title}
                                                 className="h-40 object-cover"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (target.src !== "/img_not_found.png") {
+                                                        target.src = "/img_not_found.png";
+                                                    }
+                                                }}
                                             />
 
                                             <Box className="absolute top-3 right-3">

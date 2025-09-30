@@ -16,6 +16,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useCurrency } from "../../../context/CurrencyContext";
+import { useRouter } from "next/navigation";
 import CourseBasicInfo from "./CourseBasicInfo";
 import CourseContentBuilder from "./CourseContentBuilder";
 import { CourseFormState } from "./types";
@@ -76,6 +77,7 @@ export default function CreateCoursePage({
     const { data: session } = useSession();
     const t = useTranslations("CreateCourse");
     const { currency } = useCurrency();
+    const router = useRouter();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [course, setCourse] = useState<CourseFormState>(initialCourseState);
@@ -301,6 +303,11 @@ export default function CreateCoursePage({
             }
 
             toastService.success(t("course_created_success"));
+
+            // Redirect to my-courses page after successful creation
+            setTimeout(() => {
+                router.push("/my-courses");
+            }, 1500); // Delay to allow user to see success message
         } catch (error) {
             console.error("Failed to create course content:", error);
             toastService.dismiss(); // Dismiss any loading toasts

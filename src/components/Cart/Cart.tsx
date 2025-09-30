@@ -376,7 +376,7 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                         src={
                                                             cartItem?.course
                                                                 ?.thumbnail_url ||
-                                                            "/placeholder.svg"
+                                                            "/img_not_found.png"
                                                         }
                                                         alt={
                                                             cartItem?.course?.title ||
@@ -385,6 +385,12 @@ const Cart = ({ cartItems = [] }: ICartProps) => {
                                                         width={160}
                                                         height={80}
                                                         className="course-image w-full h-full object-cover transition-transform duration-300"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            if (target.src !== "/img_not_found.png") {
+                                                                target.src = "/img_not_found.png";
+                                                            }
+                                                        }}
                                                     />
                                                     <Box
                                                         sx={{

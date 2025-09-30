@@ -348,7 +348,7 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
                                                     <img
                                                         src={
                                                             item?.course?.thumbnail_url ||
-                                                            "/placeholder.svg"
+                                                            "/img_not_found.png"
                                                         }
                                                         alt={
                                                             item?.course?.title || "Course"
@@ -357,6 +357,12 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
                                                             width: '100%',
                                                             height: '100%',
                                                             objectFit: 'cover',
+                                                        }}
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            if (target.src !== "/img_not_found.png") {
+                                                                target.src = "/img_not_found.png";
+                                                            }
                                                         }}
                                                     />
                                                 </Box>

@@ -366,12 +366,18 @@ export default function CourseDetail({
                                     }
                                 >
                                     <CardMedia
-                                        component="div"
+                                        component="img"
+                                        src={course?.thumbnail_url || "/img_not_found.png"}
+                                        alt={course?.title || "Course thumbnail"}
                                         sx={{
                                             height: "100%",
-                                            backgroundImage: `url(${course?.thumbnail_url})`,
-                                            backgroundSize: "cover",
-                                            backgroundPosition: "center",
+                                            objectFit: "cover",
+                                        }}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            if (target.src !== "/img_not_found.png") {
+                                                target.src = "/img_not_found.png";
+                                            }
                                         }}
                                     />
                                     {hasValidPreviewUrl && (

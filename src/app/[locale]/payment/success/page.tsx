@@ -27,28 +27,29 @@ export const metadata: Metadata = {
 };
 
 interface PaymentSuccessPageProps {
-    searchParams: {
+    searchParams: Promise<{
         orderId?: string;
         price?: string;
         status?: string;
         method?: string;
         date?: string;
         transactionId?: string;
-    };
+    }>;
 }
 
 export default async function PaymentSuccessPage({
     searchParams,
 }: PaymentSuccessPageProps) {
     const t = await getTranslations("Payment");
+    const params = await searchParams;
 
     const orderInfo = {
-        orderId: searchParams.orderId,
-        price: searchParams.price ? parseFloat(searchParams.price) : null,
-        status: searchParams.status,
-        method: searchParams.method,
-        date: searchParams.date ? new Date(searchParams.date) : null,
-        transactionId: searchParams.transactionId,
+        orderId: params.orderId,
+        price: params.price ? parseFloat(params.price) : null,
+        status: params.status,
+        method: params.method,
+        date: params.date ? new Date(params.date) : null,
+        transactionId: params.transactionId,
     };
 
     const nextSteps = [

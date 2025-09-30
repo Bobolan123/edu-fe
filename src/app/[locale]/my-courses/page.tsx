@@ -1,5 +1,6 @@
 import ManageMyCourses from "@/components/My-courses/ManageMyCourses";
 import { getCourses } from "@/actions/coursesAction";
+import { auth } from "@/auth";
 
 export default async function ManageMyCoursesPage(props: {
     searchParams?: {
@@ -10,8 +11,9 @@ export default async function ManageMyCoursesPage(props: {
         categoryIds?: string | string[];
     };
 }) {
-    const searchParams = props.searchParams || {};
-    
+    const searchParams = await props.searchParams || {};
+    const session = await auth();
+
     const categoryIds = Array.isArray(searchParams?.categoryIds) 
         ? searchParams.categoryIds.map(Number)
         : searchParams?.categoryIds 
@@ -24,6 +26,7 @@ export default async function ManageMyCoursesPage(props: {
         categoryIds,
         page: searchParams?.page ? Number(searchParams.page) : undefined,
         limit: searchParams?.take ? Number(searchParams.take) : undefined,
+        instructorId: session?.user?.id ? Number(session?.user?.id) : undefined,
     });
 
     return <ManageMyCourses courses={coursesData?.data?.result} />;

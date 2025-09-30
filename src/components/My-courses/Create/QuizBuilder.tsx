@@ -224,22 +224,26 @@ export default function QuizBuilder({ quizContent, onQuizChange }: QuizBuilderPr
                                             label="Question Type"
                                             onChange={(e) => {
                                                 const newType = e.target.value as QuizQuestion['type'];
-                                                let updates: Partial<QuizQuestion> = { type: newType };
+                                                let updatedQuestion: QuizQuestion = { ...question, type: newType };
 
                                                 if (newType === 'true_false') {
-                                                    updates.options = ['True', 'False'];
-                                                    updates.correctAnswer = 0;
+                                                    updatedQuestion.options = ['True', 'False'];
+                                                    updatedQuestion.correctAnswer = 0;
                                                 } else if (newType === 'fill_blank') {
-                                                    updates.options = undefined;
-                                                    updates.correctAnswer = '';
+                                                    updatedQuestion.options = undefined;
+                                                    updatedQuestion.correctAnswer = '';
                                                 } else if (newType === 'multiple_choice' && !question.options) {
-                                                    updates.options = ['', '', '', ''];
-                                                    updates.correctAnswer = 0;
+                                                    updatedQuestion.options = ['', '', '', ''];
+                                                    updatedQuestion.correctAnswer = 0;
                                                 }
 
-                                                Object.entries(updates).forEach(([field, value]) => {
-                                                    updateQuestion(question.id, field as keyof QuizQuestion, value);
-                                                });
+                                                const updatedQuiz = {
+                                                    ...quizContent,
+                                                    questions: quizContent.questions.map(q =>
+                                                        q.id === question.id ? updatedQuestion : q
+                                                    ),
+                                                };
+                                                onQuizChange(updatedQuiz);
                                             }}
                                         >
                                             {questionTypes.map((type) => (

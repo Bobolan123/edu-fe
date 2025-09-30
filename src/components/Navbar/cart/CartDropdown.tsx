@@ -112,11 +112,17 @@ export default function CartDropdown({ cartItems = [] }: CartDropdownProps) {
                 <div className="p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors">
                   <div className="flex gap-3">
                     <Image
-                      className="rounded-md flex-shrink-0"
-                      src={item.course?.thumbnail_url || "/placeholder.svg"}
+                      className="rounded-md flex-shrink-0 object-cover"
+                      src={item.course?.thumbnail_url || "/img_not_found.png"}
                       alt={item.course?.title || "Course"}
                       width={60}
                       height={60}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src !== "/img_not_found.png") {
+                          target.src = "/img_not_found.png";
+                        }
+                      }}
                     />
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900 line-clamp-2 hover:text-blue-600 transition-colors">

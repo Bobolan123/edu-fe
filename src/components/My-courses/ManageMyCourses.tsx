@@ -381,16 +381,21 @@ export default function ManageMyCourses({ courses }: IManageMyCoursesProps) {
                                 elevation={0}
                                 className="hover:shadow-md transition-all duration-200 cursor-pointer h-full rounded-2xl border border-gray-200 bg-white group overflow-hidden hover:border-blue-300"
                             >
-                                <Box className="relative">
+                                <Box className="relative h-40">
                                     <Image
                                         src={
                                             course.thumbnail_url ||
-                                            "/placeholder.svg"
+                                            "/img_not_found.png"
                                         }
                                         alt={course.title}
-                                        width={400}
-                                        height={160}
-                                        className="h-40 w-full object-cover"
+                                        fill
+                                        className="object-cover"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            if (target.src !== "/img_not_found.png") {
+                                                target.src = "/img_not_found.png";
+                                            }
+                                        }}
                                     />
 
                                     <Box className="absolute top-4 right-4">
