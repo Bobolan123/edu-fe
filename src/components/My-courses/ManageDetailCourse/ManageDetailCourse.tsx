@@ -52,6 +52,8 @@ import {
     EditOutlined,
     SettingsOutlined,
     DeleteOutlined,
+    RestoreOutlined,
+    WarningAmber,
 } from "@mui/icons-material";
 import { ICourse, ICourseContent, IReview } from "../../../../types/entities";
 import { IStudentsResponse } from "../../../../types/resData";
@@ -59,7 +61,7 @@ import CourseContentTab from "./CourseContentTab";
 import EditCourseModal from "./EditCourseModal";
 import ManageCourseContentModal from "./ManageCourseContentModal";
 import ServerPagination from "../../common/ServerPagination";
-import { uploadThumbnail, deleteCourse } from "@/actions/coursesAction";
+import { uploadThumbnail, softDeleteCourse, restoreCourse } from "@/actions/coursesAction";
 import toastService from "@/services/toast";
 import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/services/currency";
@@ -93,6 +95,7 @@ export default function ManageDetailCourse({
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [restoring, setRestoring] = useState(false);
 
     const totalLectures = courseContent?.sections.reduce(
         (acc, section) => acc + (section.lectures?.length || 0),
@@ -130,8 +133,8 @@ export default function ManageDetailCourse({
             setThumbnailUploading(true);
             const res = await uploadThumbnail(course.id.toString(), file);
             toastService.success(res.message);
-            // Refresh the page to show the new thumbnail
-            router.refresh();
+            // // Refresh the page to show the new thumbnail
+            // router.refresh();
         } catch (error) {
             toastService.error("Failed to upload thumbnail. Please try again.");
         } finally {
@@ -142,10 +145,8 @@ export default function ManageDetailCourse({
     const handleDeleteCourse = async () => {
         try {
             setDeleting(true);
-            const response = await deleteCourse(course.id.toString());
+            const response = await softDeleteCourse(course.id);
             toastService.success(response.message || "Course deleted successfully");
-            // Redirect to courses page
-            router.push("/my-courses");
         } catch (error: any) {
             toastService.error(error.message || "Failed to delete course. Please try again.");
         } finally {
@@ -154,9 +155,69 @@ export default function ManageDetailCourse({
         }
     };
 
+    const handleRestoreCourse = async () => {
+        try {
+            setRestoring(true);
+            const response = await restoreCourse(course.id);
+            toastService.success(response.message || "Course restored successfully");
+            router.refresh();
+        } catch (error: any) {
+            toastService.error(error.message || "Failed to restore course. Please try again.");
+        } finally {
+            setRestoring(false);
+        }
+    };
+
     return (
         <Box className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 py-4">
             <Container maxWidth="xl">
+                {/* Deletion Status Banner */}
+                {course.deleted_at && (
+                    <Paper
+                        elevation={0}
+                        className="mb-6 p-6 rounded-3xl border-2 border-red-300 bg-gradient-to-r from-red-50 to-orange-50"
+                    >
+                        <Box className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <Box className="flex items-start gap-4">
+                                <WarningAmber className="text-red-600 text-3xl mt-1" />
+                                <Box>
+                                    <Typography
+                                        variant="h6"
+                                        className="font-bold text-red-800 mb-2"
+                                    >
+                                        Course Deleted
+                                    </Typography>
+                                    <Typography variant="body2" className="text-red-700">
+                                        This course was deleted on{" "}
+                                        {new Date(course.deleted_at).toLocaleDateString()}.
+                                        It is no longer visible to students. You can restore it at any time.
+                                    </Typography>
+                                </Box>
+                            </Box>
+                            <Button
+                                variant="contained"
+                                startIcon={<RestoreOutlined />}
+                                onClick={handleRestoreCourse}
+                                disabled={restoring}
+                                sx={{
+                                    background: "linear-gradient(45deg, #16a34a, #22c55e)",
+                                    borderRadius: "16px",
+                                    textTransform: "none",
+                                    fontWeight: "bold",
+                                    px: 4,
+                                    py: 1.5,
+                                    whiteSpace: "nowrap",
+                                    "&:hover": {
+                                        background: "linear-gradient(45deg, #15803d, #16a34a)",
+                                    },
+                                }}
+                            >
+                                {restoring ? "Restoring..." : "Restore Course"}
+                            </Button>
+                        </Box>
+                    </Paper>
+                )}
+
                 {/* Header Section */}
                 <Box className="mb-8">
                     <Card
@@ -1073,51 +1134,95 @@ export default function ManageDetailCourse({
                                 </Box>
                             </Paper>
 
-                            {/* Danger Zone */}
-                            <Paper
-                                elevation={0}
-                                className="p-6 rounded-2xl bg-gradient-to-r from-red-50 to-pink-50 border border-red-200"
-                            >
-                                <Typography
-                                    variant="h6"
-                                    className="font-bold text-red-800 mb-4 flex items-center gap-2"
+                            {/* Course Status Section */}
+                            {course.deleted_at ? (
+                                <Paper
+                                    elevation={0}
+                                    className="p-6 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 mb-8"
                                 >
-                                    ⚠️ Danger Zone
-                                </Typography>
-                                <Box className="bg-white/80 p-6 rounded-xl border border-red-200">
                                     <Typography
-                                        variant="body1"
-                                        className="text-red-700 mb-4 leading-relaxed"
+                                        variant="h6"
+                                        className="font-bold text-orange-800 mb-4 flex items-center gap-2"
                                     >
-                                        ⚠️ <strong>Warning:</strong> Deleting
-                                        this course will permanently remove all
-                                        content, student progress, reviews, and
-                                        enrollment data. This action cannot be
-                                        undone.
+                                        🔄 Course Status
                                     </Typography>
-                                    <Button
-                                        variant="contained"
-                                        color="error"
-                                        startIcon={<DeleteOutlined />}
-                                        onClick={() => setDeleteDialogOpen(true)}
-                                        sx={{
-                                            background:
-                                                "linear-gradient(45deg, #dc2626, #b91c1c)",
-                                            borderRadius: "16px",
-                                            textTransform: "none",
-                                            fontWeight: "bold",
-                                            px: 4,
-                                            py: 1.5,
-                                            "&:hover": {
+                                    <Box className="bg-white/80 p-6 rounded-xl border border-orange-200">
+                                        <Typography
+                                            variant="body1"
+                                            className="text-orange-700 mb-4 leading-relaxed"
+                                        >
+                                            This course is currently <strong>deleted</strong> and not visible to students.
+                                            <br />
+                                            Deleted on: <strong>{new Date(course.deleted_at).toLocaleDateString()}</strong>
+                                        </Typography>
+                                        <Button
+                                            variant="contained"
+                                            startIcon={<RestoreOutlined />}
+                                            onClick={handleRestoreCourse}
+                                            disabled={restoring}
+                                            sx={{
                                                 background:
-                                                    "linear-gradient(45deg, #b91c1c, #991b1b)",
-                                            },
-                                        }}
+                                                    "linear-gradient(45deg, #16a34a, #22c55e)",
+                                                borderRadius: "16px",
+                                                textTransform: "none",
+                                                fontWeight: "bold",
+                                                px: 4,
+                                                py: 1.5,
+                                                "&:hover": {
+                                                    background:
+                                                        "linear-gradient(45deg, #15803d, #16a34a)",
+                                                },
+                                            }}
+                                        >
+                                            {restoring ? "Restoring..." : "Restore Course"}
+                                        </Button>
+                                    </Box>
+                                </Paper>
+                            ) : (
+                                /* Danger Zone - Only show if course is not deleted */
+                                <Paper
+                                    elevation={0}
+                                    className="p-6 rounded-2xl bg-gradient-to-r from-red-50 to-pink-50 border border-red-200"
+                                >
+                                    <Typography
+                                        variant="h6"
+                                        className="font-bold text-red-800 mb-4 flex items-center gap-2"
                                     >
-                                        Delete Course Permanently
-                                    </Button>
-                                </Box>
-                            </Paper>
+                                        ⚠️ Danger Zone
+                                    </Typography>
+                                    <Box className="bg-white/80 p-6 rounded-xl border border-red-200">
+                                        <Typography
+                                            variant="body1"
+                                            className="text-red-700 mb-4 leading-relaxed"
+                                        >
+                                            ⚠️ <strong>Warning:</strong> Deleting
+                                            this course will hide it from students.
+                                            You can restore it later if needed.
+                                        </Typography>
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            startIcon={<DeleteOutlined />}
+                                            onClick={() => setDeleteDialogOpen(true)}
+                                            sx={{
+                                                background:
+                                                    "linear-gradient(45deg, #dc2626, #b91c1c)",
+                                                borderRadius: "16px",
+                                                textTransform: "none",
+                                                fontWeight: "bold",
+                                                px: 4,
+                                                py: 1.5,
+                                                "&:hover": {
+                                                    background:
+                                                        "linear-gradient(45deg, #b91c1c, #991b1b)",
+                                                },
+                                            }}
+                                        >
+                                            Delete Course
+                                        </Button>
+                                    </Box>
+                                </Paper>
+                            )}
                         </CardContent>
                     </Card>
                 )}
@@ -1157,13 +1262,17 @@ export default function ManageDetailCourse({
                     <DialogContentText sx={{ fontSize: "1rem", lineHeight: 1.6 }}>
                         Are you sure you want to delete <strong>"{course.title}"</strong>?
                         <br /><br />
-                        This action will permanently remove:
-                        <br />• All course content and materials
+                        This will:
+                        <br />• Hide the course from students
+                        <br />• Prevent new enrollments
+                        <br />• Remove it from course listings
+                        <br /><br />
+                        <strong style={{ color: "#16a34a" }}>✓ You can restore this course later if needed.</strong>
+                        <br /><br />
+                        Your data will be preserved:
+                        <br />• Course content and materials
                         <br />• Student enrollments and progress
                         <br />• Reviews and ratings
-                        <br />• Revenue history
-                        <br /><br />
-                        <strong style={{ color: "#dc2626" }}>This action cannot be undone.</strong>
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, gap: 2 }}>
@@ -1196,7 +1305,7 @@ export default function ManageDetailCourse({
                             },
                         }}
                     >
-                        {deleting ? "Deleting..." : "Delete Forever"}
+                        {deleting ? "Deleting..." : "Delete Course"}
                     </Button>
                 </DialogActions>
             </Dialog>

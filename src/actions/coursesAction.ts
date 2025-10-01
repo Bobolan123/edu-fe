@@ -104,13 +104,17 @@ export const getCourses = async (params: GetCoursesParams = {}): Promise<IModelP
 
 
 export const getCourseById = async (id: string, includeDeleted?: boolean) => {
+    const access_token = await getAccessToken();
     const queryParams: any = {};
     if (includeDeleted) queryParams.includeDeleted = includeDeleted;
     
     const res = await sendRequest<IBackendRes<ICourse>>({
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/courses/${id}`,
-        queryParams: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+        queryParams,
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
         nextOption: {
             next: {
                 tags: ["courses", `course-${id}`],

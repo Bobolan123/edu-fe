@@ -31,6 +31,7 @@ export default async function ManageDetailCoursePage({
     } = await searchParams;
 
     const resCourse = await getCourseById(id);
+    console.log(resCourse)
 
     if (!resCourse) throw new Error("No course data found");
 
