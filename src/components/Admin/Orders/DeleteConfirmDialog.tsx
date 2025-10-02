@@ -34,7 +34,6 @@ export const DeleteConfirmDialog = ({ open, onClose, order }: DeleteConfirmDialo
       await deleteOrder(order.id.toString());
       toastService.success('Order deleted successfully!');
       onClose();
-      router.refresh();
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to delete order';
       toastService.error(errorMessage);

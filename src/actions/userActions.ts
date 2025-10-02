@@ -77,7 +77,7 @@ export const getUserById = async (id: number, includeDeleted?: boolean): Promise
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`user-${id}`] },
+            next: { tags: ["user"] },
         },
     });
 
@@ -108,7 +108,7 @@ export const updateUser = async (
     }
 
     revalidateTag("users");
-    revalidateTag(`user-${id}`);
+    revalidateTag("user");
     
     return res.data;
 };
@@ -152,6 +152,7 @@ export const updateUserAvatar = async (id: number, avatar: File): Promise<{ avat
     }
 
     revalidateTag("users");
+    revalidateTag("user");
     return res.data;
 };
 
@@ -172,7 +173,7 @@ export const suspendUser = async (id: number, suspended: boolean): Promise<IUser
     }
 
     revalidateTag("users");
-    revalidateTag(`user-${id}`);
+    revalidateTag("user");
     
     return res.data;
 };
@@ -192,7 +193,7 @@ export const getUserEnrollments = async (
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`user-${userId}-enrollments`] },
+            next: { tags: ["user-enrollments"] },
         },
     });
 
@@ -240,7 +241,7 @@ export const restoreUser = async (id: number): Promise<IUser> => {
     }
 
     revalidateTag("users");
-    revalidateTag(`user-${id}`);
+    revalidateTag("user");
     
     return res.data;
 };

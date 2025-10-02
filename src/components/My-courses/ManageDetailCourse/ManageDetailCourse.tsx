@@ -160,7 +160,6 @@ export default function ManageDetailCourse({
             setRestoring(true);
             const response = await restoreCourse(course.id);
             toastService.success(response.message || "Course restored successfully");
-            router.refresh();
         } catch (error: any) {
             toastService.error(error.message || "Failed to restore course. Please try again.");
         } finally {

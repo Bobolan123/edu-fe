@@ -96,7 +96,6 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
     try {
       await updateRole(role.id, { isActive: !role.isActive });
       toastService.success(`Role ${!role.isActive ? 'activated' : 'deactivated'} successfully!`);
-      router.refresh();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update role status';
       toastService.error(errorMessage);
@@ -115,10 +114,9 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
         permissionIds: data.permissions // Include permissions in create request
       };
       await createRole(roleData);
-      
+
       toastService.success('Role created successfully!');
       handleCloseDialog();
-      router.refresh();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create role';
       toastService.error(errorMessage);
@@ -129,7 +127,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
 
   const handleUpdateRole = async (data: { name: string; description?: string; isActive?: boolean; permissions?: number[] }) => {
     if (!selectedRole) return;
-    
+
     setLoading(true);
     try {
       const roleData: IRoleUpdateRequest = {
@@ -141,7 +139,6 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
       await updateRole(selectedRole.id, roleData);
       toastService.success('Role updated successfully!');
       handleCloseDialog();
-      router.refresh();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update role';
       toastService.error(errorMessage);
@@ -152,7 +149,7 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
 
   const handleUpdatePermissions = async (data: { permissions?: number[] }) => {
     if (!selectedRole || !data.permissions) return;
-    
+
     setLoading(true);
     try {
       const updateData: IRoleUpdatePermissionsRequest = {
@@ -162,7 +159,6 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
       await updateRole(selectedRole.id, updateData);
       toastService.success('Role permissions updated successfully!');
       handleCloseDialog();
-      router.refresh();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update role permissions';
       toastService.error(errorMessage);
@@ -173,13 +169,12 @@ export default function AdminRolesPage({ roles, permissions, searchParams }: Adm
 
   const handleDeleteRole = async () => {
     if (!selectedRole) return;
-    
+
     setLoading(true);
     try {
       await deleteRole(selectedRole.id);
       toastService.success('Role deleted successfully!');
       handleCloseDialog();
-      router.refresh();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete role';
       toastService.error(errorMessage);

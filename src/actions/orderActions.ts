@@ -121,7 +121,7 @@ export const getOrderById = async (id: string): Promise<IOrder> => {
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`order-${id}`] },
+            next: { tags: ["order"] },
         },
     });
 
@@ -152,8 +152,8 @@ export const updateOrderStatus = async (
     }
 
     revalidateTag("orders");
-    revalidateTag(`order-${id}`);
-    
+    revalidateTag("order");
+
     return res.data;
 };
 
@@ -171,6 +171,7 @@ export const deleteOrder = async (id: string): Promise<void> => {
     if (res?.statusCode !== 200) {
         throw new Error(res?.message || "Failed to delete order");
     }
-    
+
     revalidateTag("orders");
+    revalidateTag("order");
 };

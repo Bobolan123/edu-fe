@@ -119,7 +119,6 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                 toast.success("Review created successfully!");
             }
             setIsEditDialogOpen(false);
-            router.refresh();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to save review");
         } finally {
@@ -135,7 +134,6 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
             await deleteReview(userReview.id, courseId);
             toast.success("Review deleted successfully!");
             setIsDeleteDialogOpen(false);
-            router.refresh();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to delete review");
         } finally {

@@ -34,7 +34,6 @@ export const DeleteConfirmDialog = ({ open, onClose, category }: DeleteConfirmDi
       await deleteCategory(category.id);
       toastService.success('Category deleted successfully!');
       onClose();
-      router.refresh();
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to delete category';
       toastService.error(errorMessage);

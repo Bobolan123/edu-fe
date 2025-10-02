@@ -42,10 +42,10 @@ export const getCategoryById = async (id: number): Promise<ICategory> => {
         method: "GET",
         url: `${process.env.NEXT_PUBLIC_SERVER}/categories/${id}`,
         nextOption: {
-            next: { tags: [`category-${id}`] },
+            next: { tags: ["category"] },
         },
     });
-    
+
     if (!res?.data) {
         throw new Error(res?.message || "Failed to fetch categories");
     }
@@ -102,9 +102,9 @@ export const updateCategory = async (
     if (!res?.data) {
         throw new Error(res?.message || "Failed to fetch categories");
     }
-    
+
     revalidateTag("categories");
-    revalidateTag(`category-${id}`);
+    revalidateTag("category");
     return res.data;
 };
 
@@ -122,6 +122,7 @@ export const deleteCategory = async (id: number): Promise<void> => {
     if (res?.statusCode !== 200) {
         throw new Error(res?.message || "Failed to delete category");
     }
-    
+
     revalidateTag("categories");
+    revalidateTag("category");
 };

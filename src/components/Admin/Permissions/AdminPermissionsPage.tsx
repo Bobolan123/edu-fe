@@ -159,7 +159,7 @@ export default function AdminPermissionsPage({
   };
 
   const refreshData = () => {
-    router.refresh();
+    // Removed router.refresh() - revalidateTag in server actions handles cache invalidation
   };
 
   // Dialog handlers

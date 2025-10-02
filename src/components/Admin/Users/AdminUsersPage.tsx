@@ -196,7 +196,6 @@ export default function AdminUsersPage({
     setCreateDialogOpen(false);
     const message = response?.message || 'User created successfully!';
     toastService.success(message);
-    router.refresh();
   };
 
   const handleEditSuccess = (response?: any) => {
@@ -204,7 +203,6 @@ export default function AdminUsersPage({
     setSelectedUser(null);
     const message = response?.message || 'User updated successfully!';
     toastService.success(message);
-    router.refresh();
   };
 
   const handleDeleteSuccess = () => {
@@ -216,7 +214,6 @@ export default function AdminUsersPage({
       'force-delete': 'User permanently deleted successfully!'
     };
     toastService.success(messages[deleteAction]);
-    router.refresh();
   };
 
   const handleError = (errorMessage: string) => {

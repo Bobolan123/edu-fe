@@ -87,7 +87,6 @@ export const CategoryForm = ({ open, onClose, category, mode }: CategoryFormProp
       }
       
       handleClose();
-      router.refresh();
     } catch (error: any) {
       const errorMessage = error?.message || `Failed to ${mode} category`;
       toastService.error(errorMessage);

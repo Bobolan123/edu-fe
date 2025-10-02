@@ -117,7 +117,7 @@ export const getCourseById = async (id: string, includeDeleted?: boolean) => {
         },
         nextOption: {
             next: {
-                tags: ["courses", `course-${id}`],
+                tags: ["course"],
             },
         },
     });
@@ -149,7 +149,7 @@ export const updateCourse = async (
 
     revalidateTag("courses");
     revalidateTag("admin-courses");
-    revalidateTag(`course-${id}`);
+    revalidateTag("course");
     return res;
 };
 
@@ -169,6 +169,7 @@ export const deleteCourse = async (id: string) => {
 
     revalidateTag("courses");
     revalidateTag("admin-courses");
+    revalidateTag("course");
     return res;
 };
 
@@ -192,6 +193,7 @@ export const uploadThumbnail = async (
         throw new Error(res.message);
     }
     revalidateTag("courses");
+    revalidateTag("course");
     return res;
 };
 
@@ -238,7 +240,7 @@ export const restoreCourse = async (courseId: number): Promise<IBackendRes<any>>
 
     revalidateTag("courses");
     revalidateTag("admin-courses");
-    revalidateTag(`course-${courseId}`);
+    revalidateTag("course");
 
     return res;
 };
@@ -263,6 +265,7 @@ export const forceDeleteCourse = async (courseId: number): Promise<IBackendRes<a
 
     revalidateTag("courses");
     revalidateTag("admin-courses");
+    revalidateTag("course");
 
     return res;
 };

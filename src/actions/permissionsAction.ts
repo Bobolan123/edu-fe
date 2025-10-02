@@ -90,7 +90,7 @@ export const getPermissionById = async (id: number): Promise<IPermission> => {
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`permission-${id}`] },
+            next: { tags: ["permission"] },
         },
     });
 
@@ -118,7 +118,8 @@ export const createPermission = async (permissionData: IPermissionCreateRequest)
     }
 
     revalidateTag("permissions");
-    
+    revalidateTag("permission");
+
     return res.data;
 };
 
@@ -139,8 +140,8 @@ export const updatePermission = async (id: number, permissionData: IPermissionUp
     }
 
     revalidateTag("permissions");
-    revalidateTag(`permission-${id}`);
-    
+    revalidateTag("permission");
+
     return res.data;
 };
 
@@ -160,5 +161,5 @@ export const deletePermission = async (id: number): Promise<void> => {
     }
 
     revalidateTag("permissions");
-    revalidateTag(`permission-${id}`);
+    revalidateTag("permission");
 };

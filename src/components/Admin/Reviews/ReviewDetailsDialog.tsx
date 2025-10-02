@@ -83,7 +83,6 @@ export function ReviewDetailsDialog({
     try {
       const res = await updateReview(review.id, { status: newStatus });
       toastService.success(`Review ${newStatus} successfully!`);
-      router.refresh();
       onClose();
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to update review status');

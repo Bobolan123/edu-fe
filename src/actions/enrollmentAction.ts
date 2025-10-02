@@ -30,7 +30,7 @@ export const markLectureAsCompleted = async (
         throw new Error(res?.message || "Failed to mark lecture as completed");
     }
 
-    revalidateTag(`enrollment-progress-${courseId}`);
+    revalidateTag("enrollment-progress");
 
     return res;
 };
@@ -154,7 +154,7 @@ export const getEnrollmentProgress = async (userId: string, courseId: string) =>
         },
         nextOption: {
             next: {
-                tags: [`enrollment-progress-${courseId}`],
+                tags: ["enrollment-progress"],
             },
         },
     });

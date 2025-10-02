@@ -23,7 +23,7 @@ export const getCourseContent = async (courseId: number) => {
         url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/${courseId}/content`,
         nextOption: {
             next: {
-                tags: ["course-content", `course-content-${courseId}`],
+                tags: ["course-content"],
             },
         },
     });
@@ -52,7 +52,7 @@ export const updateCourseContent = async (
         throw new Error(res.message || "Failed to update course content");
     }
 
-    revalidateTag(`course-content-${courseId}`);
+    revalidateTag("course-content");
     return res.data;
 };
 
@@ -94,7 +94,7 @@ export const createCourseSection = async (
         throw new Error(res.message || "Failed to create section");
     }
 
-    revalidateTag(`course-content-${courseId}`);
+    revalidateTag("course-content");
     return res;
 };
 
@@ -159,7 +159,7 @@ export const reorderCourseSections = async (
         throw new Error(res.message || "Failed to reorder sections");
     }
 
-    revalidateTag(`course-content-${courseId}`);
+    revalidateTag("course-content");
     return res.data;
 };
 
@@ -185,7 +185,7 @@ export const createCourseLecture = async (
         throw new Error(res.message || "Failed to create lecture");
     }
 
-    revalidateTag(`course-content-${courseId}`);
+    revalidateTag("course-content");
     return res;
 };
 
@@ -301,7 +301,7 @@ export const uploadVideoToLecture = async (
         throw new Error(res.message || "Failed to upload video");
     }
 
-    revalidateTag(`course-content-${courseId}`);
+    revalidateTag("course-content");
     return res;
 };
 

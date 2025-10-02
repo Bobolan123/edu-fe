@@ -160,9 +160,6 @@ export default function     CourseLesson({
             );
             toast.success("Lecture marked as completed!");
             
-            // Refresh the page to update progress
-            router.refresh();
-            
         } catch (error) {
             console.error("Failed to mark lecture as completed:", error);
             toast.error("Failed to update lecture status");

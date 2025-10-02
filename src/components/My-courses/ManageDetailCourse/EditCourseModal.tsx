@@ -63,7 +63,6 @@ export default function EditCourseModal({
             const response = await updateCourse(course.id.toString(), editedCourse);
             toast.success(response.message || 'Course updated successfully!');
             onClose();
-            router.refresh();
         } catch (error) {
             console.error('Failed to update course:', error);
             const errorMessage = error instanceof Error ? error.message : 'Failed to update course';

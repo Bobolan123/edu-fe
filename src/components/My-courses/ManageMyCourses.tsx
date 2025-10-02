@@ -92,7 +92,6 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
         try {
             await softDeleteCourse(courseId);
             toast.success("Course moved to deleted");
-            router.refresh();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to delete course");
         }
@@ -103,7 +102,6 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
         try {
             await restoreCourse(courseId);
             toast.success("Course restored successfully");
-            router.refresh();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to restore course");
         }
@@ -126,7 +124,6 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
             try {
                 await forceDeleteCourse(courseToDelete);
                 toast.success("Course permanently deleted");
-                router.refresh();
             } catch (error) {
                 toast.error(error instanceof Error ? error.message : "Failed to permanently delete course");
             }

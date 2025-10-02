@@ -268,7 +268,6 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
     try {
       // TODO: Implement suspend enrollment API call
       toastService.success('Enrollment suspended successfully');
-      router.refresh();
       setDetailsDialogOpen(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to suspend enrollment';
@@ -286,7 +285,6 @@ export default function AdminEnrollmentsPage({ enrollments, searchParams }: Admi
     try {
       // TODO: Implement reactivate enrollment API call
       toastService.success('Enrollment reactivated successfully');
-      router.refresh();
       setDetailsDialogOpen(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to reactivate enrollment';

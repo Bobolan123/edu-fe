@@ -308,16 +308,12 @@ export default function AdminCoursesPage({
   const handleCreateSuccess = () => {
     setCreateDialogOpen(false);
     toastService.success('Course created successfully!');
-    // Force a router refresh to get updated data from server component
-    router.refresh();
   };
 
   const handleEditSuccess = () => {
     setEditDialogOpen(false);
     setSelectedCourse(null);
     toastService.success('Course updated successfully!');
-    // Force a router refresh to get updated data from server component
-    router.refresh();
   };
 
   const handleDeleteSuccess = () => {
@@ -329,8 +325,6 @@ export default function AdminCoursesPage({
       'force-delete': 'Course permanently deleted successfully!'
     };
     toastService.success(messages[deleteAction]);
-    // Force a router refresh to get updated data from server component
-    router.refresh();
   };
 
   const handleError = (errorMessage: string) => {

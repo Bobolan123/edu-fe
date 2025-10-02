@@ -105,7 +105,7 @@ export const getRoleById = async (id: number): Promise<IRole> => {
             Authorization: `Bearer ${access_token}`,
         },
         nextOption: {
-            next: { tags: [`role-${id}`] },
+            next: { tags: ["role"] },
         },
     });
 
@@ -133,7 +133,8 @@ export const createRole = async (roleData: IRoleCreateRequest): Promise<IRole> =
     }
 
     revalidateTag("roles");
-    
+    revalidateTag("role");
+
     return res.data;
 };
 
@@ -153,7 +154,7 @@ export const deleteRole = async (id: number): Promise<void> => {
     }
 
     revalidateTag("roles");
-    revalidateTag(`role-${id}`);
+    revalidateTag("role");
 };
 
 export const updateRole = async (id: number, roleData: IRoleUpdateRequest): Promise<IRole> => {
@@ -173,7 +174,7 @@ export const updateRole = async (id: number, roleData: IRoleUpdateRequest): Prom
     }
 
     revalidateTag("roles");
-    revalidateTag(`role-${id}`);
-    
+    revalidateTag("role");
+
     return res.data;
 };
