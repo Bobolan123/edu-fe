@@ -35,7 +35,6 @@ export default async function ManageMyCoursesPage(props: {
         includeDeleted,
     });
 
-    console.log()
     return <ManageMyCourses
         courses={coursesData?.data?.result}
         currentTab={currentTab}

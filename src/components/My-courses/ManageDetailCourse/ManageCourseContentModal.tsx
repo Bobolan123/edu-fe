@@ -33,6 +33,8 @@ import { uploadVideoToLecture, saveCourseContent } from "@/actions/courseContent
 import { toastService } from "@/services/toast";
 import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
 import CaptionManagement from "../../common/courses/CaptionManagement";
+import QuizEditor from "./QuizEditor";
+import { QuizContent } from "../../../../types/entities";
 
 interface ManageCourseContentModalProps {
     open: boolean;
@@ -128,7 +130,9 @@ export default function ManageCourseContentModal({
                     quality: []
                   }
                 : {
-                    questions: []
+                    questions: [],
+                    passingScore: 70,
+                    allowMultipleAttempts: true
                   }
         };
         updated[sectionIndex].lectures.push(newLecture);
@@ -222,6 +226,16 @@ export default function ManageCourseContentModal({
         } finally {
             setUploadingVideos((prev) => ({ ...prev, [key]: false }));
         }
+    };
+
+    const handleQuizContentChange = (
+        sectionIndex: number,
+        lectureIndex: number,
+        newQuizContent: QuizContent
+    ) => {
+        const updated = [...localSections];
+        updated[sectionIndex].lectures[lectureIndex].content = newQuizContent;
+        setLocalSections(updated);
     };
 
     const handleSaveChanges = async () => {
@@ -570,19 +584,19 @@ export default function ManageCourseContentModal({
 
                                     <Collapse in={expandedVideos[videoKey]}>
                                         {lecture.contentType === 'quiz' ? (
-                                            <Box className="mt-2 p-3 bg-purple-50 border border-purple-200 rounded-xl">
-                                                <Typography
-                                                    variant="caption"
-                                                    className="text-purple-700 font-medium"
-                                                >
-                                                    📝 Quiz Content - {lecture.content && 'questions' in lecture.content ? lecture.content.questions?.length || 0 : 0} questions
-                                                </Typography>
-                                                <Typography
-                                                    variant="caption"
-                                                    className="text-purple-600 block mt-1"
-                                                >
-                                                    Quiz questions are managed separately in the learning interface.
-                                                </Typography>
+                                            <Box className="mt-2">
+                                                {lecture.content && 'questions' in lecture.content && (
+                                                    <QuizEditor
+                                                        quizContent={lecture.content}
+                                                        onChange={(newContent) =>
+                                                            handleQuizContentChange(
+                                                                sectionIndex,
+                                                                lectureIndex,
+                                                                newContent
+                                                            )
+                                                        }
+                                                    />
+                                                )}
                                             </Box>
                                         ) : (
                                             <>

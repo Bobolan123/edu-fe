@@ -48,7 +48,11 @@ import Link from "next/link";
 import { slugify } from "../../utils/utils";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
-import { softDeleteCourse, restoreCourse, forceDeleteCourse } from "@/actions/coursesAction";
+import {
+    softDeleteCourse,
+    restoreCourse,
+    forceDeleteCourse,
+} from "@/actions/coursesAction";
 import { toast } from "react-toastify";
 
 interface IManageMyCoursesProps {
@@ -57,7 +61,11 @@ interface IManageMyCoursesProps {
     searchParams: any;
 }
 
-export default function ManageMyCourses({ courses, currentTab, searchParams }: IManageMyCoursesProps) {
+export default function ManageMyCourses({
+    courses,
+    currentTab,
+    searchParams,
+}: IManageMyCoursesProps) {
     const t = useTranslations("ManageMyCourses");
     const router = useRouter();
     const pathname = usePathname();
@@ -84,7 +92,7 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
         const params = new URLSearchParams(searchParams);
-        params.set('tab', newValue);
+        params.set("tab", newValue);
         router.push(`${pathname}?${params.toString()}`);
     };
 
@@ -93,7 +101,11 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
             await softDeleteCourse(courseId);
             toast.success("Course moved to deleted");
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Failed to delete course");
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to delete course"
+            );
         }
         handleMenuClose();
     };
@@ -103,7 +115,11 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
             await restoreCourse(courseId);
             toast.success("Course restored successfully");
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Failed to restore course");
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to restore course"
+            );
         }
         handleMenuClose();
     };
@@ -125,7 +141,11 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                 await forceDeleteCourse(courseToDelete);
                 toast.success("Course permanently deleted");
             } catch (error) {
-                toast.error(error instanceof Error ? error.message : "Failed to permanently delete course");
+                toast.error(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to permanently delete course"
+                );
             }
         }
         handleCloseDeleteDialog();
@@ -237,6 +257,9 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                     >
                         {t("subtitle")}
                     </Typography>
+                    <Button variant="contained">
+                        <Link href="/my-courses/create">Create New Course</Link>
+                    </Button>
                 </Box>
 
                 {/* Tabs */}
@@ -249,8 +272,8 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                         onChange={handleTabChange}
                         variant="fullWidth"
                         sx={{
-                            '& .MuiTabs-indicator': {
-                                backgroundColor: '#3b82f6',
+                            "& .MuiTabs-indicator": {
+                                backgroundColor: "#3b82f6",
                             },
                         }}
                     >
@@ -258,10 +281,10 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                             label="Active Courses"
                             value="active"
                             sx={{
-                                textTransform: 'none',
+                                textTransform: "none",
                                 fontWeight: 600,
-                                '&.Mui-selected': {
-                                    color: '#3b82f6',
+                                "&.Mui-selected": {
+                                    color: "#3b82f6",
                                 },
                             }}
                         />
@@ -269,10 +292,10 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                             label="Deleted Courses"
                             value="deleted"
                             sx={{
-                                textTransform: 'none',
+                                textTransform: "none",
                                 fontWeight: 600,
-                                '&.Mui-selected': {
-                                    color: '#3b82f6',
+                                "&.Mui-selected": {
+                                    color: "#3b82f6",
                                 },
                             }}
                         />
@@ -479,9 +502,14 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                                         fill
                                         className="object-cover"
                                         onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            if (target.src !== "/img_not_found.png") {
-                                                target.src = "/img_not_found.png";
+                                            const target =
+                                                e.target as HTMLImageElement;
+                                            if (
+                                                target.src !==
+                                                "/img_not_found.png"
+                                            ) {
+                                                target.src =
+                                                    "/img_not_found.png";
                                             }
                                         }}
                                     />
@@ -643,10 +671,7 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
 
                 {(!courses || courses.length === 0) && (
                     <Box className="text-center py-16">
-                        <Typography
-                            variant="h4"
-                            className="text-gray-600"
-                        >
+                        <Typography variant="h4" className="text-gray-600">
                             No deleted \courses found
                         </Typography>
                     </Box>
@@ -666,48 +691,68 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                         horizontal: "right",
                     }}
                 >
-                    {currentTab === 'active' ? [
-                        <MenuItem key="edit" onClick={handleMenuClose}>
-                            {t("menu_edit")}
-                        </MenuItem>,
-                        <MenuItem key="analytics" onClick={handleMenuClose}>
-                            {t("menu_analytics")}
-                        </MenuItem>,
-                        <MenuItem key="enrollments" onClick={handleMenuClose}>
-                            {t("menu_enrollments")}
-                        </MenuItem>,
-                        <MenuItem key="reviews" onClick={handleMenuClose}>
-                            {t("menu_reviews")}
-                        </MenuItem>,
-                        <MenuItem key="settings" onClick={handleMenuClose}>
-                            {t("menu_settings")}
-                        </MenuItem>,
-                        <MenuItem
-                            key="delete"
-                            onClick={() => selectedCourse && handleDeleteCourse(selectedCourse)}
-                            sx={{ color: "error.main" }}
-                        >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Move to Deleted
-                        </MenuItem>
-                    ] : [
-                        <MenuItem
-                            key="restore"
-                            onClick={() => selectedCourse && handleRestoreCourse(selectedCourse)}
-                            sx={{ color: "success.main" }}
-                        >
-                            <RotateCw className="w-4 h-4 mr-2" />
-                            Restore Course
-                        </MenuItem>,
-                        <MenuItem
-                            key="permanent-delete"
-                            onClick={() => selectedCourse && handleOpenDeleteDialog(selectedCourse)}
-                            sx={{ color: "error.main" }}
-                        >
-                            <X className="w-4 h-4 mr-2" />
-                            Delete Permanently
-                        </MenuItem>
-                    ]}
+                    {currentTab === "active"
+                        ? [
+                              <MenuItem key="edit" onClick={handleMenuClose}>
+                                  {t("menu_edit")}
+                              </MenuItem>,
+                              <MenuItem
+                                  key="analytics"
+                                  onClick={handleMenuClose}
+                              >
+                                  {t("menu_analytics")}
+                              </MenuItem>,
+                              <MenuItem
+                                  key="enrollments"
+                                  onClick={handleMenuClose}
+                              >
+                                  {t("menu_enrollments")}
+                              </MenuItem>,
+                              <MenuItem key="reviews" onClick={handleMenuClose}>
+                                  {t("menu_reviews")}
+                              </MenuItem>,
+                              <MenuItem
+                                  key="settings"
+                                  onClick={handleMenuClose}
+                              >
+                                  {t("menu_settings")}
+                              </MenuItem>,
+                              <MenuItem
+                                  key="delete"
+                                  onClick={() =>
+                                      selectedCourse &&
+                                      handleDeleteCourse(selectedCourse)
+                                  }
+                                  sx={{ color: "error.main" }}
+                              >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Move to Deleted
+                              </MenuItem>,
+                          ]
+                        : [
+                              <MenuItem
+                                  key="restore"
+                                  onClick={() =>
+                                      selectedCourse &&
+                                      handleRestoreCourse(selectedCourse)
+                                  }
+                                  sx={{ color: "success.main" }}
+                              >
+                                  <RotateCw className="w-4 h-4 mr-2" />
+                                  Restore Course
+                              </MenuItem>,
+                              <MenuItem
+                                  key="permanent-delete"
+                                  onClick={() =>
+                                      selectedCourse &&
+                                      handleOpenDeleteDialog(selectedCourse)
+                                  }
+                                  sx={{ color: "error.main" }}
+                              >
+                                  <X className="w-4 h-4 mr-2" />
+                                  Delete Permanently
+                              </MenuItem>,
+                          ]}
                 </Menu>
 
                 {/* Permanent Delete Confirmation Dialog */}
@@ -717,16 +762,24 @@ export default function ManageMyCourses({ courses, currentTab, searchParams }: I
                     aria-labelledby="delete-dialog-title"
                     aria-describedby="delete-dialog-description"
                 >
-                    <DialogTitle id="delete-dialog-title" sx={{ color: 'error.main' }}>
+                    <DialogTitle
+                        id="delete-dialog-title"
+                        sx={{ color: "error.main" }}
+                    >
                         Permanently Delete Course
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText id="delete-dialog-description">
-                            Are you sure you want to permanently delete this course? This action cannot be undone and all course data will be lost forever.
+                            Are you sure you want to permanently delete this
+                            course? This action cannot be undone and all course
+                            data will be lost forever.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCloseDeleteDialog} color="primary">
+                        <Button
+                            onClick={handleCloseDeleteDialog}
+                            color="primary"
+                        >
                             Cancel
                         </Button>
                         <Button
