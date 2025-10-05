@@ -260,6 +260,14 @@ export default function QuizEditor({ quizContent, onChange }: QuizEditorProps) {
                                     >
                                         Q{index + 1}
                                     </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        className="font-medium text-gray-700 truncate"
+                                    >
+                                        {question.question || "Untitled Question"}
+                                    </Typography>
+                                </Box>
+                                <Box className="flex items-center gap-1">
                                     <IconButton
                                         size="small"
                                         onClick={() => toggleQuestion(question.id)}
@@ -271,23 +279,17 @@ export default function QuizEditor({ quizContent, onChange }: QuizEditorProps) {
                                             <ExpandMoreIcon />
                                         )}
                                     </IconButton>
-                                    <Typography
-                                        variant="body2"
-                                        className="font-medium text-gray-700 truncate"
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => handleDeleteQuestion(question.id)}
+                                        sx={{
+                                            color: "#dc2626",
+                                            "&:hover": { backgroundColor: "rgba(220, 38, 38, 0.1)" },
+                                        }}
                                     >
-                                        {question.question || "Untitled Question"}
-                                    </Typography>
+                                        <DeleteIcon fontSize="small" />
+                                    </IconButton>
                                 </Box>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => handleDeleteQuestion(question.id)}
-                                    sx={{
-                                        color: "#dc2626",
-                                        "&:hover": { backgroundColor: "rgba(220, 38, 38, 0.1)" },
-                                    }}
-                                >
-                                    <DeleteIcon fontSize="small" />
-                                </IconButton>
                             </Box>
 
                             <Collapse in={expandedQuestions[question.id]}>

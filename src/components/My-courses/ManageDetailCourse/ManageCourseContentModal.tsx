@@ -19,12 +19,11 @@ import {
     Close as CloseIcon,
     PlayArrow,
     Delete,
-    Edit,
-    Visibility,
-    Save as SaveIcon,
     CloudUpload,
     Add as AddIcon,
     Quiz as QuizIcon,
+    ExpandMore as ExpandMoreIcon,
+    ExpandLess as ExpandLessIcon,
 } from "@mui/icons-material";
 import { ICourseSection, ICourseLecture } from "../../../../types/entities";
 import { useEffect, useState } from "react";
@@ -50,13 +49,6 @@ export default function ManageCourseContentModal({
     courseId,
 }: ManageCourseContentModalProps) {
     const [localSections, setLocalSections] = useState<ICourseSection[]>(sections);
-    const [editingSectionIndex, setEditingSectionIndex] = useState<
-        number | null
-    >(null);
-    const [editingLecture, setEditingLecture] = useState<{
-        sectionIndex: number;
-        lectureIndex: number;
-    } | null>(null);
     const [expandedVideos, setExpandedVideos] = useState<{
         [key: string]: boolean;
     }>({});
@@ -338,81 +330,35 @@ export default function ManageCourseContentModal({
                         key={sectionIndex}
                         className="bg-white/80 border border-blue-100 rounded-2xl mb-6 p-4 shadow-sm backdrop-blur-sm"
                     >
-                        <Box className="flex justify-between items-center mb-2">
-                            {editingSectionIndex === sectionIndex ? (
-                                <TextField
-                                    value={section.title}
-                                    onChange={(e) =>
-                                        handleSectionTitleChange(
-                                            sectionIndex,
-                                            e.target.value
-                                        )
-                                    }
-                                    size="small"
-                                    onBlur={() => setEditingSectionIndex(null)}
-                                    sx={{
-                                        "& .MuiOutlinedInput-root": {
-                                            borderRadius: "12px",
-                                        },
-                                    }}
-                                />
-                            ) : (
-                                <Typography
-                                    variant="subtitle1"
-                                    className="font-bold text-gray-800"
-                                >
-                                    {section.title}
-                                </Typography>
-                            )}
-                            <Box className="flex gap-2">
-                                <IconButton
-                                    onClick={() =>
-                                        setEditingSectionIndex(sectionIndex)
-                                    }
-                                    disabled={isSaving}
-                                    sx={{
-                                        backgroundColor:
-                                            "rgba(37, 99, 235, 0.1)",
-                                        "&:hover": {
-                                            backgroundColor:
-                                                "rgba(37, 99, 235, 0.2)",
-                                        },
-                                    }}
-                                >
-                                    <Edit
-                                        fontSize="small"
-                                        sx={{ color: "#2563eb" }}
-                                    />
-                                </IconButton>
-                                <IconButton
-                                    onClick={() =>
-                                        handleDeleteSection(sectionIndex)
-                                    }
-                                    disabled={
-                                        isSaving ||
-                                        deletingItems[`section-${sectionIndex}`]
-                                    }
-                                    sx={{
-                                        backgroundColor:
-                                            "rgba(220, 38, 38, 0.1)",
-                                        "&:hover": {
-                                            backgroundColor:
-                                                "rgba(220, 38, 38, 0.2)",
-                                        },
-                                    }}
-                                >
-                                    {deletingItems[
-                                        `section-${sectionIndex}`
-                                    ] ? (
-                                        <CircularProgress size={16} />
-                                    ) : (
-                                        <Delete
-                                            fontSize="small"
-                                            color="error"
-                                        />
-                                    )}
-                                </IconButton>
-                            </Box>
+                        <Box className="flex justify-between items-center gap-2 mb-2">
+                            <TextField
+                                value={section.title}
+                                onChange={(e) =>
+                                    handleSectionTitleChange(
+                                        sectionIndex,
+                                        e.target.value
+                                    )
+                                }
+                                size="small"
+                                fullWidth
+                                sx={{
+                                    "& .MuiOutlinedInput-root": {
+                                        borderRadius: "12px",
+                                    },
+                                }}
+                            />
+                            <IconButton
+                                onClick={() => handleDeleteSection(sectionIndex)}
+                                disabled={isSaving || deletingItems[`section-${sectionIndex}`]}
+                                size="small"
+                                sx={{ color: "#dc2626" }}
+                            >
+                                {deletingItems[`section-${sectionIndex}`] ? (
+                                    <CircularProgress size={16} />
+                                ) : (
+                                    <Delete fontSize="small" />
+                                )}
+                            </IconButton>
                         </Box>
 
                         <Typography
@@ -424,9 +370,6 @@ export default function ManageCourseContentModal({
                         </Typography>
 
                         {section.lectures.map((lecture, lectureIndex) => {
-                            const isEditing =
-                                editingLecture?.sectionIndex === sectionIndex &&
-                                editingLecture?.lectureIndex === lectureIndex;
                             const videoKey = `${sectionIndex}-${lectureIndex}`;
 
                             return (
@@ -436,150 +379,48 @@ export default function ManageCourseContentModal({
                                 >
                                     <Box className="flex items-center gap-2 w-full">
                                         {lecture.contentType === 'quiz' ? (
-                                            <QuizIcon
-                                                fontSize="small"
-                                                sx={{ color: "#7c3aed" }}
-                                            />
+                                            <QuizIcon fontSize="small" sx={{ color: "#7c3aed" }} />
                                         ) : (
-                                            <PlayArrow
-                                                fontSize="small"
-                                                sx={{ color: "#2563eb" }}
-                                            />
+                                            <PlayArrow fontSize="small" sx={{ color: "#2563eb" }} />
                                         )}
-                                        {isEditing ? (
-                                            <>
-                                                <TextField
-                                                    value={lecture.title}
-                                                    onChange={(e) =>
-                                                        handleLectureFieldChange(
-                                                            sectionIndex,
-                                                            lectureIndex,
-                                                            "title",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    size="small"
-                                                    sx={{
-                                                        mr: 1,
-                                                        "& .MuiOutlinedInput-root":
-                                                            {
-                                                                borderRadius:
-                                                                    "12px",
-                                                            },
-                                                    }}
-                                                />
-                                                <IconButton
-                                                    onClick={() =>
-                                                        setEditingLecture(null)
-                                                    }
-                                                    sx={{
-                                                        backgroundColor:
-                                                            "rgba(16, 185, 129, 0.1)",
-                                                        "&:hover": {
-                                                            backgroundColor:
-                                                                "rgba(16, 185, 129, 0.2)",
-                                                        },
-                                                    }}
-                                                >
-                                                    <SaveIcon
-                                                        sx={{
-                                                            color: "#10b981",
-                                                        }}
-                                                    />
-                                                </IconButton>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Typography className="flex-1 text-gray-800 font-medium">
-                                                    {lecture.title}
-                                                </Typography>
-                                                <Box className="ml-auto flex items-center gap-2">
-                                                    <IconButton
-                                                        onClick={() =>
-                                                            toggleVideo(
-                                                                sectionIndex,
-                                                                lectureIndex
-                                                            )
-                                                        }
-                                                        disabled={isSaving}
-                                                        sx={{
-                                                            backgroundColor:
-                                                                "rgba(59, 130, 246, 0.1)",
-                                                            "&:hover": {
-                                                                backgroundColor:
-                                                                    "rgba(59, 130, 246, 0.2)",
-                                                            },
-                                                        }}
-                                                    >
-                                                        <Visibility
-                                                            fontSize="small"
-                                                            sx={{
-                                                                color: "#3b82f6",
-                                                            }}
-                                                        />
-                                                    </IconButton>
-                                                    <IconButton
-                                                        onClick={() =>
-                                                            setEditingLecture({
-                                                                sectionIndex,
-                                                                lectureIndex,
-                                                            })
-                                                        }
-                                                        disabled={isSaving}
-                                                        sx={{
-                                                            backgroundColor:
-                                                                "rgba(37, 99, 235, 0.1)",
-                                                            "&:hover": {
-                                                                backgroundColor:
-                                                                    "rgba(37, 99, 235, 0.2)",
-                                                            },
-                                                        }}
-                                                    >
-                                                        <Edit
-                                                            fontSize="small"
-                                                            sx={{
-                                                                color: "#2563eb",
-                                                            }}
-                                                        />
-                                                    </IconButton>
-                                                    <IconButton
-                                                        onClick={() =>
-                                                            handleDeleteLecture(
-                                                                sectionIndex,
-                                                                lectureIndex
-                                                            )
-                                                        }
-                                                        disabled={
-                                                            isSaving ||
-                                                            deletingItems[
-                                                                `lecture-${sectionIndex}-${lectureIndex}`
-                                                            ]
-                                                        }
-                                                        sx={{
-                                                            backgroundColor:
-                                                                "rgba(220, 38, 38, 0.1)",
-                                                            "&:hover": {
-                                                                backgroundColor:
-                                                                    "rgba(220, 38, 38, 0.2)",
-                                                            },
-                                                        }}
-                                                    >
-                                                        {deletingItems[
-                                                            `lecture-${sectionIndex}-${lectureIndex}`
-                                                        ] ? (
-                                                            <CircularProgress
-                                                                size={16}
-                                                            />
-                                                        ) : (
-                                                            <Delete
-                                                                fontSize="small"
-                                                                color="error"
-                                                            />
-                                                        )}
-                                                    </IconButton>
-                                                </Box>
-                                            </>
-                                        )}
+
+                                        <TextField
+                                            value={lecture.title}
+                                            onChange={(e) =>
+                                                handleLectureFieldChange(
+                                                    sectionIndex,
+                                                    lectureIndex,
+                                                    "title",
+                                                    e.target.value
+                                                )
+                                            }
+                                            size="small"
+                                            fullWidth
+                                            sx={{
+                                                "& .MuiOutlinedInput-root": { borderRadius: "12px" },
+                                            }}
+                                        />
+
+                                        <IconButton
+                                            onClick={() => toggleVideo(sectionIndex, lectureIndex)}
+                                            size="small"
+                                            sx={{ color: "#3b82f6" }}
+                                        >
+                                            {expandedVideos[videoKey] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                        </IconButton>
+
+                                        <IconButton
+                                            onClick={() => handleDeleteLecture(sectionIndex, lectureIndex)}
+                                            disabled={isSaving || deletingItems[`lecture-${sectionIndex}-${lectureIndex}`]}
+                                            size="small"
+                                            sx={{ color: "#dc2626" }}
+                                        >
+                                            {deletingItems[`lecture-${sectionIndex}-${lectureIndex}`] ? (
+                                                <CircularProgress size={16} />
+                                            ) : (
+                                                <Delete fontSize="small" />
+                                            )}
+                                        </IconButton>
                                     </Box>
 
                                     <Collapse in={expandedVideos[videoKey]}>
