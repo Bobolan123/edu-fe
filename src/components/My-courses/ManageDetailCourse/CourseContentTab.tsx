@@ -17,6 +17,7 @@ import {
     Schedule,
     VideoLibrary,
     Edit,
+    Quiz as QuizIcon,
 } from "@mui/icons-material";
 import { ICourseContent, ICourseSection, ICourseLecture } from "../../../../types/entities";
 import { useState } from "react";
@@ -166,10 +167,23 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                             <Box className="space-y-3">
                                 {section.lectures?.map((lecture, lectureIndex) => {
                                     const videoKey = `${sectionIndex}-${lectureIndex}`;
-                                    const hasVideo = lecture.content &&
+                                    const isQuiz = lecture.contentType === 'quiz';
+                                    const hasVideo = !isQuiz && lecture.content &&
                                         typeof lecture.content === 'object' &&
                                         'videoUrl' in lecture.content &&
                                         isValidCloudinaryVideoUrl(lecture.content.videoUrl);
+
+                                    const quizQuestionsCount = isQuiz && lecture.content &&
+                                        typeof lecture.content === 'object' &&
+                                        'questions' in lecture.content
+                                        ? lecture.content.questions?.length || 0
+                                        : 0;
+
+                                    const quizContent = isQuiz && lecture.content &&
+                                        typeof lecture.content === 'object' &&
+                                        'questions' in lecture.content
+                                        ? lecture.content
+                                        : null;
 
                                     return (
                                         <Box
@@ -178,8 +192,16 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                         >
                                             <Box className="flex items-center justify-between">
                                                 <Box className="flex items-center gap-3 flex-1">
-                                                    <Box className="p-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 text-white">
-                                                        <PlayArrow fontSize="small" />
+                                                    <Box className={`p-2 rounded-full text-white ${
+                                                        isQuiz
+                                                            ? 'bg-gradient-to-r from-purple-500 to-indigo-500'
+                                                            : 'bg-gradient-to-r from-purple-400 to-pink-400'
+                                                    }`}>
+                                                        {isQuiz ? (
+                                                            <QuizIcon fontSize="small" />
+                                                        ) : (
+                                                            <PlayArrow fontSize="small" />
+                                                        )}
                                                     </Box>
                                                     <Box className="flex-1">
                                                         <Typography
@@ -199,43 +221,62 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                         )}
                                                         <Box className="flex items-center gap-2">
                                                             <Chip
-                                                                label={`${lecture.contentType} ${lectureIndex + 1}`}
+                                                                label={isQuiz ? 'Quiz' : 'Video'}
                                                                 size="small"
-                                                                variant="outlined"
-                                                                className="text-xs border-gray-300 text-gray-600"
+                                                                className={`text-xs font-medium ${
+                                                                    isQuiz
+                                                                        ? 'bg-purple-100 text-purple-700'
+                                                                        : 'bg-blue-100 text-blue-700'
+                                                                }`}
+                                                                sx={{ borderRadius: '8px' }}
                                                             />
-                                                            {lecture.durationSeconds && (
+                                                            {isQuiz ? (
                                                                 <Chip
-                                                                    label={`${Math.floor(lecture.durationSeconds / 60)}m`}
+                                                                    label={`${quizQuestionsCount} question${quizQuestionsCount !== 1 ? 's' : ''}`}
                                                                     size="small"
-                                                                    variant="outlined"
-                                                                    className="text-xs border-gray-300 text-gray-600"
-                                                                />
-                                                            )}
-                                                            {hasVideo ? (
-                                                                <Chip
-                                                                    label="Video available"
-                                                                    size="small"
-                                                                    className="bg-green-100 text-green-700 text-xs"
+                                                                    className="bg-indigo-100 text-indigo-700 text-xs font-medium"
+                                                                    sx={{ borderRadius: '8px' }}
                                                                 />
                                                             ) : (
-                                                                <Chip
-                                                                    label="No video uploaded"
-                                                                    size="small"
-                                                                    className="bg-gray-100 text-gray-500 text-xs"
-                                                                />
+                                                                <>
+                                                                    {lecture.durationSeconds && (
+                                                                        <Chip
+                                                                            label={`${Math.floor(lecture.durationSeconds / 60)}m`}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            className="text-xs border-gray-300 text-gray-600"
+                                                                        />
+                                                                    )}
+                                                                    {hasVideo ? (
+                                                                        <Chip
+                                                                            label="Video available"
+                                                                            size="small"
+                                                                            className="bg-green-100 text-green-700 text-xs"
+                                                                        />
+                                                                    ) : (
+                                                                        <Chip
+                                                                            label="No video uploaded"
+                                                                            size="small"
+                                                                            className="bg-gray-100 text-gray-500 text-xs"
+                                                                        />
+                                                                    )}
+                                                                </>
                                                             )}
                                                         </Box>
-                                                      
+
                                                     </Box>
                                                 </Box>
-                                                
-                                                {hasVideo && (
+
+                                                {(hasVideo || isQuiz) && (
                                                     <Box>
                                                         <Box
                                                             component="button"
                                                             onClick={() => toggleVideo(sectionIndex, lectureIndex)}
-                                                            className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors duration-200 border-0 cursor-pointer"
+                                                            className={`p-2 rounded-full transition-colors duration-200 border-0 cursor-pointer ${
+                                                                isQuiz
+                                                                    ? 'bg-purple-100 hover:bg-purple-200 text-purple-600'
+                                                                    : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
+                                                            }`}
                                                         >
                                                             <Visibility fontSize="small" />
                                                         </Box>
@@ -259,6 +300,118 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                                 />
                                                             </video>
                                                         )}
+                                                    </Box>
+                                                </Collapse>
+                                            )}
+
+                                            {isQuiz && quizContent && (
+                                                <Collapse in={expandedVideos[videoKey]}>
+                                                    <Box className="mt-4 pt-4 border-t border-purple-100">
+                                                        {/* Quiz Settings */}
+                                                        <Box className="mb-4 p-4 bg-purple-50 rounded-xl border border-purple-200">
+                                                            <Typography variant="subtitle2" className="font-bold text-purple-800 mb-2">
+                                                                📋 Quiz Settings
+                                                            </Typography>
+                                                            <Box className="flex flex-wrap gap-3">
+                                                                <Chip
+                                                                    label={`Passing Score: ${quizContent.passingScore}%`}
+                                                                    size="small"
+                                                                    className="bg-white text-purple-700 font-medium"
+                                                                />
+                                                                {quizContent.timeLimit && (
+                                                                    <Chip
+                                                                        label={`Time Limit: ${quizContent.timeLimit} min`}
+                                                                        size="small"
+                                                                        className="bg-white text-purple-700 font-medium"
+                                                                    />
+                                                                )}
+                                                                <Chip
+                                                                    label={quizContent.allowMultipleAttempts ? "Multiple Attempts" : "Single Attempt"}
+                                                                    size="small"
+                                                                    className="bg-white text-purple-700 font-medium"
+                                                                />
+                                                            </Box>
+                                                        </Box>
+
+                                                        {/* Questions List */}
+                                                        <Typography variant="subtitle2" className="font-bold text-gray-800 mb-3">
+                                                            Questions ({quizContent.questions.length})
+                                                        </Typography>
+                                                        <Box className="space-y-2">
+                                                            {quizContent.questions.map((question, qIndex) => (
+                                                                <Paper
+                                                                    key={question.id}
+                                                                    elevation={0}
+                                                                    className="p-3 bg-white border border-purple-100 rounded-lg"
+                                                                >
+                                                                    <Box className="flex items-start justify-between gap-2">
+                                                                        <Box className="flex-1">
+                                                                            <Box className="flex items-center gap-2 mb-1">
+                                                                                <Typography
+                                                                                    variant="caption"
+                                                                                    className="font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded"
+                                                                                >
+                                                                                    Q{qIndex + 1}
+                                                                                </Typography>
+                                                                                <Chip
+                                                                                    label={
+                                                                                        question.type === 'multiple_choice'
+                                                                                            ? 'Multiple Choice'
+                                                                                            : question.type === 'true_false'
+                                                                                            ? 'True/False'
+                                                                                            : 'Fill in Blank'
+                                                                                    }
+                                                                                    size="small"
+                                                                                    className={`text-xs font-medium ${
+                                                                                        question.type === 'multiple_choice'
+                                                                                            ? 'bg-blue-100 text-blue-700'
+                                                                                            : question.type === 'true_false'
+                                                                                            ? 'bg-green-100 text-green-700'
+                                                                                            : 'bg-orange-100 text-orange-700'
+                                                                                    }`}
+                                                                                />
+                                                                                <Chip
+                                                                                    label={`${question.points} pt${question.points !== 1 ? 's' : ''}`}
+                                                                                    size="small"
+                                                                                    className="text-xs bg-gray-100 text-gray-700"
+                                                                                />
+                                                                            </Box>
+                                                                            <Typography variant="body2" className="text-gray-800">
+                                                                                {question.question || 'Untitled Question'}
+                                                                            </Typography>
+                                                                            {question.type === 'multiple_choice' && question.options && (
+                                                                                <Box className="mt-2 ml-4 space-y-1">
+                                                                                    {question.options.map((option, oIndex) => (
+                                                                                        <Typography
+                                                                                            key={oIndex}
+                                                                                            variant="caption"
+                                                                                            className={`block ${
+                                                                                                question.correctAnswer === oIndex
+                                                                                                    ? 'text-green-700 font-bold'
+                                                                                                    : 'text-gray-600'
+                                                                                            }`}
+                                                                                        >
+                                                                                            {String.fromCharCode(65 + oIndex)}. {option}
+                                                                                            {question.correctAnswer === oIndex && ' ✓'}
+                                                                                        </Typography>
+                                                                                    ))}
+                                                                                </Box>
+                                                                            )}
+                                                                            {question.type === 'true_false' && (
+                                                                                <Typography variant="caption" className="text-green-700 font-bold mt-1 block">
+                                                                                    Answer: {String(question.correctAnswer).toUpperCase()} ✓
+                                                                                </Typography>
+                                                                            )}
+                                                                            {question.type === 'fill_blank' && (
+                                                                                <Typography variant="caption" className="text-green-700 font-bold mt-1 block">
+                                                                                    Answer: {question.correctAnswer} ✓
+                                                                                </Typography>
+                                                                            )}
+                                                                        </Box>
+                                                                    </Box>
+                                                                </Paper>
+                                                            ))}
+                                                        </Box>
                                                     </Box>
                                                 </Collapse>
                                             )}

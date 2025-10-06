@@ -1,564 +1,641 @@
 "use client";
 
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  TextField,
-  IconButton,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Divider,
-  Chip,
-  Card,
-  CardContent,
-  Grid,
-  CircularProgress,
-  Alert,
-  Collapse,
-} from '@mui/material';
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Box,
+    Button,
+    Typography,
+    IconButton,
+    TextField,
+    Collapse,
+    CircularProgress,
+    LinearProgress,
+} from "@mui/material";
 import {
-  Close,
-  ExpandMore,
-  Add,
-  Edit,
-  Delete,
-  PlayArrow,
-  DragIndicator,
-  Save,
-  Cancel,
-  Upload,
-  VideoLibrary,
-  School,
-} from '@mui/icons-material';
-import { useState, useEffect } from 'react';
-import { ICourse, ICourseSection, ICourseLecture } from '../../../../types/entities';
-import { toastService } from '@/services/toast';
-import CaptionManagement from '../../common/courses/CaptionManagement';
-import { saveCourseContent, uploadVideoToLecture } from '@/actions/courseContentAction';
+    Close as CloseIcon,
+    PlayArrow,
+    Delete,
+    CloudUpload,
+    Add as AddIcon,
+    Quiz as QuizIcon,
+    ExpandMore as ExpandMoreIcon,
+    ExpandLess as ExpandLessIcon,
+    School,
+} from "@mui/icons-material";
+import { ICourse, ICourseSection, ICourseLecture, QuizContent } from "../../../../types/entities";
+import { useEffect, useState } from "react";
+import { uploadVideoToLecture, saveCourseContent, getCourseStructure } from "@/actions/courseContentAction";
+import { toastService } from "@/services/toast";
+import { isValidCloudinaryVideoUrl } from "../../../utils/utils";
+import CaptionManagement from "../../common/courses/CaptionManagement";
+import QuizEditor from "../../My-courses/ManageDetailCourse/QuizEditor";
 
 interface CourseContentEditModalProps {
-  open: boolean;
-  onClose: () => void;
-  course: ICourse | null;
-  onSuccess?: () => void;
-}
-
-interface EditingState {
-  type: 'section' | 'lecture' | null;
-  sectionIndex?: number;
-  lectureIndex?: number;
-  isNew?: boolean;
+    open: boolean;
+    onClose: () => void;
+    course: ICourse | null;
+    onSuccess?: () => void;
 }
 
 export default function CourseContentEditModal({
-  open,
-  onClose,
-  course,
-  onSuccess
+    open,
+    onClose,
+    course,
+    onSuccess
 }: CourseContentEditModalProps) {
-  const [sections, setSections] = useState<ICourseSection[]>([]);
-  const [editingState, setEditingState] = useState<EditingState>({ type: null });
-  const [editingText, setEditingText] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
-  const [uploadingVideo, setUploadingVideo] = useState<{[key: string]: boolean}>({});
-  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
+    const [localSections, setLocalSections] = useState<ICourseSection[]>([]);
+    const [expandedVideos, setExpandedVideos] = useState<{
+        [key: string]: boolean;
+    }>({});
 
-  useEffect(() => {
-    if (course?.sections) {
-      setSections([...course.sections]);
-      // Expand first section by default
-      if (course.sections.length > 0) {
-        setExpandedSections(new Set([0]));
-      }
-    }
-  }, [course]);
+    // Loading states
+    const [loading, setLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [uploadingVideos, setUploadingVideos] = useState<{
+        [key: string]: boolean;
+    }>({});
+    const [uploadProgress, setUploadProgress] = useState<{
+        [key: string]: number;
+    }>({});
+    const [deletingItems, setDeletingItems] = useState<{
+        [key: string]: boolean;
+    }>({});
 
-  const handleClose = () => {
-    setEditingState({ type: null });
-    setEditingText('');
-    setSections(course?.sections ? [...course.sections] : []);
-    onClose();
-  };
+    useEffect(() => {
+        const fetchCourseContent = async () => {
+            if (!course?.id || !open) return;
 
-  const handleSave = async () => {
-    if (!course) return;
+            setLoading(true);
+            try {
+                const courseStructure = await getCourseStructure(course.id);
+                if (courseStructure?.sections) {
+                    setLocalSections([...courseStructure.sections]);
+                } else {
+                    setLocalSections([]);
+                }
+            } catch (error) {
+                console.error('Error fetching course content:', error);
+                toastService.error('Failed to load course content');
+                setLocalSections([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    setSaving(true);
-    try {
-      const courseSections = sections.map((section, index) => ({
-        ...section,
-        orderIndex: index,
-        lectures: section.lectures.map((lecture, lectureIndex) => ({
-          ...lecture,
-          orderIndex: lectureIndex
-        }))
-      }));
+        fetchCourseContent();
+    }, [course?.id, open]);
 
-      const result = await saveCourseContent(course.id, courseSections);
-      if (result.statusCode === 200) {
-        toastService.success('Course content updated successfully!');
-        onSuccess?.();
-        handleClose();
-      } else {
-        toastService.error(result.message || 'Failed to update course content');
-      }
-    } catch (error) {
-      console.error('Error saving course content:', error);
-      toastService.error('An error occurred while saving course content');
-    } finally {
-      setSaving(false);
-    }
-  };
+    const toggleVideo = (sectionIndex: number, lectureIndex: number) => {
+        const key = `${sectionIndex}-${lectureIndex}`;
+        setExpandedVideos((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
 
-  const handleSectionToggle = (index: number) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index);
-    } else {
-      newExpanded.add(index);
-    }
-    setExpandedSections(newExpanded);
-  };
-
-  const startEditingSection = (index: number, isNew = false) => {
-    setEditingState({ type: 'section', sectionIndex: index, isNew });
-    setEditingText(isNew ? '' : sections[index]?.title || '');
-  };
-
-  const startEditingLecture = (sectionIndex: number, lectureIndex: number, isNew = false) => {
-    setEditingState({
-      type: 'lecture',
-      sectionIndex,
-      lectureIndex,
-      isNew
-    });
-    setEditingText(
-      isNew ? '' : sections[sectionIndex]?.lectures[lectureIndex]?.title || ''
-    );
-  };
-
-  const saveEdit = () => {
-    const { type, sectionIndex, lectureIndex, isNew } = editingState;
-
-    if (!editingText.trim()) {
-      toastService.error('Title cannot be empty');
-      return;
-    }
-
-    const newSections = [...sections];
-
-    if (type === 'section' && typeof sectionIndex === 'number') {
-      if (isNew) {
+    const handleAddSection = () => {
         const newSection: ICourseSection = {
-          id: `temp-${Date.now()}`,
-          title: editingText,
-          description: '',
-          orderIndex: newSections.length,
-          lectures: []
+            id: `temp-${Date.now()}`,
+            title: `New Section ${localSections.length + 1}`,
+            orderIndex: localSections.length,
+            lectures: [],
         };
-        newSections.push(newSection);
-        setExpandedSections(prev => new Set([...prev, newSections.length - 1]));
-      } else {
-        newSections[sectionIndex] = {
-          ...newSections[sectionIndex],
-          title: editingText
-        };
-      }
-    } else if (type === 'lecture' && typeof sectionIndex === 'number' && typeof lectureIndex === 'number') {
-      if (isNew) {
-        const newLecture: ICourseLecture = {
-          id: `temp-${Date.now()}`,
-          title: editingText,
-          description: '',
-          contentType: 'video',
-          orderIndex: newSections[sectionIndex].lectures.length,
-          durationSeconds: 0,
-          isPreview: false,
-          content: {
-            videoUrl: '',
-            thumbnailUrl: '',
-            cloudinaryPublicId: '',
-            quality: []
-          }
-        };
-        newSections[sectionIndex].lectures.push(newLecture);
-      } else {
-        newSections[sectionIndex].lectures[lectureIndex] = {
-          ...newSections[sectionIndex].lectures[lectureIndex],
-          title: editingText
-        };
-      }
-    }
+        setLocalSections([...localSections, newSection]);
+    };
 
-    setSections(newSections);
-    setEditingState({ type: null });
-    setEditingText('');
-  };
+    const handleDeleteSection = async (sectionIndex: number) => {
+        const key = `section-${sectionIndex}`;
+        setDeletingItems((prev) => ({ ...prev, [key]: true }));
 
-  const cancelEdit = () => {
-    setEditingState({ type: null });
-    setEditingText('');
-  };
-
-  const deleteSection = (index: number) => {
-    if (window.confirm('Are you sure you want to delete this section? This action cannot be undone.')) {
-      const newSections = sections.filter((_, i) => i !== index);
-      setSections(newSections);
-      toastService.success('Section deleted');
-    }
-  };
-
-  const deleteLecture = (sectionIndex: number, lectureIndex: number) => {
-    if (window.confirm('Are you sure you want to delete this lecture?')) {
-      const newSections = [...sections];
-      newSections[sectionIndex].lectures = newSections[sectionIndex].lectures.filter((_, i) => i !== lectureIndex);
-      setSections(newSections);
-      toastService.success('Lecture deleted');
-    }
-  };
-
-  const handleVideoUpload = async (sectionIndex: number, lectureIndex: number, file: File) => {
-    if (!course) return;
-
-    const lectureKey = `${sectionIndex}-${lectureIndex}`;
-    setUploadingVideo(prev => ({ ...prev, [lectureKey]: true }));
-    setUploadProgress(prev => ({ ...prev, [lectureKey]: 0 }));
-
-    try {
-      const section = sections[sectionIndex];
-      const lecture = section.lectures[lectureIndex];
-
-      const result = await uploadVideoToLecture(
-        course.id,
-        section.id,
-        lecture.id,
-        file
-      );
-
-      if (result?.data) {
-        const newSections = [...sections];
-        const lecture = newSections[sectionIndex].lectures[lectureIndex];
-        if (lecture.contentType === 'video') {
-          (lecture.content as any).videoUrl = result.data;
+        try {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            const updated = localSections.filter((_, i) => i !== sectionIndex);
+            setLocalSections(updated);
+            toastService.success("Section deleted successfully");
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to delete section";
+            toastService.error(errorMessage);
+        } finally {
+            setDeletingItems((prev) => ({ ...prev, [key]: false }));
         }
-        setSections(newSections);
-        toastService.success('Video uploaded successfully!');
-      } else {
-        throw new Error('Upload failed');
-      }
-    } catch (error) {
-      console.error('Video upload error:', error);
-      toastService.error('Failed to upload video');
-    } finally {
-      setUploadingVideo(prev => ({ ...prev, [lectureKey]: false }));
-      setUploadProgress(prev => ({ ...prev, [lectureKey]: 0 }));
-    }
-  };
+    };
 
-  const getTotalStats = () => {
-    const totalSections = sections.length;
-    const totalLectures = sections.reduce((sum, section) => sum + section.lectures.length, 0);
-    const totalVideos = sections.reduce((sum, section) =>
-      sum + section.lectures.filter(lecture =>
-        lecture.contentType === 'video' && (lecture.content as any).videoUrl
-      ).length, 0
-    );
-    return { totalSections, totalLectures, totalVideos };
-  };
+    const handleAddLecture = (sectionIndex: number, contentType: 'video' | 'quiz' = 'video') => {
+        const updated = [...localSections];
+        const newLecture: ICourseLecture = {
+            id: `temp-${Date.now()}`,
+            title: contentType === 'quiz'
+                ? `New Quiz ${updated[sectionIndex].lectures.filter(l => l.contentType === 'quiz').length + 1}`
+                : `New Lecture ${updated[sectionIndex].lectures.filter(l => l.contentType === 'video').length + 1}`,
+            contentType: contentType,
+            orderIndex: updated[sectionIndex].lectures.length,
+            content: contentType === 'video'
+                ? {
+                    videoUrl: "",
+                    cloudinaryPublicId: "",
+                    quality: []
+                  }
+                : {
+                    questions: [],
+                    passingScore: 70,
+                    allowMultipleAttempts: true
+                  }
+        };
+        updated[sectionIndex].lectures.push(newLecture);
+        setLocalSections(updated);
+    };
 
-  if (!course) return null;
+    const handleDeleteLecture = async (
+        sectionIndex: number,
+        lectureIndex: number
+    ) => {
+        const key = `lecture-${sectionIndex}-${lectureIndex}`;
+        setDeletingItems((prev) => ({ ...prev, [key]: true }));
 
-  const { totalSections, totalLectures, totalVideos } = getTotalStats();
+        try {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            const updated = [...localSections];
+            updated[sectionIndex].lectures.splice(lectureIndex, 1);
+            setLocalSections(updated);
+            toastService.success("Lecture deleted successfully");
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to delete lecture";
+            toastService.error(errorMessage);
+        } finally {
+            setDeletingItems((prev) => ({ ...prev, [key]: false }));
+        }
+    };
 
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="lg"
-      fullWidth
-      PaperProps={{
-        sx: { borderRadius: 2, maxHeight: '90vh' }
-      }}
-    >
-      <DialogTitle
-        sx={{
-          m: 0,
-          p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          bgcolor: 'primary.main',
-          color: 'white',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <School />
-          <Box>
-            <Typography variant="h6">Edit Course Content</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              {course.title}
-            </Typography>
-          </Box>
-        </Box>
-        <IconButton
-          onClick={handleClose}
-          sx={{ color: 'white' }}
+    const handleSectionTitleChange = (
+        sectionIndex: number,
+        newTitle: string
+    ) => {
+        const updated = [...localSections];
+        updated[sectionIndex].title = newTitle;
+        setLocalSections(updated);
+    };
+
+    const handleLectureFieldChange = (
+        sectionIndex: number,
+        lectureIndex: number,
+        field: keyof ICourseLecture,
+        value: string
+    ) => {
+        const updated = [...localSections];
+        if (field === 'title') {
+            updated[sectionIndex].lectures[lectureIndex].title = value;
+        }
+        setLocalSections(updated);
+    };
+
+    const handleQuizContentChange = (
+        sectionIndex: number,
+        lectureIndex: number,
+        newQuizContent: QuizContent
+    ) => {
+        const updated = [...localSections];
+        updated[sectionIndex].lectures[lectureIndex].content = newQuizContent;
+        setLocalSections(updated);
+    };
+
+    const handleVideoUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        sectionIndex: number,
+        lectureIndex: number
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file || !course) return;
+
+        const key = `${sectionIndex}-${lectureIndex}`;
+        setUploadingVideos((prev) => ({ ...prev, [key]: true }));
+        setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
+
+        const section = localSections[sectionIndex];
+        const lecture = section.lectures[lectureIndex];
+
+        try {
+            const progressInterval = setInterval(() => {
+                setUploadProgress((prev) => ({
+                    ...prev,
+                    [key]: Math.min((prev[key] || 0) + 10, 90),
+                }));
+            }, 200);
+
+           const res = await uploadVideoToLecture(course.id, section.id, lecture.id, file);
+           toastService.success("Video uploaded successfully");
+
+            clearInterval(progressInterval);
+            setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
+
+            setTimeout(() => {
+                setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
+            }, 1000);
+
+        } catch (error) {
+            console.error(error);
+            const errorMessage =
+                error instanceof Error ? error.message : "Video upload failed.";
+            toastService.error(errorMessage);
+        } finally {
+            setUploadingVideos((prev) => ({ ...prev, [key]: false }));
+        }
+    };
+
+    const handleSaveChanges = async () => {
+        if (!course) return;
+
+        setIsSaving(true);
+        try {
+            const res = await saveCourseContent(course.id, localSections);
+            if(res.statusCode === 200) {
+                toastService.success(res.message);
+                onSuccess?.();
+                onClose();
+            } else {
+                toastService.error(res.message);
+            }
+        } catch (error) {
+            console.error(error);
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to save course content.";
+            toastService.error(errorMessage);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (!course) return null;
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="lg"
+            fullWidth
+            PaperProps={{
+                sx: { borderRadius: 2, maxHeight: '90vh' }
+            }}
         >
-          <Close />
-        </IconButton>
-      </DialogTitle>
-
-      <DialogContent sx={{ p: 3 }}>
-        {/* Stats Overview */}
-        <Card sx={{ mb: 3, bgcolor: 'grey.50' }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>Content Overview</Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <Box textAlign="center">
-                  <Typography variant="h4" color="primary">{totalSections}</Typography>
-                  <Typography variant="body2">Sections</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={4}>
-                <Box textAlign="center">
-                  <Typography variant="h4" color="secondary">{totalLectures}</Typography>
-                  <Typography variant="body2">Lectures</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={4}>
-                <Box textAlign="center">
-                  <Typography variant="h4" color="success.main">{totalVideos}</Typography>
-                  <Typography variant="body2">Videos</Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-
-        {/* Course Sections */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Course Sections</Typography>
-            <Button
-              startIcon={<Add />}
-              variant="outlined"
-              onClick={() => startEditingSection(sections.length, true)}
-              size="small"
+            <DialogTitle
+                sx={{
+                    m: 0,
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                }}
             >
-              Add Section
-            </Button>
-          </Box>
-
-          {sections.length === 0 && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              No sections yet. Add your first section to get started.
-            </Alert>
-          )}
-
-          {sections.map((section, sectionIndex) => (
-            <Accordion
-              key={section.id}
-              expanded={expandedSections.has(sectionIndex)}
-              onChange={() => handleSectionToggle(sectionIndex)}
-              sx={{ mb: 1, border: 1, borderColor: 'divider' }}
-            >
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', pr: 2 }}>
-                  <DragIndicator sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Box sx={{ flex: 1 }}>
-                    {editingState.type === 'section' && editingState.sectionIndex === sectionIndex ? (
-                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                        <TextField
-                          value={editingText}
-                          onChange={(e) => setEditingText(e.target.value)}
-                          size="small"
-                          fullWidth
-                          autoFocus
-                        />
-                        <IconButton size="small" onClick={saveEdit} color="primary">
-                          <Save />
-                        </IconButton>
-                        <IconButton size="small" onClick={cancelEdit}>
-                          <Cancel />
-                        </IconButton>
-                      </Box>
-                    ) : (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography variant="subtitle1">{section.title}</Typography>
-                        <Chip
-                          label={`${section.lectures.length} lectures`}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </Box>
-                    )}
-                  </Box>
-                  <Box sx={{ display: 'flex', gap: 1 }} onClick={(e) => e.stopPropagation()}>
-                    <IconButton size="small" onClick={() => startEditingSection(sectionIndex)}>
-                      <Edit />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => deleteSection(sectionIndex)} color="error">
-                      <Delete />
-                    </IconButton>
-                  </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <School />
+                    <Box>
+                        <Typography variant="h6">Edit Course Content</Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                            {course.title}
+                        </Typography>
+                    </Box>
                 </Box>
-              </AccordionSummary>
+                <IconButton
+                    onClick={onClose}
+                    sx={{ color: 'white' }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
 
-              <AccordionDetails>
-                <Box sx={{ pl: 4 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="subtitle2" color="text.secondary">Lectures</Typography>
-                    <Button
-                      startIcon={<Add />}
-                      size="small"
-                      onClick={() => startEditingLecture(sectionIndex, section.lectures.length, true)}
-                    >
-                      Add Lecture
-                    </Button>
-                  </Box>
+            <DialogContent sx={{ p: 3 }}>
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+                        <CircularProgress />
+                    </Box>
+                ) : (
+                    <>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                            <Typography variant="h6" fontWeight={600}>
+                                Course Sections
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={handleAddSection}
+                                disabled={isSaving}
+                            >
+                                Add Section
+                            </Button>
+                        </Box>
 
-                  {section.lectures.length === 0 ? (
-                    <Alert severity="info" sx={{ mb: 2 }}>
-                      No lectures in this section. Add your first lecture.
-                    </Alert>
-                  ) : (
-                    <List dense>
-                      {section.lectures.map((lecture, lectureIndex) => {
-                        const lectureKey = `${sectionIndex}-${lectureIndex}`;
-                        const isUploading = uploadingVideo[lectureKey];
+                        {localSections.length === 0 && (
+                            <Box sx={{ textAlign: 'center', py: 8, bgcolor: 'grey.50', borderRadius: 2 }}>
+                                <School sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+                                <Typography variant="h6" color="text.secondary" gutterBottom>
+                                    No sections yet
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Add your first section to get started with course content
+                                </Typography>
+                            </Box>
+                        )}
 
-                        return (
-                          <ListItem key={lecture.id} divider>
-                            <PlayArrow sx={{ mr: 2, color:
-                              lecture.contentType === 'video' && (lecture.content as any).videoUrl
-                                ? 'success.main' : 'text.disabled'
-                            }} />
-                            <ListItemText
-                              primary={
-                                editingState.type === 'lecture' &&
-                                editingState.sectionIndex === sectionIndex &&
-                                editingState.lectureIndex === lectureIndex ? (
-                                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        {localSections.map((section, sectionIndex) => (
+                            <Box
+                                key={sectionIndex}
+                                sx={{
+                                    bgcolor: 'background.paper',
+                                    border: 1,
+                                    borderColor: 'divider',
+                                    borderRadius: 2,
+                                    mb: 2,
+                                    p: 2,
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2 }}>
                                     <TextField
-                                      value={editingText}
-                                      onChange={(e) => setEditingText(e.target.value)}
-                                      size="small"
-                                      fullWidth
-                                      autoFocus
-                                    />
-                                    <IconButton size="small" onClick={saveEdit} color="primary">
-                                      <Save />
-                                    </IconButton>
-                                    <IconButton size="small" onClick={cancelEdit}>
-                                      <Cancel />
-                                    </IconButton>
-                                  </Box>
-                                ) : (
-                                  lecture.title
-                                )
-                              }
-                              secondary={
-                                <Box>
-                                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
-                                    {lecture.contentType === 'video' && (lecture.content as any).videoUrl ? (
-                                      <Chip label="Video uploaded" size="small" color="success" />
-                                    ) : (
-                                      <Chip label="No video" size="small" color="default" />
-                                    )}
-                                  </Box>
-
-                                  {/* Caption Management */}
-                                  {lecture.contentType === 'video' && (lecture.content as any).videoUrl && lecture.id && (
-                                    <Box sx={{ mt: 1 }}>
-                                      <CaptionManagement
-                                        lectureId={lecture.id}
-                                        lectureTitle={lecture.title}
+                                        value={section.title}
+                                        onChange={(e) =>
+                                            handleSectionTitleChange(
+                                                sectionIndex,
+                                                e.target.value
+                                            )
+                                        }
                                         size="small"
-                                        showTitle={false}
-                                      />
-                                    </Box>
-                                  )}
-
-                                  {isUploading && (
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                                      <CircularProgress size={16} />
-                                      <Typography variant="caption">Uploading...</Typography>
-                                    </Box>
-                                  )}
+                                        fullWidth
+                                        placeholder="Section title"
+                                    />
+                                    <IconButton
+                                        onClick={() => handleDeleteSection(sectionIndex)}
+                                        disabled={isSaving || deletingItems[`section-${sectionIndex}`]}
+                                        size="small"
+                                        color="error"
+                                    >
+                                        {deletingItems[`section-${sectionIndex}`] ? (
+                                            <CircularProgress size={16} />
+                                        ) : (
+                                            <Delete fontSize="small" />
+                                        )}
+                                    </IconButton>
                                 </Box>
-                              }
-                            />
-                            <ListItemSecondaryAction>
-                              <Box sx={{ display: 'flex', gap: 1 }}>
-                                <input
-                                  accept="video/*"
-                                  style={{ display: 'none' }}
-                                  id={`video-upload-${lectureKey}`}
-                                  type="file"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      handleVideoUpload(sectionIndex, lectureIndex, file);
-                                    }
-                                  }}
-                                />
-                                <label htmlFor={`video-upload-${lectureKey}`}>
-                                  <IconButton size="small" component="span" disabled={isUploading}>
-                                    <Upload />
-                                  </IconButton>
-                                </label>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => startEditingLecture(sectionIndex, lectureIndex)}
-                                >
-                                  <Edit />
-                                </IconButton>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => deleteLecture(sectionIndex, lectureIndex)}
-                                  color="error"
-                                >
-                                  <Delete />
-                                </IconButton>
-                              </Box>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                        );
-                      })}
-                    </List>
-                  )}
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Box>
-      </DialogContent>
 
-      <DialogActions sx={{ p: 2, bgcolor: 'grey.50', gap: 1 }}>
-        <Button onClick={handleClose} disabled={saving}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          disabled={saving}
-          startIcon={saving ? <CircularProgress size={16} /> : <Save />}
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ mb: 2 }}
+                                >
+                                    {section.lectures.length} lectures
+                                </Typography>
+
+                                {section.lectures.map((lecture, lectureIndex) => {
+                                    const videoKey = `${sectionIndex}-${lectureIndex}`;
+                                    const isQuiz = lecture.contentType === 'quiz';
+
+                                    return (
+                                        <Box
+                                            key={lectureIndex}
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                bgcolor: 'grey.50',
+                                                borderRadius: 1,
+                                                p: 1.5,
+                                                mb: 1,
+                                                border: 1,
+                                                borderColor: 'divider',
+                                            }}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                                                {isQuiz ? (
+                                                    <QuizIcon fontSize="small" color="secondary" />
+                                                ) : (
+                                                    <PlayArrow fontSize="small" color="primary" />
+                                                )}
+
+                                                <TextField
+                                                    value={lecture.title}
+                                                    onChange={(e) =>
+                                                        handleLectureFieldChange(
+                                                            sectionIndex,
+                                                            lectureIndex,
+                                                            "title",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    size="small"
+                                                    fullWidth
+                                                    placeholder="Lecture title"
+                                                />
+
+                                                <IconButton
+                                                    onClick={() => toggleVideo(sectionIndex, lectureIndex)}
+                                                    size="small"
+                                                    color="primary"
+                                                >
+                                                    {expandedVideos[videoKey] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                                </IconButton>
+
+                                                <IconButton
+                                                    onClick={() => handleDeleteLecture(sectionIndex, lectureIndex)}
+                                                    disabled={isSaving || deletingItems[`lecture-${sectionIndex}-${lectureIndex}`]}
+                                                    size="small"
+                                                    color="error"
+                                                >
+                                                    {deletingItems[`lecture-${sectionIndex}-${lectureIndex}`] ? (
+                                                        <CircularProgress size={16} />
+                                                    ) : (
+                                                        <Delete fontSize="small" />
+                                                    )}
+                                                </IconButton>
+                                            </Box>
+
+                                            <Collapse in={expandedVideos[videoKey]}>
+                                                {isQuiz ? (
+                                                    <Box sx={{ mt: 2 }}>
+                                                        {lecture.content && 'questions' in lecture.content && (
+                                                            <QuizEditor
+                                                                quizContent={lecture.content}
+                                                                onChange={(newContent) =>
+                                                                    handleQuizContentChange(
+                                                                        sectionIndex,
+                                                                        lectureIndex,
+                                                                        newContent
+                                                                    )
+                                                                }
+                                                            />
+                                                        )}
+                                                    </Box>
+                                                ) : (
+                                                    <Box sx={{ mt: 2 }}>
+                                                        {lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(
+                                                            lecture.content.videoUrl
+                                                        ) && (
+                                                            <video
+                                                                controls
+                                                                style={{ width: '40%', borderRadius: 4 }}
+                                                            >
+                                                                <source
+                                                                    src={lecture.content.videoUrl}
+                                                                    type="video/mp4"
+                                                                />
+                                                            </video>
+                                                        )}
+                                                        {lecture.content && 'videoUrl' in lecture.content && !isValidCloudinaryVideoUrl(
+                                                            lecture.content.videoUrl
+                                                        ) &&
+                                                            lecture.content.videoUrl && (
+                                                                <Box sx={{ p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
+                                                                    <Typography variant="caption" color="warning.dark">
+                                                                        ⚠️ Invalid video URL format. Please upload a new video.
+                                                                    </Typography>
+                                                                </Box>
+                                                            )}
+                                                    </Box>
+                                                )}
+                                            </Collapse>
+
+                                            {!isQuiz && (
+                                            <Box sx={{ mt: 1 }}>
+                                                <input
+                                                    type="file"
+                                                    accept="video/*"
+                                                    hidden
+                                                    id={`video-upload-${sectionIndex}-${lectureIndex}`}
+                                                    onChange={(e) =>
+                                                        handleVideoUpload(
+                                                            e,
+                                                            sectionIndex,
+                                                            lectureIndex
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        uploadingVideos[
+                                                            `${sectionIndex}-${lectureIndex}`
+                                                        ] || isSaving
+                                                    }
+                                                />
+                                                <label
+                                                    htmlFor={`video-upload-${sectionIndex}-${lectureIndex}`}
+                                                >
+                                                    <Button
+                                                        variant="outlined"
+                                                        size="small"
+                                                        component="span"
+                                                        disabled={
+                                                            uploadingVideos[
+                                                                `${sectionIndex}-${lectureIndex}`
+                                                            ] || isSaving
+                                                        }
+                                                        startIcon={
+                                                            uploadingVideos[
+                                                                `${sectionIndex}-${lectureIndex}`
+                                                            ] ? (
+                                                                <CircularProgress
+                                                                    size={16}
+                                                                />
+                                                            ) : (
+                                                                <CloudUpload fontSize="small" />
+                                                            )
+                                                        }
+                                                    >
+                                                        {uploadingVideos[
+                                                            `${sectionIndex}-${lectureIndex}`
+                                                        ]
+                                                            ? "Uploading..."
+                                                            : (lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(
+                                                                  lecture.content.videoUrl
+                                                              )) ? "Replace Video" : "Upload Video"}
+                                                    </Button>
+                                                </label>
+
+                                                {uploadingVideos[
+                                                    `${sectionIndex}-${lectureIndex}`
+                                                ] && (
+                                                    <Box sx={{ mt: 1 }}>
+                                                        <LinearProgress
+                                                            variant="determinate"
+                                                            value={
+                                                                uploadProgress[
+                                                                    `${sectionIndex}-${lectureIndex}`
+                                                                ] || 0
+                                                            }
+                                                            sx={{ height: 6, borderRadius: 1 }}
+                                                        />
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
+                                                            {uploadProgress[
+                                                                `${sectionIndex}-${lectureIndex}`
+                                                            ] || 0}
+                                                            % uploaded
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+
+                                                {/* Caption Management */}
+                                                {lecture.content && 'videoUrl' in lecture.content && isValidCloudinaryVideoUrl(lecture.content.videoUrl) && lecture.id && (
+                                                    <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+                                                        <CaptionManagement
+                                                            lectureId={lecture.id}
+                                                            lectureTitle={lecture.title}
+                                                            size="small"
+                                                            showTitle={true}
+                                                        />
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                            )}
+                                        </Box>
+                                    );
+                                })}
+
+                                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
+                                    <Button
+                                        variant="text"
+                                        size="small"
+                                        onClick={() => handleAddLecture(sectionIndex, 'video')}
+                                        disabled={isSaving}
+                                        startIcon={<PlayArrow />}
+                                        color="primary"
+                                    >
+                                        Add Video Lecture
+                                    </Button>
+                                    <Button
+                                        variant="text"
+                                        size="small"
+                                        onClick={() => handleAddLecture(sectionIndex, 'quiz')}
+                                        disabled={isSaving}
+                                        startIcon={<QuizIcon />}
+                                        color="secondary"
+                                    >
+                                        Add Quiz
+                                    </Button>
+                                </Box>
+                            </Box>
+                        ))}
+                    </>
+                )}
+            </DialogContent>
+
+            <DialogActions sx={{ p: 2, bgcolor: 'grey.50' }}>
+                <Button onClick={onClose} disabled={isSaving}>
+                    Cancel
+                </Button>
+                <Button
+                    variant="contained"
+                    onClick={handleSaveChanges}
+                    disabled={isSaving}
+                    startIcon={isSaving ? <CircularProgress size={16} /> : undefined}
+                >
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
 }
