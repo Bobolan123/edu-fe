@@ -155,6 +155,8 @@ export interface ICourseLecture {
     isPreview?: boolean;
     content: VideoContent | QuizContent;
     videoFile?: File | null; // For video uploads during creation
+
+    lectureId?: string;
 }
 
 // Video Quality Interface

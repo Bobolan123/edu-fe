@@ -66,7 +66,7 @@ import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
 
 import { useSession } from "next-auth/react";
-import { updateCourseContent } from "@/actions/courseContentAction";
+import { updateCourseContent, getLectureCaptions, submitQuiz } from "@/actions/courseContentAction";
 import { markLectureAsCompleted } from "@/actions/enrollmentAction";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -79,6 +79,7 @@ interface ICourseLesson {
     enrollmentProgress?: EnrollmentProgress;
     resUserReviews?: IModelPaginate<IReview>;
     userReview?: IReview;
+    initialCaptionUrl?: string | null;
 }
 
 export default function     CourseLesson({
@@ -88,6 +89,7 @@ export default function     CourseLesson({
     enrollmentProgress,
     resUserReviews,
     userReview,
+    initialCaptionUrl,
 }: ICourseLesson) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
@@ -99,6 +101,8 @@ export default function     CourseLesson({
         title: string;
         videoUrl: string;
         lectureId: string;
+        contentType: string;
+        content: any;
     } | null>(null);
     const [isVideoLoading, setIsVideoLoading] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
@@ -107,41 +111,65 @@ export default function     CourseLesson({
         null
     );
     const [captionsEnabled, setCaptionsEnabled] = useState(false);
-    const [captionUrl, setCaptionUrl] = useState<string | null>(null);
-    const [captionsAvailable, setCaptionsAvailable] = useState(false);
+    const [captionUrl, setCaptionUrl] = useState<string | null>(initialCaptionUrl || null);
+    const [quizAnswers, setQuizAnswers] = useState<Record<string, string | number | boolean>>({});
+    const [quizResult, setQuizResult] = useState<any>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const muxPlayerRef = useRef<any>(null);
 
-    // Function to check if a lecture is completed based on enrollment progress
+    // Handle quiz answer selection
+    const handleAnswerSelect = (questionId: string, answer: string | number | boolean) => {
+        setQuizAnswers(prev => ({
+            ...prev,
+            [questionId]: answer
+        }));
+    };
+
+    // Handle quiz submission
+    const handleQuizSubmit = async () => {
+        if (!enrollmentProgress?.enrollment.id || !currentLecture?.lectureId) {
+            toast.error("Unable to submit quiz");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const answers = Object.entries(quizAnswers).map(([questionId, answer]) => ({
+                questionId,
+                answer
+            }));
+
+            const result = await submitQuiz(
+                enrollmentProgress.enrollment.id,
+                currentLecture.lectureId,
+                answers
+            );
+
+            setQuizResult(result);
+
+            if (result.passed) {
+                toast.success(`Quiz passed! Score: ${result.percentage}%`);
+            } else {
+                toast.warning(`Quiz not passed. Score: ${result.percentage}%`);
+            }
+
+            // Refresh to update progress
+            router.refresh();
+        } catch (error: any) {
+            console.error("Failed to submit quiz:", error);
+            toast.error(error.message || "Failed to submit quiz");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const isLectureCompleted = (lectureId: string): boolean => {
         if (!enrollmentProgress?.lectureProgress) return false;
         return enrollmentProgress.lectureProgress.some(
-            progressLecture => progressLecture.id === lectureId
+            progressLecture => progressLecture.lectureId === lectureId
         );
-    };
-
-    // Function to fetch caption status and URL
-    const fetchCaptions = async (lectureId: string) => {
-        try {
-            // Check caption status
-            const statusResponse = await fetch(`/api/courses/lecture/${lectureId}/captions/status`);
-            if (statusResponse.ok) {
-                const statusData = await statusResponse.json();
-                setCaptionsAvailable(statusData.available);
-
-                // If captions are available, fetch the SRT URL
-                if (statusData.available) {
-                    const captionsResponse = await fetch(`/api/courses/lecture/${lectureId}/captions?format=srt`);
-                    if (captionsResponse.ok) {
-                        const captionsData = await captionsResponse.json();
-                        setCaptionUrl(captionsData.captionUrl);
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch captions:', error);
-            setCaptionsAvailable(false);
-        }
     };
 
     // Function to handle lecture completion toggle
@@ -152,21 +180,21 @@ export default function     CourseLesson({
         }
 
         try {
-            
-            const res = await markLectureAsCompleted(
+            await markLectureAsCompleted(
                 enrollmentProgress.enrollment.id.toString(),
                 lectureId,
                 course.id
             );
-            toast.success("Lecture marked as completed!");
-            
+
+    
+
         } catch (error) {
             console.error("Failed to mark lecture as completed:", error);
             toast.error("Failed to update lecture status");
         }
     };
 
-    // Initialize with first lecture
+    // Get first lecture directly from server data
     const firstLecture = courseContent?.sections?.[0]?.lectures?.[0];
     const videoUrl = firstLecture?.content && 'videoUrl' in firstLecture.content
         ? firstLecture.content.videoUrl
@@ -174,40 +202,26 @@ export default function     CourseLesson({
 
     const [curVideoUrl, setCurVideoUrl] = useState(videoUrl);
 
-    // Ensure component is mounted (client-side only)
     useEffect(() => {
         setIsMounted(true);
 
-        // Initialize current lecture after mount
+        // Initialize current lecture from server data
         if (firstLecture) {
             const lectureVideoUrl = firstLecture.content && 'videoUrl' in firstLecture.content
                 ? firstLecture.content.videoUrl
                 : "";
-
             setCurrentLecture({
                 title: firstLecture.title,
                 videoUrl: lectureVideoUrl,
                 lectureId: firstLecture.id || "",
+                contentType: firstLecture.contentType || "video",
+                content: firstLecture.content || null,
             });
-
-            // Fetch captions for the first lecture
-            if (firstLecture.id) {
-                fetchCaptions(firstLecture.id);
-            }
         }
-    }, [firstLecture]);
-
-    // Cleanup timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (loadingTimeout) {
-                clearTimeout(loadingTimeout);
-            }
-        };
-    }, [loadingTimeout]);
+    }, []);
 
     const handleLectureChange = useCallback(
-        (lecture: any) => {
+        async (lecture: any) => {
             // Clear any existing timeout
             if (loadingTimeout) {
                 clearTimeout(loadingTimeout);
@@ -224,7 +238,7 @@ export default function     CourseLesson({
             setLoadingTimeout(timeout);
 
             // Add delay to ensure state updates
-            setTimeout(() => {
+            setTimeout(async () => {
                 const lectureVideoUrl = lecture.content && 'videoUrl' in lecture.content
                     ? lecture.content.videoUrl
                     : "";
@@ -234,11 +248,16 @@ export default function     CourseLesson({
                     title: lecture.title,
                     videoUrl: lectureVideoUrl,
                     lectureId: lecture.id || "",
+                    contentType: lecture.contentType || "video",
+                    content: lecture.content || null,
                 });
 
-                // Fetch captions for the new lecture
-                if (lecture.id) {
-                    fetchCaptions(lecture.id);
+                // Fetch captions for the new lecture using server action (only for video lectures)
+                if (lecture.id && lecture.contentType === 'video') {
+                    const newCaptionUrl = await getLectureCaptions(lecture.id, 'srt');
+                    setCaptionUrl(newCaptionUrl);
+                } else {
+                    setCaptionUrl(null);
                 }
             }, 100);
         },
@@ -271,48 +290,50 @@ export default function     CourseLesson({
             <div className="flex h-screen bg-gray-100 relative">
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col">
-                    {/* Enhanced Video Player with Mux */}
+                    {/* Content Area - Video or Quiz */}
                     <div
-                        className="relative bg-black w-full"
+                        className={`relative w-full ${currentLecture?.contentType === 'quiz' ? 'bg-gray-50' : 'bg-black'}`}
                         style={{ height: "calc(130vh * 0.5)" }}
                     >
-                        {/* Video Title and Caption Controls Overlay */}
+                        {/* Title Overlay */}
                         <Box className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-                            <Box className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2">
+                            <Box className={`${currentLecture?.contentType === 'quiz' ? 'bg-white' : 'bg-black/60'} backdrop-blur-sm rounded-lg px-4 py-2`}>
                                 <Typography
                                     variant="h6"
-                                    className="text-white font-semibold"
+                                    className={`${currentLecture?.contentType === 'quiz' ? 'text-gray-900' : 'text-white'} font-semibold`}
                                 >
                                     {currentLecture?.title || "Loading..."}
                                 </Typography>
                             </Box>
 
-                            {/* Caption Controls */}
-                            <Box className="flex gap-2">
-                                {captionsAvailable && captionUrl && (
-                                    <Tooltip title={captionsEnabled ? "Hide Captions" : "Show Captions"}>
-                                        <IconButton
-                                            onClick={() => setCaptionsEnabled(!captionsEnabled)}
-                                            className="bg-black/60 backdrop-blur-sm text-white hover:bg-black/80"
-                                            size="small"
-                                        >
-                                            {captionsEnabled ? <X size={20} /> : <Subtitles size={20} />}
-                                        </IconButton>
-                                    </Tooltip>
-                                )}
+                            {/* Caption Controls - only for videos */}
+                            {currentLecture?.contentType === 'video' && (
+                                <Box className="flex gap-2">
+                                    {captionUrl && (
+                                        <Tooltip title={captionsEnabled ? "Hide Captions" : "Show Captions"}>
+                                            <IconButton
+                                                onClick={() => setCaptionsEnabled(!captionsEnabled)}
+                                                className="bg-black/60 backdrop-blur-sm text-white hover:bg-black/80"
+                                                size="small"
+                                            >
+                                                {captionsEnabled ? <X size={20} /> : <Subtitles size={20} />}
+                                            </IconButton>
+                                        </Tooltip>
+                                    )}
 
-                                {!captionsAvailable && (
-                                    <Box className="bg-black/60 backdrop-blur-sm rounded px-3 py-1">
-                                        <Typography variant="caption" className="text-white opacity-75">
-                                            No Captions
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Box>
+                                    {!captionUrl && (
+                                        <Box className="bg-black/60 backdrop-blur-sm rounded px-3 py-1">
+                                            <Typography variant="caption" className="text-white opacity-75">
+                                                No Captions
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Box>
+                            )}
                         </Box>
 
-                        {/* Loading Overlay */}
-                        {isVideoLoading && (
+                        {/* Loading Overlay - only for videos */}
+                        {currentLecture?.contentType === 'video' && isVideoLoading && (
                             <Box className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
                                 <Box className="text-center">
                                     <Box className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></Box>
@@ -326,8 +347,222 @@ export default function     CourseLesson({
                             </Box>
                         )}
 
-                        {/* Video Player - Mux with Fallback */}
-                        {isMounted && curVideoUrl ? (
+                        {/* Conditional Rendering: Video or Quiz */}
+                        {currentLecture?.contentType === 'quiz' ? (
+                            /* Quiz Content - Udemy Style */
+                            <div className="w-full h-full overflow-auto bg-white p-6 pt-16">
+                                <Box className="max-w-3xl mx-auto">
+                                    {/* Quiz Title */}
+                                    <Typography variant="h5" className="font-bold text-gray-900 mb-1">
+                                        {currentLecture?.title}
+                                    </Typography>
+
+                                    {/* Quiz Info */}
+                                    <Box className="flex items-center gap-3 text-xs text-gray-600 mb-4 pb-4 border-b">
+                                        <Typography variant="caption">
+                                            {currentLecture?.content?.questions?.length} questions
+                                        </Typography>
+                                        <Typography variant="caption">•</Typography>
+                                        <Typography variant="caption">
+                                            Passing grade: {currentLecture?.content?.passingScore}%
+                                        </Typography>
+                                        {currentLecture?.content?.timeLimit && (
+                                            <>
+                                                <Typography variant="caption">•</Typography>
+                                                <Typography variant="caption">
+                                                    Time limit: {currentLecture?.content?.timeLimit} min
+                                                </Typography>
+                                            </>
+                                        )}
+                                    </Box>
+
+                                    {/* Quiz Questions */}
+                                    {currentLecture?.content?.questions?.map((question: any, index: number) => {
+                                        const questionId = question.id || `q-${index}`;
+                                        const selectedAnswer = quizAnswers[questionId];
+                                        const isFillBlank = question.type === 'fill_blank';
+
+                                        return (
+                                            <Box key={questionId} className="mb-6">
+                                                {/* Question Text */}
+                                                <Box className="flex items-start gap-2 mb-3">
+                                                    <Typography variant="body1" className="font-semibold text-gray-900 flex-1">
+                                                        {index + 1}. {question.question}
+                                                    </Typography>
+                                                    {isFillBlank && (
+                                                        <Chip
+                                                            label="Not graded"
+                                                            size="small"
+                                                            sx={{ height: '20px', fontSize: '0.7rem', bgcolor: '#fef3c7', color: '#92400e' }}
+                                                        />
+                                                    )}
+                                                </Box>
+
+                                                {/* Multiple Choice Options */}
+                                                {question.type === 'multiple_choice' && question.options && (
+                                                    <Box className="space-y-2">
+                                                        {question.options.map((option: string, optIndex: number) => {
+                                                            const isSelected = selectedAnswer === optIndex;
+                                                            return (
+                                                                <Box
+                                                                    key={optIndex}
+                                                                    onClick={() => handleAnswerSelect(questionId, optIndex)}
+                                                                    className={`p-3 border-2 rounded cursor-pointer transition-all ${
+                                                                        isSelected
+                                                                            ? 'border-blue-500 bg-blue-50'
+                                                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                                                                    }`}
+                                                                >
+                                                                    <Box className="flex items-center gap-2.5">
+                                                                        <Box
+                                                                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                                                                isSelected
+                                                                                    ? 'border-blue-500 bg-blue-500'
+                                                                                    : 'border-gray-400'
+                                                                            }`}
+                                                                        >
+                                                                            {isSelected && (
+                                                                                <Box className="w-1.5 h-1.5 bg-white rounded-full"></Box>
+                                                                            )}
+                                                                        </Box>
+                                                                        <Typography variant="body2" className="text-gray-800">
+                                                                            {option}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                            );
+                                                        })}
+                                                    </Box>
+                                                )}
+
+                                                {/* True/False Options */}
+                                                {question.type === 'true_false' && (
+                                                    <Box className="space-y-2">
+                                                        {[{ value: true, label: 'True' }, { value: false, label: 'False' }].map((option) => {
+                                                            const isSelected = selectedAnswer === option.value;
+                                                            return (
+                                                                <Box
+                                                                    key={option.label}
+                                                                    onClick={() => handleAnswerSelect(questionId, option.value)}
+                                                                    className={`p-3 border-2 rounded cursor-pointer transition-all ${
+                                                                        isSelected
+                                                                            ? 'border-blue-500 bg-blue-50'
+                                                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                                                                    }`}
+                                                                >
+                                                                    <Box className="flex items-center gap-2.5">
+                                                                        <Box
+                                                                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                                                                isSelected
+                                                                                    ? 'border-blue-500 bg-blue-500'
+                                                                                    : 'border-gray-400'
+                                                                            }`}
+                                                                        >
+                                                                            {isSelected && (
+                                                                                <Box className="w-1.5 h-1.5 bg-white rounded-full"></Box>
+                                                                            )}
+                                                                        </Box>
+                                                                        <Typography variant="body2" className="text-gray-800">
+                                                                            {option.label}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                            );
+                                                        })}
+                                                    </Box>
+                                                )}
+
+                                                {/* Fill in the Blank */}
+                                                {question.type === 'fill_blank' && (
+                                                    <Box>
+                                                        <input
+                                                            type="text"
+                                                            value={selectedAnswer as string || ''}
+                                                            onChange={(e) => handleAnswerSelect(questionId, e.target.value)}
+                                                            placeholder="Enter your answer (for practice - not graded)"
+                                                            className="w-full p-3 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none text-sm bg-gray-50"
+                                                        />
+                                                        <Typography variant="caption" className="text-gray-500 mt-1 block">
+                                                            Note: Fill-in-the-blank questions are for practice and won't affect your score.
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+
+                                                {/* Explanation/Hint */}
+                                                {question.explanation && (
+                                                    <Box className="mt-2 p-2.5 bg-blue-50 border-l-3 border-blue-400 rounded">
+                                                        <Typography variant="caption" className="text-blue-900">
+                                                            <strong>Hint:</strong> {question.explanation}
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                        );
+                                    })}
+
+                                    {/* Quiz Results */}
+                                    {quizResult && (
+                                        <Box className={`mb-6 p-4 rounded-lg border-2 ${quizResult.passed ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+                                            <Box className="flex items-center justify-between mb-3">
+                                                <Typography variant="h6" className={`font-bold ${quizResult.passed ? 'text-green-700' : 'text-red-700'}`}>
+                                                    {quizResult.passed ? '✓ Quiz Passed!' : '✗ Quiz Not Passed'}
+                                                </Typography>
+                                                <Typography variant="h5" className={`font-bold ${quizResult.passed ? 'text-green-700' : 'text-red-700'}`}>
+                                                    {quizResult.percentage}%
+                                                </Typography>
+                                            </Box>
+                                            <Box className="grid grid-cols-3 gap-4 text-sm">
+                                                <Box>
+                                                    <Typography variant="caption" className="text-gray-600">Score</Typography>
+                                                    <Typography variant="body2" className="font-semibold">{quizResult.score} / {quizResult.totalPoints} points</Typography>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="caption" className="text-gray-600">Correct</Typography>
+                                                    <Typography variant="body2" className="font-semibold">{quizResult.correctAnswers} / {quizResult.totalQuestions}</Typography>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="caption" className="text-gray-600">Status</Typography>
+                                                    <Typography variant="body2" className="font-semibold">{quizResult.passed ? 'Passed' : 'Failed'}</Typography>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    {/* Submit Section */}
+                                    <Box className="mt-6 pt-4 border-t">
+                                        <Box className="flex items-center justify-between">
+                                            <Typography variant="caption" className="text-gray-600">
+                                                {(() => {
+                                                    const totalQuestions = currentLecture?.content?.questions?.length || 0;
+                                                    const gradedQuestions = currentLecture?.content?.questions?.filter((q: any) => q.type !== 'fill_blank').length || 0;
+                                                    const answeredGraded = Object.keys(quizAnswers).filter(qId => {
+                                                        const question = currentLecture?.content?.questions?.find((q: any) => q.id === qId || `q-${currentLecture?.content?.questions?.indexOf(q)}` === qId);
+                                                        return question && question.type !== 'fill_blank';
+                                                    }).length;
+                                                    return `${answeredGraded} of ${gradedQuestions} graded questions answered`;
+                                                })()}
+                                            </Typography>
+                                            <button
+                                                onClick={handleQuizSubmit}
+                                                className="px-6 py-2.5 bg-blue-600 text-white font-semibold text-sm rounded hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                                disabled={(() => {
+                                                    const gradedQuestions = currentLecture?.content?.questions?.filter((q: any) => q.type !== 'fill_blank') || [];
+                                                    const answeredGraded = Object.keys(quizAnswers).filter(qId => {
+                                                        const question = currentLecture?.content?.questions?.find((q: any) => q.id === qId || `q-${currentLecture?.content?.questions?.indexOf(q)}` === qId);
+                                                        return question && question.type !== 'fill_blank';
+                                                    }).length;
+                                                    return answeredGraded !== gradedQuestions.length || isSubmitting;
+                                                })()}
+                                            >
+                                                {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
+                                            </button>
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </div>
+                        ) : (
+                            /* Video Player - Mux with Fallback */
+                            isMounted && curVideoUrl ? (
                             useFallbackPlayer ? (
                                 <FallbackVideoPlayer
                                     src={curVideoUrl}
@@ -379,15 +614,16 @@ export default function     CourseLesson({
                                     )}
                                 </MuxPlayer>
                             )
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-black">
-                                <div className="text-center">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                                    <p className="text-white">
-                                        Initializing video player...
-                                    </p>
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-black">
+                                    <div className="text-center">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                                        <p className="text-white">
+                                            Initializing video player...
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            )
                         )}
                     </div>
 

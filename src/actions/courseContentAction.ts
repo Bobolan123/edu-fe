@@ -306,22 +306,22 @@ export const uploadVideoToLecture = async (
 };
 
 // Get Lecture Captions
-export const getLectureCaptions = async (lectureId: string) => {
-    const res = await sendRequest<IBackendRes<any>>({
-        method: "GET",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/lecture/${lectureId}/captions`,
-        nextOption: {
-            next: {
-                tags: ["captions", `captions-${lectureId}`],
+export const getLectureCaptions = async (lectureId: string, format: string = 'srt') => {
+    try {
+        const res = await sendRequest<IBackendRes<{ captionUrl: string }>>({
+            method: "GET",
+            url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/lecture/${lectureId}/captions`,
+            nextOption: {
+                next: {
+                    tags: ["captions", `captions-${lectureId}`],
+                },
             },
-        },
-    });
+        });
 
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to get captions");
+        return res?.data?.captionUrl || null;
+    } catch (error) {
+        return null;
     }
-
-    return res.data;
 };
 
 // ============ PROGRESS TRACKING ============
@@ -389,4 +389,48 @@ export const saveCourseContent = async (
         message: "Course content saved",
         data: sections
     };
+};
+
+// Submit Quiz
+export const submitQuiz = async (
+    enrollmentId: number,
+    lectureId: string,
+    answers: Array<{ questionId: string; answer: string | number | boolean }>
+) => {
+    console.log("enrollmentId", enrollmentId, "answers", answers, "lectureId", lectureId)
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<{
+        score: number;
+        totalPoints: number;
+        percentage: number;
+        passed: boolean;
+        correctAnswers: number;
+        totalQuestions: number;
+        results: Array<{
+            questionId: string;
+            isCorrect: boolean;
+            studentAnswer: string | number;
+            correctAnswer: string | number;
+            points: number;
+            earnedPoints: number;
+        }>;
+    }>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/quiz/submit`,
+        body: {
+            enrollmentId,
+            lectureId,
+            answers
+        },
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (!res?.data) {
+        throw new Error(res.message || "Failed to submit quiz");
+    }
+
+    revalidateTag("enrollment-progress");
+    return res.data;
 };
