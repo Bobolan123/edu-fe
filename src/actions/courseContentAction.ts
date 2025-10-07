@@ -3,13 +3,7 @@
 import { revalidateTag } from "next/cache";
 import {
     ICourseContent,
-    ICourseSection,
-    ICourseLecture,
-    UpsertCourseContentDto,
-    CreateSectionDto,
-    UpdateSectionDto,
-    CreateLectureDto,
-    UpdateLectureDto
+    ICourseLecture
 } from "../../types/entities";
 import { sendRequest, sendRequestFile } from "../utils/api";
 import { getAccessToken } from "./index";
@@ -33,28 +27,6 @@ export const getCourseContent = async (courseId: number) => {
     return res.data;
 };
 
-// Update Course Content Metadata
-export const updateCourseContent = async (
-    courseId: number,
-    contentData: UpsertCourseContentDto
-) => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<any>>({
-        method: "PATCH",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/${courseId}/content`,
-        body: contentData,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to update course content");
-    }
-
-    revalidateTag("course-content");
-    return res.data;
-};
 
 // Get Complete Course Structure
 export const getCourseStructure = async (courseId: number) => {
@@ -75,52 +47,6 @@ export const getCourseStructure = async (courseId: number) => {
 
 // ============ SECTION MANAGEMENT ============
 
-// Create Course Section
-export const createCourseSection = async (
-    courseId: number,
-    sectionData: CreateSectionDto
-) => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<ICourseSection>>({
-        method: "POST",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/course/${courseId}/sections`,
-        body: sectionData,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to create section");
-    }
-
-    revalidateTag("course-content");
-    return res;
-};
-
-// Update Section
-export const updateCourseSection = async (
-    sectionId: string,
-    sectionData: UpdateSectionDto
-) => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<ICourseSection>>({
-        method: "PATCH",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/sections/${sectionId}`,
-        body: sectionData,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to update section");
-    }
-
-    revalidateTag("course-content");
-    return res.data;
-};
-
 // Delete Section
 export const deleteCourseSection = async (sectionId: string) => {
     const access_token = await getAccessToken();
@@ -140,54 +66,8 @@ export const deleteCourseSection = async (sectionId: string) => {
     return res;
 };
 
-// Reorder Sections
-export const reorderCourseSections = async (
-    courseId: number,
-    sectionIds: string[]
-) => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<any>>({
-        method: "PUT",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/course/${courseId}/sections/reorder`,
-        body: { sectionIds },
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to reorder sections");
-    }
-
-    revalidateTag("course-content");
-    return res.data;
-};
 
 // ============ LECTURE MANAGEMENT ============
-
-// Create Course Lecture
-export const createCourseLecture = async (
-    courseId: number,
-    sectionId: string,
-    lectureData: CreateLectureDto
-) => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<ICourseLecture>>({
-        method: "POST",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/sections/${sectionId}/lectures`,
-        body: lectureData,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to create lecture");
-    }
-
-    revalidateTag("course-content");
-    return res;
-};
 
 // Get Lecture Details
 export const getLectureDetails = async (lectureId: string) => {
@@ -208,28 +88,6 @@ export const getLectureDetails = async (lectureId: string) => {
     return res.data;
 };
 
-// Update Lecture
-export const updateCourseLecture = async (
-    lectureId: string,
-    lectureData: UpdateLectureDto
-) => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<ICourseLecture>>({
-        method: "PATCH",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/lectures/${lectureId}`,
-        body: lectureData,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to update lecture");
-    }
-
-    revalidateTag("course-content");
-    return res.data;
-};
 
 // Delete Lecture
 export const deleteCourseLecture = async (lectureId: string) => {
@@ -250,28 +108,6 @@ export const deleteCourseLecture = async (lectureId: string) => {
     return res;
 };
 
-// Reorder Lectures
-export const reorderSectionLectures = async (
-    sectionId: string,
-    lectureIds: string[]
-) => {
-    const access_token = await getAccessToken();
-    const res = await sendRequest<IBackendRes<any>>({
-        method: "PUT",
-        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/sections/${sectionId}/lectures/reorder`,
-        body: { lectureIds },
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-
-    if (!res?.data) {
-        throw new Error(res.message || "Failed to reorder lectures");
-    }
-
-    revalidateTag("course-content");
-    return res.data;
-};
 
 // ============ MEDIA & FILE MANAGEMENT ============
 
@@ -380,16 +216,32 @@ export const getCourseProgress = async (
     return res.data;
 };
 
-export const saveCourseContent = async (
+// Batch Create/Update Course Content (sections and lectures)
+export const batchUpdateCourseContent = async (
     courseId: number,
     sections: any[]
 ) => {
-    return {
-        statusCode: 200,
-        message: "Course content saved",
-        data: sections
-    };
+    const access_token = await getAccessToken();
+    const res = await sendRequest<IBackendRes<any>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/course/${courseId}/batch-content`,
+        body: { sections },
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    if (!res?.data) {
+        throw new Error(res.message || "Failed to update course content");
+    }
+
+    revalidateTag("course-content");
+    revalidateTag(`course-structure-${courseId}`);
+    return res.data;
 };
+
+// Legacy alias for backwards compatibility
+export const saveCourseContent = batchUpdateCourseContent;
 
 // Submit Quiz
 export const submitQuiz = async (

@@ -233,12 +233,12 @@ export default function ManageCourseContentModal({
     const handleSaveChanges = async () => {
         setIsSaving(true);
         try {
-            const res = await saveCourseContent(courseId, localSections);
-            if(res.statusCode === 200) {
-                toastService.success(res.message);
-            } else {
-                toastService.error(res.message);
-            }
+            await saveCourseContent(courseId, localSections);
+
+            // Show success message
+            toastService.success("Course content updated successfully!");
+
+            // Close modal
             onClose();
         } catch (error) {
             console.error(error);

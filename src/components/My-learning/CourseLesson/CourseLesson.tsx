@@ -66,11 +66,12 @@ import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
 
 import { useSession } from "next-auth/react";
-import { updateCourseContent, getLectureCaptions, submitQuiz } from "@/actions/courseContentAction";
+import { getLectureCaptions, submitQuiz } from "@/actions/courseContentAction";
 import { markLectureAsCompleted } from "@/actions/enrollmentAction";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { EnrollmentProgress } from "@/app/[locale]/my-learning/[title]/page";
+import QuizDisplay from "./QuizDisplay";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
@@ -155,8 +156,8 @@ export default function     CourseLesson({
                 toast.warning(`Quiz not passed. Score: ${result.percentage}%`);
             }
 
-            // Refresh to update progress
-            router.refresh();
+            // Server action already revalidates "enrollment-progress" tag
+            // No need to refresh the page
         } catch (error: any) {
             console.error("Failed to submit quiz:", error);
             toast.error(error.message || "Failed to submit quiz");
@@ -202,11 +203,12 @@ export default function     CourseLesson({
 
     const [curVideoUrl, setCurVideoUrl] = useState(videoUrl);
 
+    // Initialize on mount only
     useEffect(() => {
         setIsMounted(true);
 
-        // Initialize current lecture from server data
-        if (firstLecture) {
+        // Initialize current lecture from server data only if not already set
+        if (firstLecture && !currentLecture) {
             const lectureVideoUrl = firstLecture.content && 'videoUrl' in firstLecture.content
                 ? firstLecture.content.videoUrl
                 : "";
@@ -217,8 +219,45 @@ export default function     CourseLesson({
                 contentType: firstLecture.contentType || "video",
                 content: firstLecture.content || null,
             });
+
+            // Load existing quiz submission for first lecture if it's a quiz
+            if (firstLecture.contentType === 'quiz' && firstLecture.id && enrollmentProgress?.lectureProgress) {
+                const lectureProgressData = enrollmentProgress.lectureProgress.find(
+                    lp => lp.lectureId === firstLecture.id
+                );
+
+                if (lectureProgressData?.submissionData?.lastSubmission) {
+                    setQuizResult(lectureProgressData.submissionData.lastSubmission);
+
+                    const previousAnswers: Record<string, string | number | boolean> = {};
+                    lectureProgressData.submissionData.lastSubmission.answers.forEach((ans: any) => {
+                        previousAnswers[ans.questionId] = ans.answer;
+                    });
+                    setQuizAnswers(previousAnswers);
+                }
+            }
         }
-    }, []);
+    }, [firstLecture]);
+
+    // Update quiz submission data when enrollmentProgress changes (after quiz submit)
+    useEffect(() => {
+        if (currentLecture?.lectureId && currentLecture.contentType === 'quiz' && enrollmentProgress?.lectureProgress) {
+            const lectureProgressData = enrollmentProgress.lectureProgress.find(
+                lp => lp.lectureId === currentLecture.lectureId
+            );
+
+            // Update quiz result if submission data exists
+            if (lectureProgressData?.submissionData?.lastSubmission) {
+                setQuizResult(lectureProgressData.submissionData.lastSubmission);
+
+                const previousAnswers: Record<string, string | number | boolean> = {};
+                lectureProgressData.submissionData.lastSubmission.answers.forEach((ans: any) => {
+                    previousAnswers[ans.questionId] = ans.answer;
+                });
+                setQuizAnswers(previousAnswers);
+            }
+        }
+    }, [enrollmentProgress, currentLecture?.lectureId]);
 
     const handleLectureChange = useCallback(
         async (lecture: any) => {
@@ -252,6 +291,29 @@ export default function     CourseLesson({
                     content: lecture.content || null,
                 });
 
+                // Check for existing quiz submission
+                if (lecture.contentType === 'quiz' && lecture.id && enrollmentProgress?.lectureProgress) {
+                    const lectureProgressData = enrollmentProgress.lectureProgress.find(
+                        lp => lp.lectureId === lecture.id
+                    );
+
+                    if (lectureProgressData?.submissionData?.lastSubmission) {
+                        // Set the previous quiz result
+                        setQuizResult(lectureProgressData.submissionData.lastSubmission);
+
+                        // Populate answers from previous submission
+                        const previousAnswers: Record<string, string | number | boolean> = {};
+                        lectureProgressData.submissionData.lastSubmission.answers.forEach((ans: any) => {
+                            previousAnswers[ans.questionId] = ans.answer;
+                        });
+                        setQuizAnswers(previousAnswers);
+                    } else {
+                        // Clear quiz state for new attempt
+                        setQuizResult(null);
+                        setQuizAnswers({});
+                    }
+                }
+
                 // Fetch captions for the new lecture using server action (only for video lectures)
                 if (lecture.id && lecture.contentType === 'video') {
                     const newCaptionUrl = await getLectureCaptions(lecture.id, 'srt');
@@ -261,7 +323,7 @@ export default function     CourseLesson({
                 }
             }, 100);
         },
-        [loadingTimeout]
+        [loadingTimeout, enrollmentProgress]
     );
 
     const handleVideoLoadStart = () => {
@@ -349,217 +411,23 @@ export default function     CourseLesson({
 
                         {/* Conditional Rendering: Video or Quiz */}
                         {currentLecture?.contentType === 'quiz' ? (
-                            /* Quiz Content - Udemy Style */
-                            <div className="w-full h-full overflow-auto bg-white p-6 pt-16">
-                                <Box className="max-w-3xl mx-auto">
-                                    {/* Quiz Title */}
-                                    <Typography variant="h5" className="font-bold text-gray-900 mb-1">
-                                        {currentLecture?.title}
-                                    </Typography>
-
-                                    {/* Quiz Info */}
-                                    <Box className="flex items-center gap-3 text-xs text-gray-600 mb-4 pb-4 border-b">
-                                        <Typography variant="caption">
-                                            {currentLecture?.content?.questions?.length} questions
-                                        </Typography>
-                                        <Typography variant="caption">•</Typography>
-                                        <Typography variant="caption">
-                                            Passing grade: {currentLecture?.content?.passingScore}%
-                                        </Typography>
-                                        {currentLecture?.content?.timeLimit && (
-                                            <>
-                                                <Typography variant="caption">•</Typography>
-                                                <Typography variant="caption">
-                                                    Time limit: {currentLecture?.content?.timeLimit} min
-                                                </Typography>
-                                            </>
-                                        )}
-                                    </Box>
-
-                                    {/* Quiz Questions */}
-                                    {currentLecture?.content?.questions?.map((question: any, index: number) => {
-                                        const questionId = question.id || `q-${index}`;
-                                        const selectedAnswer = quizAnswers[questionId];
-                                        const isFillBlank = question.type === 'fill_blank';
-
-                                        return (
-                                            <Box key={questionId} className="mb-6">
-                                                {/* Question Text */}
-                                                <Box className="flex items-start gap-2 mb-3">
-                                                    <Typography variant="body1" className="font-semibold text-gray-900 flex-1">
-                                                        {index + 1}. {question.question}
-                                                    </Typography>
-                                                    {isFillBlank && (
-                                                        <Chip
-                                                            label="Not graded"
-                                                            size="small"
-                                                            sx={{ height: '20px', fontSize: '0.7rem', bgcolor: '#fef3c7', color: '#92400e' }}
-                                                        />
-                                                    )}
-                                                </Box>
-
-                                                {/* Multiple Choice Options */}
-                                                {question.type === 'multiple_choice' && question.options && (
-                                                    <Box className="space-y-2">
-                                                        {question.options.map((option: string, optIndex: number) => {
-                                                            const isSelected = selectedAnswer === optIndex;
-                                                            return (
-                                                                <Box
-                                                                    key={optIndex}
-                                                                    onClick={() => handleAnswerSelect(questionId, optIndex)}
-                                                                    className={`p-3 border-2 rounded cursor-pointer transition-all ${
-                                                                        isSelected
-                                                                            ? 'border-blue-500 bg-blue-50'
-                                                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                                                                    }`}
-                                                                >
-                                                                    <Box className="flex items-center gap-2.5">
-                                                                        <Box
-                                                                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                                                                isSelected
-                                                                                    ? 'border-blue-500 bg-blue-500'
-                                                                                    : 'border-gray-400'
-                                                                            }`}
-                                                                        >
-                                                                            {isSelected && (
-                                                                                <Box className="w-1.5 h-1.5 bg-white rounded-full"></Box>
-                                                                            )}
-                                                                        </Box>
-                                                                        <Typography variant="body2" className="text-gray-800">
-                                                                            {option}
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </Box>
-                                                            );
-                                                        })}
-                                                    </Box>
-                                                )}
-
-                                                {/* True/False Options */}
-                                                {question.type === 'true_false' && (
-                                                    <Box className="space-y-2">
-                                                        {[{ value: true, label: 'True' }, { value: false, label: 'False' }].map((option) => {
-                                                            const isSelected = selectedAnswer === option.value;
-                                                            return (
-                                                                <Box
-                                                                    key={option.label}
-                                                                    onClick={() => handleAnswerSelect(questionId, option.value)}
-                                                                    className={`p-3 border-2 rounded cursor-pointer transition-all ${
-                                                                        isSelected
-                                                                            ? 'border-blue-500 bg-blue-50'
-                                                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                                                                    }`}
-                                                                >
-                                                                    <Box className="flex items-center gap-2.5">
-                                                                        <Box
-                                                                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                                                                isSelected
-                                                                                    ? 'border-blue-500 bg-blue-500'
-                                                                                    : 'border-gray-400'
-                                                                            }`}
-                                                                        >
-                                                                            {isSelected && (
-                                                                                <Box className="w-1.5 h-1.5 bg-white rounded-full"></Box>
-                                                                            )}
-                                                                        </Box>
-                                                                        <Typography variant="body2" className="text-gray-800">
-                                                                            {option.label}
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </Box>
-                                                            );
-                                                        })}
-                                                    </Box>
-                                                )}
-
-                                                {/* Fill in the Blank */}
-                                                {question.type === 'fill_blank' && (
-                                                    <Box>
-                                                        <input
-                                                            type="text"
-                                                            value={selectedAnswer as string || ''}
-                                                            onChange={(e) => handleAnswerSelect(questionId, e.target.value)}
-                                                            placeholder="Enter your answer (for practice - not graded)"
-                                                            className="w-full p-3 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none text-sm bg-gray-50"
-                                                        />
-                                                        <Typography variant="caption" className="text-gray-500 mt-1 block">
-                                                            Note: Fill-in-the-blank questions are for practice and won't affect your score.
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-
-                                                {/* Explanation/Hint */}
-                                                {question.explanation && (
-                                                    <Box className="mt-2 p-2.5 bg-blue-50 border-l-3 border-blue-400 rounded">
-                                                        <Typography variant="caption" className="text-blue-900">
-                                                            <strong>Hint:</strong> {question.explanation}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                        );
-                                    })}
-
-                                    {/* Quiz Results */}
-                                    {quizResult && (
-                                        <Box className={`mb-6 p-4 rounded-lg border-2 ${quizResult.passed ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
-                                            <Box className="flex items-center justify-between mb-3">
-                                                <Typography variant="h6" className={`font-bold ${quizResult.passed ? 'text-green-700' : 'text-red-700'}`}>
-                                                    {quizResult.passed ? '✓ Quiz Passed!' : '✗ Quiz Not Passed'}
-                                                </Typography>
-                                                <Typography variant="h5" className={`font-bold ${quizResult.passed ? 'text-green-700' : 'text-red-700'}`}>
-                                                    {quizResult.percentage}%
-                                                </Typography>
-                                            </Box>
-                                            <Box className="grid grid-cols-3 gap-4 text-sm">
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-600">Score</Typography>
-                                                    <Typography variant="body2" className="font-semibold">{quizResult.score} / {quizResult.totalPoints} points</Typography>
-                                                </Box>
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-600">Correct</Typography>
-                                                    <Typography variant="body2" className="font-semibold">{quizResult.correctAnswers} / {quizResult.totalQuestions}</Typography>
-                                                </Box>
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-600">Status</Typography>
-                                                    <Typography variant="body2" className="font-semibold">{quizResult.passed ? 'Passed' : 'Failed'}</Typography>
-                                                </Box>
-                                            </Box>
-                                        </Box>
-                                    )}
-
-                                    {/* Submit Section */}
-                                    <Box className="mt-6 pt-4 border-t">
-                                        <Box className="flex items-center justify-between">
-                                            <Typography variant="caption" className="text-gray-600">
-                                                {(() => {
-                                                    const totalQuestions = currentLecture?.content?.questions?.length || 0;
-                                                    const gradedQuestions = currentLecture?.content?.questions?.filter((q: any) => q.type !== 'fill_blank').length || 0;
-                                                    const answeredGraded = Object.keys(quizAnswers).filter(qId => {
-                                                        const question = currentLecture?.content?.questions?.find((q: any) => q.id === qId || `q-${currentLecture?.content?.questions?.indexOf(q)}` === qId);
-                                                        return question && question.type !== 'fill_blank';
-                                                    }).length;
-                                                    return `${answeredGraded} of ${gradedQuestions} graded questions answered`;
-                                                })()}
-                                            </Typography>
-                                            <button
-                                                onClick={handleQuizSubmit}
-                                                className="px-6 py-2.5 bg-blue-600 text-white font-semibold text-sm rounded hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                                disabled={(() => {
-                                                    const gradedQuestions = currentLecture?.content?.questions?.filter((q: any) => q.type !== 'fill_blank') || [];
-                                                    const answeredGraded = Object.keys(quizAnswers).filter(qId => {
-                                                        const question = currentLecture?.content?.questions?.find((q: any) => q.id === qId || `q-${currentLecture?.content?.questions?.indexOf(q)}` === qId);
-                                                        return question && question.type !== 'fill_blank';
-                                                    }).length;
-                                                    return answeredGraded !== gradedQuestions.length || isSubmitting;
-                                                })()}
-                                            >
-                                                {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
-                                            </button>
-                                        </Box>
-                                    </Box>
-                                </Box>
-                            </div>
+                            /* Quiz Content - Using QuizDisplay Component */
+                            <QuizDisplay
+                                title={currentLecture?.title || "Quiz"}
+                                quizContent={currentLecture?.content as any}
+                                submission={
+                                    currentLecture?.lectureId && enrollmentProgress?.lectureProgress
+                                        ? enrollmentProgress.lectureProgress.find(
+                                            lp => lp.lectureId === currentLecture.lectureId
+                                        )?.submissionData?.lastSubmission || null
+                                        : null
+                                }
+                                quizAnswers={quizAnswers}
+                                quizResult={quizResult}
+                                isSubmitting={isSubmitting}
+                                onAnswerSelect={handleAnswerSelect}
+                                onSubmit={handleQuizSubmit}
+                            />
                         ) : (
                             /* Video Player - Mux with Fallback */
                             isMounted && curVideoUrl ? (

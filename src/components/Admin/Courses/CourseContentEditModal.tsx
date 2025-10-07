@@ -64,6 +64,9 @@ export default function CourseContentEditModal({
         [key: string]: boolean;
     }>({});
 
+    // Store pending video uploads for new lectures (with temp IDs)
+    const [pendingVideoUploads, setPendingVideoUploads] = useState<Map<string, File>>(new Map());
+
     useEffect(() => {
         const fetchCourseContent = async () => {
             if (!course?.id || !open) return;
@@ -213,11 +216,25 @@ export default function CourseContentEditModal({
         if (!file || !course) return;
 
         const key = `${sectionIndex}-${lectureIndex}`;
-        setUploadingVideos((prev) => ({ ...prev, [key]: true }));
-        setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
-
         const section = localSections[sectionIndex];
         const lecture = section.lectures[lectureIndex];
+
+        // Check if this is a new lecture (temp ID) or existing lecture (real UUID)
+        const isNewLecture = lecture.id.startsWith('temp-');
+
+        if (isNewLecture) {
+            // Store file for later upload after saving
+            const newPendingUploads = new Map(pendingVideoUploads);
+            newPendingUploads.set(lecture.id, file);
+            setPendingVideoUploads(newPendingUploads);
+
+            toastService.info("Video will be uploaded when you save changes");
+            return;
+        }
+
+        // Existing lecture - upload immediately
+        setUploadingVideos((prev) => ({ ...prev, [key]: true }));
+        setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
 
         try {
             const progressInterval = setInterval(() => {
@@ -227,11 +244,12 @@ export default function CourseContentEditModal({
                 }));
             }, 200);
 
-           const res = await uploadVideoToLecture(course.id, section.id, lecture.id, file);
-           toastService.success("Video uploaded successfully");
+            await uploadVideoToLecture(course.id, section.id, lecture.id, file);
 
             clearInterval(progressInterval);
             setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
+
+            toastService.success("Video uploaded successfully");
 
             setTimeout(() => {
                 setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
@@ -252,14 +270,54 @@ export default function CourseContentEditModal({
 
         setIsSaving(true);
         try {
-            const res = await saveCourseContent(course.id, localSections);
-            if(res.statusCode === 200) {
-                toastService.success(res.message);
-                onSuccess?.();
-                onClose();
-            } else {
-                toastService.error(res.message);
+            // Step 1: Save course content structure
+            const savedSections = await saveCourseContent(course.id, localSections);
+
+            // Step 2: Upload pending videos (for new lectures)
+            if (pendingVideoUploads.size > 0) {
+                toastService.info(`Uploading ${pendingVideoUploads.size} video(s)...`);
+
+                // Create mapping from temp IDs to real IDs
+                const idMapping = new Map<string, { realId: string, sectionId: string }>();
+
+                localSections.forEach((section, sIndex) => {
+                    section.lectures.forEach((lecture, lIndex) => {
+                        if (lecture.id?.startsWith('temp-')) {
+                            idMapping.set(lecture.id, {
+                                realId: savedSections[sIndex].lectures[lIndex].id,
+                                sectionId: savedSections[sIndex].id
+                            });
+                        }
+                    });
+                });
+
+                // Upload videos with real IDs
+                const uploadPromises = [];
+                for (const [tempId, videoFile] of pendingVideoUploads.entries()) {
+                    const mapping = idMapping.get(tempId);
+                    if (mapping) {
+                        uploadPromises.push(
+                            uploadVideoToLecture(
+                                course.id,
+                                mapping.sectionId,
+                                mapping.realId,
+                                videoFile
+                            )
+                        );
+                    }
+                }
+
+                await Promise.all(uploadPromises);
+                setPendingVideoUploads(new Map()); // Clear pending uploads
+                toastService.success("Videos uploaded successfully!");
             }
+
+            // Show success message
+            toastService.success("Course content updated successfully!");
+
+            // Call onSuccess callback and close modal
+            onSuccess?.();
+            onClose();
         } catch (error) {
             console.error(error);
             const errorMessage =

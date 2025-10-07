@@ -9,8 +9,7 @@ import {
     uploadThumbnail,
 } from "@/actions/coursesAction";
 import {
-    createCourseSection,
-    createCourseLecture,
+    batchUpdateCourseContent,
     uploadVideoToLecture,
 } from "@/actions/courseContentAction";
 import { useSession } from "next-auth/react";
@@ -187,118 +186,80 @@ export default function CreateCoursePage({
         setIsSubmitting(true);
 
         try {
-            // Step 1: Create all sections first
-            const createdSections: {
-                originalId: string;
-                newId: string;
-                section: any;
+            const batchLoadingToast = toastService.loading("Saving course content...");
+
+            // Prepare sections for batch API - separate videos for upload
+            const videoUploads: {
+                sectionIndex: number;
+                lectureIndex: number;
+                videoFile: File;
             }[] = [];
 
-            for (const section of contentData.sections) {
-                // Dismiss previous loading toast and create new one with updated message
-                const sectionLoadingToast = toastService.loading(
-                    `Creating section: ${section.title}`
-                );
-
-                const sectionResponse = await createCourseSection(
-                    createdCourseId,
-                    {
-                        title: section.title,
-                        description: section.description || "",
-                        orderIndex: section.orderIndex || 0,
-                    }
-                );
-
-                if (!sectionResponse?.data?.id) {
-                    throw new Error(
-                        `Failed to create section: ${section.title}`
-                    );
-                }
-
-                toastService.dismiss(sectionLoadingToast);
-                toastService.success(`Section "${section.title}" created!`);
-
-                createdSections.push({
-                    originalId: section.id,
-                    newId: sectionResponse.data.id,
-                    section: section,
-                });
-            }
-
-            // Step 2: Create all lectures for each section
-            const createdLectures: {
-                sectionId: string;
-                lectureId: string;
-                videoFile?: File;
-            }[] = [];
-
-            for (const sectionData of createdSections) {
-                const { newId: sectionId, section } = sectionData;
-
-                if (section.lectures && section.lectures.length > 0) {
-                    for (const lecture of section.lectures) {
-                        // Create lecture with metadata only
-                        const lecturePayload: any = {
-                            title: lecture.title,
-                            description: lecture.description || "",
-                            contentType: lecture.contentType,
-                            orderIndex: lecture.orderIndex || 0,
-                            durationSeconds: lecture.durationSeconds || 0,
-                            isPreview: lecture.isPreview || false,
-                        };
-
-                        // Add content based on lecture type
-                        if (lecture.contentType === "video") {
-                            lecturePayload.content = {
-                                videoUrl: "",
-                                thumbnailUrl: "",
-                                cloudinaryPublicId: "",
-                                quality: [],
-                            };
-                        } else if (
-                            lecture.contentType === "quiz" &&
-                            lecture.content
-                        ) {
-                            lecturePayload.content = lecture.content;
-                        }
-
-                        const lectureResponse = await createCourseLecture(
-                            createdCourseId,
-                            sectionId,
-                            lecturePayload
-                        );
-
-                        if (!lectureResponse?.data?.id) {
-                            throw new Error(
-                                `Failed to create lecture: ${lecture.title}`
-                            );
-                        }
-
-                        // Store lecture info for video upload step
-                        createdLectures.push({
-                            sectionId: sectionId,
-                            lectureId: lectureResponse.data.id,
-                            videoFile: lecture.videoFile || undefined,
+            // Prepare sections data without video files
+            const sectionsData = contentData.sections.map((section, sectionIndex) => ({
+                id: section.id?.startsWith("temp-") ? undefined : section.id,
+                title: section.title,
+                description: section.description || "",
+                orderIndex: section.orderIndex,
+                lectures: section.lectures.map((lecture, lectureIndex) => {
+                    // Store video file reference for later upload
+                    if (lecture.contentType === "video" && lecture.videoFile) {
+                        videoUploads.push({
+                            sectionIndex,
+                            lectureIndex,
+                            videoFile: lecture.videoFile
                         });
                     }
-                }
-            }
 
-            // Step 3: Upload video files for video lectures
-            for (const lectureData of createdLectures) {
-                if (lectureData.videoFile) {
-                    const uploadToast = toastService.loading(
-                        "Uploading video file..."
-                    );
+                    return {
+                        id: lecture.id?.startsWith("temp-") ? undefined : lecture.id,
+                        title: lecture.title,
+                        description: lecture.description || "",
+                        contentType: lecture.contentType,
+                        orderIndex: lecture.orderIndex,
+                        durationSeconds: lecture.durationSeconds || 0,
+                        isPreview: lecture.isPreview || false,
+                        content: lecture.contentType === "video"
+                            ? {
+                                videoUrl: "",
+                                cloudinaryPublicId: "",
+                                quality: []
+                              }
+                            : lecture.content
+                    };
+                })
+            }));
 
-                    await uploadVideoToLecture(
-                        createdCourseId,
-                        lectureData.sectionId,
-                        lectureData.lectureId,
-                        lectureData.videoFile
-                    );
+            // Step 1: Batch create/update all sections and lectures
+            const batchResult = await batchUpdateCourseContent(
+                createdCourseId,
+                sectionsData
+            );
 
-                    toastService.dismiss(uploadToast);
+            toastService.dismiss(batchLoadingToast);
+            toastService.success("Course structure saved successfully!");
+
+            // Step 2: Upload video files for video lectures
+            if (videoUploads.length > 0) {
+                for (const upload of videoUploads) {
+                    const section = batchResult[upload.sectionIndex];
+                    const lecture = section.lectures[upload.lectureIndex];
+
+                    if (section?.id && lecture?.id) {
+                        const uploadToast = toastService.loading(
+                            `Uploading video for "${lecture.title}"...`
+                        );
+
+                        await uploadVideoToLecture(
+                            createdCourseId,
+                            section.id,
+                            lecture.id,
+                            upload.videoFile
+                        );
+
+                        toastService.dismiss(uploadToast);
+                        toastService.success(`Video uploaded for "${lecture.title}"`);
+                    }
                 }
             }
 
@@ -307,7 +268,7 @@ export default function CreateCoursePage({
             // Redirect to my-courses page after successful creation
             setTimeout(() => {
                 router.push("/my-courses");
-            }, 1500); // Delay to allow user to see success message
+            }, 1500);
         } catch (error) {
             console.error("Failed to create course content:", error);
             toastService.dismiss(); // Dismiss any loading toasts
@@ -322,7 +283,6 @@ export default function CreateCoursePage({
         } finally {
             setIsSubmitting(false);
         }
-
     };
 
     if (currentStep === 1) {

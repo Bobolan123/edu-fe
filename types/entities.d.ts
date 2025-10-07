@@ -198,6 +198,46 @@ export interface IProgressResponse {
     completedAt?: Date;
 }
 
+// Quiz Submission Interface - matches backend QuizSubmission
+export interface IQuizSubmission {
+    answers: Array<{
+        questionId: string;
+        answer: string | number | boolean;
+    }>;
+    submittedAt: Date;
+    results: Array<{
+        questionId: string;
+        isCorrect: boolean;
+        correctAnswer: string | number;
+        explanation?: string;
+        points: number;
+    }>;
+}
+
+// Lecture Progress Interface - matches backend entity
+export interface ILectureProgress {
+    id: number;
+    enrollmentId: number;
+    enrollment?: IEnrollment;
+    courseId: number;
+    lectureId: string;
+    lecture?: ICourseLecture;
+    isCompleted: boolean;
+    completedAt: Date | null;
+    watchTimeSeconds: number;
+    lastPositionSeconds: number | null;
+    submissionData: {
+        attempts: number;
+        score?: number;
+        percentage?: number;
+        passed?: boolean;
+        lastSubmission?: IQuizSubmission;
+        completedAt?: Date;
+    } | null;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 // Student Progress Interface
 export interface IStudentProgress {
     enrollmentId: string;
@@ -312,46 +352,6 @@ export interface QuizQuestion {
     points: number;
 }
 
-// Course Content Update DTO
-export interface UpsertCourseContentDto {
-    language?: string;
-    level?: string;
-    whatYoullLearn?: string[];
-}
-
-// Section DTOs
-export interface CreateSectionDto {
-    title: string;
-    description?: string;
-    orderIndex?: number;
-}
-
-export interface UpdateSectionDto {
-    title?: string;
-    description?: string;
-    orderIndex?: number;
-}
-
-// Lecture DTOs
-export interface CreateLectureDto {
-    title: string;
-    description?: string;
-    contentType: 'video' | 'quiz';
-    orderIndex?: number;
-    durationSeconds?: number;
-    isPreview?: boolean;
-    content: VideoContent | QuizContent;
-}
-
-export interface UpdateLectureDto {
-    title?: string;
-    description?: string;
-    contentType?: 'video' | 'quiz';
-    orderIndex?: number;
-    durationSeconds?: number;
-    isPreview?: boolean;
-    content?: VideoContent | QuizContent;
-}
 
 // ============ CAPTION MANAGEMENT INTERFACES ============
 

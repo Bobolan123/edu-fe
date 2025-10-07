@@ -6,6 +6,7 @@ import {
     IEnrollment,
     ICourseLecture,
     IReview,
+    ILectureProgress,
 } from "../../../../../types/entities";
 import { extractIds } from "../../../../utils/utils";
 import CourseLesson from "@/components/My-learning/CourseLesson/CourseLesson";
@@ -18,7 +19,7 @@ import { getEnrollmentProgress } from "@/actions/enrollmentAction";
 
 export type EnrollmentProgress = {
     enrollment: IEnrollment;
-    lectureProgress: ICourseLecture[];
+    lectureProgress: ILectureProgress[];
     progressPercentage: number;
 };
 
