@@ -62,7 +62,6 @@ import { Bot, Subtitles, X } from "lucide-react";
 import { ICourse, ICourseContent, IEnrollment, ICourseLecture, IReview } from "../../../../types/entities";
 import CourseOverview from "./Overview";
 import CourseReviews from "./CourseReviews";
-import ChatBot from "./LeaningTool";
 import { IReviewDistribution } from "../../../../types/resData";
 
 import { useSession } from "next-auth/react";
@@ -72,6 +71,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { EnrollmentProgress } from "@/app/[locale]/my-learning/[title]/page";
 import QuizDisplay from "./QuizDisplay";
+import ChatBot from "./Chatbot";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
@@ -706,9 +706,9 @@ export default function     CourseLesson({
                         )}
                     </button>
 
-                    {isOpen && (
+                    {isOpen && course?.id && (
                         <div className="animate-fade-in mt-2 w-[350px] h-[500px] rounded-xl overflow-hidden shadow-xl">
-                            <ChatBot />
+                            <ChatBot courseId={course.id} />
                         </div>
                     )}
                 </div>

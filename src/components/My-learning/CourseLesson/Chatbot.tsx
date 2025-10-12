@@ -2,15 +2,20 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2 } from "lucide-react";
-import { generateGeminiResponse } from "@/actions/gemini";
+import { generateGeminiResponse, GeminiChatSource } from "@/actions/gemini";
 
 interface Message {
     id: string;
     role: "user" | "assistant";
     content: string;
+    sources?: GeminiChatSource[];
 }
 
-export default function ChatBot() {
+interface ChatBotProps {
+    courseId: number;
+}
+
+export default function ChatBot({ courseId }: ChatBotProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -34,12 +39,31 @@ export default function ChatBot() {
         setIsLoading(true);
 
         try {
-            const res: IBackendRes<string> = await generateGeminiResponse(input);
+            const res = await generateGeminiResponse(input, courseId);
+
+            console.log("Gemini API Response:", res);
+            console.log("Response data:", res?.data);
+
+            // Handle both old (string) and new (object) response formats
+            let answerContent: string;
+            let sources: GeminiChatSource[] | undefined;
+
+            if (typeof res?.data === 'string') {
+                // Old format: data is a string
+                answerContent = res.data;
+            } else if (res?.data && typeof res.data === 'object') {
+                // New format: data is an object with answer and sources
+                answerContent = res.data.answer || "No response received.";
+                sources = res.data.sources;
+            } else {
+                answerContent = "No response received.";
+            }
 
             const aiMessage: Message = {
                 id: Date.now().toString() + "-bot",
                 role: "assistant",
-                content: res?.data || "No response received.",
+                content: answerContent,
+                sources: sources,
             };
 
             setMessages((prev) => [...prev, aiMessage]);
@@ -85,13 +109,13 @@ export default function ChatBot() {
                         }`}
                     >
                         <div
-                            className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                            className={`max-w-[75%] ${
                                 message.role === "user"
                                     ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
                                     : "bg-white text-slate-800 border border-slate-200 shadow-sm"
-                            }`}
+                            } px-4 py-3 rounded-2xl text-sm leading-relaxed`}
                         >
-                            {message.content}
+                            <div className="whitespace-pre-wrap">{message.content}</div>
                         </div>
                     </div>
                 ))}
