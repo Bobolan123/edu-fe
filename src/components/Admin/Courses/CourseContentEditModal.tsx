@@ -57,9 +57,6 @@ export default function CourseContentEditModal({
     const [uploadingVideos, setUploadingVideos] = useState<{
         [key: string]: boolean;
     }>({});
-    const [uploadProgress, setUploadProgress] = useState<{
-        [key: string]: number;
-    }>({});
     const [deletingItems, setDeletingItems] = useState<{
         [key: string]: boolean;
     }>({});
@@ -234,26 +231,11 @@ export default function CourseContentEditModal({
 
         // Existing lecture - upload immediately
         setUploadingVideos((prev) => ({ ...prev, [key]: true }));
-        setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
 
         try {
-            const progressInterval = setInterval(() => {
-                setUploadProgress((prev) => ({
-                    ...prev,
-                    [key]: Math.min((prev[key] || 0) + 10, 90),
-                }));
-            }, 200);
-
             await uploadVideoToLecture(course.id, section.id, lecture.id, file);
 
-            clearInterval(progressInterval);
-            setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
-
             toastService.success("Video uploaded successfully");
-
-            setTimeout(() => {
-                setUploadProgress((prev) => ({ ...prev, [key]: 0 }));
-            }, 1000);
 
         } catch (error) {
             console.error(error);
@@ -311,9 +293,6 @@ export default function CourseContentEditModal({
                 setPendingVideoUploads(new Map()); // Clear pending uploads
                 toastService.success("Videos uploaded successfully!");
             }
-
-            // Show success message
-            toastService.success("Course content updated successfully!");
 
             // Call onSuccess callback and close modal
             onSuccess?.();
@@ -616,22 +595,13 @@ export default function CourseContentEditModal({
                                                 ] && (
                                                     <Box sx={{ mt: 1 }}>
                                                         <LinearProgress
-                                                            variant="determinate"
-                                                            value={
-                                                                uploadProgress[
-                                                                    `${sectionIndex}-${lectureIndex}`
-                                                                ] || 0
-                                                            }
                                                             sx={{ height: 6, borderRadius: 1 }}
                                                         />
                                                         <Typography
                                                             variant="caption"
                                                             color="text.secondary"
                                                         >
-                                                            {uploadProgress[
-                                                                `${sectionIndex}-${lectureIndex}`
-                                                            ] || 0}
-                                                            % uploaded
+                                                            Uploading video...
                                                         </Typography>
                                                     </Box>
                                                 )}

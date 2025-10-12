@@ -73,7 +73,7 @@ export const getCourses = async (params: GetCoursesParams = {}): Promise<IModelP
     }
     if (params.instructorId) queryParams.instructorId = params.instructorId;
     if (params.status) queryParams.status = params.status;
-    if (params.includeDeleted) queryParams.includeDeleted = params.includeDeleted;
+    if (params.includeDeleted !== undefined) queryParams.includeDeleted = params.includeDeleted;
     if (params.minPrice !== undefined) queryParams.minPrice = params.minPrice;
     if (params.maxPrice !== undefined) queryParams.maxPrice = params.maxPrice;
     if (params.minRating !== undefined) queryParams.minRating = params.minRating;

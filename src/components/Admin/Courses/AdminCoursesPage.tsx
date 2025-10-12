@@ -104,7 +104,7 @@ export default function AdminCoursesPage({
     return [];
   });
   const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
-  const [includeDeleted, setIncludeDeleted] = useState(searchParams.includeDeleted === 'true');
+  const [includeDeleted, setIncludeDeleted] = useState(searchParams.includeDeleted === 'true' ? true : searchParams.includeDeleted === 'false' ? false : false);
   
   // New filter states
   const [minPrice, setMinPrice] = useState(searchParams.minPrice || '');
@@ -151,7 +151,7 @@ export default function AdminCoursesPage({
     }
     
     // Add includeDeleted parameter
-    if (params.includeDeleted === 'true') {
+    if (params.includeDeleted === 'true' || params.includeDeleted === 'false') {
       searchParams.set('includeDeleted', params.includeDeleted);
     }
     
@@ -207,18 +207,18 @@ export default function AdminCoursesPage({
 
   const handlePageChange = (newPage: number) => {
     const [orderBy, order] = sortBy.split('-') as [string, 'ASC' | 'DESC'];
-    updateURL({ 
-      search: searchTerm, 
-      category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
-      status: selectedStatus !== 'all' ? selectedStatus : undefined, 
-      includeDeleted: includeDeleted ? 'true' : undefined,
+    updateURL({
+      search: searchTerm,
+      category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
+      status: selectedStatus !== 'all' ? selectedStatus : undefined,
+      includeDeleted: includeDeleted ? 'true' : 'false',
       minPrice: minPrice || undefined,
       maxPrice: maxPrice || undefined,
       minRating: minRating || undefined,
       maxRating: maxRating || undefined,
       orderBy: orderBy,
       order: order,
-      page: (newPage + 1).toString() 
+      page: (newPage + 1).toString()
     });
   };
 
@@ -229,7 +229,7 @@ export default function AdminCoursesPage({
       search: searchTerm,
       category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
       status: selectedStatus !== 'all' ? selectedStatus : undefined,
-      includeDeleted: showDeleted ? 'true' : undefined,
+      includeDeleted: showDeleted ? 'true' : 'false',
       minPrice: minPrice || undefined,
       maxPrice: maxPrice || undefined,
       minRating: minRating || undefined,
@@ -243,12 +243,12 @@ export default function AdminCoursesPage({
   const handleApplyFilters = () => {
     // Parse sortBy into orderBy and order
     const [orderBy, order] = sortBy.split('-') as [string, 'ASC' | 'DESC'];
-    
-    updateURL({ 
-      search: searchTerm, 
-      category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined, 
+
+    updateURL({
+      search: searchTerm,
+      category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
       status: selectedStatus !== 'all' ? selectedStatus : undefined,
-      includeDeleted: includeDeleted ? 'true' : undefined,
+      includeDeleted: includeDeleted ? 'true' : 'false',
       minPrice: minPrice || undefined,
       maxPrice: maxPrice || undefined,
       minRating: minRating || undefined,
@@ -273,7 +273,7 @@ export default function AdminCoursesPage({
       search: undefined,
       category: undefined,
       status: undefined,
-      includeDeleted: undefined,
+      includeDeleted: 'false',
       minPrice: undefined,
       maxPrice: undefined,
       minRating: undefined,

@@ -18,9 +18,9 @@ export default async function CoursesPage(props: {
         orderBy?: string;
         order?: string;
         categoryIds?: string | string[];
+        includeDeleted?: string;
     }>;
 }) {
-    const session = await auth();
     const searchParams = (await props.searchParams) || {};
     const currentPage = Number(searchParams?.page) || 1;
     const take = Number(searchParams?.take) || 5;
@@ -60,6 +60,7 @@ export default async function CoursesPage(props: {
         order: (searchParams?.order as "ASC" | "DESC") || "DESC",
         categoryIds,
         excludeEnrolled: true,
+        includeDeleted: searchParams?.includeDeleted === 'true',
     });
 
     const resCategories = await getCategories();

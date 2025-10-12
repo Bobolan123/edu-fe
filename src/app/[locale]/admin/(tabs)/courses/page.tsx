@@ -38,7 +38,7 @@ export default async function CoursesPage(props : CoursesPageProps) {
       }
     }
     const status = searchParams.status !== 'all' ? searchParams.status : undefined;
-    const includeDeleted = searchParams.includeDeleted === 'true';
+    const includeDeleted = searchParams.includeDeleted === 'true' ? true : searchParams.includeDeleted === 'false' ? false : undefined;
     const minPrice = searchParams.minPrice ? parseFloat(searchParams.minPrice) : undefined;
     const maxPrice = searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : undefined;
     const minRating = searchParams.minRating ? parseFloat(searchParams.minRating) : undefined;
