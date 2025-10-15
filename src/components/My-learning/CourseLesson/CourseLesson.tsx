@@ -116,6 +116,9 @@ export default function     CourseLesson({
     const [quizAnswers, setQuizAnswers] = useState<Record<string, string | number | boolean>>({});
     const [quizResult, setQuizResult] = useState<any>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showControls, setShowControls] = useState(false);
+    const [isRetaking, setIsRetaking] = useState(false);
+    const controlsTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const muxPlayerRef = useRef<any>(null);
 
@@ -149,6 +152,7 @@ export default function     CourseLesson({
             );
 
             setQuizResult(result);
+            setIsRetaking(false); // Exit retake mode after submission
 
             if (result.passed) {
                 toast.success(`Quiz passed! Score: ${result.percentage}%`);
@@ -164,6 +168,14 @@ export default function     CourseLesson({
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // Handle quiz retake - only for failed quizzes
+    const handleQuizRetake = () => {
+        setIsRetaking(true);
+        setQuizAnswers({});
+        setQuizResult(null);
+        toast.info("Quiz reset. You can now retake the quiz.");
     };
 
     // Convert SRT to VTT if needed
@@ -284,6 +296,9 @@ export default function     CourseLesson({
 
     // Update quiz submission data when enrollmentProgress changes (after quiz submit)
     useEffect(() => {
+        // Don't override state when in retake mode
+        if (isRetaking) return;
+
         if (currentLecture?.lectureId && currentLecture.contentType === 'quiz' && enrollmentProgress?.lectureProgress) {
             const lectureProgressData = enrollmentProgress.lectureProgress.find(
                 lp => lp.lectureId === currentLecture.lectureId
@@ -300,7 +315,7 @@ export default function     CourseLesson({
                 setQuizAnswers(previousAnswers);
             }
         }
-    }, [enrollmentProgress, currentLecture?.lectureId]);
+    }, [enrollmentProgress, currentLecture?.lectureId, isRetaking]);
 
     // Control caption display programmatically
     useEffect(() => {
@@ -372,10 +387,12 @@ export default function     CourseLesson({
                             previousAnswers[ans.questionId] = ans.answer;
                         });
                         setQuizAnswers(previousAnswers);
+                        setIsRetaking(false); // Reset retake mode when changing lectures
                     } else {
                         // Clear quiz state for new attempt
                         setQuizResult(null);
                         setQuizAnswers({});
+                        setIsRetaking(false);
                     }
                 }
 
@@ -423,6 +440,37 @@ export default function     CourseLesson({
         setIsVideoLoading(false);
     };
 
+    // Handle mouse movement to show/hide controls and title
+    const handleMouseMove = () => {
+        setShowControls(true);
+
+        // Clear existing timer
+        if (controlsTimerRef.current) {
+            clearTimeout(controlsTimerRef.current);
+        }
+
+        // Set new timer to hide controls after 3 seconds
+        controlsTimerRef.current = setTimeout(() => {
+            setShowControls(false);
+        }, 3000);
+    };
+
+    const handleMouseLeave = () => {
+        setShowControls(false);
+        if (controlsTimerRef.current) {
+            clearTimeout(controlsTimerRef.current);
+        }
+    };
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (controlsTimerRef.current) {
+                clearTimeout(controlsTimerRef.current);
+            }
+        };
+    }, []);
+
 
     return (
         <>
@@ -433,43 +481,9 @@ export default function     CourseLesson({
                     <div
                         className={`relative w-full ${currentLecture?.contentType === 'quiz' ? 'bg-gray-50' : 'bg-black'}`}
                         style={{ height: "calc(130vh * 0.5)" }}
+                        onMouseMove={currentLecture?.contentType === 'video' ? handleMouseMove : undefined}
+                        onMouseLeave={currentLecture?.contentType === 'video' ? handleMouseLeave : undefined}
                     >
-                        {/* Title Overlay */}
-                        <Box className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-                            <Box className={`${currentLecture?.contentType === 'quiz' ? 'bg-white' : 'bg-black/60'} backdrop-blur-sm rounded-lg px-4 py-2`}>
-                                <Typography
-                                    variant="h6"
-                                    className={`${currentLecture?.contentType === 'quiz' ? 'text-gray-900' : 'text-white'} font-semibold`}
-                                >
-                                    {currentLecture?.title || "Loading..."}
-                                </Typography>
-                            </Box>
-
-                            {/* Caption Controls - only for videos */}
-                            {currentLecture?.contentType === 'video' && (
-                                <Box className="flex gap-2">
-                                    {vttCaptionUrl && (
-                                        <Tooltip title={captionsEnabled ? "Hide Captions" : "Show Captions"}>
-                                            <IconButton
-                                                onClick={() => setCaptionsEnabled(!captionsEnabled)}
-                                                className="bg-black/60 backdrop-blur-sm text-white hover:bg-black/80"
-                                                size="small"
-                                            >
-                                                {captionsEnabled ? <X size={20} /> : <Subtitles size={20} />}
-                                            </IconButton>
-                                        </Tooltip>
-                                    )}
-
-                                    {!vttCaptionUrl && (
-                                        <Box className="bg-black/60 backdrop-blur-sm rounded px-3 py-1">
-                                            <Typography variant="caption" className="text-white opacity-75">
-                                                No Captions
-                                            </Typography>
-                                        </Box>
-                                    )}
-                                </Box>
-                            )}
-                        </Box>
 
                         {/* Loading Overlay - only for videos */}
                         {currentLecture?.contentType === 'video' && isVideoLoading && (
@@ -493,7 +507,7 @@ export default function     CourseLesson({
                                 title={currentLecture?.title || "Quiz"}
                                 quizContent={currentLecture?.content as any}
                                 submission={
-                                    currentLecture?.lectureId && enrollmentProgress?.lectureProgress
+                                    !isRetaking && currentLecture?.lectureId && enrollmentProgress?.lectureProgress
                                         ? enrollmentProgress.lectureProgress.find(
                                             lp => lp.lectureId === currentLecture.lectureId
                                         )?.submissionData?.lastSubmission || null
@@ -504,6 +518,7 @@ export default function     CourseLesson({
                                 isSubmitting={isSubmitting}
                                 onAnswerSelect={handleAnswerSelect}
                                 onSubmit={handleQuizSubmit}
+                                onRetake={handleQuizRetake}
                             />
                         ) : (
                             /* Video Player - Mux with Fallback */
@@ -521,6 +536,7 @@ export default function     CourseLesson({
                                     ref={muxPlayerRef}
                                     src={curVideoUrl}
                                     autoPlay={false}
+                                    title={currentLecture?.title || "Loading..."}
                                     loop={false}
                                     muted={false}
                                     style={{
@@ -546,6 +562,8 @@ export default function     CourseLesson({
                                     disablePictureInPicture={false}
                                     crossOrigin="anonymous"
                                     targetLiveWindow={10}
+                                    
+
                                 >
                                     {/* Add caption track if available and enabled */}
                                     {vttCaptionUrl && (
@@ -553,7 +571,7 @@ export default function     CourseLesson({
                                             kind="subtitles"
                                             src={vttCaptionUrl}
                                             srcLang="en"
-                                            label="English"
+                                            label="On"
                                             default
                                         />
                                     )}

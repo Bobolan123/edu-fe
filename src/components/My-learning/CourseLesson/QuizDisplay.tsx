@@ -26,6 +26,7 @@ interface QuizDisplayProps {
     isSubmitting: boolean;
     onAnswerSelect: (questionId: string, answer: string | number | boolean) => void;
     onSubmit: () => void;
+    onRetake?: () => void;
 }
 
 export default function QuizDisplay({
@@ -37,8 +38,10 @@ export default function QuizDisplay({
     isSubmitting,
     onAnswerSelect,
     onSubmit,
+    onRetake,
 }: QuizDisplayProps) {
     const hasSubmission = !!submission;
+    const hasFailed = quizResult && !quizResult.passed;
 
     return (
         <div className="w-full h-full overflow-auto bg-white p-6 pt-16">
@@ -294,53 +297,47 @@ export default function QuizDisplay({
                 })}
 
                 {/* Quiz Results */}
-                {(quizResult || (hasSubmission && submission)) && (
+                {quizResult && (
                     <Box className={`mb-6 p-4 rounded-lg border-2 ${
-                        (quizResult?.passed ?? submission?.results?.every(r => r.isCorrect))
+                        quizResult.passed
                             ? 'bg-green-50 border-green-500'
                             : 'bg-red-50 border-red-500'
                     }`}>
                         <Box className="flex items-center justify-between mb-3">
                             <Typography variant="h6" className={`font-bold ${
-                                (quizResult?.passed ?? submission?.results?.every(r => r.isCorrect))
+                                quizResult.passed
                                     ? 'text-green-700'
                                     : 'text-red-700'
                             }`}>
-                                {(quizResult?.passed ?? submission?.results?.every(r => r.isCorrect))
+                                {quizResult.passed
                                     ? '✓ Quiz Passed!'
                                     : '✗ Quiz Not Passed'}
                             </Typography>
                             <Typography variant="h5" className={`font-bold ${
-                                (quizResult?.passed ?? submission?.results?.every(r => r.isCorrect))
+                                quizResult.passed
                                     ? 'text-green-700'
                                     : 'text-red-700'
                             }`}>
-                                {quizResult?.percentage ?? Math.round(
-                                    (submission!.results.filter(r => r.isCorrect).length / submission!.results.length) * 100
-                                )}%
+                                {quizResult.percentage}%
                             </Typography>
                         </Box>
                         <Box className="grid grid-cols-3 gap-4 text-sm">
                             <Box>
                                 <Typography variant="caption" className="text-gray-600">Score</Typography>
                                 <Typography variant="body2" className="font-semibold">
-                                    {quizResult?.score ?? submission!.results.reduce((sum, r) => sum + r.points, 0)} / {
-                                        quizResult?.totalPoints ?? submission!.results.length
-                                    } points
+                                    {quizResult.correctAnswers} / {quizResult.totalQuestions} points
                                 </Typography>
                             </Box>
                             <Box>
                                 <Typography variant="caption" className="text-gray-600">Correct</Typography>
                                 <Typography variant="body2" className="font-semibold">
-                                    {quizResult?.correctAnswers ?? submission!.results.filter(r => r.isCorrect).length} / {
-                                        quizResult?.totalQuestions ?? submission!.results.length
-                                    }
+                                    {quizResult.correctAnswers} / {quizResult.totalQuestions}
                                 </Typography>
                             </Box>
                             <Box>
                                 <Typography variant="caption" className="text-gray-600">Status</Typography>
                                 <Typography variant="body2" className="font-semibold">
-                                    {(quizResult?.passed ?? submission?.results?.every(r => r.isCorrect)) ? 'Passed' : 'Failed'}
+                                    {quizResult.passed ? 'Passed' : 'Failed'}
                                 </Typography>
                             </Box>
                         </Box>
@@ -380,11 +377,23 @@ export default function QuizDisplay({
                     </Box>
                 )}
 
-                {/* View Only Notice */}
-                {hasSubmission && (
+                {/* Retake Button for Failed Quizzes */}
+                {hasFailed && onRetake && (
+                    <Box className="mt-6 pt-4 border-t flex justify-center">
+                        <button
+                            onClick={onRetake}
+                            className="px-6 py-2.5 bg-orange-600 text-white font-semibold text-sm rounded hover:bg-orange-700 transition-colors"
+                        >
+                            Retake Quiz
+                        </button>
+                    </Box>
+                )}
+
+                {/* View Only Notice - Only for passed quizzes */}
+                {hasSubmission && !hasFailed && (
                     <Box className="mt-6 pt-4 border-t">
                         <Typography variant="caption" className="text-gray-600 block text-center">
-                            This is your previous submission. To retake the quiz, please contact your instructor.
+                            You have passed this quiz. Great job!
                         </Typography>
                     </Box>
                 )}

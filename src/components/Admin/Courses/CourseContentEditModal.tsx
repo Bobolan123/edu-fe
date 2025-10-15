@@ -111,12 +111,12 @@ export default function CourseContentEditModal({
             await new Promise((resolve) => setTimeout(resolve, 300));
             const updated = localSections.filter((_, i) => i !== sectionIndex);
             setLocalSections(updated);
-            toastService.success("Section deleted successfully");
+            toastService.success("Section removed");
         } catch (error) {
             const errorMessage =
                 error instanceof Error
                     ? error.message
-                    : "Failed to delete section";
+                    : "Failed to remove section";
             toastService.error(errorMessage);
         } finally {
             setDeletingItems((prev) => ({ ...prev, [key]: false }));
@@ -160,12 +160,12 @@ export default function CourseContentEditModal({
             const updated = [...localSections];
             updated[sectionIndex].lectures.splice(lectureIndex, 1);
             setLocalSections(updated);
-            toastService.success("Lecture deleted successfully");
+            toastService.success("Lecture removed");
         } catch (error) {
             const errorMessage =
                 error instanceof Error
                     ? error.message
-                    : "Failed to delete lecture";
+                    : "Failed to remove lecture";
             toastService.error(errorMessage);
         } finally {
             setDeletingItems((prev) => ({ ...prev, [key]: false }));
@@ -253,12 +253,11 @@ export default function CourseContentEditModal({
         setIsSaving(true);
         try {
             // Step 1: Save course content structure
+            // Backend automatically deletes sections/lectures not included in payload
             const savedSections = await saveCourseContent(course.id, localSections);
 
             // Step 2: Upload pending videos (for new lectures)
             if (pendingVideoUploads.size > 0) {
-                toastService.info(`Uploading ${pendingVideoUploads.size} video(s)...`);
-
                 // Create mapping from temp IDs to real IDs
                 const idMapping = new Map<string, { realId: string, sectionId: string }>();
 
@@ -290,9 +289,9 @@ export default function CourseContentEditModal({
                 }
 
                 await Promise.all(uploadPromises);
-                setPendingVideoUploads(new Map()); // Clear pending uploads
-                toastService.success("Videos uploaded successfully!");
+                setPendingVideoUploads(new Map());
             }
+
 
             // Call onSuccess callback and close modal
             onSuccess?.();

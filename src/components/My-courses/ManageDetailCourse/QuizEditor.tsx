@@ -53,7 +53,6 @@ export default function QuizEditor({ quizContent, onChange }: QuizEditorProps) {
             options: ["", "", "", ""],
             correctAnswer: 0,
             explanation: "",
-            points: 1,
         };
         onChange({
             ...quizContent,
@@ -173,23 +172,6 @@ export default function QuizEditor({ quizContent, onChange }: QuizEditorProps) {
                             })
                         }
                         InputProps={{ inputProps: { min: 0, max: 100 } }}
-                        sx={{
-                            flex: 1,
-                            "& .MuiOutlinedInput-root": { borderRadius: "12px" },
-                        }}
-                    />
-                    <TextField
-                        label="Time Limit (minutes)"
-                        type="number"
-                        size="small"
-                        value={quizContent.timeLimit || ""}
-                        onChange={(e) =>
-                            onChange({
-                                ...quizContent,
-                                timeLimit: e.target.value ? Number(e.target.value) : undefined,
-                            })
-                        }
-                        InputProps={{ inputProps: { min: 1 } }}
                         sx={{
                             flex: 1,
                             "& .MuiOutlinedInput-root": { borderRadius: "12px" },
@@ -439,27 +421,6 @@ export default function QuizEditor({ quizContent, onChange }: QuizEditorProps) {
                                         }}
                                     />
                                 )}
-
-                                {/* Points */}
-                                <TextField
-                                    type="number"
-                                    size="small"
-                                    label="Points"
-                                    value={question.points}
-                                    onChange={(e) =>
-                                        handleQuestionChange(
-                                            question.id,
-                                            "points",
-                                            Number(e.target.value)
-                                        )
-                                    }
-                                    InputProps={{ inputProps: { min: 1 } }}
-                                    sx={{
-                                        mb: 2,
-                                        width: "150px",
-                                        "& .MuiOutlinedInput-root": { borderRadius: "12px" },
-                                    }}
-                                />
 
                                 {/* Explanation */}
                                 <TextField
