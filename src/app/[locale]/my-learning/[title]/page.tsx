@@ -14,7 +14,7 @@ import CourseLearningNavbar from "@/components/My-learning/CourseLesson/CourseLe
 import { IReviewDistribution } from "../../../../../types/resData";
 import { auth } from "@/auth";
 import { getAllReviews, getUserReviewForCourse, getReviewDistribution } from "@/actions/reviewsAction";
-import { getCourseContent, getLectureCaptions } from "@/actions/courseContentAction";
+import { getCourseContent } from "@/actions/courseContentAction";
 import { getEnrollmentProgress } from "@/actions/enrollmentAction";
 
 export type EnrollmentProgress = {
@@ -54,12 +54,6 @@ export default async function CourseDetailPage({
 
     const resUserReview = await getUserReviewForCourse(session?.user?.id!, id);
 
-    // Fetch captions for the first lecture server-side
-    const firstLecture = resContent?.sections?.[0]?.lectures?.[0];
-    const initialCaptionUrl = firstLecture?.id
-        ? await getLectureCaptions(firstLecture.id, 'srt')
-        : null;
-
     return (
         <div className="min-h-screen">
             <CourseLearningNavbar
@@ -82,7 +76,6 @@ export default async function CourseDetailPage({
                 reviewDistribution={reviewDistribution}
                 resUserReviews={resUserReviews}
                 userReview={resUserReview}
-                initialCaptionUrl={initialCaptionUrl}
             />
         </div>
     );

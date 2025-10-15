@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -9,13 +9,14 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import MuxPlayer from "@mux/mux-player-react";
-import { getVideoType, getYouTubeEmbedUrl } from "../../utils/utils";
+import { getVideoType, getYouTubeEmbedUrl, isSrtFile, convertSrtUrlToVttBlob } from "../../utils/utils";
 
 interface VideoPreviewModalProps {
     open: boolean;
     onClose: () => void;
     videoUrl: string | null | undefined;
     title?: string;
+    captionUrl?: string | null;
 }
 
 export default function VideoPreviewModal({
@@ -23,8 +24,69 @@ export default function VideoPreviewModal({
     onClose,
     videoUrl,
     title,
+    captionUrl,
 }: VideoPreviewModalProps) {
     const videoType = getVideoType(videoUrl);
+    const muxPlayerRef = useRef<any>(null);
+    const [vttCaptionUrl, setVttCaptionUrl] = useState<string | null>(null);
+
+    // Convert SRT to VTT if needed
+    useEffect(() => {
+        let blobUrl: string | null = null;
+
+        const convertCaption = async () => {
+            if (!captionUrl) {
+                setVttCaptionUrl(null);
+                return;
+            }
+
+            // If it's an SRT file, convert it to VTT
+            if (isSrtFile(captionUrl)) {
+                const convertedUrl = await convertSrtUrlToVttBlob(captionUrl);
+                if (convertedUrl) {
+                    blobUrl = convertedUrl;
+                    setVttCaptionUrl(convertedUrl);
+                } else {
+                    // Conversion failed, try using original URL anyway
+                    setVttCaptionUrl(captionUrl);
+                }
+            } else {
+                // Already VTT or other format, use as-is
+                setVttCaptionUrl(captionUrl);
+            }
+        };
+
+        convertCaption();
+
+        // Cleanup blob URL when component unmounts or captionUrl changes
+        return () => {
+            if (blobUrl) {
+                URL.revokeObjectURL(blobUrl);
+            }
+        };
+    }, [captionUrl]);
+
+    // Enable captions by default when available
+    useEffect(() => {
+        const enableCaptions = () => {
+            if (muxPlayerRef.current && vttCaptionUrl) {
+                const video = muxPlayerRef.current.media || muxPlayerRef.current;
+                if (video?.textTracks && video.textTracks.length > 0) {
+                    for (let i = 0; i < video.textTracks.length; i++) {
+                        const track = video.textTracks[i];
+                        if (track.kind === 'subtitles') {
+                            track.mode = 'showing';
+                        }
+                    }
+                }
+            }
+        };
+
+        enableCaptions();
+        const timer = setTimeout(enableCaptions, 1000);
+
+        return () => clearTimeout(timer);
+    }, [vttCaptionUrl, videoUrl]);
     
     const renderVideo = () => {
         if (!videoUrl) return null;
@@ -52,6 +114,7 @@ export default function VideoPreviewModal({
             case 'cloudinary':
                 return (
                     <MuxPlayer
+                        ref={muxPlayerRef}
                         src={videoUrl}
                         style={{
                             width: '100%',
@@ -60,7 +123,17 @@ export default function VideoPreviewModal({
                         }}
                         autoPlay
                         muted
-                    />
+                        crossOrigin="anonymous"
+                    >
+                        {vttCaptionUrl && (
+                            <track
+                                kind="subtitles"
+                                src={vttCaptionUrl}
+                                srcLang="en"
+                                label="English"
+                            />
+                        )}
+                    </MuxPlayer>
                 );
                 
             default:

@@ -16,6 +16,7 @@ import {
     SubtitlesOff as SubtitlesOffIcon,
 } from "@mui/icons-material";
 import { ICourseLecture, IVideoQuality } from "../../../types/entities";
+import { isSrtFile, convertSrtUrlToVttBlob } from "@/utils/utils";
 
 interface VideoPlayerWithQualityProps {
     lecture: ICourseLecture;
@@ -42,6 +43,7 @@ const VideoPlayerWithQuality = ({
     const [selectedQuality, setSelectedQuality] = useState<IVideoQuality | null>(null);
     const [qualityMenuAnchor, setQualityMenuAnchor] = useState<null | HTMLElement>(null);
     const [captionsEnabled, setCaptionsEnabled] = useState(false);
+    const [vttCaptionUrl, setVttCaptionUrl] = useState<string | null>(null);
 
     // Initialize with highest quality video
     useEffect(() => {
@@ -54,6 +56,42 @@ const VideoPlayerWithQuality = ({
             setSelectedQuality(sortedQualities[0]);
         }
     }, [lecture]);
+
+    // Convert SRT to VTT if needed
+    useEffect(() => {
+        let blobUrl: string | null = null;
+
+        const convertCaption = async () => {
+            if (!captionUrl) {
+                setVttCaptionUrl(null);
+                return;
+            }
+
+            // If it's an SRT file, convert it to VTT
+            if (isSrtFile(captionUrl)) {
+                const convertedUrl = await convertSrtUrlToVttBlob(captionUrl);
+                if (convertedUrl) {
+                    blobUrl = convertedUrl;
+                    setVttCaptionUrl(convertedUrl);
+                } else {
+                    // Conversion failed, try using original URL anyway
+                    setVttCaptionUrl(captionUrl);
+                }
+            } else {
+                // Already VTT or other format, use as-is
+                setVttCaptionUrl(captionUrl);
+            }
+        };
+
+        convertCaption();
+
+        // Cleanup blob URL when component unmounts or captionUrl changes
+        return () => {
+            if (blobUrl) {
+                URL.revokeObjectURL(blobUrl);
+            }
+        };
+    }, [captionUrl]);
 
 
     const handleQualityChange = (quality: IVideoQuality) => {
@@ -122,11 +160,12 @@ const VideoPlayerWithQuality = ({
                 onEnded={handleVideoEnd}
                 className="w-full h-auto rounded-lg"
                 style={{ maxHeight: '70vh' }}
+                crossOrigin="anonymous"
             >
-                {captionsAvailable && captionUrl && (
+                {captionsAvailable && vttCaptionUrl && (
                     <track
                         kind="subtitles"
-                        src={captionUrl}
+                        src={vttCaptionUrl}
                         srcLang="en"
                         label="English"
                         default={captionsEnabled}

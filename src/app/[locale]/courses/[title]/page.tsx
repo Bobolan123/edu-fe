@@ -5,7 +5,7 @@ import {
     ICourseContent,
 } from "../../../../../types/entities";
 import { getCourseById } from "@/actions/coursesAction";
-import { getCourseContent } from "@/actions/courseContentAction";
+import { getCourseContent, getLectureCaptions } from "@/actions/courseContentAction";
 import { extractIdFromSlug } from "@/utils/utils";
 import { notFound } from "next/navigation";
 
@@ -19,20 +19,27 @@ export default async function CourseDetailPage({
     searchParams,
 }: Params) {
     const { title } = await params;
-    
+
     const courseId = extractIdFromSlug(title);
-    
+
     if (!courseId) {
-        notFound(); 
+        notFound();
     }
-    
+
     const course = await getCourseById(courseId);
     const courseContent = await getCourseContent(Number(courseId));
+
+    // Fetch captions for the first lecture server-side (if available)
+    const firstLecture = courseContent?.sections?.[0]?.lectures?.[0];
+    const firstLectureCaptionUrl = firstLecture?.id
+        ? await getLectureCaptions(firstLecture.id, 'srt')
+        : null;
 
     return (
         <CourseDetail
             course={course}
             courseContent={courseContent || undefined}
+            firstLectureCaptionUrl={firstLectureCaptionUrl}
         />
     );
 }

@@ -72,6 +72,7 @@ import { useRouter } from "next/navigation";
 import { EnrollmentProgress } from "@/app/[locale]/my-learning/[title]/page";
 import QuizDisplay from "./QuizDisplay";
 import ChatBot from "./Chatbot";
+import { isSrtFile, convertSrtUrlToVttBlob } from "@/utils/utils";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
@@ -80,7 +81,6 @@ interface ICourseLesson {
     enrollmentProgress?: EnrollmentProgress;
     resUserReviews?: IModelPaginate<IReview>;
     userReview?: IReview;
-    initialCaptionUrl?: string | null;
 }
 
 export default function     CourseLesson({
@@ -90,7 +90,6 @@ export default function     CourseLesson({
     enrollmentProgress,
     resUserReviews,
     userReview,
-    initialCaptionUrl,
 }: ICourseLesson) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
@@ -111,8 +110,9 @@ export default function     CourseLesson({
     const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(
         null
     );
-    const [captionsEnabled, setCaptionsEnabled] = useState(false);
-    const [captionUrl, setCaptionUrl] = useState<string | null>(initialCaptionUrl || null);
+    const [captionsEnabled, setCaptionsEnabled] = useState(true);
+    const [captionUrl, setCaptionUrl] = useState<string | null>(null);
+    const [vttCaptionUrl, setVttCaptionUrl] = useState<string | null>(null);
     const [quizAnswers, setQuizAnswers] = useState<Record<string, string | number | boolean>>({});
     const [quizResult, setQuizResult] = useState<any>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -165,6 +165,42 @@ export default function     CourseLesson({
             setIsSubmitting(false);
         }
     };
+
+    // Convert SRT to VTT if needed
+    useEffect(() => {
+        let blobUrl: string | null = null;
+
+        const convertCaption = async () => {
+            if (!captionUrl) {
+                setVttCaptionUrl(null);
+                return;
+            }
+
+            // If it's an SRT file, convert it to VTT
+            if (isSrtFile(captionUrl)) {
+                const convertedUrl = await convertSrtUrlToVttBlob(captionUrl);
+                if (convertedUrl) {
+                    blobUrl = convertedUrl;
+                    setVttCaptionUrl(convertedUrl);
+                } else {
+                    // Conversion failed, try using original URL anyway
+                    setVttCaptionUrl(captionUrl);
+                }
+            } else {
+                // Already VTT or other format, use as-is
+                setVttCaptionUrl(captionUrl);
+            }
+        };
+
+        convertCaption();
+
+        // Cleanup blob URL when component unmounts or captionUrl changes
+        return () => {
+            if (blobUrl) {
+                URL.revokeObjectURL(blobUrl);
+            }
+        };
+    }, [captionUrl]);
 
     const isLectureCompleted = (lectureId: string): boolean => {
         if (!enrollmentProgress?.lectureProgress) return false;
@@ -236,6 +272,13 @@ export default function     CourseLesson({
                     setQuizAnswers(previousAnswers);
                 }
             }
+
+            // Fetch captions for the first lecture client-side (only for video lectures)
+            if (firstLecture.id && firstLecture.contentType === 'video') {
+                getLectureCaptions(firstLecture.id, 'srt').then(url => {
+                    setCaptionUrl(url);
+                });
+            }
         }
     }, [firstLecture]);
 
@@ -258,6 +301,28 @@ export default function     CourseLesson({
             }
         }
     }, [enrollmentProgress, currentLecture?.lectureId]);
+
+    // Control caption display programmatically
+    useEffect(() => {
+        const enableCaptions = () => {
+            if (muxPlayerRef.current) {
+                const video = muxPlayerRef.current.media || muxPlayerRef.current;
+                if (video?.textTracks && video.textTracks.length > 0) {
+                    for (let i = 0; i < video.textTracks.length; i++) {
+                        const track = video.textTracks[i];
+                        if (track.kind === 'subtitles') {
+                            track.mode = captionsEnabled ? 'showing' : 'hidden';
+                        }
+                    }
+                }
+            }
+        };
+
+        enableCaptions();
+        const timer = setTimeout(enableCaptions, 1000);
+
+        return () => clearTimeout(timer);
+    }, [captionsEnabled, vttCaptionUrl, curVideoUrl]);
 
     const handleLectureChange = useCallback(
         async (lecture: any) => {
@@ -331,13 +396,25 @@ export default function     CourseLesson({
     };
 
     const handleVideoCanPlay = () => {
-        console.log("Video can play");
         setIsVideoLoading(false);
 
         // Clear loading timeout since video loaded successfully
         if (loadingTimeout) {
             clearTimeout(loadingTimeout);
             setLoadingTimeout(null);
+        }
+
+        // Enable captions when video is ready
+        if (muxPlayerRef.current && vttCaptionUrl) {
+            const video = muxPlayerRef.current.media || muxPlayerRef.current;
+            if (video?.textTracks && video.textTracks.length > 0) {
+                for (let i = 0; i < video.textTracks.length; i++) {
+                    const track = video.textTracks[i];
+                    if (track.kind === 'subtitles') {
+                        track.mode = captionsEnabled ? 'showing' : 'hidden';
+                    }
+                }
+            }
         }
     };
 
@@ -371,7 +448,7 @@ export default function     CourseLesson({
                             {/* Caption Controls - only for videos */}
                             {currentLecture?.contentType === 'video' && (
                                 <Box className="flex gap-2">
-                                    {captionUrl && (
+                                    {vttCaptionUrl && (
                                         <Tooltip title={captionsEnabled ? "Hide Captions" : "Show Captions"}>
                                             <IconButton
                                                 onClick={() => setCaptionsEnabled(!captionsEnabled)}
@@ -383,7 +460,7 @@ export default function     CourseLesson({
                                         </Tooltip>
                                     )}
 
-                                    {!captionUrl && (
+                                    {!vttCaptionUrl && (
                                         <Box className="bg-black/60 backdrop-blur-sm rounded px-3 py-1">
                                             <Typography variant="caption" className="text-white opacity-75">
                                                 No Captions
@@ -471,10 +548,10 @@ export default function     CourseLesson({
                                     targetLiveWindow={10}
                                 >
                                     {/* Add caption track if available and enabled */}
-                                    {captionsEnabled && captionUrl && (
+                                    {vttCaptionUrl && (
                                         <track
                                             kind="subtitles"
-                                            src={captionUrl}
+                                            src={vttCaptionUrl}
                                             srcLang="en"
                                             label="English"
                                             default

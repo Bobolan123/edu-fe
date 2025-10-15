@@ -141,10 +141,17 @@ export const uploadVideoToLecture = async (
     return res;
 };
 
+// Caption Response Types
+interface ICaptionData {
+    srt?: string;
+    vtt?: string;
+    transcript?: string;
+}
+
 // Get Lecture Captions
-export const getLectureCaptions = async (lectureId: string, format: string = 'srt') => {
+export const getLectureCaptions = async (lectureId: string, format: 'srt' | 'transcript') => {
     try {
-        const res = await sendRequest<IBackendRes<{ captionUrl: string }>>({
+        const res = await sendRequest<IBackendRes<ICaptionData>>({
             method: "GET",
             url: `${process.env.NEXT_PUBLIC_SERVER}/course-content/lecture/${lectureId}/captions`,
             nextOption: {
@@ -153,8 +160,9 @@ export const getLectureCaptions = async (lectureId: string, format: string = 'sr
                 },
             },
         });
-
-        return res?.data?.captionUrl || null;
+        console.log(res?.data?.[format])
+        // Return the requested format URL directly from data
+        return res?.data?.[format] || null;
     } catch (error) {
         return null;
     }
@@ -249,7 +257,6 @@ export const submitQuiz = async (
     lectureId: string,
     answers: Array<{ questionId: string; answer: string | number | boolean }>
 ) => {
-    console.log("enrollmentId", enrollmentId, "answers", answers, "lectureId", lectureId)
     const access_token = await getAccessToken();
     const res = await sendRequest<IBackendRes<{
         score: number;

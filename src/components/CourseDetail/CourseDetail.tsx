@@ -39,11 +39,13 @@ import Link from "next/link";
 interface ICourseDetailProps {
     course: ICourse;
     courseContent?: ICourseContent;
+    firstLectureCaptionUrl?: string | null;
 }
 
 export default function CourseDetail({
     course,
     courseContent,
+    firstLectureCaptionUrl,
 }: ICourseDetailProps) {
     const { data } = useSession();
     const t = useTranslations("CourseDetail");
@@ -529,6 +531,7 @@ export default function CourseDetail({
                 onClose={() => setPreviewModalOpen(false)}
                 videoUrl={course?.preview_url}
                 title={course?.title}
+                captionUrl={firstLectureCaptionUrl}
             />
         </div>
     );

@@ -141,26 +141,81 @@ export function getYouTubeEmbedUrl(url: string): string | null {
     try {
         const parsedUrl = new URL(url);
         const hostname = parsedUrl.hostname.toLowerCase();
-        
+
         if (hostname === 'youtube') {
             const videoId = parsedUrl.pathname.slice(1);
             return `https://www.youtube.com/embed/${videoId}`;
         }
-        
+
         if (hostname.includes('youtube.com')) {
             const videoId = parsedUrl.searchParams.get('v');
             if (videoId) {
                 return `https://www.youtube.com/embed/${videoId}`;
             }
-            
+
             if (parsedUrl.pathname.includes('/embed/')) {
                 return url;
             }
         }
-        
+
         return null;
     } catch (error) {
         return null;
     }
 }
-  
+
+/**
+ * Converts SRT subtitle format to WebVTT format
+ * @param srtContent - The SRT file content as a string
+ * @returns The converted VTT content
+ */
+export function convertSrtToVtt(srtContent: string): string {
+    // Add WEBVTT header
+    let vttContent = 'WEBVTT\n\n';
+
+    // Replace comma with dot in timestamps (00:00:01,000 -> 00:00:01.000)
+    vttContent += srtContent.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+
+    return vttContent;
+}
+
+/**
+ * Checks if a URL points to an SRT file
+ * @param url - The caption file URL
+ * @returns True if the URL contains .srt (before query parameters)
+ */
+export function isSrtFile(url: string | null | undefined): boolean {
+    if (!url) return false;
+
+    // Remove query parameters and check if it ends with .srt
+    const urlWithoutQuery = url.split('?')[0];
+    return urlWithoutQuery.toLowerCase().endsWith('.srt');
+}
+
+/**
+ * Fetches and converts an SRT file to VTT format, returning a blob URL
+ * @param srtUrl - The URL of the SRT file
+ * @returns A blob URL for the converted VTT content, or null on error
+ */
+export async function convertSrtUrlToVttBlob(srtUrl: string): Promise<string | null> {
+    try {
+        const response = await fetch(srtUrl);
+
+        if (!response.ok) {
+            console.error('[convertSrtUrlToVttBlob] Failed to fetch SRT file:', response.status);
+            return null;
+        }
+
+        const srtContent = await response.text();
+        const vttContent = convertSrtToVtt(srtContent);
+
+        // Create a blob URL for the VTT content
+        const blob = new Blob([vttContent], { type: 'text/vtt' });
+        const blobUrl = URL.createObjectURL(blob);
+
+        return blobUrl;
+    } catch (error) {
+        console.error('[convertSrtUrlToVttBlob] Error converting SRT to VTT:', error);
+        return null;
+    }
+}
