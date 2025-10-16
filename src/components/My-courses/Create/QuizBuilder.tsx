@@ -139,7 +139,7 @@ export default function QuizBuilder({ quizContent, onQuizChange }: QuizBuilderPr
                     <Typography variant="h6" gutterBottom>
                         Quiz Settings
                     </Typography>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextField
                             label="Passing Score (%)"
                             type="number"
@@ -156,16 +156,12 @@ export default function QuizBuilder({ quizContent, onQuizChange }: QuizBuilderPr
                             inputProps={{ min: 1 }}
                             helperText="Leave empty for no time limit"
                         />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={quizContent.allowMultipleAttempts}
-                                    onChange={(e) => updateQuizSettings('allowMultipleAttempts', e.target.checked)}
-                                />
-                            }
-                            label="Allow Multiple Attempts"
-                        />
                     </div>
+                    <Box mt={2}>
+                        <Typography variant="caption" color="text.secondary">
+                            Note: Quizzes allow retakes only when failed. Students can retake until they pass.
+                        </Typography>
+                    </Box>
                     <Box mt={2}>
                         <Typography variant="body2" color="text.secondary">
                             Total Questions: {quizContent.questions.length} | Total Points: {getTotalPoints()}

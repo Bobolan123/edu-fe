@@ -326,7 +326,7 @@ const CourseContentTab: React.FC<ICourseContentTabProps> = ({
                                                                     />
                                                                 )}
                                                                 <Chip
-                                                                    label={quizContent.allowMultipleAttempts ? "Multiple Attempts" : "Single Attempt"}
+                                                                    label="Retake on Fail"
                                                                     size="small"
                                                                     className="bg-white text-purple-700 font-medium"
                                                                 />

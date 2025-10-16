@@ -177,21 +177,11 @@ export default function QuizEditor({ quizContent, onChange }: QuizEditorProps) {
                             "& .MuiOutlinedInput-root": { borderRadius: "12px" },
                         }}
                     />
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={quizContent.allowMultipleAttempts ?? true}
-                                onChange={(e) =>
-                                    onChange({
-                                        ...quizContent,
-                                        allowMultipleAttempts: e.target.checked,
-                                    })
-                                }
-                            />
-                        }
-                        label="Multiple Attempts"
-                        sx={{ flex: 1 }}
-                    />
+                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="caption" color="text.secondary">
+                            Quizzes allow retakes only when failed. Students can retake until they pass.
+                        </Typography>
+                    </Box>
                 </Stack>
             </Paper>
 

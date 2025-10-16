@@ -123,8 +123,7 @@ export default function ManageCourseContentModal({
                   }
                 : {
                     questions: [],
-                    passingScore: 70,
-                    allowMultipleAttempts: true
+                    passingScore: 70
                   }
         };
         updated[sectionIndex].lectures.push(newLecture);

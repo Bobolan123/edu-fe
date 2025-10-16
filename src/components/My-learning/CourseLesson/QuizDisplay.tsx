@@ -42,6 +42,7 @@ export default function QuizDisplay({
 }: QuizDisplayProps) {
     const hasSubmission = !!submission;
     const hasFailed = quizResult && !quizResult.passed;
+    console.log("-------adfsadf",submission)
 
     return (
         <div className="w-full h-full overflow-auto bg-white p-6 pt-16">
@@ -60,14 +61,6 @@ export default function QuizDisplay({
                     <Typography variant="caption">
                         Passing grade: {quizContent.passingScore}%
                     </Typography>
-                    {quizContent.timeLimit && (
-                        <>
-                            <Typography variant="caption">•</Typography>
-                            <Typography variant="caption">
-                                Time limit: {quizContent.timeLimit} min
-                            </Typography>
-                        </>
-                    )}
                 </Box>
 
                 {/* Submission Notice */}
@@ -274,13 +267,11 @@ export default function QuizDisplay({
                                         type="text"
                                         value={selectedAnswer as string || ''}
                                         onChange={(e) => !hasSubmission && onAnswerSelect(questionId, e.target.value)}
-                                        placeholder="Enter your answer (for practice - not graded)"
+                                        placeholder="Enter your answer "
                                         disabled={hasSubmission}
                                         className="w-full p-3 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none text-sm bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                     />
-                                    <Typography variant="caption" className="text-gray-500 mt-1 block">
-                                        Note: Fill-in-the-blank questions are for practice and won't affect your score.
-                                    </Typography>
+                                  
                                 </Box>
                             )}
 
@@ -344,8 +335,8 @@ export default function QuizDisplay({
                     </Box>
                 )}
 
-                {/* Submit Section - Only show if no submission exists */}
-                {!hasSubmission && (
+                {/* Submit Section - Only show if no submission exists and no result yet */}
+                {!hasSubmission && !quizResult && (
                     <Box className="mt-6 pt-4 border-t">
                         <Box className="flex items-center justify-between">
                             <Typography variant="caption" className="text-gray-600">

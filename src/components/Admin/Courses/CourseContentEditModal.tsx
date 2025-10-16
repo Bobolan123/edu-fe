@@ -140,8 +140,7 @@ export default function CourseContentEditModal({
                   }
                 : {
                     questions: [],
-                    passingScore: 70,
-                    allowMultipleAttempts: true
+                    passingScore: 70
                   }
         };
         updated[sectionIndex].lectures.push(newLecture);

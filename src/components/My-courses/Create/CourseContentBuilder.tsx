@@ -138,7 +138,6 @@ export default function CourseContentBuilder({
                 questions: [],
                 passingScore: 70,
                 timeLimit: undefined,
-                allowMultipleAttempts: true
               };
 
         const updatedContent = {
@@ -222,7 +221,6 @@ export default function CourseContentBuilder({
                 questions: [],
                 passingScore: 70,
                 timeLimit: undefined,
-                allowMultipleAttempts: true
               };
 
         const updatedContent = {

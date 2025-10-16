@@ -53,18 +53,13 @@ import {
     ExpandMore,
     Close,
     PlayArrow,
-    Pause,
-    VolumeUp,
-    Fullscreen,
-    Speed,
 } from "@mui/icons-material";
-import { Bot, Subtitles, X } from "lucide-react";
+import { Bot} from "lucide-react";
 import { ICourse, ICourseContent, IEnrollment, ICourseLecture, IReview } from "../../../../types/entities";
 import CourseOverview from "./Overview";
 import CourseReviews from "./CourseReviews";
 import { IReviewDistribution } from "../../../../types/resData";
 
-import { useSession } from "next-auth/react";
 import { getLectureCaptions, submitQuiz } from "@/actions/courseContentAction";
 import { markLectureAsCompleted } from "@/actions/enrollmentAction";
 import { toast } from "react-toastify";
@@ -216,9 +211,11 @@ export default function     CourseLesson({
 
     const isLectureCompleted = (lectureId: string): boolean => {
         if (!enrollmentProgress?.lectureProgress) return false;
-        return enrollmentProgress.lectureProgress.some(
+        const lectureProgress = enrollmentProgress.lectureProgress.find(
             progressLecture => progressLecture.lectureId === lectureId
         );
+        // Tri-state logic: true = passed, false = failed, null = not attempted
+        return lectureProgress?.isCompleted === true;
     };
 
     // Function to handle lecture completion toggle
@@ -275,7 +272,15 @@ export default function     CourseLesson({
                 );
 
                 if (lectureProgressData?.submissionData?.lastSubmission) {
-                    setQuizResult(lectureProgressData.submissionData.lastSubmission);
+                    // Construct full quiz result with submission data + summary data
+                    const fullQuizResult = {
+                        ...lectureProgressData.submissionData.lastSubmission,
+                        passed: lectureProgressData.submissionData.passed,
+                        percentage: lectureProgressData.submissionData.percentage,
+                        correctAnswers: lectureProgressData.submissionData.score,
+                        totalQuestions: lectureProgressData.submissionData.lastSubmission.results.length,
+                    };
+                    setQuizResult(fullQuizResult);
 
                     const previousAnswers: Record<string, string | number | boolean> = {};
                     lectureProgressData.submissionData.lastSubmission.answers.forEach((ans: any) => {
@@ -306,7 +311,15 @@ export default function     CourseLesson({
 
             // Update quiz result if submission data exists
             if (lectureProgressData?.submissionData?.lastSubmission) {
-                setQuizResult(lectureProgressData.submissionData.lastSubmission);
+                // Construct full quiz result with submission data + summary data
+                const fullQuizResult = {
+                    ...lectureProgressData.submissionData.lastSubmission,
+                    passed: lectureProgressData.submissionData.passed,
+                    percentage: lectureProgressData.submissionData.percentage,
+                    correctAnswers: lectureProgressData.submissionData.score,
+                    totalQuestions: lectureProgressData.submissionData.lastSubmission.results.length,
+                };
+                setQuizResult(fullQuizResult);
 
                 const previousAnswers: Record<string, string | number | boolean> = {};
                 lectureProgressData.submissionData.lastSubmission.answers.forEach((ans: any) => {
@@ -378,8 +391,15 @@ export default function     CourseLesson({
                     );
 
                     if (lectureProgressData?.submissionData?.lastSubmission) {
-                        // Set the previous quiz result
-                        setQuizResult(lectureProgressData.submissionData.lastSubmission);
+                        // Construct full quiz result with submission data + summary data
+                        const fullQuizResult = {
+                            ...lectureProgressData.submissionData.lastSubmission,
+                            passed: lectureProgressData.submissionData.passed,
+                            percentage: lectureProgressData.submissionData.percentage,
+                            correctAnswers: lectureProgressData.submissionData.score,
+                            totalQuestions: lectureProgressData.submissionData.lastSubmission.results.length,
+                        };
+                        setQuizResult(fullQuizResult);
 
                         // Populate answers from previous submission
                         const previousAnswers: Record<string, string | number | boolean> = {};

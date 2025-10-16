@@ -194,8 +194,7 @@ export interface IProgressUpdate {
 export interface IProgressResponse {
     id: string;
     watchTimeSeconds: number;
-    isCompleted: boolean;
-    completedAt?: Date;
+    isCompleted: boolean | null;
 }
 
 // Quiz Submission Interface - matches backend QuizSubmission
@@ -204,7 +203,6 @@ export interface IQuizSubmission {
         questionId: string;
         answer: string | number | boolean;
     }>;
-    submittedAt: Date;
     results: Array<{
         questionId: string;
         isCorrect: boolean;
@@ -222,8 +220,7 @@ export interface ILectureProgress {
     courseId: number;
     lectureId: string;
     lecture?: ICourseLecture;
-    isCompleted: boolean;
-    completedAt: Date | null;
+    isCompleted: boolean | null;
     watchTimeSeconds: number;
     lastPositionSeconds: number | null;
     submissionData: {
@@ -232,7 +229,6 @@ export interface ILectureProgress {
         percentage?: number;
         passed?: boolean;
         lastSubmission?: IQuizSubmission;
-        completedAt?: Date;
     } | null;
     createdAt: Date;
     updatedAt: Date;
@@ -338,7 +334,6 @@ export interface QuizContent {
     questions: QuizQuestion[];
     passingScore: number;
     timeLimit?: number;
-    allowMultipleAttempts: boolean;
 }
 
 // Quiz Question Interface
