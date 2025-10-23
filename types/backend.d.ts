@@ -46,5 +46,7 @@ declare global {
         access_token: string;
         permissions: IPermission[];
         avatar_url: string;
+        refresh_token:string;
+        expires_at:number
     }
 }

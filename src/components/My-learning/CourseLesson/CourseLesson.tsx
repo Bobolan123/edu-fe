@@ -762,7 +762,7 @@ export default function     CourseLesson({
                                                         variant="caption"
                                                         className="text-gray-500 mt-1"
                                                     >
-                                                        Video 
+                                                        {lecture.contentType==="video"?"Video": "Quiz"}
                                                     </Typography>
                                                 </div>
 

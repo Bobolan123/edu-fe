@@ -96,3 +96,13 @@ export const fetchChangePassword = async (
     });
     return res;
 };
+
+//Refresh Token
+export const fetchRefreshToken = async (refreshToken: string) => {
+    const res = await sendRequest<IBackendRes<ILogin>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/auth/refresh`,
+        body: { refresh_token: refreshToken },
+    });
+    return res;
+};
