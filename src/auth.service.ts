@@ -23,6 +23,7 @@ export const fetchSignIn = async (email: string, password: string) => {
             email,
             password,
         },
+        useCredentials: true,
     });
     return res;
 };
@@ -36,6 +37,7 @@ export const fetchSignInGoogle = async (email: string, name: string, googleId: s
             name,
             googleId,
         },
+        useCredentials: true,
     });
     return res;
 };
@@ -98,11 +100,12 @@ export const fetchChangePassword = async (
 };
 
 //Refresh Token
-export const fetchRefreshToken = async (refreshToken: string) => {
+export const fetchRefreshToken = async (refreshToken?: string) => {
     const res = await sendRequest<IBackendRes<ILogin>>({
         method: "POST",
         url: `${process.env.NEXT_PUBLIC_SERVER}/auth/refresh`,
-        body: { refresh_token: refreshToken },
+        body: refreshToken ? { refresh_token: refreshToken } : undefined,
+        useCredentials: true, // Must include credentials to send refresh_token cookie
     });
     return res;
 };

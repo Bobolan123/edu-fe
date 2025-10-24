@@ -16,7 +16,26 @@ export default async function HomePage() {
     });
     const categories = await getCategories({ page: 1, limit: 10 });
 
+    const a = await fetch(`${process.env.NEXT_PUBLIC_SERVER}/auth/login`,{
+        method:"POST",
+        body: JSON.stringify({
+            email:"bobolan12312@gmail.com",
+            password:"123",
+        }),
+        credentials:'include'
+    })
 
+    console.log(await a.json())
+    const res = await sendRequest<IBackendRes<ILogin>>({
+        method: "POST",
+        url: `${process.env.NEXT_PUBLIC_SERVER}/auth/login`,
+        body: {
+            email:"bobolan12312@gmail.com",
+            password:"123",
+        },
+        useCredentials:true
+    });
+    console.log(res)
     return (
         <div>
             <HeroSection />

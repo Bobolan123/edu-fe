@@ -8,8 +8,9 @@ interface IUser {
     email: string;
     isVerify: boolean;
     role: string;
-    access_token:string;
+    access_token: string;
     refresh_token: string;
+    expires_at: number;
     permissions: IPermission[];
     avatar_url?: string | null;
 }
