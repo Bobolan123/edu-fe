@@ -136,10 +136,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                                 refresh_token: res.data.refresh_token,
                                 expires_at: res.data.expires_at,
                             };
+                        } else {
+                            console.error("Failed to refresh token, invalidating session");
+                            return null as any;
                         }
                     } catch (error) {
                         console.error("Error refreshing token:", error);
-                        // Return existing token, user might need to re-login
+                        return null as any;
                     }
                 }
             }

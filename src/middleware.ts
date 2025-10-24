@@ -20,7 +20,7 @@ const pages = {
 };
 
 const authPages = ["/login", "/signup", "/admin/login"];
-const protectedPages: string[] = [];
+const protectedPages: string[] = ["/my-learning", "/my-learning/*"];
 const adminPages = ["/admin", "/admin/*"];
 const adminAuthPages = ["/admin/login"];
 const instructorPages = ["/my-courses", "/my-courses/*"];
