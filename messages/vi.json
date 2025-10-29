@@ -396,6 +396,7 @@
         "my_learning": "Khóa Học Của Tôi",
         "my_activity": "Hoạt Động Của Tôi",
         "my_courses": "Quản Lý Khóa Học",
+        "support_inbox": "Câu Hỏi Học Viên",
         "logout": "Đăng Xuất"
     },
     "LocaleSwitcher": {
@@ -555,5 +556,44 @@
         "avatar_upload_failed": "Không thể cập nhật ảnh đại diện",
         "password_changed_success": "Thay đổi mật khẩu thành công",
         "password_change_failed": "Không thể thay đổi mật khẩu"
+    },
+    "support": {
+        "createTicket": "Hỏi Giảng Viên",
+        "ticketSubject": "Chủ đề",
+        "subjectPlaceholder": "Bạn cần giúp đỡ về điều gì?",
+        "subjectHelperText": "Mô tả ngắn gọn câu hỏi hoặc vấn đề của bạn",
+        "subjectRequired": "Vui lòng nhập chủ đề",
+        "subjectTooShort": "Chủ đề phải có ít nhất 5 ký tự",
+        "askInstructorAbout": "Hỏi giảng viên về",
+        "characters": "ký tự",
+        "cancel": "Hủy",
+        "create": "Tạo",
+        "creating": "Đang tạo...",
+        "ticketCreated": "Tạo yêu cầu hỗ trợ thành công",
+        "failedToCreateTicket": "Không thể tạo yêu cầu",
+        "myTickets": "Yêu Cầu Hỗ Trợ Của Tôi",
+        "teacherInbox": "Câu Hỏi Của Học Viên",
+        "filters": {
+            "all": "Tất cả",
+            "active": "Đang hoạt động",
+            "resolved": "Đã giải quyết"
+        },
+        "noTickets": "Không tìm thấy yêu cầu nào",
+        "noMessages": "Chưa có tin nhắn. Bắt đầu cuộc trò chuyện!",
+        "online": "Trực tuyến",
+        "offline": "Ngoại tuyến",
+        "typing": "Đang nhập...",
+        "typeMessage": "Nhập tin nhắn của bạn...",
+        "markAsResolved": "Đánh Dấu Đã Giải Quyết",
+        "resolving": "Đang xử lý...",
+        "ticketResolved": "Đã đánh dấu yêu cầu là đã giải quyết",
+        "failedToResolve": "Không thể giải quyết yêu cầu",
+        "ticketResolvedMessage": "Cuộc trò chuyện này đã được giải quyết",
+        "status": {
+            "open": "Mở",
+            "waiting_teacher": "Đang chờ giảng viên",
+            "waiting_student": "Đang chờ phản hồi",
+            "resolved": "Đã giải quyết"
+        }
     }
 }

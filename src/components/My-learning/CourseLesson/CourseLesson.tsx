@@ -59,6 +59,7 @@ import { ICourse, ICourseContent, IEnrollment, ICourseLecture, IReview } from ".
 import CourseOverview from "./Overview";
 import CourseReviews from "./CourseReviews";
 import { IReviewDistribution } from "../../../../types/resData";
+import { StudentSupportChat } from "@/components/SupportChat";
 
 import { getLectureCaptions, submitQuiz } from "@/actions/courseContentAction";
 import { markLectureAsCompleted } from "@/actions/enrollmentAction";
@@ -619,6 +620,7 @@ export default function     CourseLesson({
                         >
                             <Tab label="Overview" />
                             <Tab label="Reviews" />
+                            <Tab label="Ask Instructor" />
                         </Tabs>
                     </div>
 
@@ -627,7 +629,7 @@ export default function     CourseLesson({
                         {activeTab === 0 && <CourseOverview course={course} />}
 
                         {activeTab === 1 && course?.id && (
-                            <CourseReviews 
+                            <CourseReviews
                                 reviewDistribution={reviewDistribution}
                                 reviews={resUserReviews?.data?.result}
                                 userReview={userReview}
@@ -638,6 +640,15 @@ export default function     CourseLesson({
                                     });
                                 }}
                             />
+                        )}
+
+                        {activeTab === 2 && course?.id && (
+                            <div style={{ height: '600px' }}>
+                                <StudentSupportChat
+                                    courseId={course.id}
+                                    courseTitle={course.title}
+                                />
+                            </div>
                         )}
                     </div>
                 </div>

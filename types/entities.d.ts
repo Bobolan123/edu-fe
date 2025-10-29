@@ -47,6 +47,8 @@ export interface IUser {
     certifications: ICertification[];
     reviews: IReview[];
     quiz_submissions: IQuizSubmission[];
+    supportTickets?: ISupportTicket[];
+    teacherTickets?: ISupportTicket[];
 }
 
 // Category Interface
@@ -406,4 +408,31 @@ export interface ILectureCaption {
     reviewedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
+}
+
+// Support Ticket Interface
+export interface ISupportTicket {
+    id: string;
+    subject: string;
+    status: 'open' | 'waiting_teacher' | 'waiting_student' | 'resolved';
+    studentId: number;
+    teacherId: number;
+    courseId: number;
+    student: IUser;
+    teacher: IUser;
+    course: ICourse;
+    unreadCount?: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+// Ticket Message Interface (MongoDB)
+export interface ITicketMessage {
+    _id: string;
+    ticketId: string;
+    senderId: number;
+    senderRole: 'student' | 'teacher';
+    message: string;
+    isRead: boolean;
+    createdAt: Date;
 }

@@ -382,6 +382,7 @@
         "my_learning": "My Learning",
         "my_activity": "My Activity",
         "my_courses": "My Courses",
+        "support_inbox": "Student Questions",
         "logout": "Log out"
     },
     "LocaleSwitcher": {
@@ -541,5 +542,44 @@
         "avatar_upload_failed": "Failed to update profile picture",
         "password_changed_success": "Password changed successfully",
         "password_change_failed": "Failed to change password"
+    },
+    "support": {
+        "createTicket": "Ask Instructor",
+        "ticketSubject": "Subject",
+        "subjectPlaceholder": "What do you need help with?",
+        "subjectHelperText": "Describe your question or issue briefly",
+        "subjectRequired": "Please enter a subject",
+        "subjectTooShort": "Subject must be at least 5 characters",
+        "askInstructorAbout": "Ask your instructor about",
+        "characters": "characters",
+        "cancel": "Cancel",
+        "create": "Create",
+        "creating": "Creating...",
+        "ticketCreated": "Support ticket created successfully",
+        "failedToCreateTicket": "Failed to create ticket",
+        "myTickets": "My Support Tickets",
+        "teacherInbox": "Student Questions",
+        "filters": {
+            "all": "All",
+            "active": "Active",
+            "resolved": "Resolved"
+        },
+        "noTickets": "No tickets found",
+        "noMessages": "No messages yet. Start the conversation!",
+        "online": "Online",
+        "offline": "Offline",
+        "typing": "Typing...",
+        "typeMessage": "Type your message...",
+        "markAsResolved": "Mark as Resolved",
+        "resolving": "Resolving...",
+        "ticketResolved": "Ticket marked as resolved",
+        "failedToResolve": "Failed to resolve ticket",
+        "ticketResolvedMessage": "This conversation has been resolved",
+        "status": {
+            "open": "Open",
+            "waiting_teacher": "Waiting for instructor",
+            "waiting_student": "Waiting for response",
+            "resolved": "Resolved"
+        }
     }
 }

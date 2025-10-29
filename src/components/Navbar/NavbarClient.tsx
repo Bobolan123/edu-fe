@@ -19,14 +19,14 @@ import {
     Typography,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import { 
-    AccountCircle, 
+import {
+    AccountCircle,
     Search as SearchIcon,
     Person as PersonIcon,
     School as SchoolIcon,
     BookmarkBorder as BookmarkIcon,
-    Timeline as ActivityIcon,
-    Logout as LogoutIcon
+    Logout as LogoutIcon,
+    ChatBubbleOutline as ChatIcon
 } from "@mui/icons-material";
 import LocaleSwitcher from "./LocaleSwitcher";
 import Image from "next/image";
@@ -205,7 +205,7 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
                 </Link>
             </Box>
             
-            {(session?.user as any)?.role === "instructor" || (session?.user as any)?.role === "admin" && (
+            {((session?.user as any)?.role === "instructor" || (session?.user as any)?.role === "admin") && (
                 <MenuItem onClick={handleMenuClose}>
                     <ListItemIcon>
                         <SchoolIcon fontSize="small" color="primary" />
@@ -215,25 +215,29 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
                     </Link>
                 </MenuItem>
             )}
-            
-            <MenuItem onClick={handleMenuClose}>
-                <ListItemIcon>
-                    <BookmarkIcon fontSize="small" color="primary" />
-                </ListItemIcon>
-                <Link href="/my-learning" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    {t("my_learning")}
-                </Link>
-            </MenuItem>
-            
-            <MenuItem onClick={handleMenuClose}>
-                <ListItemIcon>
-                    <ActivityIcon fontSize="small" color="primary" />
-                </ListItemIcon>
-                <Link href="/my-activity" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    {t("my_activity")}
-                </Link>
-            </MenuItem>
-            
+
+            {((session?.user as any)?.role === "instructor" || (session?.user as any)?.role === "admin") && (
+                <MenuItem onClick={handleMenuClose}>
+                    <ListItemIcon>
+                        <ChatIcon fontSize="small" color="primary" />
+                    </ListItemIcon>
+                    <Link href="/support-inbox" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        {t("support_inbox")}
+                    </Link>
+                </MenuItem>
+            )}
+
+            {(session?.user as any)?.role !== "instructor" && (session?.user as any)?.role !== "admin" && (
+                <MenuItem onClick={handleMenuClose}>
+                    <ListItemIcon>
+                        <BookmarkIcon fontSize="small" color="primary" />
+                    </ListItemIcon>
+                    <Link href="/my-learning" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        {t("my_learning")}
+                    </Link>
+                </MenuItem>
+            )}
+
             <Divider sx={{ my: 1 }} />
             
             <MenuItem onClick={() => { signOut(); handleMenuClose(); }}>
