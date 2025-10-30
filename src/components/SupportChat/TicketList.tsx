@@ -17,20 +17,24 @@ import {
   Tab,
 } from '@mui/material';
 import { useTranslations } from 'next-intl';
+import { useSession } from 'next-auth/react';
 import { getMySupportTickets } from '@/actions/supportTicketActions';
 import TicketStatusBadge from './TicketStatusBadge';
 import { formatDistanceToNow } from 'date-fns';
 import { ISupportTicket } from '../../../types/entities';
+import { supportSocket } from '@/services/supportSocket';
 
 interface TicketListProps {
   onTicketSelect: (ticket: ISupportTicket) => void;
   selectedTicketId?: string;
   userRole: 'student' | 'teacher';
   onTicketsLoaded?: (tickets: ISupportTicket[]) => void;
+  onStatusUpdate?: (ticketId: string, status: ISupportTicket['status']) => void;
 }
 
-export default function TicketList({ onTicketSelect, selectedTicketId, userRole, onTicketsLoaded }: TicketListProps) {
+export default function TicketList({ onTicketSelect, selectedTicketId, userRole, onTicketsLoaded, onStatusUpdate }: TicketListProps) {
   const t = useTranslations('support');
+  const { data: session } = useSession();
   const [tickets, setTickets] = useState<ISupportTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -84,6 +88,109 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole,
   useEffect(() => {
     loadTickets(filter);
   }, [filter]);
+
+  // Setup WebSocket connection for real-time status updates
+  useEffect(() => {
+    if (!session?.user?.id || !session?.user?.access_token) {
+      return;
+    }
+
+    console.log('[TicketList] Setting up WebSocket for real-time updates');
+
+    // Connect to socket
+    const socket = supportSocket.connect(parseInt(session.user.id), session.user.access_token);
+
+    const handleConnect = () => {
+      console.log('[TicketList] Socket connected');
+    };
+
+    const handleDisconnect = () => {
+      console.log('[TicketList] Socket disconnected');
+    };
+
+    // Listen for ticket status updates
+    const handleTicketUpdated = (data: { ticketId: string; update: any }) => {
+      console.log('[TicketList] Ticket updated event received:', data);
+
+      if (data.update?.status) {
+        // Update the ticket status in the local list
+        setTickets((prevTickets) => {
+          return prevTickets.map((ticket) => {
+            if (ticket.id === data.ticketId) {
+              console.log('[TicketList] Updating ticket status:', {
+                ticketId: ticket.id,
+                oldStatus: ticket.status,
+                newStatus: data.update.status,
+              });
+              return {
+                ...ticket,
+                status: data.update.status,
+                updatedAt: new Date(),
+              };
+            }
+            return ticket;
+          });
+        });
+
+        // Notify parent component about the status change
+        if (onStatusUpdate) {
+          onStatusUpdate(data.ticketId, data.update.status);
+        }
+      }
+    };
+
+    // Listen for new messages (which may imply status changes)
+    const handleNewMessage = (data: { message: any }) => {
+      console.log('[TicketList] New message received for ticket:', data.message.ticketId);
+
+      // Infer status change from message sender
+      const inferredStatus = data.message.senderRole === 'student' ? 'waiting_teacher' : 'waiting_student';
+
+      // Update ticket status in the list
+      setTickets((prevTickets) => {
+        return prevTickets.map((ticket) => {
+          if (ticket.id === data.message.ticketId) {
+            console.log('[TicketList] Updating ticket status from message:', {
+              ticketId: ticket.id,
+              oldStatus: ticket.status,
+              newStatus: inferredStatus,
+            });
+            return {
+              ...ticket,
+              status: inferredStatus,
+              updatedAt: new Date(),
+            };
+          }
+          return ticket;
+        });
+      });
+
+      // Notify parent component about the status change
+      if (onStatusUpdate) {
+        onStatusUpdate(data.message.ticketId, inferredStatus);
+      }
+    };
+
+    // Register event listeners
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('ticketUpdated', handleTicketUpdated);
+    socket.on('newMessage', handleNewMessage);
+
+    // If already connected, log it
+    if (socket.connected) {
+      handleConnect();
+    }
+
+    // Cleanup
+    return () => {
+      console.log('[TicketList] Cleaning up WebSocket listeners');
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('ticketUpdated', handleTicketUpdated);
+      socket.off('newMessage', handleNewMessage);
+    };
+  }, [session, onStatusUpdate]);
 
   const handleFilterChange = (_event: React.SyntheticEvent, newValue: string) => {
     setFilter(newValue);

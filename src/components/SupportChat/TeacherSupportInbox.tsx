@@ -39,12 +39,14 @@ export default function TeacherSupportInbox() {
     }
   };
 
-  const handleStatusUpdate = (update: { status: 'open' | 'waiting_teacher' | 'waiting_student' | 'resolved' }) => {
-    // Update selected ticket status locally without full refresh
-    if (selectedTicket && update.status) {
+  const handleStatusUpdate = (ticketId: string, status: ISupportTicket['status']) => {
+    console.log('[TeacherSupportInbox] Status update from TicketList:', { ticketId, status });
+
+    // Update selected ticket status if it matches
+    if (selectedTicket && selectedTicket.id === ticketId) {
       setSelectedTicket({
         ...selectedTicket,
-        status: update.status,
+        status: status,
         updatedAt: new Date(),
       });
     }
@@ -60,6 +62,7 @@ export default function TeacherSupportInbox() {
           selectedTicketId={selectedTicket?.id}
           userRole="teacher"
           onTicketsLoaded={handleTicketsLoaded}
+          onStatusUpdate={handleStatusUpdate}
         />
       </Box>
 

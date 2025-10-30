@@ -57,12 +57,14 @@ export default function StudentSupportChat({
     }
   };
 
-  const handleStatusUpdate = (update: { status: 'open' | 'waiting_teacher' | 'waiting_student' | 'resolved' }) => {
-    // Update selected ticket status locally without full refresh
-    if (selectedTicket && update.status) {
+  const handleStatusUpdate = (ticketId: string, status: ISupportTicket['status']) => {
+    console.log('[StudentSupportChat] Status update from TicketList:', { ticketId, status });
+
+    // Update selected ticket status if it matches
+    if (selectedTicket && selectedTicket.id === ticketId) {
       setSelectedTicket({
         ...selectedTicket,
-        status: update.status,
+        status: status,
         updatedAt: new Date(),
       });
     }
@@ -83,9 +85,9 @@ export default function StudentSupportChat({
       </Box>
 
       {/* Chat Interface */}
-      <Box sx={{ flex: 1, display: 'flex', gap: 2, minHeight: 0 }}>
+      <Box sx={{ flex: 1, display: 'flex', gap: 2, minHeight: 0, overflow: 'hidden' }}>
         {/* Ticket List - Student's tickets for this course */}
-        <Box sx={{ width: '35%', minHeight: 0 }}>
+        <Box sx={{ width: '35%', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <TicketList
             key={refreshKey}
             onTicketSelect={handleTicketSelect}
@@ -96,7 +98,7 @@ export default function StudentSupportChat({
         </Box>
 
         {/* Chat Area */}
-        <Box sx={{ flex: 1, minHeight: 0 }}>
+        <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {selectedTicket ? (
             <TicketChat
               key={selectedTicket.id}
@@ -104,7 +106,7 @@ export default function StudentSupportChat({
               userRole="student"
               onTicketUpdated={handleTicketUpdated}
             />
-          ) : (
+          ) : ( 
             <Box
               sx={{
                 height: '100%',
