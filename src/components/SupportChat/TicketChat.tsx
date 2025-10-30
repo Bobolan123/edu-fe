@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -34,8 +34,26 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
   const { data: session } = useSession();
   const [input, setInput] = useState('');
   const [isResolving, setIsResolving] = useState(false);
+  const [currentTicketStatus, setCurrentTicketStatus] = useState(ticket.status);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Update local status when ticket prop changes
+  useEffect(() => {
+    setCurrentTicketStatus(ticket.status);
+  }, [ticket.status]);
+
+  // Handle ticket updates (including status changes)
+  const handleTicketStatusUpdate = useCallback((update: any) => {
+    console.log('[TicketChat] Ticket status update received:', update);
+
+    if (update?.status) {
+      setCurrentTicketStatus(update.status);
+    }
+
+    // Also call parent callback to refresh ticket list
+    onTicketUpdated?.();
+  }, [onTicketUpdated]);
 
   const {
     messages,
@@ -48,6 +66,7 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
   } = useSupportChat({
     ticketId: ticket.id,
     userRole,
+    onTicketUpdated: handleTicketStatusUpdate,
   });
 
   // Auto-scroll to bottom when new messages arrive
@@ -118,7 +137,7 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
             </Typography>
           </Box>
           <Stack direction="row" spacing={1} alignItems="center">
-            <TicketStatusBadge status={ticket.status} />
+            <TicketStatusBadge status={currentTicketStatus} />
             {isConnected ? (
               <Chip icon={<Wifi />} label={t('online')} size="small" color="success" variant="outlined" />
             ) : (
@@ -128,7 +147,7 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
         </Stack>
 
         {/* Resolve Button (Teacher only) */}
-        {userRole === 'teacher' && ticket.status !== 'resolved' && (
+        {userRole === 'teacher' && currentTicketStatus !== 'resolved' && (
           <Box sx={{ mt: 2 }}>
             <Button
               variant="outlined"
@@ -238,7 +257,7 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
       </Box>
 
       {/* Input Area */}
-      {ticket.status !== 'resolved' && (
+      {currentTicketStatus !== 'resolved' && (
         <Box
           component="form"
           onSubmit={handleSubmit}
@@ -278,7 +297,7 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
         </Box>
       )}
 
-      {ticket.status === 'resolved' && (
+      {currentTicketStatus === 'resolved' && (
         <Box
           sx={{
             p: 2,

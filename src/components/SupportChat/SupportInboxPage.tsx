@@ -4,11 +4,7 @@ import { Box, Container, Typography, Paper } from '@mui/material';
 import { useTranslations } from 'next-intl';
 import TeacherSupportInbox from './TeacherSupportInbox';
 
-/**
- * Support Inbox Page - Teacher Only
- * This page is only accessible to instructors/admins
- * Shows all student tickets across all courses taught by this instructor
- */
+
 export default function SupportInboxPage() {
   const t = useTranslations('support');
 
@@ -21,7 +17,7 @@ export default function SupportInboxPage() {
             {t('teacherInbox')}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Respond to student questions in FIFO order
+            Respond to student questions
           </Typography>
         </Paper>
 

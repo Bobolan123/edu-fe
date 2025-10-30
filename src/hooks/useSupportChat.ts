@@ -11,11 +11,12 @@ interface UseSupportChatProps {
   ticketId: string;
   userRole: 'student' | 'teacher';
   onMessageReceived?: (message: TicketMessage) => void;
+  onTicketUpdated?: (update?: any) => void;
 }
 
 const isDev = process.env.NODE_ENV === 'development';
 
-export function useSupportChat({ ticketId, userRole, onMessageReceived }: UseSupportChatProps) {
+export function useSupportChat({ ticketId, userRole, onMessageReceived, onTicketUpdated }: UseSupportChatProps) {
   const { data: session } = useSession();
   const [messages, setMessages] = useState<ITicketMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,11 +27,16 @@ export function useSupportChat({ ticketId, userRole, onMessageReceived }: UseSup
 
   // Use refs to store latest callback without causing re-renders
   const onMessageReceivedRef = useRef(onMessageReceived);
+  const onTicketUpdatedRef = useRef(onTicketUpdated);
 
   // Update refs when callbacks change (doesn't cause re-render)
   useEffect(() => {
     onMessageReceivedRef.current = onMessageReceived;
   }, [onMessageReceived]);
+
+  useEffect(() => {
+    onTicketUpdatedRef.current = onTicketUpdated;
+  }, [onTicketUpdated]);
 
   // Fetch initial messages
   const loadMessages = useCallback(async () => {
@@ -235,11 +241,22 @@ export function useSupportChat({ ticketId, userRole, onMessageReceived }: UseSup
       }
     };
 
+    // Listen for ticket status updates
+    const handleTicketUpdated = (data: { ticketId: string; update: any }) => {
+      if (isDev) console.log('[useSupportChat] Ticket updated:', data);
+
+      // Call the callback to refresh ticket data, pass the update
+      if (onTicketUpdatedRef.current) {
+        onTicketUpdatedRef.current(data.update);
+      }
+    };
+
     // Register event listeners
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
     socket.on('newMessage', handleNewMessage);
     socket.on('userTyping', handleTypingIndicator);
+    socket.on('ticketUpdated', handleTicketUpdated);
 
     // If already connected, join ticket immediately
     if (socket.connected) {
@@ -248,7 +265,7 @@ export function useSupportChat({ ticketId, userRole, onMessageReceived }: UseSup
 
     // Cleanup - Remove the SPECIFIC callback functions
     return () => {
-      console.log('[useSupportChat] Cleaning up WebSocket listeners for ticket:', ticketId);
+      if (isDev) console.log('[useSupportChat] Cleaning up WebSocket listeners for ticket:', ticketId);
 
       supportSocket.leaveTicket(ticketId);
 
@@ -257,6 +274,7 @@ export function useSupportChat({ ticketId, userRole, onMessageReceived }: UseSup
       socket.off('disconnect', handleDisconnect);
       socket.off('newMessage', handleNewMessage);
       socket.off('userTyping', handleTypingIndicator);
+      socket.off('ticketUpdated', handleTicketUpdated);
 
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);

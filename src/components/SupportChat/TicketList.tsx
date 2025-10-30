@@ -57,6 +57,12 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole 
           console.log('[TicketList] Filtered active tickets for teacher:', filteredTickets);
         }
 
+        // Filter out resolved tickets from "all" tab
+        if (status === 'all') {
+          filteredTickets = filteredTickets.filter(ticket => ticket.status !== 'resolved');
+          console.log('[TicketList] Filtered out resolved tickets from all tab:', filteredTickets);
+        }
+
         setTickets(filteredTickets);
       } else {
         console.warn('[TicketList] No data in response:', response);
@@ -103,10 +109,12 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole 
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label={t('filters.all')} value="all" />
-        <Tab
-          label={t('filters.active')}
-          value={userRole === 'teacher' ? 'waiting_teacher' : 'waiting_student'}
-        />
+        {userRole === 'teacher' && (
+          <Tab
+            label={t('filters.active')}
+            value="waiting_teacher"
+          />
+        )}
         <Tab label={t('filters.resolved')} value="resolved" />
       </Tabs>
 
