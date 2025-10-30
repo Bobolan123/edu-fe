@@ -17,15 +17,15 @@ export default async function ChatsPage(props: ChatsPageProps) {
 
   try {
     const page = parseInt(searchParams.page || '1');
+    const take = searchParams.take || '10';
     const search = searchParams.search;
     const status = searchParams.status;
-    const take = searchParams.take;
 
     const ticketsResponse = await getAllSupportTickets({
       page,
+      take,
       search,
-      status,
-      take
+      status
     });
     console.log(ticketsResponse)
 

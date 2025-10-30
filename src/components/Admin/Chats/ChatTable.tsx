@@ -210,7 +210,10 @@ export const ChatTable = ({
           count={totalTickets}
           rowsPerPage={10}
           page={currentPage - 1}
-          onPageChange={(_, newPage) => onPageChange(newPage + 1)}
+          onPageChange={(event, newPage) => {
+            event?.preventDefault();
+            onPageChange(newPage + 1);
+          }}
           onRowsPerPageChange={() => {}}
         />
       </Card>
