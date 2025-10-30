@@ -37,6 +37,7 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
   const [currentTicketStatus, setCurrentTicketStatus] = useState(ticket.status);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const statusUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Update local status when ticket prop changes
   useEffect(() => {
@@ -48,11 +49,22 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
     console.log('[TicketChat] Ticket status update received:', update);
 
     if (update?.status) {
+      // Update status immediately for smooth UI
       setCurrentTicketStatus(update.status);
-    }
 
-    // Also call parent callback to refresh ticket list
-    onTicketUpdated?.();
+      // Debounce full refresh to avoid glitching
+      if (!update?.skipRefresh) {
+        // Clear any pending refresh
+        if (statusUpdateTimeoutRef.current) {
+          clearTimeout(statusUpdateTimeoutRef.current);
+        }
+
+        // Delay the full refresh slightly to let the UI settle
+        statusUpdateTimeoutRef.current = setTimeout(() => {
+          onTicketUpdated?.();
+        }, 500);
+      }
+    }
   }, [onTicketUpdated]);
 
   const {
@@ -73,6 +85,15 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (statusUpdateTimeoutRef.current) {
+        clearTimeout(statusUpdateTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

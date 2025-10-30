@@ -222,6 +222,24 @@ export function useSupportChat({ ticketId, userRole, onMessageReceived, onTicket
         return [...prev, newMessage];
       });
 
+      // Infer status change from message and notify parent with local update
+      // Backend automatically updates status when message is sent:
+      // - Student sends → status becomes WAITING_TEACHER
+      // - Teacher sends → status becomes WAITING_STUDENT
+      const inferredStatus = newMessage.senderRole === 'student' ? 'waiting_teacher' : 'waiting_student';
+
+      if (isDev) {
+        console.log('[useSupportChat] Inferring status change from message:', {
+          senderRole: newMessage.senderRole,
+          inferredStatus,
+        });
+      }
+
+      // Notify parent with status update (don't trigger full refresh)
+      if (onTicketUpdatedRef.current) {
+        onTicketUpdatedRef.current({ status: inferredStatus, skipRefresh: true });
+      }
+
       // Call callback if provided
       if (onMessageReceived) {
         onMessageReceived(data.message);

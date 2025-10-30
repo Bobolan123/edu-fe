@@ -26,9 +26,10 @@ interface TicketListProps {
   onTicketSelect: (ticket: ISupportTicket) => void;
   selectedTicketId?: string;
   userRole: 'student' | 'teacher';
+  onTicketsLoaded?: (tickets: ISupportTicket[]) => void;
 }
 
-export default function TicketList({ onTicketSelect, selectedTicketId, userRole }: TicketListProps) {
+export default function TicketList({ onTicketSelect, selectedTicketId, userRole, onTicketsLoaded }: TicketListProps) {
   const t = useTranslations('support');
   const [tickets, setTickets] = useState<ISupportTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,13 +65,17 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole 
         }
 
         setTickets(filteredTickets);
+        // Notify parent of loaded tickets
+        onTicketsLoaded?.(filteredTickets);
       } else {
         console.warn('[TicketList] No data in response:', response);
         setTickets([]);
+        onTicketsLoaded?.([]);
       }
     } catch (error) {
       console.error('[TicketList] Failed to load tickets:', error);
       setTickets([]);
+      onTicketsLoaded?.([]);
     } finally {
       setIsLoading(false);
     }

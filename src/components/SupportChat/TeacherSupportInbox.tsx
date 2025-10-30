@@ -25,6 +25,31 @@ export default function TeacherSupportInbox() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleTicketsLoaded = (tickets: ISupportTicket[]) => {
+    // Update selected ticket with fresh data from the list
+    if (selectedTicket) {
+      const updatedTicket = tickets.find(t => t.id === selectedTicket.id);
+      if (updatedTicket) {
+        // Only update if status actually changed to avoid unnecessary re-renders
+        if (updatedTicket.status !== selectedTicket.status ||
+            updatedTicket.updatedAt !== selectedTicket.updatedAt) {
+          setSelectedTicket(updatedTicket);
+        }
+      }
+    }
+  };
+
+  const handleStatusUpdate = (update: { status: 'open' | 'waiting_teacher' | 'waiting_student' | 'resolved' }) => {
+    // Update selected ticket status locally without full refresh
+    if (selectedTicket && update.status) {
+      setSelectedTicket({
+        ...selectedTicket,
+        status: update.status,
+        updatedAt: new Date(),
+      });
+    }
+  };
+
   return (
     <Box sx={{ height: '100%', display: 'flex', gap: 2 }}>
       {/* Ticket List - All tickets for this teacher */}
@@ -34,6 +59,7 @@ export default function TeacherSupportInbox() {
           onTicketSelect={handleTicketSelect}
           selectedTicketId={selectedTicket?.id}
           userRole="teacher"
+          onTicketsLoaded={handleTicketsLoaded}
         />
       </Box>
 
@@ -41,6 +67,7 @@ export default function TeacherSupportInbox() {
       <Box sx={{ flex: 1 }}>
         {selectedTicket ? (
           <TicketChat
+            key={selectedTicket.id}
             ticket={selectedTicket}
             userRole="teacher"
             onTicketUpdated={handleTicketUpdated}
