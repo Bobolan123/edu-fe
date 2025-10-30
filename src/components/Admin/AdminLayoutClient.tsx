@@ -43,6 +43,7 @@ import {
     Home,
     Security,
     AdminPanelSettings,
+    Chat,
 } from "@mui/icons-material";
 import { signOut } from "next-auth/react";
 import LocaleSwitcher from "../Navbar/LocaleSwitcher";
@@ -59,6 +60,7 @@ const adminMenuItems = [
     { title: "Categories", icon: Category, path: "/admin/categories" },
     { title: "Orders", icon: ShoppingCart, path: "/admin/orders" },
     { title: "Reviews", icon: Reviews, path: "/admin/reviews" },
+    { title: "Chats", icon: Chat, path: "/admin/chats" },
     { title: "Enrollments", icon: School, path: "/admin/enrollments" },
     { title: "Roles", icon: Security, path: "/admin/roles" },
     {

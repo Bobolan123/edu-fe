@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { sendRequest } from '@/utils/api';
 import { revalidateTag } from 'next/cache';
 import { ISupportTicket, ITicketMessage } from '../../types/entities';
+import { getAccessToken } from './index';
 
 export interface CreateTicketData {
   subject: string;
@@ -247,5 +248,45 @@ export async function getUnreadTicketCount() {
   } catch (error) {
     console.error('[getUnreadTicketCount] Error:', error);
     return { success: false, message: 'Failed to fetch unread count', data: 0 };
+  }
+}
+
+/**
+ * Get all support tickets for admin (with pagination and filters)
+ */
+export async function getAllSupportTickets(params?: {
+  page?: number;
+  search?: string;
+  status?: string;
+  take?: string;
+}) {
+  const access_token = await getAccessToken();
+
+  if (!access_token) {
+    return { success: false, message: 'Not authenticated' };
+  }
+
+  try {
+    const queryParams: Record<string, string> = {};
+
+    if (params?.page) queryParams.page = params.page.toString();
+    if (params?.search) queryParams.search = params.search;
+    if (params?.status) queryParams.status = params.status;
+    if (params?.take) queryParams.take = params.take;
+    const response = await sendRequest<IModelPaginate<ISupportTicket>>({
+      method: 'GET',
+      url: `${process.env.NEXT_PUBLIC_SERVER}/support-tickets/admin/all`,
+      queryParams,
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+      nextOption: {
+        next: { tags: ['support-tickets-admin'] },
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('[getAllSupportTickets] Error:', error);
+    return { success: false, message: 'Failed to fetch all tickets' };
   }
 }
