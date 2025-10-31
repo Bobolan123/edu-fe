@@ -36,11 +36,16 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole,
   const t = useTranslations('support');
   const { data: session } = useSession();
   const [tickets, setTickets] = useState<ISupportTicket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [filter, setFilter] = useState<string>('all');
 
-  const loadTickets = async (status?: string) => {
-    setIsLoading(true);
+  const loadTickets = async (status?: string, isInitial = false) => {
+    if (isInitial) {
+      setIsInitialLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
     try {
       // For teachers viewing "active" tickets, we need to fetch all and filter client-side
       // because "active" should include both "open" and "waiting_teacher" statuses
@@ -81,12 +86,13 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole,
       setTickets([]);
       onTicketsLoaded?.([]);
     } finally {
-      setIsLoading(false);
+      setIsInitialLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    loadTickets(filter);
+    loadTickets(filter, tickets.length === 0);
   }, [filter]);
 
   // Setup WebSocket connection for real-time status updates
@@ -196,7 +202,7 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole,
     setFilter(newValue);
   };
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
         <CircularProgress />
@@ -207,10 +213,21 @@ export default function TicketList({ onTicketSelect, selectedTicketId, userRole,
   return (
     <Paper elevation={2} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', position: 'relative' }}>
         <Typography variant="h6" fontWeight="bold">
           {userRole === 'teacher' ? t('teacherInbox') : t('myTickets')}
         </Typography>
+        {isRefreshing && (
+          <CircularProgress
+            size={16}
+            sx={{
+              position: 'absolute',
+              right: 16,
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          />
+        )}
       </Box>
 
       {/* Filter Tabs */}
