@@ -25,12 +25,12 @@ import {
     DialogActions,
     CircularProgress,
 } from "@mui/material";
-import { Star, StarOutline, FilterList, Edit, Delete, Add, Save, Cancel } from "@mui/icons-material";
+import { Star, StarOutline, FilterList, Edit, Delete, Add, Save, Cancel, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { IReviewDistribution } from "../../../../types/resData";
 import { IReview } from "../../../../types/entities";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from 'date-fns';
-import { createReview, updateReview, deleteReview } from "@/actions/reviewsAction";
+import { createReview, updateReview, deleteReview, voteUp, voteDown, getUserVote, IUserVote } from "@/actions/reviewsAction";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -148,7 +148,66 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
     };
 
     // Component to render a single review
-    const ReviewCard = ({ review, isUserReview = false }: { review: IReview; isUserReview?: boolean }) => (
+    const ReviewCard = ({ review, isUserReview = false }: { review: IReview; isUserReview?: boolean }) => {
+        const [userVote, setUserVote] = useState<IUserVote['voteType'] | null>(null);
+        const [voteCount, setVoteCount] = useState({
+            upVotes: review.upVotes || 0,
+            downVotes: review.downVotes || 0,
+        });
+        const [isVoting, setIsVoting] = useState(false);
+
+        // Load user's vote when component mounts
+        useEffect(() => {
+            const loadUserVote = async () => {
+                try {
+                    const response = await getUserVote(review.id);
+                    if (response.data) {
+                        setUserVote(response.data.voteType);
+                    }
+                } catch (error) {
+                    // User hasn't voted yet, which is fine
+                }
+            };
+            loadUserVote();
+        }, [review.id]);
+
+        const handleVote = async (type: 'UP' | 'DOWN') => {
+            if (isVoting) return;
+
+            setIsVoting(true);
+            try {
+                // If clicking the same vote type, it's an unvote (toggle)
+                if (userVote === type) {
+                    setIsVoting(false);
+                    return;
+                }
+
+                // Call the appropriate vote endpoint
+                if (type === 'UP') {
+                    await voteUp(review.id);
+                    // Update local state
+                    setVoteCount(prev => ({
+                        upVotes: userVote === 'DOWN' ? prev.upVotes + 1 : prev.upVotes + 1,
+                        downVotes: userVote === 'DOWN' ? prev.downVotes - 1 : prev.downVotes,
+                    }));
+                    setUserVote('UP');
+                } else {
+                    await voteDown(review.id);
+                    // Update local state
+                    setVoteCount(prev => ({
+                        upVotes: userVote === 'UP' ? prev.upVotes - 1 : prev.upVotes,
+                        downVotes: userVote === 'UP' ? prev.downVotes + 1 : prev.downVotes + 1,
+                    }));
+                    setUserVote('DOWN');
+                }
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : "Failed to vote");
+            } finally {
+                setIsVoting(false);
+            }
+        };
+
+        return (
         <Card
             key={review.id}
             elevation={isUserReview ? 2 : 1}
@@ -272,8 +331,8 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                             </Box>
                         )}
                     </Box>
-                    <Typography 
-                        variant="body1" 
+                    <Typography
+                        variant="body1"
                         sx={{
                             color: 'text.primary',
                             lineHeight: 1.6,
@@ -282,10 +341,68 @@ export default function CourseReviews({ reviewDistribution, reviews = [], userRe
                     >
                         {review.comment}
                     </Typography>
+
+                    {/* Voting Buttons - Don't show on user's own review */}
+                    {!isUserReview && (
+                        <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <Typography variant="caption" sx={{ color: 'text.secondary', mr: 1 }}>
+                                Was this helpful?
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <Button
+                                    size="small"
+                                    variant={userVote === 'UP' ? 'contained' : 'outlined'}
+                                    color={userVote === 'UP' ? 'primary' : 'inherit'}
+                                    startIcon={<ThumbUp fontSize="small" />}
+                                    onClick={() => handleVote('UP')}
+                                    disabled={isVoting}
+                                    sx={{
+                                        minWidth: 'auto',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        fontSize: '0.75rem',
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                        '&:hover': {
+                                            backgroundColor: userVote === 'UP'
+                                                ? 'primary.dark'
+                                                : 'rgba(25, 118, 210, 0.08)',
+                                        }
+                                    }}
+                                >
+                                    {voteCount.upVotes}
+                                </Button>
+                                <Button
+                                    size="small"
+                                    variant={userVote === 'DOWN' ? 'contained' : 'outlined'}
+                                    color={userVote === 'DOWN' ? 'error' : 'inherit'}
+                                    startIcon={<ThumbDown fontSize="small" />}
+                                    onClick={() => handleVote('DOWN')}
+                                    disabled={isVoting}
+                                    sx={{
+                                        minWidth: 'auto',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        fontSize: '0.75rem',
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                        '&:hover': {
+                                            backgroundColor: userVote === 'DOWN'
+                                                ? 'error.dark'
+                                                : 'rgba(211, 47, 47, 0.08)',
+                                        }
+                                    }}
+                                >
+                                    {voteCount.downVotes}
+                                </Button>
+                            </Box>
+                        </Box>
+                    )}
                 </Box>
             </CardContent>
         </Card>
-    );
+        );
+    };
 
     return (
         <Box className="space-y-6">

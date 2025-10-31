@@ -49,7 +49,7 @@ export default async function CourseDetailPage({
     const resUserReviews = await getAllReviews({
         courseId: +id,
         rating: rating ? Number(rating) : undefined,
-        sortBy: sort ? (sort.toUpperCase() as 'NEWEST' | 'OLDEST' | 'HIGHEST_RATING' | 'LOWEST_RATING') : undefined
+        sortBy: sort ? (sort.toLowerCase() as 'newest' | 'oldest' | 'highest_rating' | 'lowest_rating') : undefined
     });
 
     const resUserReview = await getUserReviewForCourse(session?.user?.id!, id);

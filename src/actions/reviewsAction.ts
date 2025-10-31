@@ -45,7 +45,7 @@ interface GetReviewsParams {
     maxRating?: number;
     status?: ReviewStatus;
     minUpVotes?: number;
-    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
+    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
 }
 
 export const getAllReviews = async (
@@ -294,7 +294,7 @@ interface GetAllReviewsAdminParams {
     maxRating?: number;
     status?: ReviewStatus;
     minUpVotes?: number;
-    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
+    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
 }
 
 export const getAllReviewsAdmin = async (

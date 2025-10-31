@@ -12,7 +12,7 @@ interface ReviewsPageProps {
     maxRating?: string;
     status?: ReviewStatus;
     minUpVotes?: string;
-    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
+    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
   }>;
 }
 
@@ -28,8 +28,8 @@ export default async function ReviewsPage(props: ReviewsPageProps) {
     const maxRating = searchParams.maxRating ? parseInt(searchParams.maxRating) : undefined;
     const status = searchParams.status;
     const minUpVotes = searchParams.minUpVotes ? parseInt(searchParams.minUpVotes) : undefined;
-    const sortBy = searchParams.sortBy;
-    
+    const sortBy = searchParams.sortBy ? (searchParams.sortBy.toLowerCase() as "newest" | "oldest" | "highest_rating" | "lowest_rating") : undefined;
+
     const reviewsResponse = await getAllReviewsAdmin({
       page,
       take,

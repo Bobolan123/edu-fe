@@ -56,7 +56,7 @@ interface AdminReviewsPageProps {
     maxRating?: string;
     status?: ReviewStatus;
     minUpVotes?: string;
-    sortBy?: "NEWEST" | "OLDEST" | "HIGHEST_RATING" | "LOWEST_RATING";
+    sortBy?: "newest" | "oldest" | "highest_rating" | "lowest_rating";
   };
 }
 
@@ -71,7 +71,7 @@ export default function AdminReviewsPage({
   const [maxRating, setMaxRating] = useState(searchParams.maxRating || '');
   const [selectedStatus, setSelectedStatus] = useState(searchParams.status || 'all');
   const [minUpVotes, setMinUpVotes] = useState(searchParams.minUpVotes || '');
-  const [sortBy, setSortBy] = useState(searchParams.sortBy || 'NEWEST');
+  const [sortBy, setSortBy] = useState(searchParams.sortBy || 'newest');
   const [selectedReview, setSelectedReview] = useState<IReview | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -102,11 +102,11 @@ export default function AdminReviewsPage({
     if (params.minUpVotes && params.minUpVotes !== '') {
       urlSearchParams.set('minUpVotes', params.minUpVotes);
     }
-    
-    if (params.sortBy && params.sortBy !== 'NEWEST') {
+
+    if (params.sortBy && params.sortBy !== 'newest') {
       urlSearchParams.set('sortBy', params.sortBy);
     }
-    
+
     if (params.page) {
       urlSearchParams.set('page', params.page);
     }
@@ -162,14 +162,14 @@ export default function AdminReviewsPage({
   };
 
   const handleApplyFilters = () => {
-    updateURL({ 
-      search: searchTerm, 
+    updateURL({
+      search: searchTerm,
       rating: selectedRating !== 'all' ? selectedRating : undefined,
       minRating: minRating !== '' ? minRating : undefined,
       maxRating: maxRating !== '' ? maxRating : undefined,
       status: selectedStatus !== 'all' ? selectedStatus : undefined,
       minUpVotes: minUpVotes !== '' ? minUpVotes : undefined,
-      sortBy: sortBy !== 'NEWEST' ? sortBy : undefined,
+      sortBy: sortBy !== 'newest' ? sortBy : undefined,
       page: '1'
     });
   };
@@ -180,7 +180,7 @@ export default function AdminReviewsPage({
     setMaxRating('');
     setSelectedStatus('all');
     setMinUpVotes('');
-    setSortBy('NEWEST');
+    setSortBy('newest');
     updateURL({
       search: undefined,
       minRating: undefined,
@@ -198,7 +198,6 @@ export default function AdminReviewsPage({
   };
 
   const handleError = (errorMessage: string) => {
-    setError(errorMessage);
     setLoading(false);
     toastService.error(errorMessage);
   };
@@ -370,10 +369,10 @@ export default function AdminReviewsPage({
                   label="Sort By"
                   onChange={(e) => handleSortByChange(e.target.value as string)}
                 >
-                  <MenuItem value="NEWEST">Newest First</MenuItem>
-                  <MenuItem value="OLDEST">Oldest First</MenuItem>
-                  <MenuItem value="HIGHEST_RATING">Highest Rating</MenuItem>
-                  <MenuItem value="LOWEST_RATING">Lowest Rating</MenuItem>
+                  <MenuItem value="newest">Newest First</MenuItem>
+                  <MenuItem value="oldest">Oldest First</MenuItem>
+                  <MenuItem value="highest_rating">Highest Rating</MenuItem>
+                  <MenuItem value="lowest_rating">Lowest Rating</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
