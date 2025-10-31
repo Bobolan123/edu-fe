@@ -643,7 +643,7 @@ export default function     CourseLesson({
                         )}
 
                         {activeTab === 2 && course?.id && (
-                            <div style={{ height: '600px' }}>
+                            <div style={{ height: '600px', maxWidth:1000}}>
                                 <StudentSupportChat
                                     courseId={course.id}
                                     courseTitle={course.title}

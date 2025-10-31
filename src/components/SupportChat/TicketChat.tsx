@@ -146,18 +146,22 @@ export default function TicketChat({ ticket, userRole, onTicketUpdated }: Ticket
         }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          <Avatar src={otherUser?.avatar_url || undefined} alt={otherUser?.name}>
+          <Avatar
+            src={otherUser?.avatar_url || undefined}
+            alt={otherUser?.name}
+            sx={{ flexShrink: 0 }}
+          >
             {otherUser?.name?.charAt(0).toUpperCase()}
           </Avatar>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h6" fontWeight="bold">
+          <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+            <Typography variant="h6" fontWeight="bold" noWrap>
               {otherUser?.name}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
               {ticket.subject} • {ticket.course.title}
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
             <TicketStatusBadge status={currentTicketStatus} />
             {isConnected ? (
               <Chip icon={<Wifi />} label={t('online')} size="small" color="success" variant="outlined" />
