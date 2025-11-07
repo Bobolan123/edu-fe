@@ -94,7 +94,7 @@ const handleAuth = async (
     const userRole = (session?.user as any)?.role;
     if (userRole !== "admin") {
       return NextResponse.redirect(
-        new URL(`/${locale}${pages.admin.signin()}?error=admin_required`, req.url)
+        new URL(`/${locale}${pages.home.root}?error=admin_required`, req.url)
       );
     }
   }
@@ -106,6 +106,15 @@ const handleAuth = async (
   }
 
   if (isAuth && isAuthPage) {
+    const userRole = (session?.user as any)?.role;
+    const isAdminAuthPage = testPagesRegex(adminAuthPages, req.nextUrl.pathname);
+
+    if (isAdminAuthPage && userRole === "admin") {
+      return NextResponse.redirect(
+        new URL(`/${locale}/admin${search}`, req.url)
+      );
+    }
+
     return NextResponse.redirect(
       new URL(`/${locale}${pages.home.root}${search}`, req.url)
     );

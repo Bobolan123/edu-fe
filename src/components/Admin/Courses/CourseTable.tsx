@@ -148,6 +148,7 @@ export function CourseTable({
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>ID</TableCell>
                 <TableCell>Course</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell align="right">Price</TableCell>
@@ -160,8 +161,8 @@ export function CourseTable({
             </TableHead>
             <TableBody>
               {courses.map((course) => (
-                <TableRow 
-                  key={course.id} 
+                <TableRow
+                  key={course.id}
                   hover
                   sx={{
                     ...(includeDeleted && {
@@ -173,6 +174,12 @@ export function CourseTable({
                     })
                   }}
                 >
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
+                      {course.id}
+                    </Typography>
+                  </TableCell>
+
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar

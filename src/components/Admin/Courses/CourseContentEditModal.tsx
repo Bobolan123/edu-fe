@@ -234,6 +234,12 @@ export default function CourseContentEditModal({
         try {
             await uploadVideoToLecture(course.id, section.id, lecture.id, file);
 
+            // Refetch course structure to get updated video URL
+            const updatedCourseStructure = await getCourseStructure(course.id);
+            if (updatedCourseStructure?.sections) {
+                setLocalSections([...updatedCourseStructure.sections]);
+            }
+
             toastService.success("Video uploaded successfully");
 
         } catch (error) {

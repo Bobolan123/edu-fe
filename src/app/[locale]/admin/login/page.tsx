@@ -62,8 +62,9 @@ export default function AdminLoginPage() {
         password: data.password,
         redirect: false,
       });
+      console.log(result);
 
-      if (result?.error) {
+      if (!result?.ok || result?.error) {
         setError('Invalid email or password. Please try again.');
       } else {
         // Redirect to admin dashboard on successful login

@@ -129,6 +129,7 @@ export function UserTable({
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>ID</TableCell>
                 <TableCell>User</TableCell>
                 <TableCell>Bio</TableCell>
                 <TableCell>Role</TableCell>
@@ -142,8 +143,8 @@ export function UserTable({
             </TableHead>
             <TableBody>
               {users.map((user) => (
-                <TableRow 
-                  key={user.id} 
+                <TableRow
+                  key={user.id}
                   hover
                   sx={{
                     ...(includeDeleted && {
@@ -155,6 +156,12 @@ export function UserTable({
                     })
                   }}
                 >
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
+                      {user.id}
+                    </Typography>
+                  </TableCell>
+
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar
