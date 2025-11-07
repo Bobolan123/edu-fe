@@ -141,15 +141,16 @@ export const uploadVideoToLecture = async (
     return res;
 };
 
-// Caption Response Types
+// Caption Response Types - Updated for triple-language system
 interface ICaptionData {
-    srt?: string;
-    vtt?: string;
+    vtt?: string;      // Original language
+    envtt?: string;    // English
+    vivtt?: string;    // Vietnamese
     transcript?: string;
 }
 
-// Get Lecture Captions
-export const getLectureCaptions = async (lectureId: string, format: 'srt' | 'transcript') => {
+// Get Lecture Captions - Returns all three caption tracks
+export const getLectureCaptions = async (lectureId: string) => {
     try {
         const res = await sendRequest<IBackendRes<ICaptionData>>({
             method: "GET",
@@ -160,9 +161,13 @@ export const getLectureCaptions = async (lectureId: string, format: 'srt' | 'tra
                 },
             },
         });
-        console.log(res?.data?.[format])
-        // Return the requested format URL directly from data
-        return res?.data?.[format] || null;
+
+        // Return all three caption URLs
+        return res?.data ? {
+            vtt: res.data.vtt || null,
+            envtt: res.data.envtt || null,
+            vivtt: res.data.vivtt || null,
+        } : null;
     } catch (error) {
         return null;
     }

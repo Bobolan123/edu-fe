@@ -68,7 +68,6 @@ import { useRouter } from "next/navigation";
 import { EnrollmentProgress } from "@/app/[locale]/my-learning/[title]/page";
 import QuizDisplay from "./QuizDisplay";
 import ChatBot from "./Chatbot";
-import { isSrtFile, convertSrtUrlToVttBlob } from "@/utils/utils";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
@@ -107,8 +106,11 @@ export default function     CourseLesson({
         null
     );
     const [captionsEnabled, setCaptionsEnabled] = useState(true);
-    const [captionUrl, setCaptionUrl] = useState<string | null>(null);
-    const [vttCaptionUrl, setVttCaptionUrl] = useState<string | null>(null);
+    const [captionUrls, setCaptionUrls] = useState<{
+        vtt: string | null;
+        envtt: string | null;
+        vivtt: string | null;
+    }>({ vtt: null, envtt: null, vivtt: null });
     const [quizAnswers, setQuizAnswers] = useState<Record<string, string | number | boolean>>({});
     const [quizResult, setQuizResult] = useState<any>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,41 +176,6 @@ export default function     CourseLesson({
         toast.info("Quiz reset. You can now retake the quiz.");
     };
 
-    // Convert SRT to VTT if needed
-    useEffect(() => {
-        let blobUrl: string | null = null;
-
-        const convertCaption = async () => {
-            if (!captionUrl) {
-                setVttCaptionUrl(null);
-                return;
-            }
-
-            // If it's an SRT file, convert it to VTT
-            if (isSrtFile(captionUrl)) {
-                const convertedUrl = await convertSrtUrlToVttBlob(captionUrl);
-                if (convertedUrl) {
-                    blobUrl = convertedUrl;
-                    setVttCaptionUrl(convertedUrl);
-                } else {
-                    // Conversion failed, try using original URL anyway
-                    setVttCaptionUrl(captionUrl);
-                }
-            } else {
-                // Already VTT or other format, use as-is
-                setVttCaptionUrl(captionUrl);
-            }
-        };
-
-        convertCaption();
-
-        // Cleanup blob URL when component unmounts or captionUrl changes
-        return () => {
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-            }
-        };
-    }, [captionUrl]);
 
     const isLectureCompleted = (lectureId: string): boolean => {
         if (!enrollmentProgress?.lectureProgress) return false;
@@ -291,10 +258,16 @@ export default function     CourseLesson({
                 }
             }
 
-            // Fetch captions for the first lecture client-side (only for video lectures)
+            // Fetch all three caption tracks for the first lecture (only for video lectures)
             if (firstLecture.id && firstLecture.contentType === 'video') {
-                getLectureCaptions(firstLecture.id, 'srt').then(url => {
-                    setCaptionUrl(url);
+                getLectureCaptions(firstLecture.id).then(captions => {
+                    if (captions) {
+                        setCaptionUrls({
+                            vtt: captions.vtt || null,
+                            envtt: captions.envtt || null,
+                            vivtt: captions.vivtt || null,
+                        });
+                    }
                 });
             }
         }
@@ -340,7 +313,12 @@ export default function     CourseLesson({
                     for (let i = 0; i < video.textTracks.length; i++) {
                         const track = video.textTracks[i];
                         if (track.kind === 'subtitles') {
-                            track.mode = captionsEnabled ? 'showing' : 'hidden';
+                            // Enable first available track by default
+                            if (i === 0 && captionsEnabled) {
+                                track.mode = 'showing';
+                            } else {
+                                track.mode = 'disabled';
+                            }
                         }
                     }
                 }
@@ -351,7 +329,7 @@ export default function     CourseLesson({
         const timer = setTimeout(enableCaptions, 1000);
 
         return () => clearTimeout(timer);
-    }, [captionsEnabled, vttCaptionUrl, curVideoUrl]);
+    }, [captionsEnabled, captionUrls, curVideoUrl]);
 
     const handleLectureChange = useCallback(
         async (lecture: any) => {
@@ -417,12 +395,18 @@ export default function     CourseLesson({
                     }
                 }
 
-                // Fetch captions for the new lecture using server action (only for video lectures)
+                // Fetch all three caption tracks for the new lecture (only for video lectures)
                 if (lecture.id && lecture.contentType === 'video') {
-                    const newCaptionUrl = await getLectureCaptions(lecture.id, 'srt');
-                    setCaptionUrl(newCaptionUrl);
+                    const captions = await getLectureCaptions(lecture.id);
+                    if (captions) {
+                        setCaptionUrls({
+                            vtt: captions.vtt || null,
+                            envtt: captions.envtt || null,
+                            vivtt: captions.vivtt || null,
+                        });
+                    }
                 } else {
-                    setCaptionUrl(null);
+                    setCaptionUrls({ vtt: null, envtt: null, vivtt: null });
                 }
             }, 100);
         },
@@ -443,13 +427,18 @@ export default function     CourseLesson({
         }
 
         // Enable captions when video is ready
-        if (muxPlayerRef.current && vttCaptionUrl) {
+        if (muxPlayerRef.current) {
             const video = muxPlayerRef.current.media || muxPlayerRef.current;
             if (video?.textTracks && video.textTracks.length > 0) {
                 for (let i = 0; i < video.textTracks.length; i++) {
                     const track = video.textTracks[i];
                     if (track.kind === 'subtitles') {
-                        track.mode = captionsEnabled ? 'showing' : 'hidden';
+                        // Enable first available track by default
+                        if (i === 0 && captionsEnabled) {
+                            track.mode = 'showing';
+                        } else {
+                            track.mode = 'disabled';
+                        }
                     }
                 }
             }
@@ -586,14 +575,30 @@ export default function     CourseLesson({
                                     
 
                                 >
-                                    {/* Add caption track if available and enabled */}
-                                    {vttCaptionUrl && (
+                                    {/* Add all three caption tracks (Original, English, Vietnamese) */}
+                                    {captionUrls.vtt && (
                                         <track
                                             kind="subtitles"
-                                            src={vttCaptionUrl}
-                                            srcLang="en"
-                                            label="On"
+                                            src={captionUrls.vtt}
+                                            srcLang="auto"
+                                            label="Original"
                                             default
+                                        />
+                                    )}
+                                    {captionUrls.envtt && (
+                                        <track
+                                            kind="subtitles"
+                                            src={captionUrls.envtt}
+                                            srcLang="en"
+                                            label="English"
+                                        />
+                                    )}
+                                    {captionUrls.vivtt && (
+                                        <track
+                                            kind="subtitles"
+                                            src={captionUrls.vivtt}
+                                            srcLang="vi"
+                                            label="Tiếng Việt"
                                         />
                                     )}
                                 </MuxPlayer>
