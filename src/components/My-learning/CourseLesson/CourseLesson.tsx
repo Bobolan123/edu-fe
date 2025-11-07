@@ -111,6 +111,7 @@ export default function     CourseLesson({
         envtt: string | null;
         vivtt: string | null;
     }>({ vtt: null, envtt: null, vivtt: null });
+    const [selectedCaptionTrack, setSelectedCaptionTrack] = useState<number | null>(null);
     const [quizAnswers, setQuizAnswers] = useState<Record<string, string | number | boolean>>({});
     const [quizResult, setQuizResult] = useState<any>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -304,32 +305,77 @@ export default function     CourseLesson({
         }
     }, [enrollmentProgress, currentLecture?.lectureId, isRetaking]);
 
-    // Control caption display programmatically
+    // Listen for user caption track changes
     useEffect(() => {
-        const enableCaptions = () => {
-            if (muxPlayerRef.current) {
-                const video = muxPlayerRef.current.media || muxPlayerRef.current;
-                if (video?.textTracks && video.textTracks.length > 0) {
+        if (muxPlayerRef.current) {
+            const video = muxPlayerRef.current.media || muxPlayerRef.current;
+            if (video?.textTracks) {
+                const handleTrackChange = () => {
                     for (let i = 0; i < video.textTracks.length; i++) {
                         const track = video.textTracks[i];
-                        if (track.kind === 'subtitles') {
-                            // Enable first available track by default
-                            if (i === 0 && captionsEnabled) {
-                                track.mode = 'showing';
-                            } else {
+                        if (track.kind === 'subtitles' && track.mode === 'showing') {
+                            setSelectedCaptionTrack(i);
+                            break;
+                        }
+                    }
+                };
+
+                // Listen to track changes
+                for (let i = 0; i < video.textTracks.length; i++) {
+                    video.textTracks[i].addEventListener('change', handleTrackChange);
+                }
+
+                return () => {
+                    for (let i = 0; i < video.textTracks.length; i++) {
+                        video.textTracks[i].removeEventListener('change', handleTrackChange);
+                    }
+                };
+            }
+        }
+    }, [curVideoUrl]);
+
+    // Only set default caption on initial load or video change
+    useEffect(() => {
+        if (muxPlayerRef.current) {
+            const video = muxPlayerRef.current.media || muxPlayerRef.current;
+            if (video?.textTracks && video.textTracks.length > 0) {
+                const timer = setTimeout(() => {
+                    // Count how many tracks are currently showing
+                    let showingCount = 0;
+                    for (let i = 0; i < video.textTracks.length; i++) {
+                        if (video.textTracks[i].kind === 'subtitles' && video.textTracks[i].mode === 'showing') {
+                            showingCount++;
+                        }
+                    }
+
+                    // Only set default if no track is selected yet
+                    if (selectedCaptionTrack === null) {
+                        // Disable all tracks first
+                        for (let i = 0; i < video.textTracks.length; i++) {
+                            const track = video.textTracks[i];
+                            if (track.kind === 'subtitles') {
                                 track.mode = 'disabled';
                             }
                         }
+                        // Enable first track only
+                        if (video.textTracks.length > 0 && video.textTracks[0].kind === 'subtitles') {
+                            video.textTracks[0].mode = 'showing';
+                        }
+                        setSelectedCaptionTrack(0);
+                    } else {
+                        // Restore previously selected track - disable all others first
+                        for (let i = 0; i < video.textTracks.length; i++) {
+                            const track = video.textTracks[i];
+                            if (track.kind === 'subtitles') {
+                                track.mode = i === selectedCaptionTrack ? 'showing' : 'disabled';
+                            }
+                        }
                     }
-                }
+                }, 500);
+                return () => clearTimeout(timer);
             }
-        };
-
-        enableCaptions();
-        const timer = setTimeout(enableCaptions, 1000);
-
-        return () => clearTimeout(timer);
-    }, [captionsEnabled, captionUrls, curVideoUrl]);
+        }
+    }, [captionUrls, curVideoUrl, selectedCaptionTrack]);
 
     const handleLectureChange = useCallback(
         async (lecture: any) => {
@@ -340,6 +386,8 @@ export default function     CourseLesson({
 
             setIsVideoLoading(true);
             setUseFallbackPlayer(false); // Reset fallback player
+            // Keep the selected caption track when changing lectures
+            // setSelectedCaptionTrack(null); // Uncomment to reset to default track on lecture change
 
             // Set timeout for video loading (15 seconds)
             const timeout = setTimeout(() => {
@@ -424,24 +472,6 @@ export default function     CourseLesson({
         if (loadingTimeout) {
             clearTimeout(loadingTimeout);
             setLoadingTimeout(null);
-        }
-
-        // Enable captions when video is ready
-        if (muxPlayerRef.current) {
-            const video = muxPlayerRef.current.media || muxPlayerRef.current;
-            if (video?.textTracks && video.textTracks.length > 0) {
-                for (let i = 0; i < video.textTracks.length; i++) {
-                    const track = video.textTracks[i];
-                    if (track.kind === 'subtitles') {
-                        // Enable first available track by default
-                        if (i === 0 && captionsEnabled) {
-                            track.mode = 'showing';
-                        } else {
-                            track.mode = 'disabled';
-                        }
-                    }
-                }
-            }
         }
     };
 
@@ -582,7 +612,6 @@ export default function     CourseLesson({
                                             src={captionUrls.vtt}
                                             srcLang="auto"
                                             label="Original"
-                                            default
                                         />
                                     )}
                                     {captionUrls.envtt && (
