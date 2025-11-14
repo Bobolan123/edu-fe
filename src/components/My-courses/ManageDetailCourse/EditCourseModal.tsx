@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { updateCourse } from "@/actions/coursesAction";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { LANGUAGES } from "../../../../common/constant";
 
 interface EditCourseModalProps {
     open: boolean;
@@ -196,8 +197,11 @@ export default function EditCourseModal({
                             onChange={(e) => setEditedCourse(prev => ({ ...prev, language: e.target.value }))}
                             label="Language"
                         >
-                            <MenuItem value="English">🇺🇸 English</MenuItem>
-                            <MenuItem value="Vietnamese">🇻🇳 Tiếng Việt</MenuItem>
+                            {LANGUAGES.map((lang) => (
+                                <MenuItem key={lang.value} value={lang.value}>
+                                    {lang.flag} {lang.label}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
                     

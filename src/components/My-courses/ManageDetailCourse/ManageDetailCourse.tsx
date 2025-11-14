@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "../../../i18n/routing";
+import { LANGUAGES } from "../../../../common/constant";
 import {
     Box,
     Card,
@@ -624,9 +625,10 @@ export default function ManageDetailCourse({
                                             variant="h4"
                                             className="font-black text-blue-900"
                                         >
-                                            {course.language === "Vietnamese"
-                                                ? "🇻🇳 Tiếng Việt"
-                                                : "🇺🇸 English"}
+                                            {(() => {
+                                                const lang = LANGUAGES.find(l => l.value === course.language);
+                                                return lang ? `${lang.flag} ${lang.label}` : course.language;
+                                            })()}
                                         </Typography>
                                         <Typography
                                             variant="body2"

@@ -32,6 +32,7 @@ import { createCourse, updateCourse } from '../../../actions/coursesAction';
 import { ICategory, ICourse } from '../../../../types/entities';
 import { useCurrency } from '@/context/CurrencyContext';
 import { currencyService } from '@/services/currency';
+import { LANGUAGES } from '../../../../common/constant';
 
 interface CourseFormData {
   title: string;
@@ -53,16 +54,7 @@ interface CourseFormProps {
   onError: (error: string) => void;
 }
 
-const languages = [
-  { value: 'en', label: 'English' },
-  { value: 'vi', label: 'Vietnamese' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'fr', label: 'French' },
-  { value: 'de', label: 'German' },
-  { value: 'ja', label: 'Japanese' },
-  { value: 'ko', label: 'Korean' },
-  { value: 'zh', label: 'Chinese' },
-];
+// Languages are now imported from common/constant.ts
 
 export function CourseForm({
   open,
@@ -79,7 +71,7 @@ export function CourseForm({
     title: '',
     description: '',
     price: 0,
-    language: 'en',
+    language: 'English',
     isActive: true,
     categoryIds: [],
     instructorId: 0,
@@ -94,7 +86,7 @@ export function CourseForm({
         title: course.title || '',
         description: course.description || '',
         price: Math.round(course.price || 0),
-        language: course.language || 'en',
+        language: course.language || 'English',
         isActive: course.isActive ?? true,
         categoryIds: course.categories?.map(c => c.id) || [],
         instructorId: course.instructor?.id || 0,
@@ -106,7 +98,7 @@ export function CourseForm({
         title: '',
         description: '',
         price: 0,
-        language: 'en',
+        language: 'English',
         isActive: true,
         categoryIds: [],
         instructorId: 0,
@@ -143,7 +135,7 @@ export function CourseForm({
       title: '',
       description: '',
       price: 0,
-      language: 'en',
+      language: 'English',
       isActive: true,
       categoryIds: [],
       instructorId: 0,
@@ -348,9 +340,9 @@ export function CourseForm({
                     onChange={(e) => handleInputChange('language', e.target.value)}
                     disabled={isPending}
                   >
-                    {languages.map((lang) => (
+                    {LANGUAGES.map((lang) => (
                       <MenuItem key={lang.value} value={lang.value}>
-                        {lang.label}
+                        {lang.flag} {lang.label}
                       </MenuItem>
                     ))}
                   </Select>

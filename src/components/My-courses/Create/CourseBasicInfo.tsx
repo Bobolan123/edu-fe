@@ -98,8 +98,11 @@ export default function     CourseBasicInfo({
                                             onCourseChange("language", e.target.value)
                                         }
                                     >
-                                        <MenuItem value="English">🇺🇸 English</MenuItem>
-                                        <MenuItem value="Vietnamese">🇻🇳 Tiếng Việt</MenuItem>
+                                        {LANGUAGES.map((lang) => (
+                                            <MenuItem key={lang.value} value={lang.value}>
+                                                {lang.flag} {lang.label}
+                                            </MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
 
