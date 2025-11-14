@@ -10,18 +10,14 @@ import {
     Container,
     Divider,
     IconButton,
-    InputBase,
     ListItemIcon,
     Menu,
     MenuItem,
-    styled,
     Toolbar,
     Typography,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
-    AccountCircle,
-    Search as SearchIcon,
     Person as PersonIcon,
     School as SchoolIcon,
     BookmarkBorder as BookmarkIcon,
@@ -36,59 +32,7 @@ import { signOut, useSession } from "next-auth/react";
 import CartDropdown from "./cart/CartDropdown";
 import { ICart, ICartItem } from "../../../types/entities";
 import CurrencySelector from "./CurrencySelector";
-
-const Search = styled("div")(({ theme }) => ({
-    position: "relative",
-    borderRadius: 25,
-    backgroundColor: alpha(theme.palette.grey[100], 0.8),
-    border: `1px solid ${alpha(theme.palette.grey[300], 0.3)}`,
-    "&:hover": {
-        backgroundColor: alpha(theme.palette.grey[200], 0.8),
-        borderColor: alpha(theme.palette.primary.main, 0.3),
-    },
-    "&:focus-within": {
-        backgroundColor: "white",
-        borderColor: theme.palette.primary.main,
-        boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`,
-    },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: "100%",
-    maxWidth: 350,
-    [theme.breakpoints.up("sm")]: {
-        marginLeft: theme.spacing(3),
-        width: "auto",
-    },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: theme.palette.text.primary,
-    width: "100%",
-    "& .MuiInputBase-input": {
-        padding: theme.spacing(1.2, 2, 1.2, 0),
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        width: "100%",
-        fontSize: "0.95rem",
-        fontWeight: 400,
-        "&::placeholder": {
-            color: theme.palette.text.secondary,
-            opacity: 0.8,
-        },
-        [theme.breakpoints.up("md")]: {
-            width: "250px",
-        },
-    },
-}));
+import SearchAutocomplete from "./SearchAutocomplete";
 
 interface INavbarClientProps {
     cart: ICart;
@@ -334,15 +278,7 @@ export default function NavbarClient({ cart }: INavbarClientProps) {
                             </Box>
 
                             <Box sx={{ display: { xs: 'none', sm: 'block' }, ml: 3 }}>
-                                <Search>
-                                    <SearchIconWrapper>
-                                        <SearchIcon sx={{ color: 'text.secondary' }} />
-                                    </SearchIconWrapper>
-                                    <StyledInputBase
-                                        placeholder={t("search")}
-                                        inputProps={{ "aria-label": "search" }}
-                                    />
-                                </Search>
+                                <SearchAutocomplete />
                             </Box>
                         </Box>
 

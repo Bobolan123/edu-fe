@@ -31,15 +31,11 @@ export default async function CourseDetailPage({
 
     // Fetch captions for the first lecture server-side (if available)
     const firstLecture = courseContent?.sections?.[0]?.lectures?.[0];
-    const firstLectureCaptionUrl = firstLecture?.id
-        ? await getLectureCaptions(firstLecture.id, 'srt')
-        : null;
 
     return (
         <CourseDetail
             course={course}
             courseContent={courseContent || undefined}
-            firstLectureCaptionUrl={firstLectureCaptionUrl}
         />
     );
 }
