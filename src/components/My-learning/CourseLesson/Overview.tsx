@@ -25,15 +25,16 @@ import {
     TrendingUp,
 } from "@mui/icons-material";
 import { ICourse } from "../../../../types/entities";
+import { useTranslations } from "next-intl";
 
-const formatLectureCount = (course?: ICourse) => {
-    if (!course?.sections) return "0 lectures";
+const formatLectureCount = (course?: ICourse, t?: any) => {
+    if (!course?.sections) return t ? t("lectures_count", { count: 0 }) : "0 lectures";
     const totalLectures = course.sections.reduce((total, section) => total + section.lectures.length, 0);
-    return `${totalLectures} lecture${totalLectures !== 1 ? "s" : ""}`;
+    return t ? t("lectures_count", { count: totalLectures }) : `${totalLectures} lecture${totalLectures !== 1 ? "s" : ""}`;
 };
 
-const formatDate = (date?: Date | string) => {
-    if (!date) return "N/A";
+const formatDate = (date?: Date | string, naText: string = "N/A") => {
+    if (!date) return naText;
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return dateObj.toLocaleDateString("en-US", {
         month: "long",
@@ -46,6 +47,7 @@ interface ICourseOverview {
 }
 
 export default function CourseOverview({ course }: ICourseOverview) {
+    const t = useTranslations("CourseOverview");
     return (
         <Box
             className="h-96 overflow-y-auto pr-2"
@@ -138,19 +140,19 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                     {course?.average_rating ?? "N/A"}
                                 </Typography>
                                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                    ({course?.total_reviews?.toLocaleString?.() ?? 0} reviews)
+                                    ({course?.total_reviews?.toLocaleString?.() ?? 0} {course?.total_reviews === 1 ? t("review") : t("reviews")})
                                 </Typography>
                             </Box>
                             <Box className="flex items-center gap-2">
                                 <People fontSize="small" sx={{ opacity: 0.8 }} />
                                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                    {course?.total_students?.toLocaleString?.() ?? 0} students
+                                    {course?.total_students?.toLocaleString?.() ?? 0} {t("students")}
                                 </Typography>
                             </Box>
                             <Box className="flex items-center gap-2">
                                 <AccessTime fontSize="small" sx={{ opacity: 0.8 }} />
                                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                    {formatLectureCount(course)}
+                                    {formatLectureCount(course, t)}
                                 </Typography>
                             </Box>
                         </Stack>
@@ -159,13 +161,13 @@ export default function CourseOverview({ course }: ICourseOverview) {
                             <Box className="flex items-center gap-2">
                                 <CalendarMonth fontSize="small" />
                                 <Typography variant="body2">
-                                    Updated {formatDate(course?.last_updated)}
+                                    {t("last_updated")}: {formatDate(course?.last_updated, t("na"))}
                                 </Typography>
                             </Box>
                             <Box className="flex items-center gap-2">
                                 <Language fontSize="small" />
                                 <Typography variant="body2">
-                                    {course?.language ?? "N/A"}
+                                    {course?.language ?? t("na")}
                                 </Typography>
                             </Box>
                         </Stack>
@@ -198,7 +200,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                     <Box display="flex" alignItems="center" gap={1} mb={2}>
                                         <School color="primary" />
                                         <Typography variant="h6" fontWeight={600} color="primary">
-                                            Meet Your Instructor
+                                            {t("meet_instructor")}
                                         </Typography>
                                     </Box>
                                     <Box display="flex" gap={3} alignItems="center">
@@ -225,7 +227,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                                 color="text.primary"
                                                 gutterBottom
                                             >
-                                                {course?.instructor?.name ?? "Unknown"}
+                                                {course?.instructor?.name ?? t("unknown")}
                                             </Typography>
                                             {course?.instructor?.bio && (
                                                 <Typography
@@ -267,7 +269,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                 <Box display="flex" alignItems="center" gap={1} mb={3}>
                                     <TrendingUp color="primary" />
                                     <Typography variant="h6" fontWeight={600} color="primary">
-                                        Course Statistics
+                                        {t("course_stats")}
                                     </Typography>
                                 </Box>
                                 <Grid container spacing={3}>
@@ -279,7 +281,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                                     color="text.secondary"
                                                     sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
                                                 >
-                                                    Price
+                                                    {t("price")}
                                                 </Typography>
                                                 <Typography variant="h6" fontWeight={600} color="primary">
                                                     ${course?.price ?? 0}
@@ -291,7 +293,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                                     color="text.secondary"
                                                     sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
                                                 >
-                                                    Students Enrolled
+                                                    {t("students_enrolled")}
                                                 </Typography>
                                                 <Typography variant="h6" fontWeight={600} color="primary">
                                                     {course?.total_students?.toLocaleString?.() ?? 0}
@@ -386,7 +388,7 @@ export default function CourseOverview({ course }: ICourseOverview) {
                                     gutterBottom
                                     sx={{ mb: 3 }}
                                 >
-                                    About This Course
+                                    {t("about_course")}
                                 </Typography>
                                 <Divider sx={{ mb: 3 }} />
                                 {course?.description ? (

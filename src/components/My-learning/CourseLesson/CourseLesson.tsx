@@ -2,21 +2,27 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
+// Import translations for loading component
+import { useTranslations as useT } from "next-intl";
+
 // Dynamically import MuxPlayer to avoid SSR issues
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), {
     ssr: false,
-    loading: () => (
-        <div className="w-full h-full flex items-center justify-center bg-black">
-            <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                <p className="text-white">Loading video player...</p>
+    loading: () => {
+        // Note: Can't use hooks in dynamic loading component, so using default text
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-black">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                    <p className="text-white">Loading video player...</p>
+                </div>
             </div>
-        </div>
-    ),
+        );
+    },
 });
 
-// Fallback video player component
-const FallbackVideoPlayer = ({ src, onLoadStart, onCanPlay, onError }: any) => (
+// Fallback video player component with translations support
+const FallbackVideoPlayer = ({ src, onLoadStart, onCanPlay, onError, videoNotSupportedText }: any) => (
     <video
         controls
         style={{
@@ -31,7 +37,7 @@ const FallbackVideoPlayer = ({ src, onLoadStart, onCanPlay, onError }: any) => (
         className="bg-black"
     >
         <source src={src} type="video/mp4" />
-        Your browser does not support the video tag.
+        {videoNotSupportedText || "Your browser does not support the video tag."}
     </video>
 );
 import {
@@ -68,6 +74,7 @@ import { useRouter } from "next/navigation";
 import { EnrollmentProgress } from "@/app/[locale]/my-learning/[title]/page";
 import QuizDisplay from "./QuizDisplay";
 import ChatBot from "./Chatbot";
+import { useTranslations } from "next-intl";
 
 interface ICourseLesson {
     courseContent: ICourseContent;
@@ -86,6 +93,7 @@ export default function     CourseLesson({
     resUserReviews,
     userReview,
 }: ICourseLesson) {
+    const t = useTranslations("CourseLesson");
     const router = useRouter();
     const [activeTab, setActiveTab] = useState(0);
     const [expandedSection, setExpandedSection] = useState<string | false>(
@@ -132,7 +140,7 @@ export default function     CourseLesson({
     // Handle quiz submission
     const handleQuizSubmit = async () => {
         if (!enrollmentProgress?.enrollment.id || !currentLecture?.lectureId) {
-            toast.error("Unable to submit quiz");
+            toast.error(t("quiz_error"));
             return;
         }
 
@@ -163,7 +171,7 @@ export default function     CourseLesson({
             // No need to refresh the page
         } catch (error: any) {
             console.error("Failed to submit quiz:", error);
-            toast.error(error.message || "Failed to submit quiz");
+            toast.error(error.message || t("quiz_error"));
         } finally {
             setIsSubmitting(false);
         }
@@ -190,7 +198,7 @@ export default function     CourseLesson({
     // Function to handle lecture completion toggle
     const handleLectureToggle = async (lectureId: string) => {
         if (!enrollmentProgress?.enrollment.id || !course?.id) {
-            toast.error("Authentication required");
+            toast.error(t("lecture_complete_error"));
             return;
         }
 
@@ -200,12 +208,13 @@ export default function     CourseLesson({
                 lectureId,
                 course.id
             );
+            toast.success(t("lecture_complete_success"));
 
     
 
         } catch (error) {
             console.error("Failed to mark lecture as completed:", error);
-            toast.error("Failed to update lecture status");
+            toast.error(t("lecture_complete_error"));
         }
     };
 
@@ -652,9 +661,9 @@ export default function     CourseLesson({
                             onChange={(_, val) => setActiveTab(val)}
                             className="px-4"
                         >
-                            <Tab label="Overview" />
-                            <Tab label="Reviews" />
-                            <Tab label="Ask Instructor" />
+                            <Tab label={t("overview")} />
+                            <Tab label={t("reviews")} />
+                            <Tab label={t("ask_instructor")} />
                         </Tabs>
                     </div>
 

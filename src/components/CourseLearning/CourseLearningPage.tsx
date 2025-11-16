@@ -26,6 +26,7 @@ import {
 } from "@mui/icons-material";
 import { ICourse, ICourseContent, ICourseSection, ICourseLecture } from "../../../types/entities";
 import VideoPlayerWithProgress from "../VideoPlayer/VideoPlayerWithProgress";
+import { useTranslations } from "next-intl";
 
 interface CourseLearningPageProps {
     course: ICourse;
@@ -42,6 +43,7 @@ const CourseLearningPage = ({
     initialProgress = {},
     completedLectures = [],
 }: CourseLearningPageProps) => {
+    const t = useTranslations("CourseLearning");
     const [currentLecture, setCurrentLecture] = useState<ICourseLecture | null>(null);
     const [currentSection, setCurrentSection] = useState<ICourseSection | null>(null);
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
@@ -164,7 +166,7 @@ const CourseLearningPage = ({
                             {/* Overall Progress */}
                             <Box mb={2}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                                    <Typography variant="body2">Course Progress</Typography>
+                                    <Typography variant="body2">{t("course_progress")}</Typography>
                                     <Typography variant="body2" fontWeight="bold">
                                         {calculateOverallProgress()}%
                                     </Typography>
@@ -192,10 +194,10 @@ const CourseLearningPage = ({
                                                             </Typography>
                                                             <Box display="flex" justifyContent="space-between" mt={1}>
                                                                 <Typography variant="caption" color="text.secondary">
-                                                                    {section.lectures.length} lectures
+                                                                    {t("lectures_count", { count: section.lectures.length })}
                                                                 </Typography>
                                                                 <Typography variant="caption" color="text.secondary">
-                                                                    {calculateSectionProgress(section)}% complete
+                                                                    {t("section_progress", { percent: calculateSectionProgress(section) })}
                                                                 </Typography>
                                                             </Box>
                                                             <LinearProgress
@@ -279,7 +281,7 @@ const CourseLearningPage = ({
                                             variant="outlined"
                                         />
                                         <Typography variant="body2" color="text.secondary">
-                                            Duration: {formatDuration(currentLecture.durationSeconds || 0)}
+                                            {t("duration", { duration: formatDuration(currentLecture.durationSeconds || 0) })}
                                         </Typography>
                                     </Box>
                                 </Box>
@@ -304,10 +306,10 @@ const CourseLearningPage = ({
                                     <Paper sx={{ p: 3, textAlign: 'center' }}>
                                         <QuizIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                                         <Typography variant="h6" gutterBottom>
-                                            Quiz: {currentLecture.title}
+                                            {t("quiz_title", { title: currentLecture.title })}
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            Quiz functionality coming soon...
+                                            {t("quiz_coming_soon")}
                                         </Typography>
                                     </Paper>
                                 )}
@@ -315,7 +317,7 @@ const CourseLearningPage = ({
                         ) : (
                             <Box textAlign="center" py={8}>
                                 <Typography variant="h6" color="text.secondary">
-                                    Select a lecture to begin learning
+                                    {t("select_lecture")}
                                 </Typography>
                             </Box>
                         )}

@@ -2,6 +2,7 @@
 
 import { Box, Typography, Chip } from "@mui/material";
 import { IQuizSubmission } from "../../../../types/entities";
+import { useTranslations } from "next-intl";
 
 interface QuizQuestion {
     id: string;
@@ -40,6 +41,7 @@ export default function QuizDisplay({
     onSubmit,
     onRetake,
 }: QuizDisplayProps) {
+    const t = useTranslations("QuizDisplay");
     const hasSubmission = !!submission;
     const hasFailed = quizResult && !quizResult.passed;
     console.log("-------adfsadf",submission)
@@ -193,7 +195,7 @@ export default function QuizDisplay({
                             {/* True/False Options */}
                             {question.type === 'true_false' && (
                                 <Box className="space-y-2">
-                                    {[{ value: true, label: 'True' }, { value: false, label: 'False' }].map((option) => {
+                                    {[{ value: true, label: t("true") }, { value: false, label: t("false") }].map((option) => {
                                         const isSelected = selectedAnswer === option.value;
                                         const isCorrectOption = resultData && correctAnswer === (option.value ? 1 : 0);
                                         const isWrongSelection = resultData && isSelected && !isCorrect;
@@ -362,7 +364,7 @@ export default function QuizDisplay({
                                     return answeredGraded !== gradedQuestions.length || isSubmitting;
                                 })()}
                             >
-                                {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
+                                {isSubmitting ? t("submitting") : t("submit_quiz")}
                             </button>
                         </Box>
                     </Box>
@@ -375,7 +377,7 @@ export default function QuizDisplay({
                             onClick={onRetake}
                             className="px-6 py-2.5 bg-orange-600 text-white font-semibold text-sm rounded hover:bg-orange-700 transition-colors"
                         >
-                            Retake Quiz
+                            {t("retake_quiz")}
                         </button>
                     </Box>
                 )}
