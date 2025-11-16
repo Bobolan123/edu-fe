@@ -30,7 +30,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { signOut, useSession } from "next-auth/react";
 import CartDropdown from "./cart/CartDropdown";
-import { ICart, ICartItem } from "../../../types/entities";
+import { ICart, ICartItem } from "@/types/entities";
 import CurrencySelector from "./CurrencySelector";
 import SearchAutocomplete from "./SearchAutocomplete";
 

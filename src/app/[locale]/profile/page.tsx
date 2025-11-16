@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { getCurrentUserProfile } from "@/actions/userActions";
 import { redirect } from "next/navigation";
-import ProfilePageClient from "../../../components/Profile/ProfilePageClient";
+import ProfilePageClient from "@/components/Profile/ProfilePageClient";
 
 export default async function ProfilePage() {
     const session = await auth();
