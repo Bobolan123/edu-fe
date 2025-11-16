@@ -1,17 +1,12 @@
 import CourseDetail from "@/components/CourseDetail/CourseDetail";
-import {
-    ICategory,
-    ICourse,
-    ICourseContent,
-} from "../../../../../types/entities";
 import { getCourseById } from "@/actions/coursesAction";
 import { getCourseContent, getLectureCaptions } from "@/actions/courseContentAction";
 import { extractIdFromSlug } from "@/utils/utils";
 import { notFound } from "next/navigation";
 
 interface Params {
-    params: { title: string };
-    searchParams?: Record<string, string>;
+    params: Promise<{ title: string }>;
+    searchParams?: Promise<Record<string, string>>;
 }
 
 export default async function CourseDetailPage({
