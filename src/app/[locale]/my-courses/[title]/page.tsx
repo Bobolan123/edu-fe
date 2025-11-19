@@ -7,15 +7,15 @@ import { getAllReviews } from "@/actions/reviewsAction";
 import { slugify } from "../../../../utils/utils";
 
 interface IParams {
-    params: { title: string };
-    searchParams: { 
+    params: Promise<{ title: string }>;
+    searchParams: Promise<{
         id: string;
         studentsPage?: string;
         studentsTake?: string;
         reviewsPage?: string;
         reviewsTake?: string;
         tab?: string;
-    };
+    }>;
 }
 
 export default async function ManageDetailCoursePage({

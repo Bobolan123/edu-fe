@@ -63,7 +63,7 @@ export default function TestimonialsSection() {
     };
 
     return (
-        <Box sx={{ bgcolor: '#333b3c', py: 10, mt: 8, height: '85vh' }}>
+        <Box sx={{ bgcolor: '#333b3c', py: 10, mt: 8, height: '700px' }}>
             <Container maxWidth="lg">
                 <Typography variant="h3" component="h2" gutterBottom sx={{ color: 'white', textAlign: 'center', mb: 6 }}>
                     {t('title')}

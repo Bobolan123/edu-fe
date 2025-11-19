@@ -8,132 +8,144 @@ import {
     Pinterest,
     Instagram,
     Twitter,
-    LinkedIn,
-    MusicNote,
 } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
 
 const socialLinks = [
-    { Icon: YouTube, href: 'https://youtube.com' },
     { Icon: Facebook, href: 'https://facebook.com' },
     { Icon: Pinterest, href: 'https://pinterest.com' },
-    { Icon: Instagram, href: 'https://instagram.com' },
     { Icon: Twitter, href: 'https://twitter.com' },
-    { Icon: LinkedIn, href: 'https://linkedin.com' },
-    { Icon: MusicNote, href: 'https://tiktok.com' },
+    { Icon: Instagram, href: 'https://instagram.com' },
+    { Icon: YouTube, href: 'https://youtube.com' },
 ];
 
 export default function Footer() {
     const t = useTranslations('Footer');
     
-    const footerLinks = {
-        explore: {
-            title: t('section_explore'),
+    const footerSections = {
+        help: {
+            title: 'GET HELP',
             links: [
-                { name: t('products'), href: '/products' },
-                { name: t('features'), href: '/features' },
-                { name: t('pricing'), href: '/pricing' },
-                { name: t('staff_picks'), href: '/staff-picks' },
-                { name: t('product_demo'), href: '/demo' },
+                { name: 'Contact Us', href: '/contact' },
+                { name: 'Latest Articles', href: '/articles' },
+                { name: 'FAQ', href: '/faq' },
             ],
         },
-        company: {
-            title: t('section_company'),
+        programs: {
+            title: 'PROGRAMS',
             links: [
-                { name: t('careers'), href: '/careers' },
-                { name: t('blog'), href: '/blog' },
-                { name: t('press'), href: '/press' },
-                { name: t('partners'), href: '/partners' },
-                { name: t('newsletter'), href: '/newsletter' },
-            ],
-        },
-        support: {
-            title: t('section_support'),
-            links: [
-                { name: t('help_center'), href: '/help' },
-                { name: t('house_rules'), href: '/rules' },
-                { name: t('content_guidelines'), href: '/guidelines' },
+                { name: 'Art & Design', href: '/programs/art-design' },
+                { name: 'Business', href: '/programs/business' },
+                { name: 'IT & Software', href: '/programs/it-software' },
+                { name: 'Languages', href: '/programs/languages' },
+                { name: 'Programming', href: '/programs/programming' },
             ],
         },
     };
-    
-    const legalLinks = [
-        { name: t('privacy_policy'), href: '/privacy' },
-        { name: t('terms_of_use'), href: '/terms' },
-        { name: t('cookies_policy'), href: '/cookies' },
-        { name: t('cookie_preferences'), href: '/cookie-preferences' },
-        { name: t('ethics_line'), href: '/ethics' },
-        { name: t('accessibility'), href: '/accessibility' },
-    ];
+
     return (
-        <Box className="bg-[#1B1B1B] text-white pt-8 pb-4">
+        <Box className="bg-[#E8E8E8] text-[#333333] py-12">
             <Container maxWidth="lg">
-                {/* Main Footer Content */}
-                <Grid container spacing={4}>
-                    {/* Logo and Description */}
-                    <Grid item xs={12} md={4}>
-                        <Box className="mb-3">
-                            <Typography variant="h4" className="font-bold mb-2">
-                                MindfulMaze
-                            </Typography>
-                        </Box>
-                        <Typography variant="body2" className="mb-3 opacity-80">
-                            {t('brand_description')}
+                <Grid container spacing={6}>
+                    {/* Brand Section */}
+                    <Grid item xs={12} md={3}>
+                        <Typography 
+                            variant="h5" 
+                            className="font-bold mb-3"
+                            sx={{ fontWeight: 700 }}
+                        >
+                            Mindful Maze
                         </Typography>
-                        {/* Social Media Icons */}
-                        <Box className="flex gap-4">
-                            {socialLinks.map(({ Icon, href }, index) => (
-                                <a
-                                    key={index}
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-white hover:text-primary-500 transition-colors"
+                        <Typography 
+                            variant="body2" 
+                            className="text-[#666666] leading-relaxed"
+                            sx={{ lineHeight: 1.6 }}
+                        >
+                            Enhancing learning experiences and bring international knowledge to Vietnam
+                        </Typography>
+                    </Grid>
+
+                    {/* GET HELP Section */}
+                    <Grid item xs={12} sm={6} md={2.5}>
+                        <Typography 
+                            variant="h6" 
+                            className="font-semibold mb-4"
+                            sx={{ fontWeight: 600, fontSize: '1rem' }}
+                        >
+                            {footerSections.help.title}
+                        </Typography>
+                        <Box className="flex flex-col gap-2.5">
+                            {footerSections.help.links.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    href={link.href}
+                                    className="text-[#666666] hover:text-[#333333] no-underline transition-colors text-sm"
                                 >
-                                    <Icon className="text-2xl" />
-                                </a>
+                                    {link.name}
+                                </Link>
                             ))}
                         </Box>
                     </Grid>
 
-                    {/* Navigation Links */}
-                    {Object.entries(footerLinks).map(([key, section]) => (
-                        <Grid item xs={12} sm={6} md={2} key={key}>
-                            <Typography variant="h6" className="mb-4">
-                                {section.title}
+                    {/* PROGRAMS Section */}
+                    <Grid item xs={12} sm={6} md={3}>
+                        <Typography 
+                            variant="h6" 
+                            className="font-semibold mb-4"
+                            sx={{ fontWeight: 600, fontSize: '1rem' }}
+                        >
+                            {footerSections.programs.title}
+                        </Typography>
+                        <Box className="flex flex-col gap-2.5">
+                            {footerSections.programs.links.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    href={link.href}
+                                    className="text-[#666666] hover:text-[#333333] no-underline transition-colors text-sm"
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                        </Box>
+                    </Grid>
+
+                    {/* CONTACT US Section */}
+                    <Grid item xs={12} md={3.5}>
+                        <Typography 
+                            variant="h6" 
+                            className="font-semibold mb-4"
+                            sx={{ fontWeight: 600, fontSize: '1rem' }}
+                        >
+                            CONTACT US
+                        </Typography>
+                        <Box className="flex flex-col gap-2">
+                            <Typography variant="body2" className="text-[#666666] text-sm">
+                                <strong>Address:</strong> 536 Nguyen Thai Hoc
                             </Typography>
-                            <Box className="flex flex-col gap-2">
-                                {section.links.map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        href={link.href}
-                                        className="text-white opacity-80 hover:opacity-100 no-underline transition-opacity"
+                            <Typography variant="body2" className="text-[#666666] text-sm">
+                                <strong>Tel:</strong> + (84) 2500-567-8988
+                            </Typography>
+                            <Typography variant="body2" className="text-[#666666] text-sm">
+                                <strong>Mail:</strong> mindfulmaze@gmail.com
+                            </Typography>
+                            
+                            {/* Social Media Icons */}
+                            <Box className="flex gap-3 mt-3">
+                                {socialLinks.map(({ Icon, href }, index) => (
+                                    <a
+                                        key={index}
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[#666666] hover:text-[#333333] transition-colors"
                                     >
-                                        {link.name}
-                                    </Link>
+                                        <Icon sx={{ fontSize: 20 }} />
+                                    </a>
                                 ))}
                             </Box>
-                        </Grid>
-                    ))}
+                        </Box>
+                    </Grid>
                 </Grid>
-
-                {/* Bottom Section */}
-                <Box className="mt-8 pt-3 border-t border-white/10 flex flex-col md:flex-row justify-between items-center md:items-start gap-4">
-                    <Typography variant="body2" className="opacity-80">
-                        {t('copyright', { year: new Date().getFullYear() })}
-                    </Typography>
-                    <Box className="flex gap-6 flex-wrap justify-center">
-                        {legalLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                className="text-white opacity-80 hover:opacity-100 no-underline text-sm transition-opacity"
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
-                    </Box>
-                </Box>
             </Container>
         </Box>
     );

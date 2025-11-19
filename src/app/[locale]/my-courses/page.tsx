@@ -3,7 +3,7 @@ import { getCourses } from "@/actions/coursesAction";
 import { auth } from "@/auth";
 
 export default async function ManageMyCoursesPage(props: {
-    searchParams?: {
+    searchParams?: Promise<{
         filter?: string;
         page?: string;
         take?: string;
@@ -11,7 +11,7 @@ export default async function ManageMyCoursesPage(props: {
         categoryIds?: string | string[];
         tab?: string;
         includeDeleted?: string;
-    };
+    }>;
 }) {
     const searchParams = await props.searchParams || {};
     const session = await auth();

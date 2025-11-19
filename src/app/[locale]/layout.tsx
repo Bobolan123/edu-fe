@@ -16,6 +16,8 @@ import MainContentWrapper from "@/components/Layout/MainContentWrapper";
 import { getExchangeRateVND } from "../../utils/utils";
 import { cookies, headers } from "next/headers";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import Footer from "@/components/Footer/Footer";
+import ConditionalFooter from "@/components/Footer/ConditionalFooter";
 
 const roboto = Roboto({
     weight: ["100", "300", "400", "500", "700"],
@@ -54,6 +56,9 @@ export default async function LocaleLayout({
                             <MainContentWrapper>
                                 {children}
                             </MainContentWrapper>
+                            <ConditionalFooter>
+                                <Footer />
+                            </ConditionalFooter>
                             <ClientSideToastContainer />
                         </CurrencyProvider>
                     </SessionProvider>
