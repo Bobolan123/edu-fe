@@ -16,7 +16,6 @@ import {
     Box,
     Skeleton,
     Fade,
-    Zoom,
     CircularProgress,
 } from "@mui/material";
 import { Lock, Shield } from "lucide-react";
@@ -27,7 +26,6 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { currencyService } from "@/services/currency";
 import { useTranslations } from "next-intl";
 import { toastService } from "@/services/toast";
-// Removed LoadingButton and ErrorBoundary imports
 
 interface ICheckoutProps {
     cartItems?: ICartItem[];
@@ -64,7 +62,9 @@ function CheckoutComponent({ cartItems, cartId }: ICheckoutProps) {
             // Handle specific error messages
             const errorMessage = error?.message || error?.toString() || "";
             
-            if (errorMessage.includes("Already enrolled in course")) {
+            if (errorMessage.includes("already enrolled in all courses in your cart")) {
+                toastService.error(errorMessage);
+            } else if (errorMessage.includes("Already enrolled in course")) {
                 toastService.error("You are already enrolled in one or more courses");
             } else if (errorMessage.includes("Cart not found or is empty")) {
                 toastService.error("Your cart is empty or has expired");

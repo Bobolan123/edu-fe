@@ -20,7 +20,6 @@ import {
     ChevronRight as ChevronRightIcon,
     Star,
     Person,
-    PlayCircle,
     ArrowRight,
 } from "@mui/icons-material";
 import { ICourse } from "../../../types/entities";
@@ -288,9 +287,10 @@ export default function FeaturedCoursesSection({
                                             display: "flex",
                                             gap: 1,
                                             mb: 1.5,
-                                            flexWrap: "wrap",
-                                            minHeight: "28px",
+                                            flexWrap: "nowrap",
+                                            height: "28px",
                                             alignItems: "center",
+                                            overflow: "hidden",
                                         }}
                                     >
                                         {course.categories
@@ -306,6 +306,7 @@ export default function FeaturedCoursesSection({
                                                         fontSize: "0.8rem",
                                                         height: "28px",
                                                         fontWeight: "medium",
+                                                        flexShrink: 0,
                                                     }}
                                                 />
                                             ))}
