@@ -107,14 +107,15 @@ const handleAuth = async (
 
   if (isAuth && isAuthPage) {
     const userRole = (session?.user as any)?.role;
-    const isAdminAuthPage = testPagesRegex(adminAuthPages, req.nextUrl.pathname);
 
-    if (isAdminAuthPage && userRole === "admin") {
+    // Redirect admin users to admin page
+    if (userRole === "admin") {
       return NextResponse.redirect(
         new URL(`/${locale}/admin${search}`, req.url)
       );
     }
 
+    // Redirect other authenticated users to home page
     return NextResponse.redirect(
       new URL(`/${locale}${pages.home.root}${search}`, req.url)
     );

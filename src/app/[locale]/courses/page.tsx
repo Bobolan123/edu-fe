@@ -24,7 +24,8 @@ export default async function CoursesPage(props: {
     const searchParams = (await props.searchParams) || {};
     const currentPage = Number(searchParams?.page) || 1;
     const take = Number(searchParams?.take) || 5;
-
+    const session = await auth();
+    
     // Parse categoryIds if it's a string
     let categoryIds: number[] | undefined;
     if (searchParams?.categoryIds) {
@@ -61,6 +62,7 @@ export default async function CoursesPage(props: {
         categoryIds,
         excludeEnrolled: true,
         includeDeleted: searchParams?.includeDeleted === 'true',
+        userId: session?.user?.id ? Number(session?.user?.id) : undefined,  
     });
 
     const resCategories = await getCategories();

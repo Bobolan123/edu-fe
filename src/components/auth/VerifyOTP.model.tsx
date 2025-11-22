@@ -12,6 +12,7 @@ import { TextField, CircularProgress, alpha } from "@mui/material";
 import { fetchResendOtp, fetchVerifyOTP } from "@/auth.service";
 import { toast } from "react-toastify";
 import { useTranslations } from 'next-intl';
+import { useRouter } from "next/navigation";
 // Removed LoadingButton import
 import { toastService } from "@/services/toast";
 
@@ -41,7 +42,8 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
     const [userId, setUserId] = React.useState<number>(0);
     const [otp, setOtp] = React.useState<string>("");
     const t = useTranslations('VerifyOTP');
-    
+    const router = useRouter();
+
     // Loading states
     const [isVerifying, setIsVerifying] = React.useState(false);
     const [isResending, setIsResending] = React.useState(false);
@@ -87,6 +89,7 @@ export default function VerifyOtpModel(props: IResendOtpModelProps) {
     };
     const handleDone = async () => {
         handleCloseModelOpenVerify();
+        router.push('/login');
     };
     return (
         <div>

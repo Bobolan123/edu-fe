@@ -64,6 +64,7 @@ export const fetchVerifyOTP = async (id: number, otp: number) => {
             otp,
         },
     });
+    console.log(res)
     return res;
 };
 

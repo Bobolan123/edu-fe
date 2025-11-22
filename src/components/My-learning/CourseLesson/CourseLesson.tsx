@@ -167,8 +167,6 @@ export default function     CourseLesson({
                 toast.warning(`Quiz not passed. Score: ${result.percentage}%`);
             }
 
-            // Server action already revalidates "enrollment-progress" tag
-            // No need to refresh the page
         } catch (error: any) {
             console.error("Failed to submit quiz:", error);
             toast.error(error.message || t("quiz_error"));
