@@ -661,5 +661,68 @@
         "correct_answer": "Correct Answer",
         "your_answer": "Your Answer",
         "explanation": "Explanation"
+    },
+    "AboutUs": {
+        "hero": {
+            "title": "About Mindful Maze",
+            "subtitle": "Empowering learners worldwide with quality education"
+        },
+        "mission": {
+            "title": "Our Mission",
+            "description": "At Mindful Maze, we believe that education should be accessible to everyone, everywhere. Our mission is to enhance learning experiences and bring international knowledge to Vietnam, bridging the gap between local talent and global opportunities."
+        },
+        "values": {
+            "title": "Our Core Values",
+            "excellence": {
+                "title": "Excellence in Education",
+                "description": "We are committed to delivering high-quality courses taught by expert instructors from around the world."
+            },
+            "innovation": {
+                "title": "Innovation",
+                "description": "We continuously improve our platform using the latest technology to provide the best learning experience."
+            },
+            "community": {
+                "title": "Community First",
+                "description": "We foster a supportive learning community where students and instructors can connect and grow together."
+            },
+            "quality": {
+                "title": "Quality Content",
+                "description": "Every course is carefully curated and reviewed to ensure it meets our high standards of quality and relevance."
+            }
+        },
+        "story": {
+            "title": "Our Story",
+            "paragraph1": "Founded with a vision to democratize education, Mindful Maze started as a small project aimed at making quality learning accessible to Vietnamese students. What began as a simple platform has grown into a comprehensive learning ecosystem serving thousands of students.",
+            "paragraph2": "Today, we partner with expert instructors from various fields to bring you courses that are not only educational but also practical and applicable to real-world scenarios. Our platform continues to evolve, adapting to the needs of modern learners while staying true to our core mission.",
+            "imageAlt": "Learning Together"
+        },
+        "team": {
+            "title": "Meet Our Team",
+            "member1": {
+                "name": "Education Team",
+                "role": "Curriculum Development",
+                "description": "Dedicated professionals working tirelessly to curate and develop high-quality educational content for our learners."
+            },
+            "member2": {
+                "name": "Technology Team",
+                "role": "Platform Innovation",
+                "description": "Expert developers and designers creating an intuitive and seamless learning experience for all users."
+            },
+            "member3": {
+                "name": "Support Team",
+                "role": "Student Success",
+                "description": "Passionate individuals committed to ensuring every student has the support they need to succeed."
+            }
+        },
+        "stats": {
+            "students": "10,000+",
+            "studentsLabel": "Active Students",
+            "courses": "500+",
+            "coursesLabel": "Quality Courses",
+            "instructors": "100+",
+            "instructorsLabel": "Expert Instructors",
+            "satisfaction": "95%",
+            "satisfactionLabel": "Student Satisfaction"
+        }
     }
 }

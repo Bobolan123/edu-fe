@@ -675,5 +675,68 @@
         "correct_answer": "Câu Trả Lời Đúng",
         "your_answer": "Câu Trả Lời Của Bạn",
         "explanation": "Giải Thích"
+    },
+    "AboutUs": {
+        "hero": {
+            "title": "Về Mindful Maze",
+            "subtitle": "Trao quyền cho người học trên toàn thế giới với giáo dục chất lượng"
+        },
+        "mission": {
+            "title": "Sứ Mệnh Của Chúng Tôi",
+            "description": "Tại Mindful Maze, chúng tôi tin rằng giáo dục phải có thể tiếp cận được với tất cả mọi người, ở mọi nơi. Sứ mệnh của chúng tôi là nâng cao trải nghiệm học tập và mang kiến thức quốc tế đến Việt Nam, thu hẹp khoảng cách giữa tài năng địa phương và cơ hội toàn cầu."
+        },
+        "values": {
+            "title": "Giá Trị Cốt Lõi",
+            "excellence": {
+                "title": "Xuất Sắc Trong Giáo Dục",
+                "description": "Chúng tôi cam kết cung cấp các khóa học chất lượng cao được giảng dạy bởi các giảng viên chuyên gia từ khắp nơi trên thế giới."
+            },
+            "innovation": {
+                "title": "Đổi Mới",
+                "description": "Chúng tôi không ngừng cải thiện nền tảng của mình bằng công nghệ mới nhất để mang đến trải nghiệm học tập tốt nhất."
+            },
+            "community": {
+                "title": "Cộng Đồng Là Trên Hết",
+                "description": "Chúng tôi xây dựng một cộng đồng học tập hỗ trợ lẫn nhau nơi học viên và giảng viên có thể kết nối và phát triển cùng nhau."
+            },
+            "quality": {
+                "title": "Nội Dung Chất Lượng",
+                "description": "Mỗi khóa học đều được tuyển chọn và đánh giá cẩn thận để đảm bảo đáp ứng tiêu chuẩn cao về chất lượng và tính liên quan."
+            }
+        },
+        "story": {
+            "title": "Câu Chuyện Của Chúng Tôi",
+            "paragraph1": "Được thành lập với tầm nhìn dân chủ hóa giáo dục, Mindful Maze bắt đầu như một dự án nhỏ nhằm mục đích làm cho việc học chất lượng trở nên dễ tiếp cận với học sinh Việt Nam. Những gì bắt đầu như một nền tảng đơn giản đã phát triển thành một hệ sinh thái học tập toàn diện phục vụ hàng nghìn sinh viên.",
+            "paragraph2": "Ngày nay, chúng tôi hợp tác với các giảng viên chuyên gia từ nhiều lĩnh vực khác nhau để mang đến cho bạn những khóa học không chỉ mang tính giáo dục mà còn thực tế và có thể áp dụng vào các tình huống thực tế. Nền tảng của chúng tôi tiếp tục phát triển, thích ứng với nhu cầu của người học hiện đại trong khi vẫn trung thành với sứ mệnh cốt lõi của chúng tôi.",
+            "imageAlt": "Học Cùng Nhau"
+        },
+        "team": {
+            "title": "Gặp Gỡ Đội Ngũ Của Chúng Tôi",
+            "member1": {
+                "name": "Đội Giáo Dục",
+                "role": "Phát Triển Chương Trình Giảng Dạy",
+                "description": "Những chuyên gia tận tâm làm việc không mệt mỏi để tuyển chọn và phát triển nội dung giáo dục chất lượng cao cho người học."
+            },
+            "member2": {
+                "name": "Đội Công Nghệ",
+                "role": "Đổi Mới Nền Tảng",
+                "description": "Các nhà phát triển và thiết kế chuyên gia tạo ra trải nghiệm học tập trực quan và liền mạch cho tất cả người dùng."
+            },
+            "member3": {
+                "name": "Đội Hỗ Trợ",
+                "role": "Thành Công Của Học Viên",
+                "description": "Những cá nhân đam mê cam kết đảm bảo mọi học viên đều có sự hỗ trợ cần thiết để thành công."
+            }
+        },
+        "stats": {
+            "students": "10,000+",
+            "studentsLabel": "Học Viên Tích Cực",
+            "courses": "500+",
+            "coursesLabel": "Khóa Học Chất Lượng",
+            "instructors": "100+",
+            "instructorsLabel": "Giảng Viên Chuyên Gia",
+            "satisfaction": "95%",
+            "satisfactionLabel": "Sự Hài Lòng Của Học Viên"
+        }
     }
 }
