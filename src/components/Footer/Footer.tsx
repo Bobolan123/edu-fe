@@ -26,6 +26,7 @@ export default function Footer() {
         help: {
             title: 'GET HELP',
             links: [
+                { name: 'About Us', href: '/about' },
                 { name: 'Contact Us', href: '/contact' },
                 { name: 'Latest Articles', href: '/articles' },
                 { name: 'FAQ', href: '/faq' },

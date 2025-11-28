@@ -1,11 +1,9 @@
-'use client';
-
 import {
     Box,
     Container,
     Typography,
     Grid,
-    Card,
+    Card,   
     CardContent,
     Avatar,
 } from '@mui/material';
@@ -15,10 +13,10 @@ import {
     People as PeopleIcon,
     Star as StarIcon,
 } from '@mui/icons-material';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
-export default function AboutUsPage() {
-    const t = useTranslations('AboutUs');
+export default async function AboutUsPage() {
+    const t = await getTranslations('AboutUs');
 
     const values = [
         {
@@ -63,36 +61,9 @@ export default function AboutUsPage() {
 
     return (
         <Box>
-            {/* Hero Section */}
-            <Box
-                sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    py: 8,
-                    mb: 8,
-                }}
-            >
-                <Container maxWidth="lg">
-                    <Typography
-                        variant="h2"
-                        component="h1"
-                        fontWeight="bold"
-                        gutterBottom
-                        sx={{ textAlign: 'center' }}
-                    >
-                        {t('hero.title')}
-                    </Typography>
-                    <Typography
-                        variant="h5"
-                        sx={{ textAlign: 'center', mt: 2, opacity: 0.9 }}
-                    >
-                        {t('hero.subtitle')}
-                    </Typography>
-                </Container>
-            </Box>
-
+       
             {/* Mission Section */}
-            <Container maxWidth="lg" sx={{ mb: 8 }}>
+            <Container maxWidth="lg" sx={{ mb: 8, mt: 8 }}>
                 <Typography
                     variant="h3"
                     component="h2"
