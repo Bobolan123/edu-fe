@@ -39,7 +39,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         refresh_token: res.data.refresh_token,
                         expires_at: res.data.expires_at,
                         role: res.data.role || "user",
-                        permissions: res.data.permissions || [],
                         avatar_url: res.data.avatar_url || "",
                     };
                 } else if (res?.statusCode === 403) {

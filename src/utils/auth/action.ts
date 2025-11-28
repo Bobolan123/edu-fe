@@ -7,8 +7,21 @@ export const customSignin = async (email: string, password: string) => {
         const res = await signIn("credentials", {
             email,
             password,
+            redirect: false,
         });
-        return res;
+
+        // Check if signin was successful
+        if (res?.error) {
+            return {
+                message: "Invalid credentials",
+                statusCode: 400
+            };
+        }
+
+        return {
+            statusCode: 201,
+            data: res
+        };
     } catch (error) {
         if ((error as any).name === "InvalidCredentials") {
             return {
@@ -21,6 +34,12 @@ export const customSignin = async (email: string, password: string) => {
                 statusCode: 403,
             };
         } else {
+            // Re-throw redirect errors - they're not actual errors
+            if ((error as any).digest?.startsWith('NEXT_REDIRECT')) {
+                throw error;
+            }
+
+            console.error('Unexpected signin error:', error);
             return {
                 message: "Internal server error",
                 statusCode: 500,

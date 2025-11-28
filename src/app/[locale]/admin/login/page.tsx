@@ -25,7 +25,7 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, LoginFormData } from '@/lib/validationSchemas';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 
@@ -62,18 +62,33 @@ export default function AdminLoginPage() {
         password: data.password,
         redirect: false,
       });
-      console.log(result);
+      console.log('[Admin Login] SignIn result:', result);
 
       if (!result?.ok || result?.error) {
         setError('Invalid email or password. Please try again.');
+        setIsLoading(false);
       } else {
-        // Redirect to admin dashboard on successful login
-        router.push(`/${locale}/admin`);
+        // Successfully logged in - get session to check user role
+        console.log('[Admin Login] Login successful, checking user role...');
+        const session = await getSession();
+        const userRole = (session?.user as any)?.role;
+
+        console.log('[Admin Login] User role:', userRole);
+
+        // Redirect based on role
+        let redirectUrl = `/${locale}/admin`; // default to admin
+        if (userRole === 'instructor') {
+          redirectUrl = `/${locale}/my-courses`;
+        }
+
+        console.log('[Admin Login] Redirecting to:', redirectUrl);
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 500);
       }
     } catch (error) {
       console.error('Login error:', error);
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };

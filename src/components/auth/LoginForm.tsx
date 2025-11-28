@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { signIn, getSession } from "next-auth/react";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { customSignin } from "../../utils/auth/action";
 import { loginSchema, LoginFormData } from "@/lib/validationSchemas";
@@ -24,6 +24,7 @@ import ResendOtpModel from "./resendOtp.model";
 const LoginForm = () => {
     const t = useTranslations("Login");
     const router = useRouter();
+    const locale = useLocale();
     const [loading, setLoading] = useState(false);
 
     const [isOpenModelResendOtp, setIsOpenModelResendOtp] = useState(false);
@@ -59,8 +60,21 @@ const LoginForm = () => {
                 setIsOpenModelResendOtp(true);
             } else {
                 toastService.success("Login successful! Redirecting...");
+
+                // Get session to check user role
+                const session = await getSession();
+                const userRole = (session?.user as any)?.role;
+
+                // Redirect based on role
+                let redirectUrl = `/${locale}/`; // default to home
+                if (userRole === 'instructor') {
+                    redirectUrl = `/${locale}/my-courses`;
+                } else if (userRole === 'admin') {
+                    redirectUrl = `/${locale}/admin`;
+                }
+
                 setTimeout(() => {
-                    window.location.href = "/";
+                    window.location.href = redirectUrl;
                 }, 1000);
             }
         } catch (error) {
