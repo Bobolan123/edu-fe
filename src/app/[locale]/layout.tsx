@@ -7,14 +7,12 @@ import { ThemeProvider } from "@mui/material";
 import theme from "./theme";
 import { Roboto } from "next/font/google";
 import "../globals.css";
-import ToastProvider from "@/components/Toastify/ToastContainer";
 import ClientSideToastContainer from "@/components/Toastify/ToastContainer";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/Navbar/Navbar";
 import ConditionalNavbar from "@/components/Navbar/ConditionalNavbar";
 import MainContentWrapper from "@/components/Layout/MainContentWrapper";
 import { getExchangeRateVND } from "../../utils/utils";
-import { cookies, headers } from "next/headers";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import Footer from "@/components/Footer/Footer";
 import ConditionalFooter from "@/components/Footer/ConditionalFooter";
@@ -31,12 +29,13 @@ export default async function LocaleLayout({
     params,
 }: {
     children: React.ReactNode;
-    params: { locale: string };
+    params: Promise<{ locale: string }>; 
 }) {
     const messages = await getMessages();
-    const parameters = await params;
-    const locale = parameters.locale;
+    const { locale } = await params; 
+    
     let exchangeRate: number | string = 1;
+
     // Ensure that the incoming `locale` is valid
     if (!routing.locales.includes(locale as any)) {
         notFound();
@@ -46,7 +45,7 @@ export default async function LocaleLayout({
         exchangeRate = await getExchangeRateVND("USD");
     } catch (error) {
         console.error("Failed to fetch exchange rate, using fallback:", error);
-        exchangeRate = 1; // Fallback to 1:1 ratio if API fails
+        exchangeRate = 1; 
     }
 
     return (
