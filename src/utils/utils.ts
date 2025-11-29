@@ -36,7 +36,14 @@ export const createSlugWithId = (title: string, id: number | string): string => 
 
 // Fetch real-time USD to VND exchange rate
 export async function getExchangeRateVND(to: string): Promise<number> {
-    const res = await fetch("https://open.er-api.com/v6/latest/VND");
+    const res = await fetch("https://open.er-api.com/v6/latest/VND", {
+        next: { revalidate: 3600 } // Cache for 1 hour
+    });
+
+    if (!res.ok) {
+        throw new Error(`Exchange rate API returned ${res.status}`);
+    }
+
     const data = await res.json();
 
     const rate = data.rates[to];

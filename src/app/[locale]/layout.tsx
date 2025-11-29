@@ -42,7 +42,12 @@ export default async function LocaleLayout({
         notFound();
     }
 
-    exchangeRate = await getExchangeRateVND("USD");
+    try {
+        exchangeRate = await getExchangeRateVND("USD");
+    } catch (error) {
+        console.error("Failed to fetch exchange rate, using fallback:", error);
+        exchangeRate = 1; // Fallback to 1:1 ratio if API fails
+    }
 
     return (
         <NextIntlClientProvider messages={messages}>
